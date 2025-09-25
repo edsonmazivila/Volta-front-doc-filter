@@ -1,0 +1,366 @@
+<form hx-post="/api/employees/with-user" hx-target="body" hx-swap="none" hx-on="htmx:afterRequest: if (event.detail && event.detail.elt === this && event.detail.xhr.status===201) { (window.hideModal && hideModal('modal')); window.location.href='/employees'; }">
+    <div class="space-y-6">
+        <!-- Account & User -->
+        <div class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Account & User</h3>
+                <p class="text-sm text-gray-500">Create the user account that will be linked to the employee.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-800 mb-2">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent" autocomplete="given-name">
+                </div>
+                
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-800 mb-2">Last Name *</label>
+                    <input type="text" id="last_name" name="last_name" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent" autocomplete="family-name">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-800 mb-2">Email *</label>
+                    <input type="email" id="email" name="email" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent" autocomplete="email">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-800 mb-2">Password *</label>
+                    <input type="password" id="password" name="password" required minlength="8"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent" autocomplete="new-password">
+                </div>
+                
+                <div>
+                    <label for="role" class="block text-sm font-medium text-gray-800 mb-2">Role *</label>
+                    <select id="role" name="role" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                        <option value="">Select Role</option>
+                        <option value="employee">Employee</option>
+                        <option value="operational_manager">Operational Manager</option>
+                        <option value="hr_manager">HR Manager</option>
+                        <option value="payroll_manager">Payroll Manager</option>
+                        <option value="system_admin">System Administrator</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employment & Organization -->
+        <div class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Employment & Organization</h3>
+                <p class="text-sm text-gray-500">Link the employee to the company and define their role.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="company_id" class="block text-sm font-medium text-gray-800 mb-2">Company *</label>
+                    {{if .Company}}
+                    <input type="hidden" id="company_id" name="company_id" value="{{.Company.ID}}">
+                    <input type="text" value="{{.Company.Name}}" readonly
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                    <p class="text-xs text-gray-500 mt-1">Company is automatically set based on your account</p>
+                    {{else}}
+                    <input type="text" value="No company associated" readonly
+                           class="w-full px-3 py-2 border border-red-300 rounded-lg bg-red-50 cursor-not-allowed text-red-600">
+                    <p class="text-xs text-red-500 mt-1">Please contact your administrator to associate your account with a company</p>
+                    {{end}}
+                </div>
+                
+                <div>
+                    <label for="department_id" class="block text-sm font-medium text-gray-800 mb-2">Department</label>
+                    <select id="department_id" name="department_id" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                        <option value="">Select Department</option>
+                        {{range .Departments}}
+                        <option value="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="employee_number" class="block text-sm font-medium text-gray-800 mb-2">Employee Number</label>
+                    <input type="text" id="employee_number" name="employee_number" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                
+                <div>
+                    <label for="job_title" class="block text-sm font-medium text-gray-800 mb-2">Job Title</label>
+                    <input type="text" id="job_title" name="job_title" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                
+                <div>
+                    <label for="employment_type" class="block text-sm font-medium text-gray-800 mb-2">Employment Type *</label>
+                    <select id="employment_type" name="employment_type" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                        <option value="">Select Type</option>
+                        <option value="full_time">Full Time</option>
+                        <option value="part_time">Part Time</option>
+                        <option value="contractor">Contractor</option>
+                        <option value="intern">Intern</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="hire_date" class="block text-sm font-medium text-gray-800 mb-2">Hire Date *</label>
+                    <input type="date" id="hire_date" name="hire_date" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact & Address -->
+        <div class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Contact & Address</h3>
+                <p class="text-sm text-gray-500">Optional contact details for the employee.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="phone_primary" class="block text-sm font-medium text-gray-800 mb-2">Primary Phone</label>
+                    <input type="tel" id="phone_primary" name="phone_primary" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="phone_secondary" class="block text-sm font-medium text-gray-800 mb-2">Secondary Phone</label>
+                    <input type="tel" id="phone_secondary" name="phone_secondary" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="date_of_birth" class="block text-sm font-medium text-gray-800 mb-2">Date of Birth</label>
+                    <input type="date" id="date_of_birth" name="date_of_birth" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div></div>
+                <div>
+                    <label for="address_line1" class="block text-sm font-medium text-gray-800 mb-2">Address Line 1</label>
+                    <input type="text" id="address_line1" name="address_line1" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="address_line2" class="block text-sm font-medium text-gray-800 mb-2">Address Line 2</label>
+                    <input type="text" id="address_line2" name="address_line2" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-800 mb-2">City</label>
+                    <input type="text" id="city" name="city" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-800 mb-2">State</label>
+                    <input type="text" id="state" name="state" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="postal_code" class="block text-sm font-medium text-gray-800 mb-2">Postal Code</label>
+                    <input type="text" id="postal_code" name="postal_code" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="country" class="block text-sm font-medium text-gray-800 mb-2">Country</label>
+                    <input type="text" id="country" name="country" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Emergency Contact</h3>
+                <p class="text-sm text-gray-500">Who should we contact in an emergency?</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="emergency_contact_name" class="block text-sm font-medium text-gray-800 mb-2">Name</label>
+                    <input type="text" id="emergency_contact_name" name="emergency_contact_name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-800 mb-2">Phone</label>
+                    <input type="text" id="emergency_contact_phone" name="emergency_contact_phone" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                <div>
+                    <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-800 mb-2">Relationship</label>
+                    <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+            </div>
+        </div>
+
+        <!-- Compensation -->
+        <div class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Compensation</h3>
+                <p class="text-sm text-gray-500">Pay structure and hours.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="pay_type" class="block text-sm font-medium text-gray-800 mb-2">Pay Type</label>
+                    <select id="pay_type" name="pay_type" required onchange="togglePayFields()"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                        <option value="">Select Pay Type</option>
+                        <option value="salary">Salary</option>
+                        <option value="hourly">Hourly</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="pay_frequency" class="block text-sm font-medium text-gray-800 mb-2">Pay Frequency</label>
+                    <select id="pay_frequency" name="pay_frequency" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                        <option value="">Select Frequency</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly" selected>Bi-weekly</option>
+                        <option value="semimonthly">Semi-monthly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                
+                <div id="salary_field" style="display: none;">
+                    <label for="annual_salary" class="block text-sm font-medium text-gray-800 mb-2">Annual Salary ($)</label>
+                    <input type="number" id="annual_salary" name="annual_salary" step="0.01" min="0" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                
+                <div id="hourly_field" style="display: none;">
+                    <label for="hourly_rate" class="block text-sm font-medium text-gray-800 mb-2">Hourly Rate ($)</label>
+                    <input type="number" id="hourly_rate" name="hourly_rate" step="0.01" min="0" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                
+                <div>
+                    <label for="overtime_rate" class="block text-sm font-medium text-gray-800 mb-2">Overtime Rate (Multiplier)</label>
+                    <input type="number" id="overtime_rate" name="overtime_rate" step="0.1" min="1" value="1.5"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+                
+                <div>
+                    <label for="standard_hours" class="block text-sm font-medium text-gray-800 mb-2">Standard Hours (per week)</label>
+                    <input type="number" id="standard_hours" name="standard_hours" step="1" min="1" value="40"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 mt-6">
+		<a href="/employees" class="btn btn-secondary" id="cancel-new-user-employee">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            Create User & Employee
+        </button>
+    </div>
+</form>
+
+<script>
+console.log('User & Employee form loaded');
+
+// Toggle pay fields based on pay type selection
+function togglePayFields() {
+    const payType = document.getElementById('pay_type').value;
+    const salaryField = document.getElementById('salary_field');
+    const hourlyField = document.getElementById('hourly_field');
+    const annualSalaryInput = document.getElementById('annual_salary');
+    const hourlyRateInput = document.getElementById('hourly_rate');
+    
+    if (payType === 'salary') {
+        salaryField.style.display = 'block';
+        hourlyField.style.display = 'none';
+        annualSalaryInput.required = true;
+        hourlyRateInput.required = false;
+        hourlyRateInput.value = '';
+    } else if (payType === 'hourly') {
+        salaryField.style.display = 'none';
+        hourlyField.style.display = 'block';
+        annualSalaryInput.required = false;
+        hourlyRateInput.required = true;
+        annualSalaryInput.value = '';
+    } else {
+        salaryField.style.display = 'none';
+        hourlyField.style.display = 'none';
+        annualSalaryInput.required = false;
+        hourlyRateInput.required = false;
+    }
+}
+
+// Initialize form state when loaded
+document.addEventListener('DOMContentLoaded', function() {
+    togglePayFields();
+    
+    // Set default hire date to today
+    const hireDateInput = document.getElementById('hire_date');
+    if (hireDateInput && !hireDateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        hireDateInput.value = today;
+    }
+    // Cancel uses normal navigation via href
+});
+
+// Handle form submission
+document.addEventListener('htmx:afterRequest', function(event) {
+    // Only handle events from this specific form
+    if (event.detail.elt && event.detail.elt.getAttribute('hx-post') === '/api/employees/with-user') {
+        console.log('HTMX afterRequest:', event.detail);
+        
+        // If successful (status 201 = Created)
+        if (event.detail.xhr.status === 201) {
+            console.log('User and Employee created successfully!');
+            
+            // Close modal
+            hideModal();
+            
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50';
+            successMessage.textContent = 'User and Employee created successfully!';
+            document.body.appendChild(successMessage);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                if (document.body.contains(successMessage)) {
+                    document.body.removeChild(successMessage);
+                }
+            }, 3000);
+            
+            // Reload the employee table
+            setTimeout(() => {
+                if (typeof loadEmployees === 'function') {
+                    loadEmployees();
+                }
+            }, 1000);
+        }
+        
+        // If error
+        if (event.detail.xhr.status >= 400) {
+            console.log('Error creating user and employee:', event.detail.xhr.responseText);
+            
+            // Parse error message from response
+            let errorText = 'Error creating user and employee. Please try again.';
+            try {
+                const response = JSON.parse(event.detail.xhr.responseText);
+                if (response.error) {
+                    errorText = response.error;
+                }
+            } catch (e) {
+                // Use default error message if parsing fails
+            }
+            
+            // Show error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50';
+            errorMessage.textContent = errorText;
+            document.body.appendChild(errorMessage);
+            
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(errorMessage)) {
+                    document.body.removeChild(errorMessage);
+                }
+            }, 5000);
+        }
+    }
+});
+</script> 

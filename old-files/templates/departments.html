@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Management - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jech-blue': '#1e40af',
+                        'jech-dark': '#0f172a',
+                        'jech-light': '#f8fafc',
+                        'jech-accent': '#3b82f6',
+                        'jech-secondary': '#64748b'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-glow': 'pulseGlow 2s infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <style>
+        .text-jech-accent { color: #3b82f6 !important; }
+        .bg-jech-accent { background-color: #3b82f6 !important; }
+        .text-jech-dark { color: #0f172a !important; }
+        .bg-jech-blue { background-color: #1e40af !important; }
+        .hover\:bg-jech-blue:hover { background-color: #1e40af !important; }
+        .hover\:text-jech-accent:hover { color: #3b82f6 !important; }
+        .focus\:ring-jech-accent:focus { --tw-ring-color: #3b82f6 !important; }
+    </style>
+</head>
+<body class="h-full bg-gray-100">
+    <div id="app" class="min-h-full">
+        {{template "partials/nav.html" .}}
+        <div class="md:pl-64 relative z-0">
+            <main id="main-content" class="mt-5 container mx-auto px-4">
+                <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                    <a href="/dashboard" class="hover:text-jech-accent">Dashboard</a>
+                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                    <span class="text-gray-700">Departments</span>
+                </div>
+
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-jech-dark">Department Management</h1>
+                        <p class="text-sm text-gray-500">Manage departments for {{.Company.Name}}</p>
+                    </div>
+                    <button 
+                        hx-get="/departments/new" 
+                        hx-target="#main-content" 
+                        hx-trigger="click"
+                        class="inline-flex items-center gap-2 bg-jech-accent hover:bg-jech-blue text-white font-semibold rounded-full px-4 py-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"/></svg>
+                        New Department
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Departments</h2>
+                    </div>
+                    <div id="departments-table" hx-get="/departments/table" hx-trigger="load, refresh" hx-swap="innerHTML" hx-indicator="#loading-indicator">
+                        <div id="loading-indicator" class="flex justify-center items-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-jech-accent"></div>
+                            <span class="ml-2 text-gray-600">Loading departments...</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/js/htmx.min.js"></script>
+    <script>
+        // Fallback: if local HTMX fails to load (e.g., wrong MIME in prod), load from CDN
+        (function(){
+            function ensureHTMX(){
+                if (!window.htmx) {
+                    var s=document.createElement('script');
+                    s.src='https://unpkg.com/htmx.org@1.9.10';
+                    s.defer=true;
+                    document.head.appendChild(s);
+                }
+            }
+            if (!window.htmx) ensureHTMX();
+            window.addEventListener('error', function(e){
+                var t=e.target||{}; if (t.tagName==='SCRIPT' && (t.src||'').indexOf('/static/js/htmx.min.js')!==-1) ensureHTMX();
+            }, true);
+        })();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Departments page loaded');
+        });
+    </script>
+    <script src="/static/js/nav-dropdown.js"></script>
+    <script src="/static/js/departments.js"></script>
+</body>
+</html> 

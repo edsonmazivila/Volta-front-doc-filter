@@ -3,19 +3,30 @@
 import Link from 'next/link'
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react'
 import { X } from 'lucide-react'
+import { Button } from '@/components/ui'
 
 export const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/employees', label: 'Employees' },
-  { href: '/timesheets', label: 'Timesheets' },
-  { href: '/documents', label: 'Documents' },
-  { href: '/leaves', label: 'Leaves' },
-  { href: '/payroll', label: 'Payroll' },
-  { href: '/reports', label: 'Reports' },
-  { href: '/users', label: 'Users' },
-  { href: '/departments', label: 'Departments' },
-  { href: '/company', label: 'Company Management' },
-  { href: '/settings', label: 'Settings' },
+  { href: '/dashboard/employees', label: 'Employees' },
+  { href: '/dashboard/timesheets', label: 'Timesheets' },
+  { href: '/dashboard/documents', label: 'Documents' },
+  { href: '/dashboard/leaves', label: 'Leaves' },
+  { href: '/dashboard/payroll', label: 'Payroll' },
+  { href: '/dashboard/reports', label: 'Reports' },
+  { href: '/dashboard/users', label: 'Users' },
+  { href: '/dashboard/departments', label: 'Departments' },
+  { href: '/dashboard/company', label: 'Company Management' },
+  { href: '/dashboard/settings', label: 'Settings' },
+  { href: '/self-service/paystubs', label: 'My Paystubs' },
+  { href: '/my-timesheets', label: 'My Timesheets' },
+  { href: '/leaves?my=true', label: 'My Leaves' },
+  { href: '/self-service/documents', label: 'My Documents' },
+  { href: '/meetings', label: 'My Meetings' },
+  { href: '/attendance/my', label: 'My Attendance' },
+  { href: '/admin/leaves', label: 'Leaves Management (Admin)' },
+  { href: '/attendance/admin', label: 'Attendance (HR)' },
+  { href: '/company-documents', label: 'Company Documents' },
+  { href: '/company/profile', label: 'Company Profile' },
 ]
 
 type SidebarContextValue = { open: boolean, openDrawer: () => void, closeDrawer: () => void }
@@ -56,10 +67,9 @@ export function Sidebar() {
 export function SidebarTrigger({ className = '' }: { className?: string }) {
   const { openDrawer } = useSidebar()
   return (
-    <button aria-label='Open menu' className={`md:hidden btn ${className}`} onClick={openDrawer}>
-      <span className='i' />
+    <Button aria-label='Open menu' className={`md:hidden ${className}`} variant='outline' size='sm' onClick={openDrawer}>
       Menu
-    </button>
+    </Button>
   )
 }
 

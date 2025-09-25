@@ -1,0 +1,81 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  AuthForm,
+  EmailField,
+  PasswordField,
+} from "@/components/auth/auth-form";
+import { loginAction } from "@/lib/auth/actions";
+import { loginSchema } from "@/lib/auth/types";
+import Link from "next/link";
+
+export function LoginForm() {
+  // Use form submitting state from AuthForm; no external loading state needed
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get redirect URL and success message from search params
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const successMessage = searchParams.get("message");
+
+  // Set success message on mount
+  useEffect(() => {
+    if (successMessage) {
+      setMessage(successMessage);
+    }
+  }, [successMessage]);
+
+  return (
+    <>
+      {message && (
+        <div className="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+          <p className="text-sm text-green-400">{message}</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+          <p className="text-sm text-red-400">{error}</p>
+        </div>
+      )}
+
+      <AuthForm
+        title="Welcome back"
+        subtitle="Sign in to your account to continue"
+        onSubmit={async () => {
+          /* handled by action */
+        }}
+        action={async (formData) => {
+          setError(null);
+          const result = await loginAction(undefined, formData);
+          if ('errors' in result) {
+            const formErrors = (result.errors as Record<string, string[] | undefined>)._form;
+            if (formErrors && formErrors.length) {
+              setError(formErrors[0]);
+              return;
+            }
+          }
+          router.push(redirectTo);
+        }}
+        schema={loginSchema}
+        submitText="Sign in"
+      >
+        <EmailField />
+
+        <PasswordField />
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+      </AuthForm>
+    </>
+  );
+}

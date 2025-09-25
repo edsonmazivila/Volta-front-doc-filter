@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jech-blue': '#1e40af',
+                        'jech-dark': '#0f172a',
+                        'jech-light': '#f8fafc',
+                        'jech-accent': '#3b82f6',
+                        'jech-secondary': '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    {{template "partials/jech-colors.html" .}}
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+// Prevent multiple HTMX loads in tab containers
+document.body.addEventListener('htmx:beforeRequest', function(evt){
+    const elt = evt.target;
+    if (elt && (elt.id === 'myRequestsContent' || elt.id === 'myBalancesContent' || elt.id === 'pendingApprovalsContent')) {
+        elt.setAttribute('hx-sync', 'this:replace');
+    }
+});
+</script>
+    <style>
+        .leave-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .leave-table th, .leave-table td {
+            vertical-align: top;
+        }
+        .leave-table .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .leave-table tbody tr:hover {
+            background-color: rgba(249, 250, 251, 0.5);
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-100">
+    <div id="app" class="min-h-full">
+        {{template "partials/nav.html" .}}
+        <div class="md:pl-64 relative z-0">
+            <main id="main-content" class="mt-5 container mx-auto px-4">
+                <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                    <a href="/dashboard" class="hover:text-jech-accent">Dashboard</a>
+                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                    <span class="text-gray-700">Leaves</span>
+                </div>
+
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Leave Management</h1>
+                        <p class="text-sm text-gray-500">Manage time off requests and balances</p>
+                    </div>
+                    <button id="newLeaveRequestBtn" class="inline-flex items-center gap-2 bg-jech-accent hover:bg-jech-blue text-white font-semibold rounded-full px-4 py-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        New Leave Request
+                    </button>
+                </div>
+
+                <div class="mb-6">
+                    <nav class="flex space-x-8">
+                        <button id="myRequestsTab" class="tab-button active py-2 px-1 border-b-2 border-jech-accent text-jech-accent font-medium">My Requests</button>
+                        <button id="myBalancesTab" class="tab-button py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">My Balances</button>
+                        {{if or (eq .User.Role "operational_manager") (eq .User.Role "hr_manager") (eq .User.Role "system_admin") (eq .User.Role "payroll_manager")}}
+                        <button id="pendingApprovalsTab" class="tab-button py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium">Pending Approvals <span id="pendingCount" class="hidden ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5"></span></button>
+                        {{end}}
+                    </nav>
+                </div>
+
+                <div id="tabContent">
+                    <div id="myRequestsContent" class="tab-content" hx-get="/leaves/my-requests" hx-trigger="load" hx-swap="innerHTML" hx-target="#myRequestsContent">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">My Leave Requests</h3>
+                                <div class="flex items-center space-x-4">
+                                    <button id="refreshBtn" class="text-gray-500 hover:text-jech-accent transition-colors" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                                    <select id="statusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                        <option value="">All Statuses</option>
+                                        <option value="DRAFT">Draft</option>
+                                        <option value="SUBMITTED">Submitted</option>
+                                        <option value="APPROVED_L1">Approved L1</option>
+                                        <option value="APPROVED_FINAL">Approved</option>
+                                        <option value="REJECTED">Rejected</option>
+                                        <option value="CANCELLED">Cancelled</option>
+                                    </select>
+                                    <select id="typeFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                        <option value="">All Types</option>
+                                        <option value="vacation">Vacation</option>
+                                        <option value="sick">Sick</option>
+                                        <option value="personal">Personal</option>
+                                        <option value="maternity">Maternity</option>
+                                        <option value="paternity">Paternity</option>
+                                        <option value="bereavement">Bereavement</option>
+                                        <option value="emergency">Emergency</option>
+                                    </select>
+                                    <button id="clearFiltersBtn" class="text-gray-500 hover:text-red-600 transition-colors text-sm" title="Clear Filters"><i class="fas fa-times-circle"></i> Clear</button>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="leave-table min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="leaveRequestsList" class="bg-white divide-y divide-gray-200">
+                                            <tr>
+                                                <td colspan="7" class="px-6 py-8 text-center">
+                                                    <div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-jech-accent"></div></div>
+                                                    <p class="mt-2 text-sm text-gray-500">Loading...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="myBalancesContent" class="tab-content hidden" hx-get="/leaves/my-balances" hx-trigger="revealed once" hx-swap="innerHTML" hx-target="#myBalancesContent">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">My Leave Balances</h3>
+                                <select id="yearFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                </select>
+                            </div>
+                            <div id="balancesList">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-sm font-medium text-blue-800">Vacation</h4>
+                                                <p class="text-2xl font-bold text-blue-900" id="vacationBalance">--</p>
+                                                <p class="text-xs text-blue-600">Days remaining</p>
+                                            </div>
+                                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-sm font-medium text-red-800">Sick Leave</h4>
+                                                <p class="text-2xl font-bold text-red-900" id="sickBalance">--</p>
+                                                <p class="text-xs text-red-600">Days remaining</p>
+                                            </div>
+                                            <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-sm font-medium text-green-800">Personal</h4>
+                                                <p class="text-2xl font-bold text-green-900" id="personalBalance">--</p>
+                                                <p class="text-xs text-green-600">Days remaining</p>
+                                            </div>
+                                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-700">Pending Requests</span>
+                                        <span class="text-lg font-bold text-orange-600" id="pendingDays">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{if or (eq .User.Role "operational_manager") (eq .User.Role "hr_manager") (eq .User.Role "system_admin") (eq .User.Role "payroll_manager")}}
+                    <div id="pendingApprovalsContent" class="tab-content hidden" hx-get="/leaves/pending-approvals" hx-trigger="revealed once" hx-swap="innerHTML" hx-target="#pendingApprovalsContent">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Requests Awaiting My Approval</h3>
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="leave-table min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pendingApprovalsList" class="bg-white divide-y divide-gray-200">
+                                            <tr>
+                                                <td colspan="7" class="px-6 py-8 text-center">
+                                                    <div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-jech-accent"></div></div>
+                                                    <p class="mt-2 text-sm text-gray-500">Loading approvals...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- New Leave Request Modal -->
+    <div id="leaveRequestModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">New Leave Request</h3>
+                    <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <form id="leaveRequestForm" class="space-y-4" onsubmit="return false;" novalidate>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Leave Type</label>
+                        <select id="leaveType" name="leave_type" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Select leave type</option>
+                            <option value="vacation">Vacation</option>
+                            <option value="sick">Sick Leave</option>
+                            <option value="personal">Personal Leave</option>
+                            <option value="maternity">Maternity Leave</option>
+                            <option value="paternity">Paternity Leave</option>
+                            <option value="bereavement">Bereavement Leave</option>
+                            <option value="emergency">Emergency Leave</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                            <input type="date" id="startDate" name="start_date" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                            <input type="date" id="endDate" name="end_date" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="flex items-center"><input type="checkbox" id="isHalfDay" name="is_half_day" class="rounded"><span class="ml-2 text-sm text-gray-700">Half Day</span></label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+                        <textarea id="reason" name="reason" required rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Please provide a reason for your leave request"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" id="cancelLeaveRequest" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300">Cancel</button>
+                        <button type="button" id="submitLeaveRequest" class="px-4 py-2 text-sm font-medium text-white bg-jech-accent border border-transparent rounded-md hover:bg-jech-blue">Create Request</button>
+                    </div>
+                    <div id="calculatedDays" class="hidden mt-4 p-3 bg-blue-50 rounded-md"><span class="text-sm text-blue-700">Total Days: <span id="totalDays">0</span></span></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Details Modal -->
+    <div id="leaveDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-2/3 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Leave Request Details</h3>
+                    <button id="closeDetailsBtn" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="leaveDetailContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/nav-dropdown.js"></script>
+    <script src="/static/js/leaves.js"></script>
+    <script>
+        window.leaveManagement = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            window.leaveManagement = new LeaveManagement();
+        });
+        window.safeLeaveAction = function(action, ...args) {
+            if (window.leaveManagement && window.leaveManagement[action]) {
+                return window.leaveManagement[action](...args);
+            } else {
+                setTimeout(() => window.safeLeaveAction(action, ...args), 100);
+            }
+        };
+    </script>
+</body>
+</html> 

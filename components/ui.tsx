@@ -1,25 +1,7 @@
-import { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
-
-type ButtonVariant = 'default' | 'primary' | 'ghost'
-
-export function Button({ children, className = '', glow = false, variant = 'default', ...props }: { children: ReactNode, className?: string, glow?: boolean, variant?: ButtonVariant } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-	const variantClass =
-		variant === 'primary'
-			? 'btn-primary btn-pill'
-			: variant === 'ghost'
-				? 'btn-ghost btn-pill'
-				: 'btn'
-
-	return (
-		<button className={cn(variantClass, glow && 'btn-glow', className)} {...props}>
-			{children}
-		</button>
-	)
-}
+export { Button, buttonVariants } from '@/components/ui/button'
 
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`skeleton ${className}`} />
+  return <div className={`relative overflow-hidden rounded-md bg-[linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06))] bg-[length:200%_100%] animate-[shimmer_1.6s_infinite] ${className}`} />
 }
 
 

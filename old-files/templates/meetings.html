@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <title>Meetings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  {{template "partials/jech-colors.html" .}}
+  <link rel="stylesheet" href="/static/css/custom.css">
+  </head>
+<body class="h-full bg-gray-100">
+  <div id="app" class="min-h-full">
+    {{template "partials/nav.html" .}}
+    <div class="md:pl-64">
+      <main id="main-content" class="container mx-auto mt-6 px-4">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl font-semibold text-gray-900">Meetings</h1>
+          <button class="btn btn-primary px-4 py-2 rounded-md text-sm"
+                  hx-get="/ui/meetings/new"
+                  hx-target="#meetingFormHost"
+                  hx-swap="innerHTML">New meeting</button>
+        </div>
+
+        <section id="meetingFormHost" class="mb-6"></section>
+
+        <div class="grid grid-cols-1 gap-6">
+          <section class="elevated-card bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 class="text-lg font-semibold text-gray-900">My agenda</h2>
+              <div class="text-xs text-gray-500">Manage, accept or decline</div>
+            </div>
+            <div id="agendaList" class="p-4"
+                 hx-get="/meetings/user/{{.User.ID}}"
+                 hx-trigger="load delay:200ms, agenda-refresh from:body delay:200ms"
+                 hx-sync="this:queue"
+                 hx-target="#agendaList"
+                 hx-swap="innerHTML">
+              <div class="text-sm text-gray-500">Loading…</div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/static/js/htmx.min.js"></script>
+</body>
+</html>
+
+

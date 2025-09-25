@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui";
 import Image from "next/image";
@@ -18,21 +18,25 @@ export function HomeHeader() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (isMenuOpen && !target.closest('.mobile-menu') && !target.closest('.menu-toggle')) {
+      if (
+        isMenuOpen &&
+        !target.closest(".mobile-menu") &&
+        !target.closest(".menu-toggle")
+      ) {
         setIsMenuOpen(false);
       }
     };
 
     if (isMenuOpen) {
-      document.addEventListener('click', handleClickOutside);
-      document.body.style.overflow = 'hidden'; // Prevent background scroll
+      document.addEventListener("click", handleClickOutside);
+      document.body.style.overflow = "hidden"; // Prevent background scroll
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("click", handleClickOutside);
+      document.body.style.overflow = "unset";
     };
   }, [isMenuOpen]);
 
@@ -61,7 +65,7 @@ export function HomeHeader() {
                 alt="Logo"
                 width={28}
                 height={28}
-                className="h-8 w-8"
+                className="h-10 w-10"
               />
             </Link>
           </div>
@@ -69,9 +73,9 @@ export function HomeHeader() {
           {/* Desktop Center Navigation */}
           <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
             {navLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.href}
-                href={link.href} 
+                href={link.href}
                 className="text-white/90 hover:text-white transition-colors duration-200 font-medium"
               >
                 {link.label}
@@ -81,11 +85,11 @@ export function HomeHeader() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-2">
-            <Button variant="ghost" className="px-6">
-              Sign In
+            <Button variant="primaryGradient" className="text-md font-semibold px-6 py-3" asChild>
+              <Link href="/signup">Sign Up</Link>
             </Button>
-            <Button variant="primary" className="px-6">
-              Sign Up
+            <Button variant="ghost" className="text-md font-semibold px-6 py-3" asChild>
+              <Link href="/login">Sign In</Link>
             </Button>
           </div>
 
@@ -109,7 +113,7 @@ export function HomeHeader() {
         <div className="fixed inset-0 z-40 lg:hidden">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          
+
           {/* Mobile Menu */}
           <div className="mobile-menu absolute top-20 left-4 right-4 glass-mobile-menu rounded-2xl p-6 animate-slide-down">
             <div className="flex flex-col space-y-6">
@@ -127,23 +131,30 @@ export function HomeHeader() {
                   </Link>
                 ))}
               </div>
-              
+
               {/* Mobile CTA */}
-              <div className="pt-4 border-t border-white/20 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+              <div
+                className="pt-4 border-t border-white/20 animate-fade-in-up"
+                style={{ animationDelay: "400ms" }}
+              >
                 <div className="flex flex-col gap-2">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-center"
-                    onClick={handleLinkClick}
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-center rounded-full text-blue-300 hover:text-blue-200"
+                    asChild
                   >
-                    Sign In
+                    <Link href="/login" onClick={handleLinkClick}>
+                      Sign In
+                    </Link>
                   </Button>
-                  <Button 
-                    variant="primary" 
-                    className="w-full justify-center"
-                    onClick={handleLinkClick}
+                  <Button
+                    variant="primaryGradient"
+                    className="w-full justify-center rounded-full"
+                    asChild
                   >
-                    Sign Up
+                    <Link href="/signup" onClick={handleLinkClick}>
+                      Sign Up
+                    </Link>
                   </Button>
                 </div>
               </div>

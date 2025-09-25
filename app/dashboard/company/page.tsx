@@ -2,8 +2,10 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { Button } from '@/components/ui'
+import { requireUser } from '@/lib/auth/dal'
 
-export default function CompanyPage() {
+export default async function CompanyPage() {
+  await requireUser()
   return (
     <div className='min-h-dvh flex app-background'>
       <Sidebar />

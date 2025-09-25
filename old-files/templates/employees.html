@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jech-blue': '#1e40af',
+                        'jech-dark': '#0f172a',
+                        'jech-light': '#f8fafc',
+                        'jech-accent': '#3b82f6',
+                        'jech-secondary': '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="h-full bg-gray-100">
+    <div id="app" class="min-h-full">
+        {{template "partials/nav.html" .}}
+        <div class="md:pl-64 relative z-0">
+            <main id="main-content" class="mt-5 container mx-auto px-4">
+                <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                    <a href="/dashboard" class="hover:text-jech-accent">Dashboard</a>
+                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                    <span class="text-gray-700">Employees</span>
+                </div>
+                <div class="toolbar sticky top-16 z-20 bg-gray-100/90 backdrop-blur supports-backdrop-blur:border-b supports-backdrop-blur:border-gray-200 mb-6 flex flex-col md:flex-row items-start md:items-center gap-3 px-2 py-3 rounded-xl">
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-semibold text-gray-900">Employee Management</h1>
+                        <p class="text-sm text-gray-500">Create, edit and manage your workforce.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            hx-get="/employees/new-with-user" 
+                            hx-target="#main-content" 
+                            hx-trigger="click"
+                            class="inline-flex items-center gap-2 bg-jech-accent hover:bg-jech-blue text-white font-semibold rounded-full px-4 py-2 shadow-sm">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+                            Add User & Employee
+                        </button>
+                        <button 
+                            hx-get="/employees/new" 
+                            hx-target="#main-content" 
+                            hx-trigger="click"
+                            class="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-700 font-semibold rounded-full px-4 py-2 hover:bg-gray-50 shadow-sm">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+                            Add Employee Only
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11A5.5 5.5 0 009 3.5zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
+                            </span>
+                            <input type="text" id="employee-search" placeholder="Search employees..." class="input-modern w-full pl-9" />
+                        </div>
+                        <div>
+                            <select id="department-filter" class="select-modern w-full">
+                                <option value="">All Departments</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="status-filter" class="select-modern w-full">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="sort-select" class="select-modern w-full">
+                                <option value="name_asc">Name A–Z</option>
+                                <option value="name_desc">Name Z–A</option>
+                                <option value="department_asc">Department</option>
+                                <option value="status_asc">Status</option>
+                            </select>
+                        </div>
+                        <div class="flex sm:justify-end">
+                            <button onclick="applyFilters()" class="btn btn-primary">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 01.8 1.6l-4.2 6.3V16l-4 2v-6.1L3.2 4.6A1 1 0 013 4z"/></svg>
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-3 overflow-x-auto no-scrollbar">
+                        <div class="flex items-center gap-2 min-w-max" id="alpha-chips">
+                            <button type="button" class="px-2.5 py-1 text-xs rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50" onclick="setAlphaFilter('')">All</button>
+                            {{/* A–Z chips */}}
+                            <script>
+                                (function(){
+                                    const container = document.currentScript.previousElementSibling;
+                                    const active = localStorage.getItem('emp_initial') || '';
+                                    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                                    letters.forEach(function(ch){
+                                        const b = document.createElement('button');
+                                        b.type='button';
+                                        b.textContent=ch;
+                                        b.className='px-2.5 py-1 text-xs rounded-full border border-gray-200 text-gray-700 hover:bg-gray-50';
+                                        b.onclick=function(){ setAlphaFilter(ch); };
+                                        if (active===ch){ b.classList.add('bg-slate-900','text-white','border-slate-900'); }
+                                        container.appendChild(b);
+                                    });
+                                })();
+                            </script>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="elevated-card overflow-hidden rounded-xl shadow-sm bg-white border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+                        <h2 class="text-xl font-semibold text-gray-900">Employee List</h2>
+                    </div>
+                    <div id="employee-table" class="overflow-x-auto" hx-sync="this:queue">
+                        <div class="p-6">
+                            <div class="animate-pulse space-y-3">
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-200 bg-white flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            <span id="employee-page-label">Page 1</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="employee-prev" class="btn btn-secondary" onclick="changeEmployeePage(-1)">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06L7.44 10.53a1 1 0 010-1.06l4.29-4.24a.75.75 0 011.06 0z" clip-rule="evenodd"/></svg>
+                                Previous
+                            </button>
+                            <button id="employee-next" class="btn btn-secondary" onclick="changeEmployeePage(1)">
+                                Next
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/js/htmx.min.js"></script>
+    <script>
+    // Fallback: if local HTMX fails to load (e.g., wrong MIME in prod), load from CDN
+    (function(){
+        function ensureHTMX(){
+            if (!window.htmx) {
+                var s=document.createElement('script');
+                s.src='https://unpkg.com/htmx.org@1.9.10';
+                s.defer=true;
+                document.head.appendChild(s);
+            }
+        }
+        // Immediate check
+        if (!window.htmx) ensureHTMX();
+        // Error listener in case the local script tag errors
+        window.addEventListener('error', function(e){
+            var t=e.target||{}; if (t.tagName==='SCRIPT' && (t.src||'').indexOf('/static/js/htmx.min.js')!==-1) ensureHTMX();
+        }, true);
+    })();
+    </script>
+    <script src="/static/js/nav-dropdown.js"></script>
+    <script src="/static/js/employees.js"></script>
+    
+    <script>
+    (function(){
+        function debounce(fn, wait){ let t; return function(){ clearTimeout(t); t = setTimeout(()=>fn.apply(this, arguments), wait); } }
+        const search = document.getElementById('employee-search');
+        const dept = document.getElementById('department-filter');
+        const status = document.getElementById('status-filter');
+        const sort = document.getElementById('sort-select');
+        if (search) search.addEventListener('input', debounce(applyFilters, 300));
+        if (dept) dept.addEventListener('change', applyFilters);
+        if (status) status.addEventListener('change', applyFilters);
+        if (sort) sort.addEventListener('change', applyFilters);
+    })();
+    </script>
+    
+</body>
+</html>

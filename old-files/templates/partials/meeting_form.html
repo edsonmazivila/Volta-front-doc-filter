@@ -1,0 +1,142 @@
+{{define "meeting_form.html"}}
+<div class="bg-white border border-gray-200 rounded-xl p-5 mb-4">
+  <h3 class="text-lg font-semibold text-gray-900 mb-3">{{if .Meeting}}Edit meeting{{else}}Create meeting{{end}}</h3>
+  <form
+    {{if .Meeting}}
+      hx-put="/api/meetings/{{.Meeting.ID}}"
+    {{else}}
+      hx-post="/api/meetings"
+    {{end}}
+    hx-target="#meetingFormHost"
+    hx-swap="innerHTML"
+    hx-on:htmx:afterRequest="var d=event.detail||{}; if(!(d.elt===this && d.xhr && d.xhr.status>=200 && d.xhr.status<400)) return; document.body && htmx.trigger(document.body,'agenda-refresh',{bubbles:true}); this.innerHTML='';">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Title</label>
+        <input name="title" type="text" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2"
+               value="{{if .Meeting}}{{.Meeting.Title}}{{end}}">
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Date</label>
+        <input id="meetingDate" type="date" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2">
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Time</label>
+        <div class="flex items-center gap-2">
+          <select id="hourSelect" class="rounded-md border border-gray-300 px-2 py-2 text-sm">
+            <option value="">HH</option>
+            {{/* 00..23 */}}
+            <option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option>
+            <option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option>
+            <option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option>
+            <option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option>
+          </select>
+          <span class="text-gray-500">:</span>
+          <select id="minuteSelect" class="rounded-md border border-gray-300 px-2 py-2 text-sm">
+            <option value="">MM</option>
+            <option>00</option><option>05</option><option>10</option><option>15</option><option>20</option><option>25</option>
+            <option>30</option><option>35</option><option>40</option><option>45</option><option>50</option><option>55</option>
+          </select>
+        </div>
+        <input id="meetingTime" type="hidden">
+      </div>
+
+      <!-- Hidden combined field submitted to server (YYYY-MM-DDTHH:MM) -->
+      <input id="datetimeHidden" name="datetime" type="hidden" value="{{if .Meeting}}{{.Meeting.DateTimeLocal}}{{end}}">
+
+      <div class="md:col-span-2">
+        <label class="block text-xs text-gray-600 mb-1">Description</label>
+        <textarea name="description" rows="3" class="w-full rounded-md border border-gray-300 px-3 py-2">{{if .Meeting}}{{with .Meeting.Description}}{{.}}{{end}}{{end}}</textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Location</label>
+        <input name="location" type="text"
+               class="w-full rounded-md border border-gray-300 px-3 py-2"
+               value="{{if .Meeting}}{{with .Meeting.Location}}{{.}}{{end}}{{end}}">
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-600 mb-1">Participants</label>
+        <select id="participantsSelect" name="participants_ids" multiple size="6"
+                class="w-full rounded-md border border-gray-300 px-3 py-1 text-sm bg-white"
+                hx-get="/meetings/participants/options"
+                hx-trigger="load, focus once"
+                hx-include="#participants_initial"
+                hx-target="this"
+                hx-swap="innerHTML"
+                hx-credentials="true">
+          <option value="">Select participants...</option>
+        </select>
+        <input id="participants_initial" type="hidden" name="participants_initial" value="{{.ParticipantsCSV}}">
+        <script>
+          (function() {
+            var sel = document.getElementById('participantsSelect');
+            if (!sel) return;
+            sel.addEventListener('mousedown', function(e) {
+              if (e.target && e.target.tagName === 'OPTION') {
+                e.preventDefault();
+                var opt = e.target;
+                opt.selected = !opt.selected;
+                // trigger change for htmx serialization if needed
+                var ev = new Event('change', { bubbles: true });
+                sel.dispatchEvent(ev);
+              }
+            });
+
+            // Date/Time combiner
+            var d = document.getElementById('meetingDate');
+            var t = document.getElementById('meetingTime');
+            var h = document.getElementById('datetimeHidden');
+            var hs = document.getElementById('hourSelect');
+            var ms = document.getElementById('minuteSelect');
+            function syncDT(){
+              if (!d || !t || !h) return;
+              if (d.value && t.value) {
+                h.value = d.value + 'T' + t.value;
+              }
+            }
+            function syncTimeFromSelects(){
+              if (!t) return;
+              if (hs && ms && hs.value && ms.value) {
+                t.value = hs.value + ':' + ms.value;
+                syncDT();
+              }
+            }
+            if (d) d.addEventListener('change', syncDT);
+            if (hs) hs.addEventListener('change', syncTimeFromSelects);
+            if (ms) ms.addEventListener('change', syncTimeFromSelects);
+            // Pre-fill when editing
+            if (h && h.value && (!d.value || !t.value)) {
+              var parts = h.value.split('T');
+              if (parts.length === 2) { d.value = parts[0]; t.value = parts[1].slice(0,5); }
+            }
+            // Pre-fill selects from hidden time
+            if (t && t.value) {
+              var tp = t.value.split(':');
+              if (tp.length >= 2) { if (hs) hs.value = tp[0]; if (ms) ms.value = tp[1]; }
+            }
+          })();
+        </script>
+      </div>
+    </div>
+
+    <div class="mt-4 flex items-center gap-2">
+      <button type="submit" class="btn btn-primary px-4 py-2 rounded-md text-sm">
+        {{if .Meeting}}Save changes{{else}}Create{{end}}
+      </button>
+      <button type="button" class="btn btn-secondary px-4 py-2 rounded-md text-sm"
+              onclick="document.getElementById('meetingFormHost').innerHTML='';">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>
+{{end}}
+
+

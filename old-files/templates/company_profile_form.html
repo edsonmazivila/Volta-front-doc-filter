@@ -1,0 +1,126 @@
+<!-- Success Message -->
+{{if .Message}}
+<div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+    {{.Message}}
+</div>
+{{end}}
+
+<form hx-put="/api/company" hx-target="#company-form" hx-swap="outerHTML">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Basic Information -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
+            
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Company Name *</label>
+                <input type="text" id="name" name="name" value="{{.Company.Name}}" required
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="legal_name" class="block text-sm font-medium text-gray-700">Legal Name</label>
+                <input type="text" id="legal_name" name="legal_name" value="{{if .Company.LegalName}}{{.Company.LegalName}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="tax_id" class="block text-sm font-medium text-gray-700">Tax ID</label>
+                <input type="text" id="tax_id" name="tax_id" value="{{if .Company.TaxID}}{{.Company.TaxID}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="email" value="{{if .Company.Email}}{{.Company.Email}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                <input type="tel" id="phone" name="phone" value="{{if .Company.Phone}}{{.Company.Phone}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+                <input type="url" id="website" name="website" value="{{if .Company.Website}}{{.Company.Website}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <!-- Address Information -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Address</h3>
+            
+            <div>
+                <label for="address_line1" class="block text-sm font-medium text-gray-700">Address Line 1</label>
+                <input type="text" id="address_line1" name="address_line1" value="{{if .Company.AddressLine1}}{{.Company.AddressLine1}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="address_line2" class="block text-sm font-medium text-gray-700">Address Line 2</label>
+                <input type="text" id="address_line2" name="address_line2" value="{{if .Company.AddressLine2}}{{.Company.AddressLine2}}{{end}}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                    <input type="text" id="city" name="city" value="{{if .Company.City}}{{.Company.City}}{{end}}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-700">State/Province</label>
+                    <input type="text" id="state" name="state" value="{{if .Company.State}}{{.Company.State}}{{end}}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="postal_code" class="block text-sm font-medium text-gray-700">Postal Code</label>
+                    <input type="text" id="postal_code" name="postal_code" value="{{if .Company.PostalCode}}{{.Company.PostalCode}}{{end}}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+                    <input type="text" id="country" name="country" value="{{if .Company.Country}}{{.Company.Country}}{{end}}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="mt-8 flex justify-end space-x-4">
+        <button type="button" onclick="window.history.back()" 
+                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Cancel
+        </button>
+        <button type="submit" 
+                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-jech-accent hover:bg-jech-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Save Changes
+        </button>
+    </div>
+</form> 
+
+<!-- Company Branding (Logo Upload) -->
+<div class="mt-6 p-6 bg-white rounded-lg shadow-md">
+  <h3 class="text-lg font-semibold text-gray-900 mb-4">Company Branding</h3>
+  <div class="flex items-center gap-6">
+    <div class="w-32 h-32 border rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
+      {{if .Company.LogoPath}}
+        <img src="/{{.Company.LogoPath}}" alt="Company Logo" class="max-w-full max-h-full">
+      {{else}}
+        <span class="text-gray-400 text-sm">No logo</span>
+      {{end}}
+    </div>
+    <form hx-post="/api/company/logo" hx-target="#company-form" hx-swap="none" enctype="multipart/form-data" class="flex items-center gap-3">
+      <input type="file" name="logo" accept="image/*" class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-jech-accent file:text-white hover:file:bg-jech-blue" required>
+      <button type="submit" class="px-4 py-2 bg-jech-accent text-white rounded-md hover:bg-jech-blue">Upload Logo</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,234 @@
+<form hx-put="/api/timesheets/{{.Timesheet.ID}}" hx-target="body" hx-swap="none">
+
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-2">Employee</label>
+            <input type="text" id="employee_id" name="employee_id" value="{{if .Timesheet.Employee.User}}{{.Timesheet.Employee.User.FirstName}} {{.Timesheet.Employee.User.LastName}}{{end}}" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed" disabled>
+            <p class="text-xs text-gray-500 mt-1">Employee cannot be changed</p>
+        </div>
+        
+        <div>
+            <label for="pay_period_start" class="block text-sm font-medium text-gray-700 mb-2">Pay Period Start</label>
+            <input type="date" id="pay_period_start" name="pay_period_start" value="{{if .Timesheet.PayPeriodStart}}{{.Timesheet.PayPeriodStart.Format "2006-01-02"}}{{end}}" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed" disabled>
+            <p class="text-xs text-gray-500 mt-1">Pay period cannot be changed</p>
+        </div>
+        
+        <div>
+            <label for="pay_period_end" class="block text-sm font-medium text-gray-700 mb-2">Pay Period End</label>
+            <input type="date" id="pay_period_end" name="pay_period_end" value="{{if .Timesheet.PayPeriodEnd}}{{.Timesheet.PayPeriodEnd.Format "2006-01-02"}}{{end}}" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed" disabled>
+            <p class="text-xs text-gray-500 mt-1">Pay period cannot be changed</p>
+        </div>
+        
+        <div>
+            <label for="total_hours" class="block text-sm font-medium text-gray-700 mb-2">Total Hours</label>
+            <input type="number" id="total_hours" name="total_hours" value="{{.Timesheet.TotalHours}}" step="0.5" min="0" max="168" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">
+        </div>
+        
+        <div>
+            <label for="regular_hours" class="block text-sm font-medium text-gray-700 mb-2">Regular Hours</label>
+            <input type="number" id="regular_hours" name="regular_hours" value="{{.Timesheet.RegularHours}}" step="0.5" min="0" max="168" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">
+        </div>
+        
+        <div>
+            <label for="overtime_hours" class="block text-sm font-medium text-gray-700 mb-2">Overtime Hours</label>
+            <input type="number" id="overtime_hours" name="overtime_hours" value="{{.Timesheet.OvertimeHours}}" step="0.5" min="0" max="168" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">
+        </div>
+        
+        <div>
+            <label for="sick_hours" class="block text-sm font-medium text-gray-700 mb-2">Sick Hours</label>
+            <input type="number" id="sick_hours" name="sick_hours" value="{{.Timesheet.SickHours}}" step="0.5" min="0" max="168" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">
+        </div>
+        
+        <div>
+            <label for="vacation_hours" class="block text-sm font-medium text-gray-700 mb-2">Vacation Hours</label>
+            <input type="number" id="vacation_hours" name="vacation_hours" value="{{.Timesheet.VacationHours}}" step="0.5" min="0" max="168" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">
+        </div>
+        
+        <div>
+            <label for="holiday_hours" class="block text-sm font-medium text-gray-700 mb-2">Holiday Hours</label>
+            <input type="number" id="holiday_hours" name="holiday_hours" value="{{.Timesheet.HolidayHours}}" step="0.5" min="0" max="168" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">
+        </div>
+        
+        <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select id="status" name="status" required data-current-status="{{.Timesheet.Status}}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent">
+                <!-- Options will be populated by JavaScript based on user role -->
+            </select>
+        </div>
+        
+        <div class="md:col-span-2">
+            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+            <textarea id="notes" name="notes" rows="3" 
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jech-accent content-editable-field">{{if .Timesheet.Notes}}{{.Timesheet.Notes}}{{end}}</textarea>
+        </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 mt-6">
+        <button type="button" onclick="hideModal()" 
+                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+            Cancel
+        </button>
+        <button type="submit" 
+                class="px-4 py-2 bg-jech-accent text-white rounded-md hover:bg-jech-blue transition-colors">
+            Update Timesheet
+        </button>
+    </div>
+</form>
+
+<script>
+console.log('Edit timesheet form loaded');
+
+// Setup status options when form loads
+async function setupStatusOptions() {
+    try {
+        const response = await fetch('/api/auth/profile', {
+            credentials: 'same-origin'
+        });
+        
+        if (response.ok) {
+            const userData = await response.json();
+            const userRole = userData.data.role;
+            
+            console.log('Setting up status options for role:', userRole);
+            
+            const statusSelect = document.getElementById('status');
+            if (!statusSelect) {
+                console.log('No status select found');
+                return;
+            }
+            
+            // Clear existing options
+            statusSelect.innerHTML = '';
+            
+            // Define allowed statuses based on role
+            let allowedStatuses = [];
+            switch (userRole) {
+                case 'admin':
+                    allowedStatuses = [
+                        { value: 'draft', label: 'Draft' },
+                        { value: 'submitted', label: 'Submitted' },
+                        { value: 'approved', label: 'Approved' },
+                        { value: 'rejected', label: 'Rejected' }
+                    ];
+                    break;
+                case 'manager':
+                    allowedStatuses = [
+                        { value: 'approved', label: 'Approved' },
+                        { value: 'rejected', label: 'Rejected' }
+                    ];
+                    break;
+                case 'employee':
+                    allowedStatuses = [
+                        { value: 'draft', label: 'Draft' },
+                        { value: 'submitted', label: 'Submitted' }
+                    ];
+                    break;
+                default:
+                    allowedStatuses = [
+                        { value: 'draft', label: 'Draft' },
+                        { value: 'submitted', label: 'Submitted' }
+                    ];
+            }
+            
+            // Add options
+            allowedStatuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.value;
+                option.textContent = status.label;
+                statusSelect.appendChild(option);
+            });
+            
+            // Set the current status if it's allowed, otherwise set to first allowed status
+            const currentStatus = statusSelect.getAttribute('data-current-status');
+            if (currentStatus && allowedStatuses.some(s => s.value === currentStatus)) {
+                statusSelect.value = currentStatus;
+            } else if (allowedStatuses.length > 0) {
+                statusSelect.value = allowedStatuses[0].value;
+            }
+            
+            console.log('Status options set up successfully');
+        }
+    } catch (error) {
+        console.error('Error setting up status options:', error);
+    }
+}
+
+// Setup when form loads
+setTimeout(() => {
+    setupStatusOptions();
+}, 100);
+
+// Handle form submission - listen to all htmx:afterRequest events but filter by target
+document.addEventListener('htmx:afterRequest', function(event) {
+    // Only handle events from forms with hx-put attribute (timesheet update forms)
+    if (event.detail.elt && event.detail.elt.tagName === 'FORM' && event.detail.elt.hasAttribute('hx-put')) {
+        console.log('Timesheet form HTMX afterRequest:', event.detail);
+        
+        // If successful (status 200 = OK)
+        if (event.detail.xhr.status === 200) {
+            console.log('Timesheet updated successfully!');
+            
+            // Close modal
+            hideModal();
+            
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50';
+            successMessage.textContent = 'Timesheet updated successfully!';
+            document.body.appendChild(successMessage);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                if (document.body.contains(successMessage)) {
+                    document.body.removeChild(successMessage);
+                }
+            }, 3000);
+            
+            // Reload the timesheet table only once
+            setTimeout(() => {
+                loadTimesheets();
+            }, 1000);
+        }
+        
+        // If error
+        if (event.detail.xhr.status >= 400) {
+            console.log('Error updating timesheet:', event.detail.xhr.responseText);
+            
+            // Parse error message from response
+            let errorText = 'Error updating timesheet. Please try again.';
+            try {
+                const response = JSON.parse(event.detail.xhr.responseText);
+                if (response.error) {
+                    errorText = response.error;
+                }
+            } catch (e) {
+                // Use default error message if parsing fails
+            }
+            
+            // Show error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50';
+            errorMessage.textContent = errorText;
+            document.body.appendChild(errorMessage);
+            
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                if (document.body.contains(errorMessage)) {
+                    document.body.removeChild(errorMessage);
+                }
+            }, 5000);
+        }
+    }
+});
+</script>

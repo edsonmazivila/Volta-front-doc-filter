@@ -2,8 +2,10 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader, Stat } from '@/components/dashboard/card'
 import { Button, Skeleton } from '@/components/ui'
+import { requireUser } from '@/lib/auth/dal'
 
-export default function PayrollPage() {
+export default async function PayrollPage() {
+  await requireUser()
   return (
     <div className='min-h-dvh flex app-background'>
       <Sidebar />
@@ -16,7 +18,7 @@ export default function PayrollPage() {
             <Card><Stat label='Gross Payroll' value={'—'} /></Card>
           </div>
           <Card>
-            <CardHeader title='Pending Approvals' action={<Button glow>Run Payroll</Button>} />
+            <CardHeader title='Pending Approvals' action={<Button>Run Payroll</Button>} />
             <div className='space-y-2'>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className='h-10' />

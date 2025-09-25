@@ -14,12 +14,17 @@ export function ThemeToggle() {
   return (
     <button
       type='button'
-      className='inline-flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm hover:bg-muted'
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-label='Toggle theme'
+      className='cursor-pointer relative inline-flex items-center h-6 w-12 rounded-full border border-[var(--border)] bg-[var(--card)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-colors'
     >
-      {mounted ? (isDark ? <Sun size={16} /> : <Moon size={16} />) : <span className='w-4 h-4' />}
-      <span className='hidden sm:inline'>Theme</span>
+      <span className={`absolute left-0.5 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-foreground transition-transform ${mounted && isDark ? 'translate-x-6' : ''}`} />
+      <span className='absolute left-1 text-[10px] opacity-80'>
+        <Sun size={12} />
+      </span>
+      <span className='absolute right-1 text-[10px] opacity-80'>
+        <Moon size={12} />
+      </span>
     </button>
   )
 }

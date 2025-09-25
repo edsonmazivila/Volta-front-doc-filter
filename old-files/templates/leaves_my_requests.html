@@ -1,0 +1,52 @@
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">My Leave Requests</h3>
+        <div class="flex items-center space-x-4">
+            <button id="refreshBtn" class="text-gray-500 hover:text-jech-accent transition-colors" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+            <select id="statusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                <option value="">All Statuses</option>
+                <option value="DRAFT">Draft</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="APPROVED_L1">Approved L1</option>
+                <option value="APPROVED_FINAL">Approved</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="CANCELLED">Cancelled</option>
+            </select>
+            <select id="typeFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                <option value="">All Types</option>
+                <option value="vacation">Vacation</option>
+                <option value="sick">Sick</option>
+                <option value="personal">Personal</option>
+                <option value="maternity">Maternity</option>
+                <option value="paternity">Paternity</option>
+                <option value="bereavement">Bereavement</option>
+                <option value="emergency">Emergency</option>
+            </select>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="leave-table min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="leaveRequestsList" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center">
+                            <div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-jech-accent"></div></div>
+                            <p class="mt-2 text-sm text-gray-500">Loading...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> 

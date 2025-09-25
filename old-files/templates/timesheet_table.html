@@ -1,0 +1,97 @@
+{{if .Timesheets}}
+<table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+        <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay Period</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Hours</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+        {{range .Timesheets}}
+        <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+                {{if .Employee}}
+                    {{if .Employee.User}}
+                        {{.Employee.User.FirstName}} {{.Employee.User.LastName}}
+                    {{else}}
+                        Employee #{{.EmployeeID}}
+                    {{end}}
+                {{else}}
+                    Employee #{{.EmployeeID}}
+                {{end}}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">{{.PayPeriodStart.Format "Jan 02"}} - {{.PayPeriodEnd.Format "Jan 02, 2006"}}</td>
+            <td class="px-6 py-4 whitespace-nowrap">{{.TotalHours}}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    {{if eq .Status "approved"}}bg-green-100 text-green-800
+                    {{else if eq .Status "submitted"}}bg-yellow-100 text-yellow-800
+                    {{else if eq .Status "rejected"}}bg-red-100 text-red-800
+                    {{else}}bg-gray-100 text-gray-800{{end}}">
+                    {{.Status}}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button hx-get="/timesheets/{{.ID}}/edit" hx-target="#modal-content" hx-trigger="click" onclick="showModal()" 
+                        class="text-jech-accent hover:text-jech-dark mr-3">Edit</button>
+                {{if eq .Status "draft"}}
+                <button 
+                    hx-post="/api/timesheets/{{.ID}}/submit"
+                    hx-target="#timesheet-table" 
+                    hx-swap="innerHTML"
+                    class="text-yellow-600 hover:text-yellow-800 submit-timesheet-btn mr-3">Submit</button>
+                {{end}}
+                {{if or (eq .Status "submitted") (eq .Status "rejected")}}
+                <button 
+                    hx-patch="/api/timesheets/{{.ID}}"
+                    hx-vals='{"status":"draft"}'
+                    hx-target="#timesheet-table" 
+                    hx-swap="innerHTML"
+                    class="text-gray-600 hover:text-gray-800 cancel-timesheet-btn mr-3">Cancel</button>
+                {{end}}
+                {{/* Approve/Reject only in general view, not in My Timesheets */}}
+                {{if and (eq $.IsSelf false) (eq .Status "submitted")}}
+                <button 
+                    hx-post="/api/timesheets/{{.ID}}/approve"
+                    hx-target="#timesheet-table" 
+                    hx-swap="innerHTML"
+                    class="text-green-600 hover:text-green-800 approve-timesheet-btn mr-3" 
+                    style="display: none;">Approve</button>
+                <button 
+                    hx-post="/api/timesheets/{{.ID}}/reject"
+                    hx-vals='{"reason":"Rejected from list"}'
+                    hx-target="#timesheet-table" 
+                    hx-swap="innerHTML"
+                    class="text-red-600 hover:text-red-800 reject-timesheet-btn mr-3" 
+                    style="display: none;">Reject</button>
+                {{end}}
+                <button hx-delete="/api/timesheets/{{.ID}}" 
+                        hx-confirm="Are you sure you want to delete this timesheet? This action cannot be undone." 
+                        hx-target="#timesheet-table"
+                        hx-swap="innerHTML"
+                        class="text-red-600 hover:text-red-800 delete-timesheet-btn" 
+                        style="display: none;">Delete</button>
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{else}}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+        </svg>
+    </div>
+    <h3 class="empty-state-title">No Timesheets Found</h3>
+    <p class="empty-state-description">There are no timesheets to display. Timesheets will appear here once employees start tracking their time.</p>
+    <div class="empty-state-action">
+        <button class="btn btn-primary" hx-get="/timesheets/new" hx-target="#modal-content" onclick="showModal()">
+            Add New Timesheet
+        </button>
+    </div>
+</div>
+{{end}} 

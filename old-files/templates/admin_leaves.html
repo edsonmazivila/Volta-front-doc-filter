@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jech-blue': '#1e40af',
+                        'jech-light-blue': '#3b82f6',
+                        'jech-dark': '#1f2937',
+                        'jech-accent': '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    {{template "partials/jech-colors.html" .}}
+    <link rel="stylesheet" href="/static/css/custom.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+        .badge-draft { @apply bg-gray-100 text-gray-800; }
+        .badge-submitted { @apply bg-blue-100 text-blue-800; }
+        .badge-approved-l1 { @apply bg-yellow-100 text-yellow-800; }
+        .badge-approved-final { @apply bg-green-100 text-green-800; }
+        .badge-rejected { @apply bg-red-100 text-red-800; }
+        .badge-cancelled { @apply bg-gray-100 text-gray-800; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    {{template "partials/nav.html" .}}
+    <div class="md:pl-64 relative z-0">
+        <main id="main-content" class="container mx-auto px-4 py-8 mt-0">
+            <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                <a href="/dashboard" class="hover:text-jech-light-blue">Dashboard</a>
+                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-700">Leaves Management</span>
+            </div>
+
+        <div class="mb-8">
+                <h1 class="text-2xl font-semibold text-jech-dark mb-1">{{.Title}}</h1>
+            <p class="text-gray-600">Review and approve employee leave requests</p>
+        </div>
+
+        <div class="mb-6">
+            <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex gap-6">
+                        <button id="pendingTab" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 active">Pending Approvals <span id="pendingCount" class="ml-2 bg-jech-accent text-white rounded-full px-2 py-0.5 text-xs">0</span></button>
+                        <button id="allRequestsTab" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">All Requests <span id="allRequestsCount" class="ml-2 bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs">0</span></button>
+                        <button id="teamBalancesTab" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">Team Balances</button>
+                </nav>
+            </div>
+        </div>
+
+        <div id="pendingContent" class="tab-content active">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200"><h3 class="text-lg font-medium text-gray-900">Pending Leave Requests</h3></div>
+                <div id="pendingTable" class="overflow-x-auto">
+                        <div class="p-8 text-center text-gray-500"><div class="animate-spin h-8 w-8 border-b-2 border-jech-accent mx-auto mb-4"></div>Loading pending approvals...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="allRequestsContent" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">All Leave Requests</h3>
+                    <div class="flex space-x-4">
+                        <select id="statusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                            <option value="">All Status</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="SUBMITTED">Submitted</option>
+                            <option value="APPROVED_L1">Approved L1</option>
+                            <option value="APPROVED_FINAL">Approved Final</option>
+                            <option value="REJECTED">Rejected</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                        <select id="typeFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm">
+                            <option value="">All Types</option>
+                            <option value="vacation">Vacation</option>
+                            <option value="sick">Sick</option>
+                            <option value="personal">Personal</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="allRequestsTable" class="overflow-x-auto">
+                        <div class="p-8 text-center text-gray-500"><div class="animate-spin h-8 w-8 border-b-2 border-jech-accent mx-auto mb-4"></div>Loading all requests...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="teamBalancesContent" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200"><h3 class="text-lg font-medium text-gray-900">Team Leave Balances</h3></div>
+                <div id="teamBalancesTable" class="overflow-x-auto">
+                        <div class="p-8 text-center text-gray-500"><div class="animate-spin h-8 w-8 border-b-2 border-jech-accent mx-auto mb-4"></div>Loading team balances...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        </div>
+
+    <div id="approvalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full m-4">
+            <div class="px-6 py-4 border-b border-gray-200"><h3 id="approvalModalTitle" class="text-lg font-medium text-gray-900">Approve Leave Request</h3></div>
+            <div class="px-6 py-4">
+                <div id="approvalModalContent"></div>
+                <div class="mt-4">
+                    <label for="approvalNotes" class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                    <textarea id="approvalNotes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jech-accent" placeholder="Add any notes about this approval..."></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelApproval" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">Cancel</button>
+                <button id="rejectRequest" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Reject</button>
+                <button id="approveRequest" class="px-4 py-2 text-sm font-medium text-white bg-jech-accent rounded-md hover:bg-green-700">Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/nav-dropdown.js"></script>
+    <script src="/static/js/admin_leaves.js"></script>
+</body>
+</html> 

@@ -3,8 +3,10 @@ import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { LineChartPlaceholder } from '@/components/dashboard/line-chart'
 import { Button } from '@/components/ui'
+import { requireUser } from '@/lib/auth/dal'
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  await requireUser()
   return (
     <div className='min-h-dvh flex app-background'>
       <Sidebar />

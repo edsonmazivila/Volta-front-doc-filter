@@ -1,0 +1,11 @@
+<div>
+  {{if not .Meetings}}
+    <div class="text-sm text-gray-500">No meetings.</div>
+  {{else}}
+    {{range .Meetings}}
+      {{template "meeting_card.html" .}}
+    {{end}}
+  {{end}}
+</div>
+
+

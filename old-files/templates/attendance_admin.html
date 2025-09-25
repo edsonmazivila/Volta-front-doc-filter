@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Dashboard - HR - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {{template "partials/jech-colors.html" .}}
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="h-full bg-gray-100">
+    <div id="app" class="min-h-full">
+        {{template "partials/nav.html" .}}
+        <div class="md:pl-64 relative z-0">
+            <main id="main-content" class="mt-5 container mx-auto px-4">
+                <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                    <a href="/dashboard" class="hover:text-jech-accent">Dashboard</a>
+                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                    <span class="text-gray-700">Attendance - HR</span>
+                </div>
+
+                <section class="elevated-card bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-gray-900">Employees Attendance</h2>
+                        <div class="flex items-center gap-3">
+                            <input id="monthFilter" name="month" type="month" class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jech-accent"
+                                   hx-on:htmx:load="try{if(!this.value){var d=new Date();var m=('0'+(d.getMonth()+1)).slice(-2);this.value=d.getFullYear()+'-'+m; if(window.htmx){htmx.trigger('#attendanceList','refresh'); htmx.trigger('#teamJustifications','refresh');}}}catch(e){}" />
+                            <input id="monthShadowAdmin" name="month" type="hidden" value="">
+                            <a id="exportCsvBtn" class="btn btn-secondary text-sm px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-50" href="#" title="Export CSV">Export CSV</a>
+                        </div>
+                    </div>
+
+                    <div id="attendanceList"
+                         class="px-6 py-4"
+                         hx-get="/attendance/list"
+                         hx-trigger="load, change from:#monthFilter, refresh"
+                         hx-include="#monthFilter, #monthShadowAdmin"
+                         hx-vals="js:{month: (document.getElementById('monthFilter')?.value || (new Date().toISOString().slice(0,7)))}"
+                         hx-target="#attendanceList"
+                         hx-swap="innerHTML">
+                        <div class="py-10 text-center text-gray-500 text-sm">Loading employees…</div>
+                    </div>
+                </section>
+
+                <section class="mt-8 elevated-card bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-gray-900">Team Justifications</h2>
+                    </div>
+                    <div id="teamJustifications" class="px-6 py-4 overflow-x-auto"
+                         hx-get="/attendance/justifications/team"
+                         hx-trigger="load, change from:#monthFilter, refresh"
+                         hx-include="#monthFilter, #monthShadowAdmin"
+                         hx-vals="js:{month: (document.getElementById('monthFilter')?.value || (new Date().toISOString().slice(0,7)))}"
+                         hx-target="#teamJustifications"
+                         hx-swap="innerHTML">
+                        <table class="min-w-full text-left">
+                            <thead>
+                                <tr class="text-xs uppercase text-gray-500">
+                                    <th class="px-4 py-2">Employee</th>
+                                    <th class="px-4 py-2">Date</th>
+                                    <th class="px-4 py-2">Status</th>
+                                    <th class="px-4 py-2">Reason</th>
+                                    <th class="px-4 py-2 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="px-4 py-6 text-center text-sm text-gray-500" colspan="5">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="/static/js/htmx.min.js"></script>
+    <script>
+    (function(){
+        const mf = document.getElementById('monthFilter');
+        const msA = document.getElementById('monthShadowAdmin');
+        if (mf && !mf.value) {
+            const d = new Date();
+            const m = String(d.getMonth()+1).padStart(2,'0');
+            mf.value = `${d.getFullYear()}-${m}`;
+        }
+        if (msA) { msA.value = mf?.value || msA.value || new Date().toISOString().slice(0,7); }
+        if (mf && msA) { mf.addEventListener('change', function(){ msA.value = mf.value || new Date().toISOString().slice(0,7); }); }
+        // Wire export button to trigger a normal file download
+        const btn = document.getElementById('exportCsvBtn');
+        if (btn && mf) {
+           btn.addEventListener('click', function(e){
+                e.preventDefault();
+                const month = encodeURIComponent(mf.value || '');
+                if (!month) { alert('Selecione um mês.'); return; }
+               try {
+                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+                 const tzp = tz ? `&tz=${encodeURIComponent(tz)}` : '';
+                 window.location.href = `/attendance/export.csv?month=${month}${tzp}`;
+               } catch(_) {
+                 window.location.href = `/attendance/export.csv?month=${month}`;
+               }
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
+
+

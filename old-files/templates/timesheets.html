@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timesheets - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jech-blue': '#1e40af',
+                        'jech-dark': '#0f172a',
+                        'jech-light': '#f8fafc',
+                        'jech-accent': '#3b82f6',
+                        'jech-secondary': '#64748b'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="h-full bg-gray-100">
+    <div id="app" class="min-h-full">
+        {{template "partials/nav.html" .}}
+        <div class="md:pl-64 relative z-0">
+            <main id="main-content" class="mt-5 container mx-auto px-4">
+                <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                    <a href="/dashboard" class="hover:text-jech-accent">Dashboard</a>
+                    <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                    <span class="text-gray-700">Timesheets</span>
+                </div>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Timesheet Management</h1>
+                        <p class="text-sm text-gray-500">Track and manage employee time entries.</p>
+                    </div>
+                    <div>
+                        <button hx-get="/timesheets/new" hx-target="#main-content" hx-trigger="click" class="btn btn-primary">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+                            Add New Timesheet
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-900">Timesheet List</h2>
+                    </div>
+                    <div id="timesheet-table" class="overflow-x-auto" hx-sync="this:queue" 
+                         hx-get="{{if .IsSelf}}/my-timesheets/table{{else}}/timesheets/table{{end}}" 
+                         hx-trigger="load, refresh from:body" 
+                         hx-swap="innerHTML">
+                        <div class="p-6">
+                            <div class="animate-pulse space-y-3">
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                                <div class="h-4 bg-gray-200 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/js/htmx.min.js"></script>
+    <script>
+    // Fallback: if local HTMX fails to load (e.g., wrong MIME in prod), load from CDN
+    (function(){
+        function ensureHTMX(){
+            if (!window.htmx) {
+                var s=document.createElement('script');
+                s.src='https://unpkg.com/htmx.org@1.9.10';
+                s.defer=true;
+                document.head.appendChild(s);
+            }
+        }
+        if (!window.htmx) ensureHTMX();
+        window.addEventListener('error', function(e){
+            var t=e.target||{}; if (t.tagName==='SCRIPT' && (t.src||'').indexOf('/static/js/htmx.min.js')!==-1) ensureHTMX();
+        }, true);
+    })();
+    </script>
+    <script src="/static/js/nav-dropdown.js"></script>
+    <script src="/static/js/timesheets.js"></script>
+</body>
+</html>

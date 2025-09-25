@@ -1,0 +1,18 @@
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-semibold text-jech-dark mb-2">Total Employees</h3>
+        <div class="text-3xl font-bold text-jech-accent">{{.TotalEmployees}}</div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-semibold text-jech-dark mb-2">Gross Payroll</h3>
+        <div class="text-3xl font-bold text-green-600">${{printf "%.2f" .GrossPayroll}}</div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-semibold text-jech-dark mb-2">Net Payroll</h3>
+        <div class="text-3xl font-bold text-blue-600">${{printf "%.2f" .NetPayroll}}</div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h3 class="text-lg font-semibold text-jech-dark mb-2">Tax Withholding</h3>
+        <div class="text-3xl font-bold text-red-600">${{printf "%.2f" .TaxWithholding}}</div>
+    </div>
+</div> 

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Paystubs - NexuPayroll</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    {{template "partials/jech-colors.html" .}}
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="h-full bg-gray-100">
+    {{template "partials/nav.html" .}}
+    
+    <div class="md:pl-64 relative z-0">
+        <main id="main-content" class="container mx-auto px-4 py-8">
+            <div class="mb-2 text-sm text-gray-500 flex items-center gap-2">
+                <a href="/dashboard" class="hover:text-jech-accent">Dashboard</a>
+                <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L10.94 10 7.23 6.29A.75.75 0 118.29 5.23l4.25 4.24a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.08-.02z" clip-rule="evenodd"/></svg>
+                <span class="text-gray-700">My Paystubs</span>
+            </div>
+
+            <div class="mb-8">
+                <h1 class="text-2xl font-semibold text-jech-dark">My Paystubs</h1>
+                <p class="text-sm text-gray-500">View and download your paystubs</p>
+            </div>
+
+            {{if .Employee}}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-jech-dark">{{.Employee.FirstName}} {{.Employee.LastName}}</h2>
+                        <p class="text-gray-600">{{.Employee.JobTitle}}</p>
+                        <p class="text-sm text-gray-500">Employee ID: {{.Employee.ID}}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Total Paystubs</p>
+                        <p class="text-2xl font-bold text-jech-accent">{{.Count}}</p>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-jech-dark">{{.User.FirstName}} {{.User.LastName}}</h2>
+                        <p class="text-gray-600">{{.User.Email}}</p>
+                        <p class="text-sm text-gray-500">User ID: {{.User.ID}}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">Total Paystubs</p>
+                        <p class="text-2xl font-bold text-jech-accent">{{.Count}}</p>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+
+            <div class="bg-white rounded-lg shadow-md">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-jech-dark">Paystub History</h3>
+                </div>
+                {{if .PayStubs}}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay Period</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pay Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gross Pay</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net Pay</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {{range .PayStubs}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{.PayPeriodStart}} to {{.PayPeriodEnd}}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{.PayDate}}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${{.GrossPay}}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">${{.NetPay}}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{.RegularHours}}h{{if .OvertimeHours}} + {{.OvertimeHours}}h OT{{end}}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <button onclick="viewPaystub('{{.ID}}')" class="text-jech-accent hover:text-jech-dark">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        </button>
+                                        <button onclick="downloadPaystub('{{.ID}}')" class="text-green-600 hover:text-green-800">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                    <div class="px-6 py-3 bg-gray-50 text-sm text-gray-500">Total: {{.Count}} paystub{{if ne .Count 1}}s{{end}}</div>
+                </div>
+                {{else}}
+                <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No paystubs found</h3>
+                    <p class="mt-1 text-sm text-gray-500">Your paystubs will appear here once they are generated.</p>
+                </div>
+                {{end}}
+            </div>
+
+            <div id="paystubModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-jech-dark">Paystub Details</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                    </div>
+                    <div id="paystubContent" class="p-6"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function viewPaystub(paystubId) {
+            // Show modal
+            document.getElementById('paystubModal').classList.remove('hidden');
+            
+            // Load paystub details
+            fetch(`/api/paystubs/${paystubId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const content = document.getElementById('paystubContent');
+                    content.innerHTML = `
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Pay Period</h4>
+                                    <p class="text-gray-600">${formatDate(data.pay_period_start)} - ${formatDate(data.pay_period_end)}</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Pay Date</h4>
+                                    <p class="text-gray-600">${formatDate(data.pay_date)}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t pt-4">
+                                <h4 class="font-semibold text-gray-900 mb-3">Earnings</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Regular Hours: ${data.regular_hours}</p>
+                                        <p class="text-sm font-medium">$${data.regular_pay.toFixed(2)}</p>
+                                    </div>
+                                    ${data.overtime_hours > 0 ? `
+                                    <div>
+                                        <p class="text-sm text-gray-600">Overtime Hours: ${data.overtime_hours}</p>
+                                        <p class="text-sm font-medium">$${data.overtime_pay.toFixed(2)}</p>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                <div class="mt-3 pt-3 border-t">
+                                    <div class="flex justify-between">
+                                        <span class="font-semibold">Gross Pay</span>
+                                        <span class="font-semibold">$${data.gross_pay.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t pt-4">
+                                <h4 class="font-semibold text-gray-900 mb-3">Deductions</h4>
+                                <div class="flex justify-between">
+                                    <span>Total Deductions</span>
+                                    <span>$${data.total_deductions.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t pt-4 bg-gray-50 -mx-6 px-6 py-4">
+                                <div class="flex justify-between text-lg font-semibold">
+                                    <span>Net Pay</span>
+                                    <span class="text-green-600">$${data.net_pay.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    document.getElementById('paystubContent').innerHTML = 
+                        '<p class="text-red-600">Error loading paystub details.</p>';
+                });
+        }
+
+        function downloadPaystub(paystubId) {
+            // Create a temporary link to download PDF
+            const link = document.createElement('a');
+            link.href = `/api/paystubs/${paystubId}/pdf`;
+            link.download = `paystub-${paystubId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function closeModal() {
+            document.getElementById('paystubModal').classList.add('hidden');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('paystubModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+    <script src="/static/js/nav-dropdown.js"></script>
+</body>
+</html> 

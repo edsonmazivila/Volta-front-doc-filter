@@ -1,0 +1,279 @@
+<div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+    <div class="sticky top-16 z-10 -mx-6 md:-mx-8 px-6 md:px-8 py-3 bg-white/85 backdrop-blur border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="h-10 w-10 rounded-full bg-jech-accent text-white flex items-center justify-center text-sm font-semibold">
+                {{if .Employee.User}}{{printf "%c%c" (index .Employee.User.FirstName 0) (index .Employee.User.LastName 0)}}{{else}}E{{end}}
+            </div>
+            <div class="min-w-0">
+                <h2 class="text-lg md:text-xl font-semibold text-jech-dark truncate">{{if .Employee.User}}{{.Employee.User.FirstName}} {{.Employee.User.LastName}}{{else}}Employee Details{{end}}</h2>
+                <p class="text-xs md:text-sm text-gray-500 truncate">{{if .Employee.User}}{{.Employee.User.Email}}{{end}}</p>
+            </div>
+            <span class="ml-3 px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{if eq .Employee.EmploymentStatus "active"}}bg-green-100 text-green-800{{else}}bg-red-100 text-red-800{{end}}">{{.Employee.EmploymentStatus}}</span>
+            {{if .Employee.Department}}
+            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-blue-100 text-blue-800">{{.Employee.Department.Name}}</span>
+            {{end}}
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/employees" hx-get="/employees" hx-target="#main-content" class="btn btn-secondary">Back</a>
+            <a href="/employees/{{.Employee.ID}}/edit" hx-get="/employees/{{.Employee.ID}}/edit" hx-target="#main-content" class="btn btn-primary">Edit</a>
+        </div>
+    </div>
+
+    <div class="md:grid md:grid-cols-12 md:gap-6">
+        <aside class="hidden md:block md:col-span-3">
+            <nav class="sticky top-28 space-y-1 text-sm">
+                <a href="#identity" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">Identity</a>
+                <a href="#compensation" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">Compensation</a>
+                <a href="#personal" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">Personal</a>
+                <a href="#address" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">Address</a>
+                <a href="#emergency" class="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50">Emergency</a>
+            </nav>
+        </aside>
+        <div class="md:col-span-9 space-y-8" id="identity">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="first_name" class="block text-sm font-medium text-gray-800 mb-2">First Name</label>
+            <input type="text" id="first_name" value="{{if .Employee.User}}{{.Employee.User.FirstName}}{{end}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="last_name" class="block text-sm font-medium text-gray-800 mb-2">Last Name</label>
+            <input type="text" id="last_name" value="{{if .Employee.User}}{{.Employee.User.LastName}}{{end}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-800 mb-2">Email</label>
+            <input type="email" id="email" value="{{if .Employee.User}}{{.Employee.User.Email}}{{end}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="employee_number" class="block text-sm font-medium text-gray-800 mb-2">Employee Number</label>
+            <div class="flex gap-2">
+                <input type="text" id="employee_number" value="{{if .Employee.EmployeeNumber}}{{.Employee.EmployeeNumber}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                <button onclick="navigator.clipboard.writeText(document.getElementById('employee_number').value); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy',1200);" type="button" class="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm">Copy</button>
+            </div>
+        </div>
+        
+        <div>
+            <label for="company_id" class="block text-sm font-medium text-gray-800 mb-2">Company</label>
+            {{if .Company}}
+            <input type="text" value="{{.Company.Name}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            {{else}}
+            <input type="text" value="Company ID: {{.Employee.CompanyID}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            {{end}}
+        </div>
+        
+        <div>
+            <label for="department_id" class="block text-sm font-medium text-gray-800 mb-2">Department</label>
+            <input type="text" id="department_id" value="{{if .Employee.Department}}{{.Employee.Department.Name}}{{else if .Employee.DepartmentID}}{{.Employee.DepartmentID}}{{else}}No Department{{end}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="employment_type" class="block text-sm font-medium text-gray-800 mb-2">Employment Type</label>
+            <input type="text" id="employment_type" value="{{.Employee.EmploymentType}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="employment_status" class="block text-sm font-medium text-gray-800 mb-2">Status</label>
+            <input type="text" id="employment_status" value="{{.Employee.EmploymentStatus}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="hire_date" class="block text-sm font-medium text-gray-800 mb-2">Hire Date</label>
+            <input type="text" id="hire_date" value="{{if .Employee.HireDate}}{{.Employee.HireDate.Format "2006-01-02"}}{{end}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+        
+        <div>
+            <label for="job_title" class="block text-sm font-medium text-gray-800 mb-2">Job Title</label>
+            <input type="text" id="job_title" value="{{if .Employee.JobTitle}}{{.Employee.JobTitle}}{{end}}" readonly
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+        </div>
+    </div>
+    
+    <!-- Compensation Section -->
+    {{if .Employee.Compensation}}
+    <div id="compensation" class="mt-8 border-t border-gray-200 pt-6">
+        <details class="group" open>
+            <summary class="list-none flex items-center justify-between cursor-pointer select-none">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">Compensation Details</h3>
+                </div>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+            </summary>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="pay_type" class="block text-sm font-medium text-gray-800 mb-2">Pay Type</label>
+                    <input type="text" id="pay_type" value="{{.Employee.Compensation.PayType}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+                <div>
+                    <label for="pay_frequency" class="block text-sm font-medium text-gray-800 mb-2">Pay Frequency</label>
+                    <input type="text" id="pay_frequency" value="{{.Employee.Compensation.PayFrequency}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+                {{if eq .Employee.Compensation.PayType "salary"}}
+                <div>
+                    <label for="annual_salary" class="block text-sm font-medium text-gray-800 mb-2">Annual Salary</label>
+                    <input type="text" id="annual_salary" value="{{if .Employee.Compensation.AnnualSalary}}${{.Employee.Compensation.AnnualSalary}}{{end}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+                {{else if eq .Employee.Compensation.PayType "hourly"}}
+                <div>
+                    <label for="hourly_rate" class="block text-sm font-medium text-gray-800 mb-2">Hourly Rate</label>
+                    <input type="text" id="hourly_rate" value="{{if .Employee.Compensation.HourlyRate}}${{.Employee.Compensation.HourlyRate}}{{end}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+                {{end}}
+            </div>
+        </details>
+    </div>
+    {{end}}
+    
+    <!-- Personal Information Section -->
+    <div id="personal" class="mt-8 border-t border-gray-200 pt-6">
+        <details class="group" open>
+            <summary class="list-none flex items-center justify-between cursor-pointer select-none">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-100 rounded-lg"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
+                    <h3 class="text-xl font-semibold text-gray-900">Personal Information</h3>
+                </div>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+            </summary>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="phone_primary" class="block text-sm font-medium text-gray-800 mb-2">Primary Phone</label>
+                    <input type="text" id="phone_primary" value="{{if .Employee.PhonePrimary}}{{.Employee.PhonePrimary}}{{end}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+                <div>
+                    <label for="phone_secondary" class="block text-sm font-medium text-gray-800 mb-2">Secondary Phone</label>
+                    <input type="text" id="phone_secondary" value="{{if .Employee.PhoneSecondary}}{{.Employee.PhoneSecondary}}{{end}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+                <div>
+                    <label for="date_of_birth" class="block text-sm font-medium text-gray-800 mb-2">Date of Birth</label>
+                    <input type="text" id="date_of_birth" value="{{if .Employee.DateOfBirth}}{{.Employee.DateOfBirth.Format "2006-01-02"}}{{end}}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+            </div>
+        </details>
+    </div>
+    
+    <!-- Address Section -->
+    <div id="address" class="mt-8 border-t border-gray-200 pt-6">
+        <details class="group" open>
+            <summary class="list-none flex items-center justify-between cursor-pointer select-none">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-purple-100 rounded-lg"><svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                    <h3 class="text-xl font-semibold text-gray-900">Address Information</h3>
+                </div>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+            </summary>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="address_line1" class="block text-sm font-medium text-gray-800 mb-2">Address Line 1</label>
+                <input type="text" id="address_line1" value="{{if .Employee.AddressLine1}}{{.Employee.AddressLine1}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            
+            <div>
+                <label for="address_line2" class="block text-sm font-medium text-gray-800 mb-2">Address Line 2</label>
+                <input type="text" id="address_line2" value="{{if .Employee.AddressLine2}}{{.Employee.AddressLine2}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            
+            <div>
+                <label for="city" class="block text-sm font-medium text-gray-800 mb-2">City</label>
+                <input type="text" id="city" value="{{if .Employee.City}}{{.Employee.City}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            
+            <div>
+                <label for="state" class="block text-sm font-medium text-gray-800 mb-2">State</label>
+                <input type="text" id="state" value="{{if .Employee.State}}{{.Employee.State}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            
+            <div>
+            <label for="postal_code" class="block text-sm font-medium text-gray-800 mb-2">Postal Code</label>
+            <div class="flex gap-2">
+                <input type="text" id="postal_code" value="{{if .Employee.PostalCode}}{{.Employee.PostalCode}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                <button onclick="navigator.clipboard.writeText(document.getElementById('postal_code').value); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy',1200);" type="button" class="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm">Copy</button>
+            </div>
+            </div>
+            
+            <div>
+                <label for="country" class="block text-sm font-medium text-gray-800 mb-2">Country</label>
+                <input type="text" id="country" value="{{if .Employee.Country}}{{.Employee.Country}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            </div>
+        </details>
+    </div>
+    
+    <!-- Emergency Contact Section -->
+    <div id="emergency" class="mt-8 border-t border-gray-200 pt-6">
+        <details class="group" open>
+            <summary class="list-none flex items-center justify-between cursor-pointer select-none">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-red-100 rounded-lg"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg></div>
+                    <h3 class="text-xl font-semibold text-gray-900">Emergency Contact</h3>
+                </div>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+            </summary>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="emergency_contact_name" class="block text-sm font-medium text-gray-800 mb-2">Emergency Contact Name</label>
+                <input type="text" id="emergency_contact_name" value="{{if .Employee.EmergencyContactName}}{{.Employee.EmergencyContactName}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            
+            <div>
+                <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-800 mb-2">Emergency Contact Phone</label>
+                <input type="text" id="emergency_contact_phone" value="{{if .Employee.EmergencyContactPhone}}{{.Employee.EmergencyContactPhone}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            
+            <div>
+                <label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-800 mb-2">Relationship</label>
+                <input type="text" id="emergency_contact_relationship" value="{{if .Employee.EmergencyContactRelationship}}{{.Employee.EmergencyContactRelationship}}{{end}}" readonly
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+            </div>
+            </div>
+        </details>
+    </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mt-10 flex justify-between items-center pt-6 border-t border-gray-200">
+        <a href="/employees" hx-get="/employees" hx-target="#main-content" 
+           class="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Employee List
+        </a>
+        
+        <div class="flex items-center gap-3">
+            <a href="/employees/{{.Employee.ID}}/edit" hx-get="/employees/{{.Employee.ID}}/edit" hx-target="#main-content"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-jech-accent text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Edit Employee
+            </a>
+        </div>
+    </div>
+</div> 

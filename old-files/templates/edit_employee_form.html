@@ -1,0 +1,421 @@
+
+<form hx-put="/api/employees/{{.Employee.ID}}" hx-target="body" hx-swap="none" hx-on="htmx:afterRequest: if (event.detail && event.detail.elt === this && event.detail.xhr.status===200) { (window.hideModal && hideModal('modal')); window.location.href='/employees'; }">
+    <div class="sticky top-16 z-20 -mx-0 md:-mx-0 px-0 md:px-0">
+        <div class="bg-white/90 backdrop-blur border-b border-gray-200 px-4 md:px-6 py-3 flex items-center justify-between rounded-t-xl">
+            <div class="min-w-0">
+                <h2 class="text-lg font-semibold text-gray-900 truncate">Edit Employee</h2>
+                <p class="text-xs text-gray-500 truncate">{{if .Employee.User}}{{.Employee.User.FirstName}} {{.Employee.User.LastName}} · {{.Employee.User.Email}}{{end}}</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/employees/{{.Employee.ID}}/view" hx-get="/employees/{{.Employee.ID}}/view" hx-target="#main-content" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+        <div class="hidden md:flex gap-2 px-4 md:px-6 py-2 bg-white/90 border-b border-gray-100">
+            <a href="#identity" class="px-2 py-1 rounded-md text-xs text-gray-700 hover:bg-gray-50">Identity</a>
+            <a href="#employment" class="px-2 py-1 rounded-md text-xs text-gray-700 hover:bg-gray-50">Employment</a>
+            <a href="#compensation" class="px-2 py-1 rounded-md text-xs text-gray-700 hover:bg-gray-50">Compensation</a>
+            <a href="#personal" class="px-2 py-1 rounded-md text-xs text-gray-700 hover:bg-gray-50">Personal</a>
+            <a href="#address" class="px-2 py-1 rounded-md text-xs text-gray-700 hover:bg-gray-50">Address</a>
+            <a href="#emergency" class="px-2 py-1 rounded-md text-xs text-gray-700 hover:bg-gray-50">Emergency</a>
+        </div>
+    </div>
+    <div class="space-y-6">
+		<!-- Identity & Account -->
+        <div id="identity" class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <details class="group" open>
+                <summary class="list-none flex items-center justify-between cursor-pointer select-none mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Identity & Account</h3>
+                        <p class="text-sm text-gray-500">Basic information for the employee.</p>
+                    </div>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+                </summary>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="first_name" class="block text-sm font-medium text-gray-800 mb-2">First Name</label>
+					<input type="text" id="first_name" name="first_name" value="{{if .Employee.User}}{{.Employee.User.FirstName}}{{end}}" required 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="last_name" class="block text-sm font-medium text-gray-800 mb-2">Last Name</label>
+					<input type="text" id="last_name" name="last_name" value="{{if .Employee.User}}{{.Employee.User.LastName}}{{end}}" required 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="email" class="block text-sm font-medium text-gray-800 mb-2">Email</label>
+					<input type="email" id="email" name="email" value="{{if .Employee.User}}{{.Employee.User.Email}}{{end}}" required 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="employee_number" class="block text-sm font-medium text-gray-800 mb-2">Employee Number</label>
+					<input type="text" id="employee_number" name="employee_number" value="{{if .Employee.EmployeeNumber}}{{.Employee.EmployeeNumber}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" disabled>
+					<p class="text-xs text-gray-500 mt-1">Employee Number cannot be changed</p>
+				</div>
+			</div>
+            </details>
+		</div>
+
+		<!-- Employment & Organization -->
+        <div id="employment" class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <details class="group" open>
+                <summary class="list-none flex items-center justify-between cursor-pointer select-none mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Employment & Organization</h3>
+                        <p class="text-sm text-gray-500">Company, department and role details.</p>
+                    </div>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+                </summary>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="company_id" class="block text-sm font-medium text-gray-800 mb-2">Company</label>
+					<input type="hidden" id="company_id" name="company_id" value="{{.Employee.CompanyID}}">
+					{{if .Company}}
+					<input type="text" value="{{.Company.Name}}" readonly
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+					{{else}}
+					<input type="text" value="Company ID: {{.Employee.CompanyID}}" readonly
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+					{{end}}
+					<p class="text-xs text-gray-500 mt-1">Company cannot be changed</p>
+				</div>
+				<div>
+					<label for="department_id" class="block text-sm font-medium text-gray-800 mb-2">Department</label>
+					<input type="text" id="department_id" name="department_id" value="{{if .Employee.Department}}{{.Employee.Department.Name}}{{else if .Employee.DepartmentID}}{{.Employee.DepartmentID}}{{else}}No Department{{end}}" readonly
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+					<p class="text-xs text-gray-500 mt-1">Department cannot be changed</p>
+				</div>
+				<div>
+					<label for="job_title" class="block text-sm font-medium text-gray-800 mb-2">Job Title</label>
+					<input type="text" id="job_title" name="job_title" value="{{if .Employee.JobTitle}}{{.Employee.JobTitle}}{{end}}" required 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="employment_type" class="block text-sm font-medium text-gray-800 mb-2">Employment Type</label>
+					<select id="employment_type" name="employment_type" required 
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+						<option value="">Select Type</option>
+						<option value="full_time" {{if eq .Employee.EmploymentType "full_time"}}selected{{end}}>Full Time</option>
+						<option value="part_time" {{if eq .Employee.EmploymentType "part_time"}}selected{{end}}>Part Time</option>
+						<option value="contractor" {{if eq .Employee.EmploymentType "contractor"}}selected{{end}}>Contractor</option>
+						<option value="intern" {{if eq .Employee.EmploymentType "intern"}}selected{{end}}>Intern</option>
+					</select>
+				</div>
+				<div>
+					<label for="employment_status" class="block text-sm font-medium text-gray-800 mb-2">Status</label>
+					<select id="employment_status" name="employment_status" required 
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+						<option value="active" {{if eq .Employee.EmploymentStatus "active"}}selected{{end}}>Active</option>
+						<option value="inactive" {{if eq .Employee.EmploymentStatus "inactive"}}selected{{end}}>Inactive</option>
+						<option value="terminated" {{if eq .Employee.EmploymentStatus "terminated"}}selected{{end}}>Terminated</option>
+					</select>
+				</div>
+				<div>
+					<label for="hire_date" class="block text-sm font-medium text-gray-800 mb-2">Hire Date</label>
+					<input type="date" id="hire_date" name="hire_date" value="{{if .Employee.HireDate}}{{.Employee.HireDate.Format "2006-01-02"}}{{end}}" required 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+			</div>
+            </details>
+		</div>
+
+		<!-- Compensation -->
+        <div id="compensation" class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <details class="group" open>
+                <summary class="list-none flex items-center justify-between cursor-pointer select-none mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Compensation</h3>
+                        <p class="text-sm text-gray-500">Pay structure and hours.</p>
+                    </div>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+                </summary>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="pay_type" class="block text-sm font-medium text-gray-800 mb-2">Pay Type</label>
+					<select id="pay_type" name="pay_type" required onchange="togglePayFields()"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+						<option value="">Select Pay Type</option>
+						<option value="salary" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayType "salary")) (and .Compensation (eq .Compensation.PayType "salary"))}}selected{{end}}>Salary</option>
+						<option value="hourly" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayType "hourly")) (and .Compensation (eq .Compensation.PayType "hourly"))}}selected{{end}}>Hourly</option>
+					</select>
+				</div>
+				<div>
+					<label for="pay_frequency" class="block text-sm font-medium text-gray-800 mb-2">Pay Frequency</label>
+					<select id="pay_frequency" name="pay_frequency" required 
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+						<option value="">Select Frequency</option>
+						<option value="weekly" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayFrequency "weekly")) (and .Compensation (eq .Compensation.PayFrequency "weekly"))}}selected{{end}}>Weekly</option>
+						<option value="biweekly" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayFrequency "biweekly")) (and .Compensation (eq .Compensation.PayFrequency "biweekly"))}}selected{{else if and (not .Employee.Compensation) (not .Compensation)}}selected{{end}}>Bi-weekly</option>
+						<option value="semimonthly" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayFrequency "semimonthly")) (and .Compensation (eq .Compensation.PayFrequency "semimonthly"))}}selected{{end}}>Semi-monthly</option>
+						<option value="monthly" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayFrequency "monthly")) (and .Compensation (eq .Compensation.PayFrequency "monthly"))}}selected{{end}}>Monthly</option>
+					</select>
+				</div>
+				<div id="salary_field" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayType "salary")) (and .Compensation (eq .Compensation.PayType "salary"))}}style="display: block;"{{else}}style="display: none;"{{end}}>
+					<label for="annual_salary" class="block text-sm font-medium text-gray-800 mb-2">Annual Salary ($)</label>
+					<input type="number" id="annual_salary" name="annual_salary" step="0.01" min="0" 
+						   value="{{if and .Employee.Compensation .Employee.Compensation.AnnualSalary}}{{.Employee.Compensation.AnnualSalary}}{{else if and .Compensation .Compensation.AnnualSalary}}{{.Compensation.AnnualSalary}}{{end}}"
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div id="hourly_field" {{if or (and .Employee.Compensation (eq .Employee.Compensation.PayType "hourly")) (and .Compensation (eq .Compensation.PayType "hourly"))}}style="display: block;"{{else}}style="display: none;"{{end}}>
+					<label for="hourly_rate" class="block text-sm font-medium text-gray-800 mb-2">Hourly Rate ($)</label>
+					<input type="number" id="hourly_rate" name="hourly_rate" step="0.01" min="0" 
+						   value="{{if and .Employee.Compensation .Employee.Compensation.HourlyRate}}{{printf "%.2f" .Employee.Compensation.HourlyRate}}{{else if and .Compensation .Compensation.HourlyRate}}{{printf "%.2f" .Compensation.HourlyRate}}{{end}}"
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="standard_hours" class="block text-sm font-medium text-gray-800 mb-2">Standard Hours/Week</label>
+					<input type="number" id="standard_hours" name="standard_hours" step="0.5" min="0" required
+						   value="{{if and .Employee.Compensation .Employee.Compensation.StandardHours}}{{printf "%.1f" .Employee.Compensation.StandardHours}}{{else if and .Compensation .Compensation.StandardHours}}{{printf "%.1f" .Compensation.StandardHours}}{{else}}40{{end}}"
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="overtime_rate" class="block text-sm font-medium text-gray-800 mb-2">Overtime Multiplier</label>
+					<input type="number" id="overtime_rate" name="overtime_rate" step="0.1" min="1" required
+						   value="{{if and .Employee.Compensation .Employee.Compensation.OvertimeRate}}{{printf "%.1f" .Employee.Compensation.OvertimeRate}}{{else if and .Compensation .Compensation.OvertimeRate}}{{printf "%.1f" .Compensation.OvertimeRate}}{{else}}1.5{{end}}"
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+			</div>
+            </details>
+		</div>
+	</div>
+
+		<!-- Personal Information -->
+        <div id="personal" class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <details class="group" open>
+                <summary class="list-none flex items-center justify-between cursor-pointer select-none mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
+                        <p class="text-sm text-gray-500">Contact and personal details.</p>
+                    </div>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+                </summary>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="phone_primary" class="block text-sm font-medium text-gray-800 mb-2">Primary Phone</label>
+					<input type="text" id="phone_primary" name="phone_primary" value="{{if .Employee.PhonePrimary}}{{.Employee.PhonePrimary}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="phone_secondary" class="block text-sm font-medium text-gray-800 mb-2">Secondary Phone</label>
+					<input type="text" id="phone_secondary" name="phone_secondary" value="{{if .Employee.PhoneSecondary}}{{.Employee.PhoneSecondary}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="date_of_birth" class="block text-sm font-medium text-gray-800 mb-2">Date of Birth</label>
+					<input type="date" id="date_of_birth" name="date_of_birth" value="{{if .Employee.DateOfBirth}}{{.Employee.DateOfBirth.Format "2006-01-02"}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+			</div>
+            </details>
+		</div>
+
+		<!-- Address Information -->
+        <div id="address" class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <details class="group" open>
+                <summary class="list-none flex items-center justify-between cursor-pointer select-none mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Address Information</h3>
+                        <p class="text-sm text-gray-500">Home address details.</p>
+                    </div>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+                </summary>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="address_line1" class="block text-sm font-medium text-gray-800 mb-2">Address Line 1</label>
+					<input type="text" id="address_line1" name="address_line1" value="{{if .Employee.AddressLine1}}{{.Employee.AddressLine1}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="address_line2" class="block text-sm font-medium text-gray-800 mb-2">Address Line 2</label>
+					<input type="text" id="address_line2" name="address_line2" value="{{if .Employee.AddressLine2}}{{.Employee.AddressLine2}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="city" class="block text-sm font-medium text-gray-800 mb-2">City</label>
+					<input type="text" id="city" name="city" value="{{if .Employee.City}}{{.Employee.City}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="state" class="block text-sm font-medium text-gray-800 mb-2">State</label>
+					<input type="text" id="state" name="state" value="{{if .Employee.State}}{{.Employee.State}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="postal_code" class="block text-sm font-medium text-gray-800 mb-2">Postal Code</label>
+					<input type="text" id="postal_code" name="postal_code" value="{{if .Employee.PostalCode}}{{.Employee.PostalCode}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="country" class="block text-sm font-medium text-gray-800 mb-2">Country</label>
+					<input type="text" id="country" name="country" value="{{if .Employee.Country}}{{.Employee.Country}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+			</div>
+            </details>
+		</div>
+
+		<!-- Emergency Contact -->
+        <div id="emergency" class="rounded-xl shadow-sm bg-white border border-gray-200 p-4 md:p-6">
+            <details class="group" open>
+                <summary class="list-none flex items-center justify-between cursor-pointer select-none mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Emergency Contact</h3>
+                        <p class="text-sm text-gray-500">Who should we contact in an emergency?</p>
+                    </div>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 group-open:hidden">Collapse</span>
+                    <span class="text-xs text-gray-500 px-2 py-1 rounded-md border border-gray-200 hidden group-open:inline">Expand</span>
+                </summary>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label for="emergency_contact_name" class="block text-sm font-medium text-gray-800 mb-2">Name</label>
+					<input type="text" id="emergency_contact_name" name="emergency_contact_name" value="{{if .Employee.EmergencyContactName}}{{.Employee.EmergencyContactName}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="emergency_contact_phone" class="block text-sm font-medium text-gray-800 mb-2">Phone</label>
+					<input type="text" id="emergency_contact_phone" name="emergency_contact_phone" value="{{if .Employee.EmergencyContactPhone}}{{.Employee.EmergencyContactPhone}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+				<div>
+					<label for="emergency_contact_relationship" class="block text-sm font-medium text-gray-800 mb-2">Relationship</label>
+					<input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship" value="{{if .Employee.EmergencyContactRelationship}}{{.Employee.EmergencyContactRelationship}}{{end}}" 
+						   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jech-accent focus:border-jech-accent">
+				</div>
+			</div>
+            </details>
+		</div>
+	
+	<div class="flex justify-end space-x-3 mt-6">
+		<a href="/employees" hx-get="/employees" hx-target="#main-content" hx-select="main" hx-push-url="true" hx-swap="outerHTML" data-action="cancel" data-modal-id="modal" class="btn btn-secondary">Cancel</a>
+		<button type="submit" class="btn btn-primary">
+			Update Employee
+		</button>
+	</div>
+</form>
+
+<script>
+console.log('Edit employee form loaded');
+
+// Toggle pay fields based on pay type selection
+function togglePayFields() {
+	const payType = document.getElementById('pay_type').value;
+	const salaryField = document.getElementById('salary_field');
+	const hourlyField = document.getElementById('hourly_field');
+	const annualSalaryInput = document.getElementById('annual_salary');
+	const hourlyRateInput = document.getElementById('hourly_rate');
+	
+	console.log('togglePayFields called - payType:', payType);
+	console.log('salaryField:', salaryField);
+	console.log('hourlyField:', hourlyField);
+	
+	if (payType === 'salary') {
+		console.log('Setting salary field visible');
+		salaryField.style.display = 'block';
+		hourlyField.style.display = 'none';
+		annualSalaryInput.required = true;
+		hourlyRateInput.required = false;
+		hourlyRateInput.value = '';
+	} else if (payType === 'hourly') {
+		console.log('Setting hourly field visible');
+		salaryField.style.display = 'none';
+		hourlyField.style.display = 'block';
+		annualSalaryInput.required = false;
+		hourlyRateInput.required = true;
+		annualSalaryInput.value = '';
+	} else {
+		console.log('Hiding both fields - payType:', payType);
+		salaryField.style.display = 'none';
+		hourlyField.style.display = 'none';
+		annualSalaryInput.required = false;
+		hourlyRateInput.required = false;
+	}
+}
+
+// Initialize form state when loaded
+document.addEventListener('DOMContentLoaded', function() {
+	console.log('DOMContentLoaded - initializing pay fields');
+	togglePayFields();
+});
+
+// Also initialize when the form is loaded via HTMX
+document.addEventListener('htmx:afterSwap', function(event) {
+	console.log('HTMX afterSwap - initializing pay fields');
+	togglePayFields();
+});
+
+// Initialize immediately for this template
+setTimeout(function() {
+	console.log('Timeout - initializing pay fields');
+	togglePayFields();
+}, 100);
+
+
+// Handle form submission - listen to all htmx:afterRequest events but filter by target
+document.addEventListener('htmx:afterRequest', function(event) {
+	// Only handle events from forms with hx-put attribute (employee update forms)
+	if (event.detail.elt && event.detail.elt.tagName === 'FORM' && event.detail.elt.hasAttribute('hx-put')) {
+		console.log('Employee form HTMX afterRequest:', event.detail);
+		
+		// If successful (status 200 = OK)
+		if (event.detail.xhr.status === 200) {
+			console.log('Employee updated successfully!');
+			
+			// Close modal
+			hideModal();
+			
+			// Show success message
+			const successMessage = document.createElement('div');
+			successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50';
+			successMessage.textContent = 'Employee updated successfully!';
+			document.body.appendChild(successMessage);
+			
+			// Remove message after 3 seconds
+			setTimeout(() => {
+				if (document.body.contains(successMessage)) {
+					document.body.removeChild(successMessage);
+				}
+			}, 3000);
+			
+			// Reload the employee table only once
+			setTimeout(() => {
+				loadEmployees();
+			}, 1000);
+		}
+		
+		// If error
+		if (event.detail.xhr.status >= 400) {
+			console.log('Error updating employee:', event.detail.xhr.responseText);
+			
+			// Parse error message from response
+			let errorText = 'Error updating employee. Please try again.';
+			try {
+				const response = JSON.parse(event.detail.xhr.responseText);
+				if (response.error) {
+					errorText = response.error;
+				}
+			} catch (e) {
+				// Use default error message if parsing fails
+			}
+			
+			// Show error message
+			const errorMessage = document.createElement('div');
+			errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50';
+			errorMessage.textContent = errorText;
+			document.body.appendChild(errorMessage);
+			
+			// Remove message after 5 seconds
+			setTimeout(() => {
+				if (document.body.contains(errorMessage)) {
+					document.body.removeChild(errorMessage);
+				}
+			}, 5000);
+		}
+	}
+});
+</script> 

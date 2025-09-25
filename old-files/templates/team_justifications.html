@@ -1,0 +1,44 @@
+{{define "team_justifications.html"}}
+<table class="min-w-full text-left">
+  <thead>
+    <tr class="text-xs uppercase text-gray-500">
+      <th class="px-4 py-2">Employee</th>
+      <th class="px-4 py-2">Date</th>
+      <th class="px-4 py-2">Status</th>
+      <th class="px-4 py-2">Reason</th>
+      <th class="px-4 py-2 text-right">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{if not .Rows}}
+    <tr><td class="px-4 py-6 text-center text-sm text-gray-500" colspan="5">No justifications</td></tr>
+    {{else}}
+    {{range .Rows}}
+    <tr id="just_row_{{.id}}">
+      <td class="px-4 py-3 text-sm text-gray-700">{{.employee}}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">{{.date}}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">{{template "attendance/status_badge" .status}}</td>
+      <td class="px-4 py-3 text-sm text-gray-700">{{.reason}}</td>
+      <td class="px-4 py-3 text-right">
+        <div class="inline-flex gap-2">
+          <button class="btn btn-primary text-xs px-2 py-1 rounded-md"
+                  hx-post="/api/attendance/justifications/{{.id}}/approve"
+                  hx-target="#just_row_{{.id}}"
+                  hx-swap="outerHTML"
+                  title="Approve">Approve</button>
+          <button class="btn btn-secondary text-xs px-2 py-1 rounded-md"
+                  hx-post="/api/attendance/justifications/{{.id}}/reject"
+                  hx-vals='{"reason": "Rejected by manager"}'
+                  hx-target="#just_row_{{.id}}"
+                  hx-swap="outerHTML"
+                  title="Reject">Reject</button>
+        </div>
+      </td>
+    </tr>
+    {{end}}
+    {{end}}
+  </tbody>
+</table>
+{{end}}
+
+
