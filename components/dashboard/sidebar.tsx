@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { useSession } from '@/components/auth/session-context'
 
 export const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -51,9 +52,16 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 }
 
 export function Sidebar() {
+  const { user, isAuthenticated } = useSession()
   return (
     <aside className='hidden md:flex w-64 shrink-0 border-r bg-background/50 backdrop-blur'>
       <nav className='p-4 space-y-2 w-full'>
+        {isAuthenticated && (
+          <div className='mb-3 px-3 py-2 rounded-md border text-sm'>
+            <div className='font-medium truncate'>{user?.name || user?.email}</div>
+            <div className='text-xs text-muted-foreground capitalize'>{user?.role}</div>
+          </div>
+        )}
         {NAV_ITEMS.map(item => (
           <Link key={item.href} href={item.href} className='block px-3 py-2 rounded-md hover:bg-muted'>
             {item.label}
@@ -75,6 +83,7 @@ export function SidebarTrigger({ className = '' }: { className?: string }) {
 
 function SidebarDrawer() {
   const { open, closeDrawer } = useSidebar()
+  const { user, isAuthenticated } = useSession()
   return (
     <div aria-hidden={!open} className={`fixed inset-0 z-50 md:hidden ${open ? '' : 'pointer-events-none'}`}>
       <div className={`absolute inset-0 bg-black/40 transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`} onClick={closeDrawer} aria-label='Close menu overlay' />
@@ -82,6 +91,12 @@ function SidebarDrawer() {
         <button onClick={closeDrawer} aria-label='Close menu' className='btn mb-4'>
           <X size={16} /> Close
         </button>
+        {isAuthenticated && (
+          <div className='mb-3 px-3 py-2 rounded-md border text-sm'>
+            <div className='font-medium truncate'>{user?.name || user?.email}</div>
+            <div className='text-xs text-muted-foreground capitalize'>{user?.role}</div>
+          </div>
+        )}
         <nav className='space-y-2'>
           {NAV_ITEMS.map(item => (
             <Link key={item.href} href={item.href} className='block px-3 py-2 rounded-md hover:bg-muted' onClick={closeDrawer}>

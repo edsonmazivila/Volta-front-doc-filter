@@ -80,10 +80,10 @@ export class ApiClient {
 		console.groupEnd()
 	}
 
-	private async doFetch(method: string, endpoint: string, body?: unknown, token?: string, config?: ApiRequestConfig): Promise<Response> {
+	private async doFetch(method: string, endpoint: string, body?: unknown, _token?: string, config?: ApiRequestConfig): Promise<Response> {
 		const url = this.buildUrl(endpoint, config)
 		const headers: Record<string, string> = { 'Content-Type': 'application/json', ...config?.headers }
-		if (token) headers['Authorization'] = `Bearer ${token}`
+		// Note: Token-based auth removed - use HTTP-only cookies only
 		if (method !== 'GET') {
 			const csrf = getCsrfToken()
 			if (csrf) headers['X-CSRF-Token'] = csrf
@@ -140,40 +140,40 @@ export class ApiClient {
 		throw lastErr as Error
 	}
 
-	async get<T>(endpoint: string, token?: string, config?: ApiRequestConfig): Promise<T> {
+	async get<T>(endpoint: string, _token?: string, config?: ApiRequestConfig): Promise<T> {
 		const start = Date.now()
 		const url = this.buildUrl(endpoint, config)
 		return this.withRetry(async () => {
-			const res = await this.doFetch('GET', endpoint, undefined, token, config)
+			const res = await this.doFetch('GET', endpoint, undefined, undefined, config)
 			return this.handleResponse<T>(res, 'GET', url, start, config)
 		}, config)
 	}
 
-	async post<T>(endpoint: string, data: unknown, token?: string, config?: ApiRequestConfig): Promise<T> {
+	async post<T>(endpoint: string, data: unknown, _token?: string, config?: ApiRequestConfig): Promise<T> {
 		const start = Date.now()
 		const url = this.buildUrl(endpoint, config)
-		const res = await this.doFetch('POST', endpoint, data, token, config)
+		const res = await this.doFetch('POST', endpoint, data, undefined, config)
 		return this.handleResponse<T>(res, 'POST', url, start, config)
 	}
 
-	async put<T>(endpoint: string, data: unknown, token?: string, config?: ApiRequestConfig): Promise<T> {
+	async put<T>(endpoint: string, data: unknown, _token?: string, config?: ApiRequestConfig): Promise<T> {
 		const start = Date.now()
 		const url = this.buildUrl(endpoint, config)
-		const res = await this.doFetch('PUT', endpoint, data, token, config)
+		const res = await this.doFetch('PUT', endpoint, data, undefined, config)
 		return this.handleResponse<T>(res, 'PUT', url, start, config)
 	}
 
-	async patch<T>(endpoint: string, data: unknown, token?: string, config?: ApiRequestConfig): Promise<T> {
+	async patch<T>(endpoint: string, data: unknown, _token?: string, config?: ApiRequestConfig): Promise<T> {
 		const start = Date.now()
 		const url = this.buildUrl(endpoint, config)
-		const res = await this.doFetch('PATCH', endpoint, data, token, config)
+		const res = await this.doFetch('PATCH', endpoint, data, undefined, config)
 		return this.handleResponse<T>(res, 'PATCH', url, start, config)
 	}
 
-	async delete<T>(endpoint: string, token?: string, config?: ApiRequestConfig): Promise<T> {
+	async delete<T>(endpoint: string, _token?: string, config?: ApiRequestConfig): Promise<T> {
 		const start = Date.now()
 		const url = this.buildUrl(endpoint, config)
-		const res = await this.doFetch('DELETE', endpoint, undefined, token, config)
+		const res = await this.doFetch('DELETE', endpoint, undefined, undefined, config)
 		return this.handleResponse<T>(res, 'DELETE', url, start, config)
 	}
 }

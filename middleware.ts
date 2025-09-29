@@ -8,7 +8,8 @@ const publicRoutes = [
 	'/login',
 	'/signup',
 	'/forgot-password',
-	'/reset-password'
+	'/reset-password',
+	'/dashboard'
 ]
 
 // Auth routes that should redirect to dashboard if already authenticated

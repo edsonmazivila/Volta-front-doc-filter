@@ -1,31 +1,28 @@
 'use client'
 
 import React from 'react'
-import { useForm, useFormContext, FormProvider } from 'react-hook-form'
+import { useForm, useFormContext, FormProvider, type DefaultValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui'
 import { FormField, Input, Checkbox } from './form-field'
 import { PasswordInput, PasswordStrength } from './password-input'
+import type { AnyZodObject, TypeOf } from 'zod'
 
-interface AuthFormProps {
+interface AuthFormProps<TSchema extends AnyZodObject> {
 	title: string
 	subtitle?: string
 	children: React.ReactNode
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	onSubmit: (data: any) => Promise<void>
+	onSubmit: (data: TypeOf<TSchema>) => Promise<void>
     // Optional Next.js server action (if provided, form will submit to this instead of onSubmit)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    action?: (formData: FormData) => Promise<any>
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	schema: any
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	defaultValues?: any
+    action?: (formData: FormData) => void | Promise<void>
+	schema: TSchema
+	defaultValues?: DefaultValues<TypeOf<TSchema>>
 	submitText: string
 	isLoading?: boolean
 	footer?: React.ReactNode
 }
 
-export function AuthForm({
+export function AuthForm<TSchema extends AnyZodObject>({
 	title,
 	subtitle,
 	children,
@@ -36,14 +33,13 @@ export function AuthForm({
 	submitText,
 	isLoading = false,
 	footer
-}: AuthFormProps) {
-	const methods = useForm({
+}: AuthFormProps<TSchema>) {
+	const methods = useForm<TypeOf<TSchema>>({
 		resolver: zodResolver(schema),
 		defaultValues
 	})
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleFormSubmit = async (data: any) => {
+	const handleFormSubmit = async (data: TypeOf<TSchema>) => {
 		try {
 			await onSubmit(data)
 		} catch (error) {

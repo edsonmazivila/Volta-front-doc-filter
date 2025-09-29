@@ -6,8 +6,9 @@ import { Button } from '@/components/ui'
 import { Modal, ConfirmModal, useModal } from '@/components/ui/modal'
 import { useToast } from '@/components/ui/toast'
 import { UsersService } from '@/lib/services/users'
-import { rbacClient } from '@/lib/rbac/client'
-import { PERMISSIONS, ROLE_DISPLAY_NAMES, Role } from '@/lib/rbac/types'
+import { ROLE_DISPLAY_NAMES, Role } from '@/lib/rbac/types'
+import { useSession } from '@/components/auth/session-context'
+import { hasAnyRole } from '@/lib/auth/utils'
 import { UserForm } from './user-form'
 
 export interface User {
@@ -30,6 +31,7 @@ export interface UserStats {
 }
 
 export function UserManagement() {
+    const { user } = useSession()
 	const [users, setUsers] = useState<User[]>([])
 	const [stats, setStats] = useState<UserStats>({
 		totalUsers: 0,
@@ -176,10 +178,11 @@ useEffect(() => {
 		showModal('delete-user-modal')
 	}
 
-	// Check permissions
-	const canCreateUser = rbacClient.hasPermission(PERMISSIONS.USER_CREATE)
-	const canUpdateUser = rbacClient.hasPermission(PERMISSIONS.USER_UPDATE)
-	const canDeleteUser = rbacClient.hasPermission(PERMISSIONS.USER_DELETE)
+    // Simple role-based UI gating: allow managers/admins to manage users
+    const isManagerOrAdmin = hasAnyRole(user, ['admin','system_admin','hr','operational_manager','payroll_manager'])
+    const canCreateUser = isManagerOrAdmin
+    const canUpdateUser = isManagerOrAdmin
+    const canDeleteUser = isManagerOrAdmin
 
 	if (loading) {
 		return (

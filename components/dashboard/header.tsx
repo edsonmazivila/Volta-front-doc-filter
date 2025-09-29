@@ -1,8 +1,10 @@
+"use client"
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/dashboard/theme-toggle'
 import { Button } from '@/components/ui'
 import { LogoutButton } from '@/components/dashboard/logout-button'
 import { Bell, Settings } from 'lucide-react'
+import { useSession } from '@/components/auth/session-context'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -14,6 +16,7 @@ import {
 import { SidebarTrigger } from '@/components/dashboard/sidebar'
 
 export function Header({ title }: { title: string }) {
+  const { user, isAuthenticated } = useSession()
   return (
     <header className='sticky top-0 z-10 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='h-14 px-4 flex items-center justify-between'>
@@ -25,10 +28,16 @@ export function Header({ title }: { title: string }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button aria-label='User menu' className='rounded-full h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 text-white flex items-center justify-center text-xs font-bold focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'>
-                U
+                {(user?.name || user?.email || 'U').substring(0,1).toUpperCase()}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-56'>
+              {isAuthenticated && (
+                <div className='px-3 py-2 text-sm'>
+                  <div className='font-medium truncate'>{user?.name || user?.email}</div>
+                  <div className='text-xs text-muted-foreground capitalize'>{user?.role}</div>
+                </div>
+              )}
               <DropdownMenuLabel className='flex items-center justify-between'>
                 <span>Theme</span>
                 <ThemeToggle />

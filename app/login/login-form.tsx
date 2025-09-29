@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AuthForm,
@@ -12,9 +12,7 @@ import { loginSchema } from "@/lib/auth/types";
 import Link from "next/link";
 
 export function LoginForm() {
-  // Use form submitting state from AuthForm; no external loading state needed
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -22,18 +20,11 @@ export function LoginForm() {
   const redirectTo = searchParams.get("redirect") || "/dashboard";
   const successMessage = searchParams.get("message");
 
-  // Set success message on mount
-  useEffect(() => {
-    if (successMessage) {
-      setMessage(successMessage);
-    }
-  }, [successMessage]);
-
   return (
     <>
-      {message && (
+      {successMessage && (
         <div className="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-          <p className="text-sm text-green-400">{message}</p>
+          <p className="text-sm text-green-400">{successMessage}</p>
         </div>
       )}
 
@@ -65,7 +56,6 @@ export function LoginForm() {
         submitText="Sign in"
       >
         <EmailField />
-
         <PasswordField />
         <div className="flex justify-end">
           <Link

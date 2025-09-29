@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { EmployeesService, type Employee, type EmployeeListParams } from '@/lib/services/employees'
 import { Button } from '@/components/ui'
-import { SearchInput } from '@/components/common/search-input'
+import { SearchInput } from '@/components/search-input'
 
 export function EmployeeTable() {
 	const [items, setItems] = useState<Employee[]>([])

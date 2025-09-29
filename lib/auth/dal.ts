@@ -1,4 +1,4 @@
-'use server'
+import 'server-only'
 import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -17,7 +17,6 @@ export const verifySession = cache(async (): Promise<Session | null> => {
 	const refreshToken = cookieStore.get(COOKIE_NAMES.REFRESH_TOKEN)?.value
 	if (!sessionToken) return null
 
-	// Forward session cookies to backend instead of Authorization header
 	const cookieHeader = [
 		`${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken}`,
 		refreshToken ? `${COOKIE_NAMES.REFRESH_TOKEN}=${refreshToken}` : null,
