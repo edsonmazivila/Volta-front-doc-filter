@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Plus, Edit, Trash2, UserCheck, UserX } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { Modal, ConfirmModal, useModal } from '@/components/ui/modal'
 import { useToast } from '@/components/ui/toast'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { UsersService } from '@/lib/services/users'
 import { ROLE_DISPLAY_NAMES, Role } from '@/lib/rbac/types'
 import { useSession } from '@/components/auth/session-context'
@@ -30,22 +31,29 @@ export interface UserStats {
 	employeeUsers: number
 }
 
-export function UserManagement() {
+interface UserManagementProps {
+	initialUsers?: User[]
+	initialStats?: UserStats
+}
+
+export function UserManagement({ initialUsers, initialStats }: UserManagementProps) {
     const { user } = useSession()
-	const [users, setUsers] = useState<User[]>([])
-	const [stats, setStats] = useState<UserStats>({
+	const [users, setUsers] = useState<User[]>(initialUsers || [])
+	const [stats, setStats] = useState<UserStats>(initialStats || {
 		totalUsers: 0,
 		activeUsers: 0,
 		adminUsers: 0,
 		managerUsers: 0,
 		employeeUsers: 0
 	})
-	const [loading, setLoading] = useState(true)
+	const [loading, setLoading] = useState(!initialUsers)
 	const [selectedUser, setSelectedUser] = useState<User | null>(null)
 	const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
-	const { showToast } = useToast()
-	const { showModal, hideModal } = useModal()
+    const { showToast } = useToast()
+    const [createOpen, setCreateOpen] = useState(false)
+    const [editOpen, setEditOpen] = useState(false)
+    const [deleteOpen, setDeleteOpen] = useState(false)
 
 // Load users and stats on mount
 const loadUsers = useCallback(async () => {
@@ -75,9 +83,9 @@ const loadStats = useCallback(async () => {
 }, [])
 
 useEffect(() => {
-    loadUsers()
-    loadStats()
-}, [loadUsers, loadStats])
+	if (!initialUsers) loadUsers()
+	if (!initialStats) loadStats()
+}, [loadUsers, loadStats, initialUsers, initialStats])
 
 	const handleCreateUser = async (userData: unknown) => {
         try {
@@ -87,8 +95,7 @@ useEffect(() => {
 				message: 'User created successfully!',
 				title: 'Success'
 			})
-			// Modal will be handled by the modal system
-			loadUsers()
+            loadUsers()
 			loadStats()
 		} catch (error) {
 			console.error('Error creating user:', error)
@@ -110,9 +117,9 @@ useEffect(() => {
 				message: 'User updated successfully!',
 				title: 'Success'
 			})
-			// Modal will be handled by the modal system
-			setSelectedUser(null)
-			loadUsers()
+            setSelectedUser(null)
+            setEditOpen(false)
+            loadUsers()
 			loadStats()
 		} catch (error) {
 			console.error('Error updating user:', error)
@@ -134,9 +141,9 @@ useEffect(() => {
 				message: 'User deleted successfully!',
 				title: 'Success'
 			})
-			// Modal will be handled by the modal system
-			setUserToDelete(null)
-			loadUsers()
+            setUserToDelete(null)
+            setDeleteOpen(false)
+            loadUsers()
 			loadStats()
 		} catch (error) {
 			console.error('Error deleting user:', error)
@@ -168,15 +175,15 @@ useEffect(() => {
 		}
 	}
 
-	const openEditModal = (user: User) => {
-		setSelectedUser(user)
-		showModal('edit-user-modal')
-	}
+    const openEditModal = (user: User) => {
+        setSelectedUser(user)
+        setEditOpen(true)
+    }
 
-	const openDeleteModal = (user: User) => {
-		setUserToDelete(user)
-		showModal('delete-user-modal')
-	}
+    const openDeleteModal = (user: User) => {
+        setUserToDelete(user)
+        setDeleteOpen(true)
+    }
 
     // Simple role-based UI gating: allow managers/admins to manage users
     const isManagerOrAdmin = hasAnyRole(user, ['admin','system_admin','hr','operational_manager','payroll_manager'])
@@ -206,12 +213,12 @@ useEffect(() => {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<h2 className="text-2xl font-bold text-white">User Management</h2>
-				{canCreateUser && (
-					<Button
-						variant="default"
-						onClick={() => showModal('create-user-modal')}
-						className="flex items-center gap-2"
-					>
+                {canCreateUser && (
+                    <Button
+                        variant="default"
+                        onClick={() => setCreateOpen(true)}
+                        className="flex items-center gap-2"
+                    >
 						<Plus className="h-4 w-4" />
 						Add User
 					</Button>
@@ -296,44 +303,52 @@ useEffect(() => {
 				</div>
 			</div>
 
-			{/* Modals */}
-			<Modal
-				id="create-user-modal"
-				title="Add New User"
-				size="md"
-				closable={true}
-			>
-				<UserForm
-					mode="create"
-					onSubmit={handleCreateUser}
-					onCancel={() => hideModal('create-user-modal')}
-				/>
-			</Modal>
+            {/* Create Dialog */}
+            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Add New User</DialogTitle>
+                    </DialogHeader>
+                    <UserForm
+                        mode="create"
+                        onSubmit={async (data) => { await handleCreateUser(data); setCreateOpen(false) }}
+                        onCancel={() => setCreateOpen(false)}
+                    />
+                </DialogContent>
+            </Dialog>
 
-			<Modal
-				id="edit-user-modal"
-				title="Edit User"
-				size="md"
-				closable={true}
-			>
-				<UserForm
-					mode="edit"
-					user={selectedUser}
-					onSubmit={handleEditUser}
-					onCancel={() => hideModal('edit-user-modal')}
-				/>
-			</Modal>
+            {/* Edit Dialog */}
+            <Dialog open={editOpen} onOpenChange={(open) => { setEditOpen(open); if (!open) setSelectedUser(null) }}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Edit User</DialogTitle>
+                    </DialogHeader>
+                    <UserForm
+                        mode="edit"
+                        user={selectedUser}
+                        onSubmit={handleEditUser}
+                        onCancel={() => setEditOpen(false)}
+                    />
+                </DialogContent>
+            </Dialog>
 
-			<ConfirmModal
-				id="delete-user-modal"
-				title="Delete User"
-				message={`Are you sure you want to delete ${userToDelete?.first_name} ${userToDelete?.last_name}? This action cannot be undone.`}
-				confirmText="Delete"
-				cancelText="Cancel"
-				variant="danger"
-				onConfirm={handleDeleteUser}
-				onCancel={() => hideModal('delete-user-modal')}
-			/>
+            {/* Delete Confirm */}
+            <AlertDialog open={deleteOpen} onOpenChange={(open) => { setDeleteOpen(open); if (!open) setUserToDelete(null) }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete User</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {`Are you sure you want to delete ${userToDelete?.first_name} ${userToDelete?.last_name}? This action cannot be undone.`}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteUser} className="bg-red-600 hover:bg-red-700">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 		</div>
 	)
 }

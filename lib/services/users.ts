@@ -1,21 +1,22 @@
 import { apiClient } from '@/lib/http/api-client'
 import { handleServiceError } from '@/lib/http/error-handler'
+import { API_BASE_URL } from '@/lib/config'
 
 export interface UserListResponse<T> {
 	users?: T[]
 }
 
 const ENDPOINTS = {
-	LIST: '/api/users',
-	DETAIL: (id: string) => `/api/users/${id}`,
-	STATS: '/api/users/stats',
+    LIST: `${API_BASE_URL}/api/users`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/users/${id}`,
+    STATS: `${API_BASE_URL}/api/users/stats`,
 }
 
 export class UsersService {
 	static async list<T>(): Promise<T[]> {
 		try {
-			const data = await apiClient.get<UserListResponse<T> | T[]>(ENDPOINTS.LIST, undefined, { retries: 3 })
-			return Array.isArray(data) ? data : (data.users || [])
+            const data = await apiClient.get<UserListResponse<T> | { data?: T[] } | T[]>(ENDPOINTS.LIST, undefined, { retries: 3 })
+            return Array.isArray(data) ? data : ((data as any).data || (data as any).users || [])
 		} catch (error) {
 			return handleServiceError(error, 'UsersService.list', 'Failed to load users')
 		}
@@ -55,7 +56,7 @@ export class UsersService {
 
 	static async toggleStatus(id: string, isActive: boolean): Promise<void> {
 		try {
-			await apiClient.put(ENDPOINTS.DETAIL(id), { is_active: isActive })
+            await apiClient.put(ENDPOINTS.DETAIL(id), { is_active: isActive })
 		} catch (error) {
 			return handleServiceError(error, 'UsersService.toggleStatus', 'Failed to update user status')
 		}

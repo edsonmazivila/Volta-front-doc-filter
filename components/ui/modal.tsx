@@ -125,7 +125,8 @@ export function Modal({
 		<div
 			className={cn(
 				'fixed inset-0 z-50 flex items-center justify-center p-4',
-				'bg-black/50 backdrop-blur-sm transition-opacity duration-300',
+				
+				'bg-black/70 backdrop-blur-[2px] transition-opacity duration-200',
 				isVisible ? 'opacity-100' : 'opacity-0'
 			)}
 			onClick={handleBackdropClick}
@@ -134,8 +135,9 @@ export function Modal({
 		>
 			<div
 				className={cn(
-					'relative w-full rounded-xl border bg-white/10 backdrop-blur-md',
-					'border-white/20 shadow-2xl transition-all duration-300',
+					'relative w-full rounded-xl border',
+					
+					'bg-neutral-900/90 border-white/10 shadow-2xl transition-all duration-200',
 					sizeClasses[size],
 					isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
 					className

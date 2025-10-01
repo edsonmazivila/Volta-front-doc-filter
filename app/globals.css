@@ -7,7 +7,8 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --border: oklch(0.922 0 0);
-  --card: oklch(1 0 0);
+  /* Glass-friendly default card in light theme (neutral, no hue) */
+  --card: rgba(255,255,255,0.35);
   --card-foreground: oklch(0.145 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
@@ -101,8 +102,9 @@
   --foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --card: oklch(0.205 0 0);
+  /* Glass variables in dark theme (neutral, no hue) */
+  --border: rgba(255,255,255,0.08);
+  --card: rgba(12,12,12,0.35);
   --card-foreground: oklch(0.985 0 0);
   --ring: oklch(0.556 0 0);
   --popover: oklch(0.205 0 0);
@@ -137,7 +139,7 @@
     --muted: #111318;
     --muted-foreground: #9aa3af;
     --border: rgba(255,255,255,0.08);
-    --card: rgba(17, 25, 40, 0.65);
+    --card: rgba(12, 12, 12, 0.35);
     --card-foreground: #e5e7eb;
     --ring: 217 33% 17%;
   }

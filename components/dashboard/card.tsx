@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 export function Card({ children, className = '' }: { children: ReactNode, className?: string }) {
   return (
-    <div className={`rounded-xl p-4 border border-[var(--border)] bg-[var(--card)] shadow-[0_10px_40px_rgba(0,0,0,0.15),_inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-[12px] saturate-[120%] ${className}`}>{children}</div>
+    <div className={`rounded-2xl p-4 border border-[var(--border)] bg-[var(--card)] shadow-[0_10px_40px_rgba(0,0,0,0.25),_inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-[18px] ${className}`}>{children}</div>
   )
 }
 

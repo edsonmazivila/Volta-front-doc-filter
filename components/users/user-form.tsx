@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormField, Input, Checkbox } from '@/components/auth/form-field'
 import { PasswordInput } from '@/components/auth/password-input'
 import { ROLES, ROLE_DISPLAY_NAMES } from '@/lib/rbac/types'
@@ -48,7 +49,8 @@ export function UserForm({ mode, user, onSubmit, onCancel }: UserFormProps) {
 		register,
 		handleSubmit,
 		formState: { errors },
-		reset
+		reset,
+		control
 	} = useForm({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -163,17 +165,28 @@ export function UserForm({ mode, user, onSubmit, onCancel }: UserFormProps) {
 				error={errors.role?.message as string}
 				required
 			>
-				<select
-					{...register('role')}
-					disabled={isSubmitting}
-					className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/5 text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					{roleOptions.map((option) => (
-						<option key={option.value} value={option.value}>
-							{option.label}
-						</option>
-					))}
-				</select>
+				<Controller
+					name="role"
+					control={control}
+					render={({ field }) => (
+						<Select
+							value={(field.value as string) || ROLES.EMPLOYEE}
+							onValueChange={field.onChange}
+							disabled={isSubmitting}
+						>
+							<SelectTrigger className="w-full bg-neutral-900/90 text-white border-white/20">
+								<SelectValue placeholder="Select a role" />
+							</SelectTrigger>
+							<SelectContent className="bg-neutral-900 text-white border-white/10">
+								{roleOptions.map((option) => (
+									<SelectItem key={option.value} value={option.value}>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					)}
+				/>
 			</FormField>
 
 			<FormField label="" error={errors.is_active?.message as string}>

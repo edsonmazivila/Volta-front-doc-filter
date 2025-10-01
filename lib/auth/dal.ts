@@ -1,9 +1,10 @@
 import 'server-only'
 import { cache } from 'react'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { AUTH_ENDPOINTS } from './utils'
 import { getAuthCookieHeader } from './server-utils'
-import { API_BASE_URL } from '@/lib/config'
+import { API_BASE_URL, COOKIE_NAMES } from '@/lib/config'
 import type { User } from './types'
 
 
@@ -24,7 +25,14 @@ export const verifySession = cache(async (): Promise<Session | null> => {
 		cache: 'no-store',
 	})
 
-	if (!res.ok) return null
+	if (!res.ok) {
+		// Session expired or invalid - delete the cookie
+		const cookieStore = await cookies()
+		cookieStore.delete(COOKIE_NAMES.SESSION_TOKEN)
+		cookieStore.delete(COOKIE_NAMES.REFRESH_TOKEN)
+		return null
+	}
+
 	const data = await res.json().catch(() => null)
 	const user = data?.data?.user || data?.data || data?.user
 	if (!user) return null

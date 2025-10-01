@@ -34,6 +34,13 @@ const ENDPOINTS = {
 
 // Client-side service for Client Components (CRUD operations only)
 export class EmployeesService {
+    static async list<T>(params?: Record<string, string | number | boolean | undefined>): Promise<T> {
+        try {
+			return await apiClient.get<T>(ENDPOINTS.LIST, undefined, { searchParams: params, retries: 3 })
+        } catch (error) {
+            return handleServiceError(error, 'EmployeesService.list', 'Failed to load employees')
+        }
+    }
 	static async create(payload: Partial<Employee>): Promise<Employee> {
 		try {
 			return await apiClient.post<Employee>(ENDPOINTS.LIST, payload)

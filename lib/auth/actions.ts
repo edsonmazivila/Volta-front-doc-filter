@@ -4,6 +4,7 @@ import { AUTH_ENDPOINTS } from './utils'
 import { API_BASE_URL } from '@/lib/config'
 import { cookies } from 'next/headers'
 import { COOKIE_NAMES } from '@/lib/config'
+import { revalidatePath } from 'next/cache'
 
 type ActionResult = { errors: Record<string, string[]> } | { success: true }
 
@@ -44,6 +45,8 @@ export async function loginAction(prevState: unknown, formData: FormData): Promi
 			maxAge: 60 * 60 * 24
 		})
 	}
+
+	revalidatePath('/', 'layout')
 
     return { success: true }
 }

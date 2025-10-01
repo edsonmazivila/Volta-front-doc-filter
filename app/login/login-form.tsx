@@ -50,6 +50,7 @@ export function LoginForm() {
               return;
             }
           }
+          router.refresh(); // Clear server cache
           router.push(redirectTo);
         }}
         schema={loginSchema}
