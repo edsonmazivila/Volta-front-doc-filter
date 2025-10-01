@@ -26,6 +26,9 @@ export class ApiClient {
 	private baseUrl: string
 	private enableLogging: boolean
 
+	// Prevent multiple parallel 401 handlers from racing
+	private static isHandlingUnauthorized = false
+
 	constructor(baseUrl = process.env.NEXT_PUBLIC_API_URL || '', enableLogging = false) {
 		this.baseUrl = baseUrl
 		this.enableLogging = enableLogging
@@ -99,6 +102,25 @@ export class ApiClient {
 
 	private async handleResponse<T>(response: Response, method: string, url: string, start: number, config?: ApiRequestConfig): Promise<T> {
 		if (!response.ok) {
+			// Global 401 handling: clear session and redirect to login from the browser
+			if (response.status === 401) {
+				if (typeof window !== 'undefined' && !ApiClient.isHandlingUnauthorized) {
+					ApiClient.isHandlingUnauthorized = true
+					// Best-effort logout to clear httpOnly cookies
+					fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
+					// Avoid redirect loop if already on /login
+					try {
+						const currentPath = window.location.pathname || '/'
+						if (!currentPath.startsWith('/login')) {
+							const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}`
+							window.location.replace(loginUrl)
+						}
+					} finally {
+						// If we're already on /login, allow further 401s to be handled normally
+						ApiClient.isHandlingUnauthorized = false
+					}
+				}
+			}
 			const text = await response.text()
 			if (this.enableLogging && !config?.disableLogging) {
 				console.group(`API Error: ${method} ${url} (${response.status})`)

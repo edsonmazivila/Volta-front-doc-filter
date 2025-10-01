@@ -1,0 +1,146 @@
+'use client'
+import { useState, useTransition } from 'react'
+import { TimesheetTable } from '@/components/timesheets/timesheet-table'
+import { TimesheetFormDialog, type TimesheetFormValues } from '@/components/timesheets/timesheet-form-dialog'
+import { TimesheetsService } from '@/lib/services/timesheets'
+import type { TimesheetListItem } from '@/lib/services/timesheets-server'
+import { Button } from '@/components/ui'
+import { useToastHelpers } from '@/components/ui/toast'
+import { useRouter } from 'next/navigation'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+interface TimesheetsSectionProps {
+	items: TimesheetListItem[]
+}
+
+export function TimesheetsSection({ items }: TimesheetsSectionProps) {
+	const router = useRouter()
+	const [open, setOpen] = useState(false)
+	const [isPending, startTransition] = useTransition()
+  const toast = useToastHelpers()
+  const [editId, setEditId] = useState<string | null>(null)
+  const [rejectId, setRejectId] = useState<string | null>(null)
+  const [rejectOpen, setRejectOpen] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+
+  async function handleSave(values: TimesheetFormValues) {
+		try {
+			const payload = {
+				period_start: values.periodStart,
+				period_end: values.periodEnd,
+				total_hours: values.totalHours,
+				notes: values.notes,
+			}
+			if (editId) {
+				await TimesheetsService.update(editId, payload)
+				toast.success('Timesheet updated')
+			} else {
+				await TimesheetsService.create(payload)
+				toast.success('Timesheet created')
+			}
+			startTransition(() => router.refresh())
+		} catch (e) {
+			toast.error('Failed to save timesheet')
+		}
+	}
+
+async function handleSubmitTimesheet(id: string) {
+	try {
+		await TimesheetsService.submit(id)
+		toast.success('Timesheet submitted')
+		startTransition(() => router.refresh())
+	} catch (e) {
+		toast.error('Failed to submit timesheet')
+	}
+}
+
+async function handleApprove(id: string) {
+	try {
+		await TimesheetsService.approve(id)
+		toast.success('Timesheet approved')
+		startTransition(() => router.refresh())
+	} catch (e) {
+		toast.error('Failed to approve timesheet')
+	}
+}
+
+async function handleReject(id: string) {
+	setRejectId(id)
+	setRejectReason('')
+	setRejectOpen(true)
+}
+
+return (
+		<div className='grid gap-4'>
+			<div className='flex items-center justify-between'>
+				<h2 className='text-sm font-medium'>Review Timesheets</h2>
+				<Button onClick={() => { setEditId(null); setOpen(true) }}>New Timesheet</Button>
+			</div>
+			<TimesheetTable
+				items={items}
+				isLoading={isPending}
+				onNewTimesheet={() => { setEditId(null); setOpen(true) }}
+				onEdit={(id) => { setEditId(id); setOpen(true) }}
+				onSubmit={handleSubmitTimesheet}
+				onApprove={handleApprove}
+				onReject={handleReject}
+				onDelete={(id) => {
+					// Simple confirm; can be replaced by a styled dialog later
+					if (!confirm('Delete this timesheet?')) return
+					TimesheetsService.remove(id)
+						.then(() => { toast.success('Timesheet deleted'); startTransition(() => router.refresh()) })
+						.catch(() => toast.error('Failed to delete timesheet'))
+				}}
+			/>
+			<TimesheetFormDialog
+				open={open}
+				onOpenChange={(v) => { if (!v) setEditId(null); setOpen(v) }}
+				defaultValues={editId ? (() => {
+					const item = items.find(i => i.id === editId)
+					return item ? {
+						periodStart: (item.periodStart ? new Date(item.periodStart).toISOString().slice(0, 10) : ''),
+						periodEnd: (item.periodEnd ? new Date(item.periodEnd).toISOString().slice(0, 10) : ''),
+						totalHours: item.totalHours,
+						notes: item.notes || '',
+					} : undefined
+				})() : undefined}
+				onSubmit={handleSave}
+				title={editId ? 'Edit Timesheet' : 'New Timesheet'}
+				submitLabel={editId ? 'Update' : 'Save'}
+			/>
+			{/* Reject reason dialog */}
+			<Dialog open={rejectOpen} onOpenChange={(v: boolean) => { if (!v) { setRejectId(null); setRejectReason('') }; setRejectOpen(v) }}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Reject Timesheet</DialogTitle>
+					</DialogHeader>
+					<div className='flex flex-col gap-2'>
+						<label className='text-sm'>Reason (optional)</label>
+						<textarea className='textarea' rows={4} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+					</div>
+					<div className='flex justify-end gap-2 pt-2'>
+						<Button variant='secondary' onClick={() => setRejectOpen(false)}>Cancel</Button>
+						<Button
+							variant='destructive'
+							onClick={async () => {
+								if (!rejectId) return
+								try {
+									await TimesheetsService.reject(rejectId, rejectReason || undefined)
+									toast.success('Timesheet rejected')
+									setRejectOpen(false)
+									startTransition(() => router.refresh())
+								} catch (e) {
+									toast.error('Failed to reject timesheet')
+								}
+							}}
+						>
+							Reject
+						</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
+		</div>
+	)
+}
+
+

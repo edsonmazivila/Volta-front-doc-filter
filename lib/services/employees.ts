@@ -25,35 +25,15 @@ interface EmployeeListResponse {
 	total?: number
 }
 
-// Proxy through Next.js route to avoid CORS and attach cookies server-side
+// API endpoints for employee operations
 const ENDPOINTS = {
 	LIST: '/api/employees',
 	DETAIL: (id: string) => `/api/employees/${id}`,
 	STATS: '/api/employees/stats',
 }
 
+// Client-side service for Client Components (CRUD operations only)
 export class EmployeesService {
-	static async list(params: EmployeeListParams = {}): Promise<{ items: Employee[], total: number }> {
-		try {
-			const data = await apiClient.get<EmployeeListResponse | Employee[]>(ENDPOINTS.LIST, undefined, {
-				searchParams: {
-					q: params.q,
-					status: params.status,
-					sort: params.sort,
-					order: params.order,
-					page: params.page,
-					pageSize: params.pageSize,
-				},
-				retries: 3,
-			})
-			const items = Array.isArray(data) ? data : (data.employees || data.data || [])
-			const total = Array.isArray(data) ? items.length : (data.total ?? items.length)
-			return { items, total }
-		} catch (error) {
-			return handleServiceError(error, 'EmployeesService.list', 'Failed to load employees')
-		}
-	}
-
 	static async create(payload: Partial<Employee>): Promise<Employee> {
 		try {
 			return await apiClient.post<Employee>(ENDPOINTS.LIST, payload)

@@ -1,30 +1,51 @@
+import { Suspense } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
-import { Card, CardHeader } from "@/components/dashboard/card";
-import Link from "next/link";
 import { EmployeeTable } from "@/components/employees/employee-table";
+import { fetchEmployees } from "@/lib/services/employees-server";
 
 export default async function EmployeesPage() {
+  const { items: employees, total } = await fetchEmployees();
+
   return (
     <div className="min-h-dvh flex app-background">
       <Sidebar />
       <main className="flex-1">
         <Header title="Employee Management" />
         <section className="p-4">
-          <Card>
-            <CardHeader title="Create, edit and manage your workforce." />
-            <div className="flex justify-end">
-              <Link
-                href="/employees/new"
-                className="rounded-md bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 font-medium text-center"
-              >
-                Add Employee
-              </Link>
-            </div>
-          </Card>
-          <EmployeeTable />
+          <div>
+            <h1 className="text-xl font-bold">
+              Create, edit and manage your workforce.
+            </h1>
+          </div>
+          <Suspense fallback={<EmployeeTableSkeleton />}>
+            <EmployeeTable initialEmployees={employees} initialTotal={total} />
+          </Suspense>
         </section>
       </main>
+    </div>
+  );
+}
+
+function EmployeeTableSkeleton() {
+  return (
+    <div className="glass rounded-xl overflow-hidden">
+      <div className="p-3 flex items-center gap-2 border-b border-[var(--border)]">
+        <div className="h-10 bg-neutral-700/50 rounded-md flex-1 animate-pulse" />
+        <div className="h-10 w-32 bg-neutral-700/50 rounded-md animate-pulse" />
+        <div className="h-10 w-32 bg-neutral-700/50 rounded-md animate-pulse" />
+        <div className="h-10 w-32 bg-neutral-700/50 rounded-md animate-pulse" />
+      </div>
+      <div className="p-4">
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className="h-12 bg-neutral-700/50 rounded-md animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

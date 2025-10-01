@@ -6,7 +6,7 @@ import { SidebarProvider } from "@/components/dashboard/sidebar";
 import { SessionProvider } from "@/components/auth/session-context";
 import { getUser } from "@/lib/auth/dal";
 import type { ClientUser } from "@/lib/auth/types";
-
+import { ToastProvider } from "@/components/ui/toast";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -44,9 +44,11 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SessionProvider initialUser={clientUser}>
-            <SidebarProvider>
-              {children}
-            </SidebarProvider>
+            <ToastProvider>
+              <SidebarProvider>
+                {children}
+              </SidebarProvider>
+            </ToastProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>

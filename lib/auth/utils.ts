@@ -1,8 +1,3 @@
-import { COOKIE_NAMES as CONFIG_COOKIE_NAMES } from "@/lib/config";
-
-// Cookie names (centralized)
-export const COOKIE_NAMES = CONFIG_COOKIE_NAMES;
-
 // Auth API endpoints
 export const AUTH_ENDPOINTS = {
   LOGIN: "/api/auth/login",
@@ -13,7 +8,7 @@ export const AUTH_ENDPOINTS = {
   RESET_PASSWORD: "/api/auth/reset-password",
 } as const;
 
-// Simple role helpers for UI gating
+
 export function hasRole(user: { role?: string } | null | undefined, role: string): boolean {
   return !!user && user.role === role
 }

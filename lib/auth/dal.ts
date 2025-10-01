@@ -1,9 +1,9 @@
 import 'server-only'
 import { cache } from 'react'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { AUTH_ENDPOINTS } from './utils'
-import { API_BASE_URL, COOKIE_NAMES } from '@/lib/config'
+import { getAuthCookieHeader } from './server-utils'
+import { API_BASE_URL } from '@/lib/config'
 import type { User } from './types'
 
 
@@ -12,15 +12,8 @@ interface Session {
 }
 
 export const verifySession = cache(async (): Promise<Session | null> => {
-	const cookieStore = await cookies()
-	const sessionToken = cookieStore.get(COOKIE_NAMES.SESSION_TOKEN)?.value
-	const refreshToken = cookieStore.get(COOKIE_NAMES.REFRESH_TOKEN)?.value
-	if (!sessionToken) return null
-
-	const cookieHeader = [
-		`${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken}`,
-		refreshToken ? `${COOKIE_NAMES.REFRESH_TOKEN}=${refreshToken}` : null,
-	].filter(Boolean).join('; ')
+	const cookieHeader = await getAuthCookieHeader()
+	if (!cookieHeader) return null
 
 	const res = await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.PROFILE}` , {
 		method: 'GET',

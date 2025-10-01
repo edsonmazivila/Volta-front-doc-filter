@@ -33,7 +33,7 @@ export async function loginAction(prevState: unknown, formData: FormData): Promi
 	// Attempt to set session cookie from response payload if backend did not set it via Set-Cookie
     const json: unknown = await res.json().catch(() => null)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sessionId: string | undefined = (json as any)?.data?.session_id
+    const sessionId: string | undefined = (json as any)?.data?.session_id || (json as any)?.data?.access_token || (json as any)?.access_token
 	if (sessionId) {
 		const cookieStore = await cookies()
 		cookieStore.set(COOKIE_NAMES.SESSION_TOKEN, sessionId, {
@@ -128,26 +128,6 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
 	}
 
     return { success: true }
-}
-
-export async function logoutAction() {
-	'use server'
-	const cookieStore = await cookies()
-	cookieStore.set(COOKIE_NAMES.SESSION_TOKEN, '', {
-		path: '/',
-		httpOnly: true,
-		sameSite: 'lax',
-		secure: process.env.NODE_ENV === 'production',
-		maxAge: 0
-	})
-	try {
-		await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.LOGOUT}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			credentials: 'include'
-		})
-	} catch {}
-	return { success: true }
 }
 
 

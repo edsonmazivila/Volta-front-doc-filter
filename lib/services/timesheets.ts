@@ -6,6 +6,7 @@ const ENDPOINTS = {
 	DETAIL: (id: string) => `/api/timesheets/${id}`,
 	APPROVE: (id: string) => `/api/timesheets/${id}/approve`,
 	REJECT: (id: string) => `/api/timesheets/${id}/reject`,
+	SUBMIT: (id: string) => `/api/timesheets/${id}/submit`,
 }
 
 export class TimesheetsService {
@@ -54,6 +55,22 @@ export class TimesheetsService {
 			return await apiClient.patch<TOut>(ENDPOINTS.REJECT(id), { reason })
 		} catch (error) {
 			return handleServiceError(error, 'TimesheetsService.reject', 'Failed to reject timesheet')
+		}
+	}
+
+	static async submit<TOut = unknown>(id: string): Promise<TOut> {
+		try {
+			return await apiClient.patch<TOut>(ENDPOINTS.SUBMIT(id), {})
+		} catch (error) {
+			return handleServiceError(error, 'TimesheetsService.submit', 'Failed to submit timesheet')
+		}
+	}
+
+	static async remove(id: string): Promise<void> {
+		try {
+			await apiClient.delete(ENDPOINTS.DETAIL(id))
+		} catch (error) {
+			return handleServiceError(error, 'TimesheetsService.remove', 'Failed to delete timesheet')
 		}
 	}
 }

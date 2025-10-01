@@ -1,8 +1,6 @@
 'use server'
-import { apiClient } from '@/lib/http/api-client'
 import { handleServiceError } from '@/lib/http/error-handler'
-import { cookies } from 'next/headers'
-import { COOKIE_NAMES } from '@/lib/config'
+import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
 
 const DASHBOARD_ENDPOINTS = {
@@ -30,22 +28,40 @@ interface TimesheetsStatsResponse {
 export async function fetchDashboardStats(): Promise<DashboardStats> {
 	try {
 		// Forward auth cookies to backend
-		const cookieStore = await cookies()
-		const session = cookieStore.get(COOKIE_NAMES.SESSION_TOKEN)?.value
-		const refresh = cookieStore.get(COOKIE_NAMES.REFRESH_TOKEN)?.value
-		const cookieHeader = [
-			session ? `${COOKIE_NAMES.SESSION_TOKEN}=${session}` : null,
-			refresh ? `${COOKIE_NAMES.REFRESH_TOKEN}=${refresh}` : null,
-		].filter(Boolean).join('; ')
-		const commonHeaders: Record<string, string> | undefined = cookieHeader ? { Cookie: cookieHeader } : undefined
+		const cookieHeader = await getAuthCookieHeader()
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json',
+		}
+		if (cookieHeader) {
+			headers['Cookie'] = cookieHeader
+		}
 
-	    const [employeesStats, timesheetsStats] = await Promise.all([
-			apiClient.get<EmployeesStatsResponse>(DASHBOARD_ENDPOINTS.EMPLOYEES_STATS, undefined, { retries: 3, headers: commonHeaders }),
-			apiClient.get<TimesheetsStatsResponse>(DASHBOARD_ENDPOINTS.TIMESHEETS_STATS, undefined, { retries: 3, headers: commonHeaders }),
+		// Fetch stats from backend API using native fetch (server-side)
+		const [employeesRes, timesheetsRes] = await Promise.all([
+			fetch(`${API_BASE_URL}${DASHBOARD_ENDPOINTS.EMPLOYEES_STATS}`, {
+				method: 'GET',
+				headers,
+				cache: 'no-store',
+			}),
+			fetch(`${API_BASE_URL}${DASHBOARD_ENDPOINTS.TIMESHEETS_STATS}`, {
+				method: 'GET',
+				headers,
+				cache: 'no-store',
+			}),
 		])
 
-		const totalEmployees = employeesStats?.total ?? employeesStats?.data?.total ?? 0
-		const pendingTimesheets = timesheetsStats?.pending ?? timesheetsStats?.data?.pending ?? 0
+		let totalEmployees = 0
+		let pendingTimesheets = 0
+
+		if (employeesRes.ok) {
+			const employeesData = await employeesRes.json().catch(() => ({}))
+			totalEmployees = employeesData?.total ?? employeesData?.data?.total ?? 0
+		}
+
+		if (timesheetsRes.ok) {
+			const timesheetsData = await timesheetsRes.json().catch(() => ({}))
+			pendingTimesheets = timesheetsData?.pending ?? timesheetsData?.data?.pending ?? 0
+		}
 
 		// Fetch payroll stats from legacy web endpoint; be tolerant of response shape
 		let monthlyPayroll = 0
@@ -53,7 +69,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 			const res = await fetch(`${API_BASE_URL}${DASHBOARD_ENDPOINTS.PAYROLL_STATS}`, {
 				method: 'GET',
 				headers: {
-					...(commonHeaders || {}),
+					...headers,
 					'Accept': 'application/json, text/plain;q=0.9, */*;q=0.1'
 				},
 				cache: 'no-store'
