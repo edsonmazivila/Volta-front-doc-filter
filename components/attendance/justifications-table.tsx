@@ -28,7 +28,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
       } else {
         toast.success('Justification approved')
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred')
     } finally {
       setProcessing((prev) => ({ ...prev, [id]: false }))
@@ -44,7 +44,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
       } else {
         toast.success('Justification rejected')
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred')
     } finally {
       setProcessing((prev) => ({ ...prev, [id]: false }))

@@ -32,11 +32,7 @@ export default async function AttendancePage() {
           <AttendanceSection
             initialRecords={attendanceRecords}
             initialJustifications={justifications}
-            employees={employees.map((emp) => ({
-              id: Number(emp.id),
-              first_name: emp.first_name,
-              last_name: emp.last_name,
-            }))}
+            employees={employees}
           />
         </section>
       </main>

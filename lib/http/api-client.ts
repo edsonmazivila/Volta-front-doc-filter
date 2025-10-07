@@ -63,7 +63,7 @@ export class ApiClient {
 		return result
 	}
 
-	private logRequest(method: string, url: string, headers: Record<string, string>, body?: unknown): void {
+	private logRequest(method: string, url: string, headers: Record<string, string>): void {
 		if (!this.enableLogging) return
 		const safe = { ...headers }
 		if (safe['Authorization']) safe['Authorization'] = 'Bearer [REDACTED]'
@@ -73,8 +73,8 @@ export class ApiClient {
 
 	private logResponse(method: string, url: string, status: number, data: unknown, start: number): void {
 		if (!this.enableLogging) return
-		const duration = Date.now() - start
 		// Logging disabled for production
+		void start // Duration calculation removed but start param kept for future use
 	}
 
 	private async doFetch(method: string, endpoint: string, body?: unknown, _token?: string, config?: ApiRequestConfig): Promise<Response> {
@@ -85,7 +85,7 @@ export class ApiClient {
 			const csrf = getCsrfToken()
 			if (csrf) headers['X-CSRF-Token'] = csrf
 		}
-		if (this.enableLogging && !config?.disableLogging) this.logRequest(method, url, headers, body)
+		if (this.enableLogging && !config?.disableLogging) this.logRequest(method, url, headers)
 		return fetch(url, {
 			method,
 			headers,

@@ -15,6 +15,7 @@ import {
 import { Edit, Trash2, Upload } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import Image from 'next/image'
 
 interface CompanyProfileProps {
 	company: {
@@ -137,7 +138,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 					<div className='mt-3 grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6'>
 						<div className='flex flex-col items-start gap-3'>
 							{company.logo ? (
-								<img src={company.logo} alt='Company Logo' className='h-24 w-24 rounded-lg object-cover border border-white/10' />
+								<Image src={company.logo} alt='Company Logo' className='h-24 w-24 rounded-lg object-cover border border-white/10' width={96} height={96} />
 							) : (
 								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400'>Logo</div>
 							)}

@@ -18,8 +18,8 @@ import { SidebarTrigger } from '@/components/dashboard/sidebar'
 export function Header({ title }: { title: string }) {
   const { user, isAuthenticated } = useSession()
   return (
-    <header className='sticky top-0 z-10 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-      <div className='h-14 px-4 flex items-center justify-between'>
+    <header className='sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+      <div className='h-12 px-4 flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <SidebarTrigger />
           <h1 className='text-lg font-medium'>{title}</h1>

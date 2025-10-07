@@ -41,7 +41,7 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
       } else {
         toast.success('Attendance record deleted')
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred')
     } finally {
       setDeleting((prev) => ({ ...prev, [id]: false }))

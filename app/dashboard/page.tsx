@@ -40,15 +40,13 @@ export default async function DashboardPage() {
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
   }
 
-  const [stats, payrollRuns, timesheets, employeesData, leaveRequests] = await Promise.all([
+  const [stats, payrollRuns, timesheets, _employeesData, leaveRequests] = await Promise.all([
     statsPromise,
     payrollRunsPromise,
     timesheetsPromise,
     employeesPromise,
     leaveRequestsPromise,
   ])
-
-  const employees = employeesData.items || []
 
   // Pending items requiring action
   const pendingLeaves = leaveRequests.filter(l => l.status === 'SUBMITTED').slice(0, 5)

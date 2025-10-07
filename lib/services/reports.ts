@@ -269,8 +269,7 @@ export async function exportChartAsPDF(chartId: string, filename: string = 'char
       return
     }
 
-    // Convert canvas to image data
-    const imgData = canvas.toDataURL('image/png')
+    // Convert canvas to image data (not used currently; fallback exports PNG below)
 
     // Check if jsPDF is available (needs to be imported by the client)
     // This is just a helper function - actual PDF generation should be done client-side

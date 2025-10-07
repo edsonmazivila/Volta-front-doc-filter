@@ -10,11 +10,12 @@ import { Input } from '../ui/input'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { exportAttendanceCSV } from '@/lib/services/attendance'
 import { toast } from 'sonner'
+import type { Employee } from '@/lib/services/employees'
 
 interface AttendanceSectionProps {
   initialRecords: AttendanceRecord[]
   initialJustifications: AttendanceJustification[]
-  employees: Array<{ id: number; first_name: string; last_name: string }>
+  employees: Employee[]
 }
 
 export function AttendanceSection({
@@ -57,7 +58,7 @@ export function AttendanceSection({
       } else {
         toast.error('Failed to export CSV')
       }
-    } catch (error) {
+    } catch {
       toast.error('Export failed')
     } finally {
       setExporting(false)

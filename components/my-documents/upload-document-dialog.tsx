@@ -83,7 +83,7 @@ export function UploadDocumentDialog({
       setTitle('')
       setDocumentType('')
       setDescription('')
-    } catch (error) {
+    } catch {
       toast.error('Failed to upload document')
     } finally {
       setIsSubmitting(false)

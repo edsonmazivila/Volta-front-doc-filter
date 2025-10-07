@@ -1,20 +1,23 @@
-'use client'
-import { useState, useMemo } from 'react'
-import type { DocumentListItem, DocumentTypeItem } from '@/lib/services/documents'
-import { DocumentCard } from '@/components/my-documents/document-card'
-import { UploadDocumentDialog } from '@/components/my-documents/upload-document-dialog'
-import { deleteDocumentAction } from '@/lib/services/documents'
-import { SearchInput } from '@/components/search-input'
-import { Button } from '@/components/ui'
-import { useToastHelpers } from '@/components/ui/toast'
-import { useRouter } from 'next/navigation'
-import { Upload } from 'lucide-react'
+"use client";
+import { useState, useMemo } from "react";
+import type {
+  DocumentListItem,
+  DocumentTypeItem,
+} from "@/lib/services/documents";
+import { DocumentCard } from "@/components/my-documents/document-card";
+import { UploadDocumentDialog } from "@/components/my-documents/upload-document-dialog";
+import { deleteDocumentAction } from "@/lib/services/documents";
+import { SearchInput } from "@/components/search-input";
+import { Button } from "@/components/ui";
+import { useToastHelpers } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
+import { Upload } from "lucide-react";
 
 interface MyDocumentsSectionProps {
-  documents: DocumentListItem[]
-  employeeId?: string
-  employeeName?: string
-  documentTypes?: DocumentTypeItem[]
+  documents: DocumentListItem[];
+  employeeId?: string;
+  employeeName?: string;
+  documentTypes?: DocumentTypeItem[];
 }
 
 export function MyDocumentsSection({
@@ -23,53 +26,53 @@ export function MyDocumentsSection({
   employeeName,
   documentTypes = [],
 }: MyDocumentsSectionProps) {
-  const router = useRouter()
-  const toast = useToastHelpers()
-  const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const router = useRouter();
+  const toast = useToastHelpers();
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
+    const q = search.trim().toLowerCase();
     return documents.filter((doc) => {
       const matchesSearch =
         !q ||
         doc.title.toLowerCase().includes(q) ||
-        doc.type.toLowerCase().includes(q)
-      const matchesType = !typeFilter || doc.type === typeFilter
-      const matchesStatus = !statusFilter || doc.status === statusFilter
-      return matchesSearch && matchesType && matchesStatus
-    })
-  }, [documents, search, typeFilter, statusFilter])
+        doc.type.toLowerCase().includes(q);
+      const matchesType = !typeFilter || doc.type === typeFilter;
+      const matchesStatus = !statusFilter || doc.status === statusFilter;
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [documents, search, typeFilter, statusFilter]);
 
   async function handleDownload(id: string) {
     try {
-      const link = document.createElement('a')
-      link.href = `/api/documents/${id}/download`
-      link.download = `document-${id}`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      toast.success('Downloading document...')
-    } catch (error) {
-      toast.error('Failed to download document')
+      const link = document.createElement("a");
+      link.href = `/api/documents/${id}/download`;
+      link.download = `document-${id}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Downloading document...");
+    } catch {
+      toast.error("Failed to download document");
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this document?')) return
+    if (!confirm("Are you sure you want to delete this document?")) return;
 
     try {
-      await deleteDocumentAction(id)
-      toast.success('Document deleted')
-      router.refresh()
-    } catch (error) {
-      toast.error('Failed to delete document')
+      await deleteDocumentAction(id);
+      toast.success("Document deleted");
+      router.refresh();
+    } catch {
+      toast.error("Failed to delete document");
     }
   }
 
-  const uniqueTypes = Array.from(new Set(documents.map((d) => d.type)))
+  const uniqueTypes = Array.from(new Set(documents.map((d) => d.type)));
 
   return (
     <div className="space-y-6">
@@ -86,8 +89,12 @@ export function MyDocumentsSection({
               )}
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground mb-1">Total Documents</p>
-              <p className="text-3xl font-bold text-blue-600">{documents.length}</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                Total Documents
+              </p>
+              <p className="text-3xl font-bold text-blue-600">
+                {documents.length}
+              </p>
             </div>
           </div>
         </div>
@@ -105,7 +112,9 @@ export function MyDocumentsSection({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium mb-1">Document Type</label>
+            <label className="block text-xs font-medium mb-1">
+              Document Type
+            </label>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
@@ -114,7 +123,9 @@ export function MyDocumentsSection({
               <option value="">All Types</option>
               {uniqueTypes.map((type) => (
                 <option key={type} value={type}>
-                  {type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                  {type
+                    .replace(/_/g, " ")
+                    .replace(/\b\w/g, (c) => c.toUpperCase())}
                 </option>
               ))}
             </select>
@@ -151,8 +162,8 @@ export function MyDocumentsSection({
         <div className="text-center py-12 border border-dashed border-[var(--border)] rounded-lg">
           <div className="text-muted-foreground">
             {search || typeFilter || statusFilter
-              ? 'No documents match your filters'
-              : 'No documents found'}
+              ? "No documents match your filters"
+              : "No documents found"}
           </div>
           {!search && !typeFilter && !statusFilter && (
             <Button
@@ -187,5 +198,5 @@ export function MyDocumentsSection({
         documentTypes={documentTypes}
       />
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { TimesheetListItem } from '@/lib/services/timesheets'
 import { Button, Skeleton } from '@/components/ui'
 import { format } from 'date-fns'
@@ -16,15 +16,9 @@ interface TimesheetTableProps {
 	onDelete?: (id: string) => void
 }
 
-export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, onEdit, onSubmit, onApprove, onReject, onDelete }: TimesheetTableProps) {
+export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, onEdit, onDelete }: TimesheetTableProps) {
 	const rows = useMemo(() => items, [items])
-  const [pendingId, setPendingId] = useState<string | null>(null)
-
-  function fmtDate(v?: string) {
-    if (!v) return '-'
-    const d = new Date(v)
-    return isNaN(d.getTime()) ? v : format(d, 'yyyy-MM-dd')
-  }
+  const pendingId = null
 
 	function statusClass(status: string) {
     switch (status) {

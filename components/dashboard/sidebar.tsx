@@ -9,9 +9,9 @@ import {
   FileCheck, CalendarCheck, FolderOpen, X, ClipboardCheck, Video
 } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { LogoutButton } from '@/components/dashboard/logout-button'
 import { useSession } from '@/components/auth/session-context'
 import { usePermissions } from '@/lib/rbac/hooks'
+import Image from 'next/image'
 
 type NavItem = {
   href: string
@@ -98,10 +98,25 @@ export function Sidebar() {
     .filter(section => section.items.length > 0)
 
   return (
-    <aside className='hidden md:flex w-64 shrink-0 border-r bg-background/50 backdrop-blur flex-col'>
-      <div className='p-3.5 border-b'>
-        <h2 className='text-lg font-bold'>NEXUpayroll</h2>
+    <aside className='hidden md:flex w-64 shrink-0 border-r border-border bg-background/50 backdrop-blur flex-col'>
+      <div className='p-1 border-b border-border'>
+        <Image src="/logo/full-logo-blue-white.svg" alt="NEXUpayroll" width={100} height={100} className='h-auto w-20' />
       </div>
+
+      {isAuthenticated && (
+        <div className='p-4 border-b border-border'>
+          <p className='text-sm text-muted-foreground mb-2'>Welcome back,</p>
+          <div className='flex items-center gap-3'>
+            <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold'>
+              {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+            </div>
+            <div className='flex-1 min-w-0'>
+              <div className='font-medium truncate text-sm'>{user?.name || user?.email}</div>
+              <div className='text-xs text-muted-foreground capitalize'>{user?.role?.replace(/_/g, ' ')}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <nav className='flex-1 overflow-y-auto p-3 space-y-6'>
         {filteredSections.map(section => (
@@ -132,21 +147,6 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
-      
-      {isAuthenticated && (
-        <div className='p-4 border-t'>
-          <div className='flex items-center gap-3 mb-3'>
-            <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold'>
-              {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
-            </div>
-            <div className='flex-1 min-w-0'>
-              <div className='font-medium truncate text-sm'>{user?.name || user?.email}</div>
-              <div className='text-xs text-muted-foreground capitalize'>{user?.role?.replace(/_/g, ' ')}</div>
-            </div>
-          </div>
-          <LogoutButton className='w-full justify-start' />
-        </div>
-      )}
     </aside>
   )
 }
@@ -177,13 +177,28 @@ function SidebarDrawer() {
   return (
     <div aria-hidden={!open} className={`fixed inset-0 z-50 md:hidden ${open ? '' : 'pointer-events-none'}`}>
       <div className={`absolute inset-0 bg-black/60 transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`} onClick={closeDrawer} aria-label='Close menu overlay' />
-      <aside className={`absolute left-0 top-0 h-full w-72 bg-background border-r flex flex-col transition-transform ${open ? 'translate-x-0' : '-translate-x-full'}`} role='dialog' aria-modal='true' aria-label='Navigation menu'>
-        <div className='p-4 border-b flex items-center justify-between'>
+      <aside className={`absolute left-0 top-0 h-full w-72 bg-background border-r border-border flex flex-col transition-transform ${open ? 'translate-x-0' : '-translate-x-full'}`} role='dialog' aria-modal='true' aria-label='Navigation menu'>
+        <div className='p-4 border-b border-border flex items-center justify-between'>
           <h2 className='text-lg font-bold'>NEXUpayroll</h2>
           <button onClick={closeDrawer} aria-label='Close menu' className='p-2 hover:bg-muted rounded-lg'>
             <X className='h-5 w-5' />
           </button>
         </div>
+
+        {isAuthenticated && (
+          <div className='p-4 border-b border-border'>
+            <p className='text-xs text-muted-foreground mb-2'>Welcome back,</p>
+            <div className='flex items-center gap-3'>
+              <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold'>
+                {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div className='flex-1 min-w-0'>
+                <div className='font-medium truncate text-sm'>{user?.name || user?.email}</div>
+                <div className='text-xs text-muted-foreground capitalize'>{user?.role?.replace(/_/g, ' ')}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <nav className='flex-1 overflow-y-auto p-3 space-y-6'>
           {filteredSections.map(section => (
@@ -215,21 +230,6 @@ function SidebarDrawer() {
             </div>
           ))}
         </nav>
-        
-        {isAuthenticated && (
-          <div className='p-4 border-t'>
-            <div className='flex items-center gap-3 mb-3'>
-              <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold'>
-                {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
-              </div>
-              <div className='flex-1 min-w-0'>
-                <div className='font-medium truncate text-sm'>{user?.name || user?.email}</div>
-                <div className='text-xs text-muted-foreground capitalize'>{user?.role?.replace(/_/g, ' ')}</div>
-              </div>
-            </div>
-            <LogoutButton className='w-full justify-start' />
-          </div>
-        )}
       </aside>
     </div>
   )
