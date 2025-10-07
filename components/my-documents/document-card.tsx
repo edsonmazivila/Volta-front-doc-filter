@@ -76,16 +76,19 @@ export function DocumentCard({ document, onDownload, onDelete }: DocumentCardPro
               size="sm"
               onClick={() => onDownload(document.id)}
               className="flex-1"
+              disabled={document.canDownload === false}
+              title={document.canDownload === false ? 'Download not available' : 'Download document'}
             >
               <Download className="h-3 w-3 mr-1" />
               Download
             </Button>
-            {onDelete && (
+            {onDelete && document.canEdit !== false && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onDelete(document.id)}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                title="Delete document"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>

@@ -38,6 +38,32 @@ export interface LeavePolicy {
   annual_allocation_days: number
 }
 
+export interface CompanyDocument {
+  id: string
+  company_id: string
+  name: string
+  document_type: string
+  original_filename: string
+  stored_filename: string
+  file_path: string
+  file_size: number
+  mime_type: string
+  storage_provider: string
+  expiry_date?: string
+  description?: string
+  created_at: string
+  updated_at: string
+  created_by: string
+  updated_by: string
+}
+
+export interface CompanyDocumentsResponse {
+  documents: CompanyDocument[]
+  limit: number
+  page: number
+  total: number
+}
+
 export interface ActionResult {
   success?: boolean
   data?: unknown
@@ -74,6 +100,13 @@ const leavePolicySchema = z.object({
   name: z.string().min(1, 'Name is required'),
   leave_type: z.string().min(1, 'Leave type is required'),
   annual_allocation_days: z.number().min(0, 'Allocation days must be positive'),
+})
+
+const updateCompanyDocumentSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  expiry_date: z.string().optional(),
+  document_type: z.string().optional(),
 })
 
 // READ operations (cached)
@@ -184,6 +217,63 @@ export const getLeavePolicies = cache(async (): Promise<LeavePolicy[]> => {
     }))
   } catch {
     return []
+  }
+})
+
+export const getCompanyDocuments = cache(async (params?: { page?: number; limit?: number; document_type?: string }): Promise<CompanyDocumentsResponse> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const queryParams = new URLSearchParams()
+    if (params?.page) queryParams.set('page', String(params.page))
+    if (params?.limit) queryParams.set('limit', String(params.limit))
+    if (params?.document_type) queryParams.set('document_type', params.document_type)
+
+    const url = `${API_BASE_URL}/api/company-documents${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['company-documents'], revalidate: 60 },
+    })
+
+    if (!res.ok) {
+      return { documents: [], limit: 20, page: 1, total: 0 }
+    }
+
+    const json = await res.json()
+    
+    return {
+      documents: json.documents || [],
+      limit: json.limit || 20,
+      page: json.page || 1,
+      total: json.total || 0,
+    }
+  } catch {
+    return { documents: [], limit: 20, page: 1, total: 0 }
+  }
+})
+
+export const getCompanyDocument = cache(async (id: string): Promise<CompanyDocument | null> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/company-documents/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: [`company-document-${id}`], revalidate: 60 },
+    })
+
+    if (!res.ok) return null
+
+    const json = await res.json()
+    const doc = json.document || json
+    
+    return doc
+  } catch {
+    return null
   }
 })
 
@@ -436,5 +526,98 @@ export async function deleteLeavePolicyAction(id: string): Promise<void> {
   // Revalidate company and all dependent caches
   revalidateEntityMutation('COMPANY')
 }
+
+/**
+ * Upload a new company document
+ * Endpoint: POST /api/company-documents/upload
+ */
+export async function uploadCompanyDocumentAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/company-documents/upload`, {
+      method: 'POST',
+      headers: {
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: formData,
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || error.error || 'Failed to upload document'] } }
+    }
+
+    const data = await res.json()
+    revalidateEntityMutation('COMPANY')
+    
+    return { success: true, data }
+  } catch (error) {
+    return { errors: { _form: ['Failed to upload document: ' + (error instanceof Error ? error.message : 'Unknown error')] } }
+  }
+}
+
+/**
+ * Update company document metadata
+ * Endpoint: PUT /api/company-documents/:id
+ */
+export async function updateCompanyDocumentAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = updateCompanyDocumentSchema.safeParse({
+    name: formData.get('name') || undefined,
+    description: formData.get('description') || undefined,
+    expiry_date: formData.get('expiry_date') || undefined,
+    document_type: formData.get('document_type') || undefined,
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/company-documents/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || error.error || 'Failed to update document'] } }
+    }
+
+    const data = await res.json()
+    revalidateEntityMutation('COMPANY')
+    
+    return { success: true, data }
+  } catch (error) {
+    return { errors: { _form: ['Failed to update document: ' + (error instanceof Error ? error.message : 'Unknown error')] } }
+  }
+}
+
+/**
+ * Delete a company document
+ * Endpoint: DELETE /api/company-documents/:id
+ */
+export async function deleteCompanyDocumentAction(id: string): Promise<void> {
+  const cookieHeader = await getAuthCookieHeader()
+  const res = await fetch(`${API_BASE_URL}/api/company-documents/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cookieHeader && { Cookie: cookieHeader }),
+    },
+  })
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || error.error || 'Failed to delete document')
+  }
+
+  revalidateEntityMutation('COMPANY')
+}
+
 
 

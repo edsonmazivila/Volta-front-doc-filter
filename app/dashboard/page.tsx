@@ -2,7 +2,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { Card, CardHeader } from "@/components/dashboard/card";
 import { StatsCard } from "@/components/dashboard/stats-card";
-import { LineChartPlaceholder } from "@/components/dashboard/line-chart";
+import { PayrollChart } from "@/components/dashboard/payroll-chart";
 import { BarChart } from "@/components/dashboard/bar-chart";
 import { Button } from "@/components/ui";
 import Link from "next/link";
@@ -192,11 +192,11 @@ export default async function DashboardPage() {
             <Card className="h-[360px] p-0 overflow-hidden">
               <div className="h-full w-full grid grid-rows-[auto,1fr]">
                 <div className="p-4 flex items-center justify-between">
-                  <span className="text-sm font-medium">Payroll Trends</span>
+                  <span className="text-sm font-medium">Payroll Totals</span>
                   <Link href="/dashboard/payroll" className="text-xs text-blue-400 hover:underline">View All</Link>
                 </div>
-                <div className="px-2 pb-2">
-                  <LineChartPlaceholder className="w-full h-[280px]" />
+                <div className="overflow-hidden">
+                  <PayrollChart data={payrollRuns} className="w-full h-[300px]" />
                 </div>
               </div>
             </Card>

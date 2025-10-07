@@ -11,6 +11,28 @@ import { z } from 'zod'
 
 export type DocumentStatus = 'uploaded' | 'approved' | 'rejected' | 'expired' | 'pending'
 
+// Employee document (from /api/my-documents response)
+export interface MyDocument {
+  id: string
+  employee_id: string
+  document_type: string
+  document_status: DocumentStatus
+  original_filename: string
+  can_download: boolean
+  can_edit: boolean
+  created_at: string
+  file_size?: number
+  expiry_date?: string
+  description?: string
+}
+
+export interface MyDocumentsResponse {
+  success: boolean
+  count: number
+  data: MyDocument[]
+}
+
+// Full document details (from /api/documents/:id)
 export interface Document {
   id: string
   employee_id: string
@@ -28,6 +50,7 @@ export interface Document {
   updated_at?: string
 }
 
+// List item for tables/grids
 export interface DocumentListItem {
   id: string
   employeeName: string
@@ -36,11 +59,19 @@ export interface DocumentListItem {
   status: DocumentStatus
   createdAt?: string
   sizeBytes?: number
+  canDownload?: boolean
+  canEdit?: boolean
 }
 
 export interface DocumentTypeItem {
   type: string
   display_name: string
+}
+
+export interface DocumentCategory {
+  id: string
+  name: string
+  description?: string
 }
 
 export type ActionResult =
@@ -68,62 +99,44 @@ const rejectDocumentSchema = z.object({
 
 /**
  * Get my documents (employee self-service)
+ * Endpoint: GET /api/my-documents
  */
 export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
-  const cookieHeader = await getAuthCookieHeader()
-  const res = await fetch(`${API_BASE_URL}/api/documents/my`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(cookieHeader && { Cookie: cookieHeader }),
-    },
-    next: { tags: ['documents'], revalidate: 60 },
-  })
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/my-documents`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['my-documents'], revalidate: 60 },
+    })
 
-  if (!res.ok) {
-    // If endpoint doesn't exist, fallback to regular documents
-    return getDocuments()
-  }
-
-  const json = await res.json()
-  const raw = json.documents || json.data || []
-
-  interface RawDocument {
-    id?: string | number;
-    doc_id?: string | number;
-    uuid?: string;
-    employee?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string };
-    user?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string };
-    employee_name?: string;
-    title?: string;
-    original_filename?: string;
-    document_type?: string;
-    type?: string;
-    document_status?: string;
-    status?: string;
-    expiry_date?: string;
-    is_confidential?: boolean;
-    file_size?: number;
-    created_at?: string;
-    updated_at?: string;
-  }
-  return raw.map((d: RawDocument) => {
-    const emp = d.employee || d.user || undefined
-    const empUser = emp?.user || emp
-    const first = empUser?.first_name ?? ''
-    const last = empUser?.last_name ?? ''
-    const email = empUser?.email ?? ''
-    const name = [first, last].filter(Boolean).join(' ') || email || '—'
-
-    return {
-      id: String(d.id ?? d.doc_id ?? d.uuid ?? ''),
-      employeeName: String(d.employee_name ?? name),
-      title: String(d.title ?? d.original_filename ?? 'Untitled'),
-      type: String(d.document_type ?? d.type ?? 'unknown'),
-      status: (d.document_status ?? d.status ?? 'uploaded') as DocumentStatus,
-      createdAt: d.created_at ? String(d.created_at) : undefined,
-      sizeBytes: typeof d.file_size === 'number' ? d.file_size : undefined,
+    if (!res.ok) {
+      throw new Error(`Failed to fetch my documents: ${res.status}`)
     }
-  })
+
+    const json: MyDocumentsResponse = await res.json()
+    
+    if (!json.success || !Array.isArray(json.data)) {
+      return []
+    }
+
+    return json.data.map((d) => ({
+      id: d.id,
+      employeeName: '—', // Employee viewing their own docs
+      title: d.original_filename || 'Untitled',
+      type: d.document_type,
+      status: d.document_status,
+      createdAt: d.created_at,
+      sizeBytes: d.file_size,
+      canDownload: d.can_download,
+      canEdit: d.can_edit,
+    }))
+  } catch (error) {
+    console.error('Error fetching my documents:', error)
+    return []
+  }
 })
 
 /**
@@ -233,6 +246,7 @@ export const getDocument = cache(async (id: string): Promise<Document | null> =>
 
 /**
  * Get available document types
+ * Endpoint: GET /api/documents/types
  * Note: Uses 300s (5 min) cache instead of standard 60s because document types
  * are configuration data that rarely changes
  */
@@ -253,6 +267,30 @@ export const getDocumentTypes = cache(async (): Promise<DocumentTypeItem[]> => {
     if (Array.isArray(json.document_types)) return json.document_types
     if (Array.isArray(json.types)) return json.types.map((t: string) => ({ type: t, display_name: t }))
     return []
+  } catch {
+    return []
+  }
+})
+
+/**
+ * Get document categories
+ * Endpoint: GET /api/documents/categories
+ */
+export const getDocumentCategories = cache(async (): Promise<DocumentCategory[]> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/documents/categories`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['document-categories'], revalidate: 300 },
+    })
+
+    if (!res.ok) return []
+
+    const json = await res.json()
+    return json.categories || json.data || []
   } catch {
     return []
   }
@@ -310,6 +348,7 @@ export async function uploadDocumentAction(prevState: unknown, formData: FormDat
 
 /**
  * Update document metadata
+ * Endpoint: PUT /api/documents/:id
  */
 export async function updateDocumentAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
   const parsed = updateDocumentSchema.safeParse({
@@ -340,9 +379,6 @@ export async function updateDocumentAction(id: string, prevState: unknown, formD
     }
 
     const data = await res.json()
-
-    // Revalidate caches
-    // Revalidate documents and all dependent caches
     revalidateEntityMutation('DOCUMENTS')
 
     return { success: true, data }
@@ -352,7 +388,47 @@ export async function updateDocumentAction(id: string, prevState: unknown, formD
 }
 
 /**
+ * Update document with file replacement
+ * Endpoint: PUT /api/documents/:id/update-with-file
+ */
+export async function updateDocumentWithFileAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const file = formData.get('file')
+
+  if (!file) {
+    return {
+      errors: {
+        _form: ['File is required']
+      }
+    }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/documents/${id}/update-with-file`, {
+      method: 'PUT',
+      headers: {
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: formData,
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to update document with file'] } }
+    }
+
+    const data = await res.json()
+    revalidateEntityMutation('DOCUMENTS')
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to update document with file'] } }
+  }
+}
+
+/**
  * Delete a document
+ * Endpoint: DELETE /api/documents/:id
  */
 export async function deleteDocumentAction(id: string): Promise<void> {
   const cookieHeader = await getAuthCookieHeader()
@@ -369,13 +445,30 @@ export async function deleteDocumentAction(id: string): Promise<void> {
     throw new Error(error.message || 'Failed to delete document')
   }
 
-  // Revalidate caches
-  // Revalidate documents and all dependent caches
   revalidateEntityMutation('DOCUMENTS')
 }
 
 /**
+ * Get document preview URL
+ * Endpoint: GET /api/documents/:id/preview
+ * Returns the preview URL for browser display
+ */
+export async function getDocumentPreviewUrl(id: string): Promise<string> {
+  return `${API_BASE_URL}/api/documents/${id}/preview`
+}
+
+/**
+ * Get document download URL
+ * Endpoint: GET /api/documents/:id/download
+ * Returns the download URL
+ */
+export async function getDocumentDownloadUrl(id: string): Promise<string> {
+  return `${API_BASE_URL}/api/documents/${id}/download`
+}
+
+/**
  * Approve a document
+ * Endpoint: POST /api/documents/:id/approve
  */
 export async function approveDocumentAction(id: string): Promise<void> {
   const cookieHeader = await getAuthCookieHeader()
@@ -393,13 +486,12 @@ export async function approveDocumentAction(id: string): Promise<void> {
     throw new Error(error.message || 'Failed to approve document')
   }
 
-  // Revalidate caches
-  // Revalidate documents and all dependent caches
   revalidateEntityMutation('DOCUMENTS')
 }
 
 /**
  * Reject a document
+ * Endpoint: POST /api/documents/:id/reject
  */
 export async function rejectDocumentAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
   const parsed = rejectDocumentSchema.safeParse({
@@ -427,9 +519,6 @@ export async function rejectDocumentAction(id: string, prevState: unknown, formD
     }
 
     const data = await res.json()
-
-    // Revalidate caches
-    // Revalidate documents and all dependent caches
     revalidateEntityMutation('DOCUMENTS')
 
     return { success: true, data }

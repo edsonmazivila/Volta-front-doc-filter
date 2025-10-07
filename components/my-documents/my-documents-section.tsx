@@ -54,7 +54,7 @@ export function MyDocumentsSection({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Downloading document...");
+      toast.success("Download started");
     } catch {
       toast.error("Failed to download document");
     }
