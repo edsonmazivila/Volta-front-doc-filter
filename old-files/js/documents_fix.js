@@ -1,6 +1,6 @@
-// Documents JavaScript for JECH Pay
+// Documents JavaScript for NEXUpayroll
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('JECH Pay Documents - Ready');
+    console.log('NEXUpayroll Documents - Ready');
     
     // Initialize page
     initializeDocuments();

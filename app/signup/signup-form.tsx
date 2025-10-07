@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AuthForm, NameField, EmailField, PasswordField, ConfirmPasswordField, CompanyNameField, TermsField } from '@/components/auth/auth-form'
+import { AuthForm, NameField, EmailField, PasswordField, CompanyNameField, TermsField } from '@/components/auth/auth-form'
 import { signupSchema } from '@/lib/auth/types'
 import { signupAction } from '@/lib/auth/actions'
 
@@ -40,9 +40,9 @@ export function SignupForm() {
 				</div>
 			)}
 			
-            <AuthForm
+			<AuthForm
 				title="Create your account"
-				subtitle="Get started with JECH Pay in minutes"
+				subtitle="Get started with NEXUpayroll in minutes"
                 onSubmit={handleSignup}
                 action={async (formData) => {
 					const result = await signupAction(undefined, formData)
@@ -61,11 +61,37 @@ export function SignupForm() {
 				schema={signupSchema}
 				submitText="Create account"
 			>
+				<CompanyNameField />
 				<NameField />
 				<EmailField />
 				<PasswordField placeholder="Create a strong password" showStrength={true} />
-				<ConfirmPasswordField />
-				<CompanyNameField />
+
+				{/* Optional fields */}
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="flex flex-col gap-1">
+						<label className="text-sm">Employment type (optional)</label>
+						<select name="employmentType" className="w-full border rounded-md px-3 py-2 bg-background">
+							<option value="">Select type</option>
+							<option value="full_time">Full time</option>
+							<option value="part_time">Part time</option>
+							<option value="contract">Contract</option>
+							<option value="intern">Intern</option>
+						</select>
+					</div>
+					<div className="flex flex-col gap-1">
+						<label className="text-sm">Hire date (optional)</label>
+						<input type="date" name="hireDate" className="w-full border rounded-md px-3 py-2 bg-background" />
+					</div>
+					<div className="flex flex-col gap-1">
+						<label className="text-sm">Job title (optional)</label>
+						<input type="text" name="jobTitle" placeholder="e.g., CEO" className="w-full border rounded-md px-3 py-2 bg-background" />
+					</div>
+					<div className="flex flex-col gap-1">
+						<label className="text-sm">Employee number (optional)</label>
+						<input type="text" name="employeeNumber" placeholder="Auto-generated if empty" className="w-full border rounded-md px-3 py-2 bg-background" />
+					</div>
+				</div>
+
 				<TermsField />
 			</AuthForm>
 		</>

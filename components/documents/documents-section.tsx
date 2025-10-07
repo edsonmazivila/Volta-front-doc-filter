@@ -1,11 +1,17 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { DocumentTable } from "@/components/documents/document-table";
-import type { DocumentListItem } from "@/lib/services/documents-server";
-import { DocumentsService } from "@/lib/services/documents";
+import type { DocumentListItem, Document } from "@/lib/services/documents";
+import {
+  uploadDocumentAction,
+  updateDocumentAction,
+  deleteDocumentAction,
+  approveDocumentAction,
+  rejectDocumentAction,
+  getDocument,
+} from "@/lib/services/documents";
 import { Button } from "@/components/ui";
 import { useToastHelpers } from "@/components/ui/toast";
-import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +28,6 @@ interface DocumentsSectionProps {
 }
 
 export function DocumentsSection({ items, initialTypes = [], initialEmployees = [] }: DocumentsSectionProps) {
-  const router = useRouter();
   const toast = useToastHelpers();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -42,7 +47,7 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
     { type: string; display_name: string }[]
   >(initialTypes);
   const [viewId, setViewId] = useState<string | null>(null);
-  const [viewData, setViewData] = useState<any | null>(null);
+  const [viewData, setViewData] = useState<Document | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState<{
     title: string;
@@ -53,6 +58,8 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [operationInProgress, setOperationInProgress] = useState<Record<string, boolean>>({});
 
   async function handleUpload() {
     if (!file || !employeeId || !docType) {
@@ -67,20 +74,27 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
     if (expiryDate) form.append("expiry_date", expiryDate);
     if (confidential) form.append("is_confidential", "true");
     form.append("file", file);
+
+    setUploading(true);
     try {
-      await DocumentsService.upload(form);
-      toast.success("Uploaded");
-      setOpen(false);
-      setFile(null);
-      setEmployeeId("");
-      setDocType("");
-      setTitle("");
-      setDescription("");
-      setExpiryDate("");
-      setConfidential(false);
-      router.refresh();
+      const result = await uploadDocumentAction(null, form);
+      if ('errors' in result) {
+        toast.error(result.errors._form?.[0] || "Upload failed");
+      } else {
+        toast.success("Uploaded");
+        setOpen(false);
+        setFile(null);
+        setEmployeeId("");
+        setDocType("");
+        setTitle("");
+        setDescription("");
+        setExpiryDate("");
+        setConfidential(false);
+      }
     } catch {
       toast.error("Upload failed");
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -157,49 +171,55 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
         items={filtered}
         onUpload={() => setOpen(true)}
         onApprove={async (id) => {
+          if (operationInProgress[id]) return; // Prevent double-click
+          setOperationInProgress(prev => ({ ...prev, [id]: true }));
           try {
-            await DocumentsService.approve(id);
+            await approveDocumentAction(id);
             toast.success("Approved");
-            router.refresh();
           } catch {
             toast.error("Failed to approve");
+          } finally {
+            setOperationInProgress(prev => ({ ...prev, [id]: false }));
           }
         }}
         onReject={(id) => {
+          if (operationInProgress[id]) return;
           setRejectId(id);
           setRejectReason("");
           setRejectOpen(true);
         }}
         onDelete={async (id) => {
+          if (operationInProgress[id]) return; // Prevent double-click
           if (!confirm("Delete document?")) return;
+          setOperationInProgress(prev => ({ ...prev, [id]: true }));
           try {
-            await DocumentsService.remove(id);
+            await deleteDocumentAction(id);
             toast.success("Deleted");
-            router.refresh();
           } catch {
             toast.error("Failed to delete");
+          } finally {
+            setOperationInProgress(prev => ({ ...prev, [id]: false }));
           }
         }}
         onView={async (id) => {
           setViewId(id);
           setViewData(null);
           try {
-            const data = await DocumentsService.get<any>(id);
-            setViewData((data as any)?.document || data);
+            const data = await getDocument(id);
+            setViewData(data);
           } catch {}
         }}
         onEdit={async (id) => {
           setEditId(id);
           try {
-            const data = await DocumentsService.get<any>(id);
-            const d = (data as any)?.document || data || {};
+            const data = await getDocument(id);
             setEditData({
-              title: d.title || "",
-              description: d.description || "",
-              expiry_date: d.expiry_date
-                ? String(d.expiry_date).slice(0, 10)
+              title: data?.title || "",
+              description: data?.description || "",
+              expiry_date: data?.expiry_date
+                ? String(data.expiry_date).slice(0, 10)
                 : "",
-              is_confidential: !!d.is_confidential,
+              is_confidential: !!data?.is_confidential,
             });
           } catch {
             setEditData({
@@ -297,7 +317,9 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleUpload}>Upload</Button>
+              <Button onClick={handleUpload} disabled={uploading}>
+                {uploading ? "Uploading..." : "Upload"}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -329,11 +351,11 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
                 </div>
                 <div>
                   <span className="text-muted-foreground">Type:</span>{" "}
-                  {viewData.document_type || viewData.type}
+                  {viewData.document_type}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Status:</span>{" "}
-                  {viewData.document_status || viewData.status}
+                  {viewData.document_status}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Uploaded:</span>{" "}
@@ -445,24 +467,32 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
                 </Button>
                 <Button
                   onClick={async () => {
-                    if (!editId || !editData) return;
+                    if (!editId || !editData || operationInProgress['edit']) return;
+                    setOperationInProgress(prev => ({ ...prev, edit: true }));
                     try {
-                      await DocumentsService.update(editId, {
-                        title: editData.title,
-                        description: editData.description,
-                        expiry_date: editData.expiry_date,
-                        is_confidential: editData.is_confidential,
-                      });
-                      toast.success("Updated");
-                      setEditId(null);
-                      setEditData(null);
-                      router.refresh();
+                      const form = new FormData();
+                      form.append("title", editData.title);
+                      form.append("description", editData.description);
+                      form.append("expiry_date", editData.expiry_date);
+                      form.append("is_confidential", String(editData.is_confidential));
+
+                      const result = await updateDocumentAction(editId, null, form);
+                      if ('errors' in result) {
+                        toast.error(result.errors._form?.[0] || "Failed to update");
+                      } else {
+                        toast.success("Updated");
+                        setEditId(null);
+                        setEditData(null);
+                      }
                     } catch {
                       toast.error("Failed to update");
+                    } finally {
+                      setOperationInProgress(prev => ({ ...prev, edit: false }));
                     }
                   }}
+                  disabled={operationInProgress['edit']}
                 >
-                  Save
+                  {operationInProgress['edit'] ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </div>
@@ -503,18 +533,28 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
             <Button
               variant="destructive"
               onClick={async () => {
-                if (!rejectId || !rejectReason.trim()) return;
+                if (!rejectId || !rejectReason.trim() || operationInProgress['reject']) return;
+                setOperationInProgress(prev => ({ ...prev, reject: true }));
                 try {
-                  await DocumentsService.reject(rejectId, rejectReason.trim());
-                  toast.success("Rejected");
-                  setRejectOpen(false);
-                  router.refresh();
+                  const form = new FormData();
+                  form.append("reason", rejectReason.trim());
+
+                  const result = await rejectDocumentAction(rejectId, null, form);
+                  if ('errors' in result) {
+                    toast.error(result.errors._form?.[0] || "Failed to reject");
+                  } else {
+                    toast.success("Rejected");
+                    setRejectOpen(false);
+                  }
                 } catch {
                   toast.error("Failed to reject");
+                } finally {
+                  setOperationInProgress(prev => ({ ...prev, reject: false }));
                 }
               }}
+              disabled={operationInProgress['reject']}
             >
-              Reject
+              {operationInProgress['reject'] ? 'Rejecting...' : 'Reject'}
             </Button>
           </div>
         </DialogContent>

@@ -4,9 +4,8 @@ import { AUTH_ENDPOINTS } from './utils'
 import { API_BASE_URL } from '@/lib/config'
 import { cookies } from 'next/headers'
 import { COOKIE_NAMES } from '@/lib/config'
-import { revalidatePath } from 'next/cache'
 
-type ActionResult = { errors: Record<string, string[]> } | { success: true }
+type ActionResult = { errors: Record<string, string[]> } | { success: true } | never
 
 export async function loginAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
 	const validatedFields = loginSchema.safeParse({
@@ -40,38 +39,44 @@ export async function loginAction(prevState: unknown, formData: FormData): Promi
 		cookieStore.set(COOKIE_NAMES.SESSION_TOKEN, sessionId, {
 			path: '/',
 			httpOnly: true,
-			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'strict', // Changed from 'lax' for better CSRF protection
+			secure: true, // Always secure - dev environments should use HTTPS or backend handles this
 			maxAge: 60 * 60 * 24
 		})
 	}
 
-	revalidatePath('/', 'layout')
-
-    return { success: true }
+	// Return success; client will handle redirect to force full page reload with new cookie
+	return { success: true }
 }
 
 export async function signupAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
-	const parsed = signupSchema.safeParse({
-		name: formData.get('name'),
-		email: formData.get('email'),
-		password: formData.get('password'),
-		confirmPassword: formData.get('confirmPassword'),
-		companyName: formData.get('companyName'),
-		termsAccepted: formData.get('termsAccepted') === 'on'
-	})
+    const parsed = signupSchema.safeParse({
+        companyName: formData.get('companyName'),
+        name: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        employmentType: formData.get('employmentType') || undefined,
+        hireDate: formData.get('hireDate') || undefined,
+        jobTitle: formData.get('jobTitle') || undefined,
+        employeeNumber: formData.get('employeeNumber') || undefined,
+        termsAccepted: formData.get('termsAccepted') === 'on'
+    })
 	if (!parsed.success) {
 		return { errors: parsed.error.flatten().fieldErrors }
 	}
 
-	const res = await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.SIGNUP}`, {
+    const res = await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.SIGNUP}`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
-			name: parsed.data.name,
-			email: parsed.data.email,
-			password: parsed.data.password,
-			companyName: parsed.data.companyName
+            company_name: parsed.data.companyName,
+            full_name: parsed.data.name,
+            email: parsed.data.email,
+            password: parsed.data.password,
+            employment_type: parsed.data.employmentType || undefined,
+            hire_date: parsed.data.hireDate || undefined,
+            job_title: parsed.data.jobTitle || undefined,
+            employee_number: parsed.data.employeeNumber || undefined,
 		}),
 		credentials: 'include'
 	})
@@ -132,5 +137,4 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
 
     return { success: true }
 }
-
 

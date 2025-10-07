@@ -1,70 +1,64 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/toast'
-
-export interface DepartmentFormData {
-	name: string
-	description: string
-	manager_id: string | null
-	is_active: boolean
-}
+import { createDepartmentAction, updateDepartmentAction, type Department } from '@/lib/services/departments'
 
 interface DepartmentFormProps {
-	initialData?: Partial<DepartmentFormData>
-	onSubmit: (data: DepartmentFormData) => Promise<void>
+	department?: Department
 	onCancel: () => void
+	onSuccess: () => void
 	managers?: Array<{ id: string; first_name: string; last_name: string }>
 }
 
-export function DepartmentForm({ initialData, onSubmit, onCancel, managers = [] }: DepartmentFormProps) {
-	const [formData, setFormData] = useState<DepartmentFormData>({
-		name: initialData?.name || '',
-		description: initialData?.description || '',
-		manager_id: initialData?.manager_id || null,
-		is_active: initialData?.is_active ?? true,
-	})
-	const [loading, setLoading] = useState(false)
+export function DepartmentForm({ department, onCancel, onSuccess, managers = [] }: DepartmentFormProps) {
 	const { showToast } = useToast()
+	const isEditing = !!department
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
+	const [createState, createAction, createPending] = useActionState(
+		createDepartmentAction,
+		null
+	)
 
-		if (!formData.name.trim()) {
+	const [updateState, updateAction, updatePending] = useActionState(
+		department ? updateDepartmentAction.bind(null, department.id) : createDepartmentAction,
+		null
+	)
+
+	const state = isEditing ? updateState : createState
+	const action = isEditing ? updateAction : createAction
+	const pending = isEditing ? updatePending : createPending
+
+	React.useEffect(() => {
+		if (state && 'success' in state && state.success) {
 			showToast({
-				type: 'error',
-				title: 'Validation Error',
-				message: 'Department name is required',
+				type: 'success',
+				message: isEditing ? 'Department updated successfully' : 'Department created successfully',
+				title: 'Success'
 			})
-			return
+			onSuccess()
 		}
-
-		try {
-			setLoading(true)
-			await onSubmit(formData)
-		} catch (error) {
-			console.error('Form submission error:', error)
-		} finally {
-			setLoading(false)
-		}
-	}
+	}, [state, isEditing, showToast, onSuccess])
 
 	return (
-		<form onSubmit={handleSubmit} className='space-y-4'>
+		<form action={action} className='space-y-4'>
 			<div>
 				<label htmlFor='name' className='block text-sm font-medium text-foreground mb-1'>
 					Department Name <span className='text-red-500'>*</span>
 				</label>
 				<Input
 					id='name'
+					name='name'
 					type='text'
-					value={formData.name}
-					onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+					defaultValue={department?.name}
 					placeholder='e.g. Engineering, Sales, HR'
 					required
 				/>
+				{state && 'errors' in state && state.errors?.name && (
+					<p className='text-sm text-red-600 mt-1'>{state.errors.name[0]}</p>
+				)}
 			</div>
 
 			<div>
@@ -73,12 +67,15 @@ export function DepartmentForm({ initialData, onSubmit, onCancel, managers = [] 
 				</label>
 				<textarea
 					id='description'
-					value={formData.description}
-					onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+					name='description'
+					defaultValue={department?.description}
 					placeholder='Brief description of the department'
 					rows={3}
 					className='w-full px-3 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring'
 				/>
+				{state && 'errors' in state && state.errors?.description && (
+					<p className='text-sm text-red-600 mt-1'>{state.errors.description[0]}</p>
+				)}
 			</div>
 
 			<div>
@@ -87,8 +84,8 @@ export function DepartmentForm({ initialData, onSubmit, onCancel, managers = [] 
 				</label>
 				<select
 					id='manager_id'
-					value={formData.manager_id || ''}
-					onChange={(e) => setFormData({ ...formData, manager_id: e.target.value || null })}
+					name='manager_id'
+					defaultValue={department?.manager_id || ''}
 					className='w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring'
 				>
 					<option value=''>No manager assigned</option>
@@ -103,9 +100,10 @@ export function DepartmentForm({ initialData, onSubmit, onCancel, managers = [] 
 			<div className='flex items-center gap-2'>
 				<input
 					id='is_active'
+					name='is_active'
 					type='checkbox'
-					checked={formData.is_active}
-					onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+					defaultChecked={department?.is_active ?? true}
+					value='true'
 					className='w-4 h-4 text-primary border-input rounded focus:ring-ring'
 				/>
 				<label htmlFor='is_active' className='text-sm font-medium text-foreground'>
@@ -113,12 +111,18 @@ export function DepartmentForm({ initialData, onSubmit, onCancel, managers = [] 
 				</label>
 			</div>
 
+			{state && 'errors' in state && state.errors?._form && (
+				<div className='p-3 rounded-md bg-red-50 dark:bg-red-900/20'>
+					<p className='text-sm text-red-600 dark:text-red-400'>{state.errors._form[0]}</p>
+				</div>
+			)}
+
 			<div className='flex justify-end gap-3 pt-4'>
-				<Button type='button' variant='outline' onClick={onCancel} disabled={loading}>
+				<Button type='button' variant='outline' onClick={onCancel} disabled={pending}>
 					Cancel
 				</Button>
-				<Button type='submit' disabled={loading}>
-					{loading ? 'Saving...' : initialData ? 'Update Department' : 'Create Department'}
+				<Button type='submit' disabled={pending}>
+					{pending ? 'Saving...' : isEditing ? 'Update Department' : 'Create Department'}
 				</Button>
 			</div>
 		</form>

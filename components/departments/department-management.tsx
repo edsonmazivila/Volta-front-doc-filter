@@ -1,58 +1,26 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { Plus, Edit, Trash2, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { DepartmentsService } from '@/lib/services/departments'
-import { DepartmentForm, DepartmentFormData } from './department-form'
+import { deleteDepartmentAction, toggleDepartmentStatusAction, type Department, type DepartmentStats } from '@/lib/services/departments'
+import { DepartmentForm } from './department-form'
 import { useSession } from '@/components/auth/session-context'
 import { hasAnyRole } from '@/lib/auth/utils'
 
-export interface Department {
-	id: string
-	name: string
-	description: string
-	manager_id: string | null
-	manager: {
-		id: string
-		first_name: string
-		last_name: string
-		email: string
-	} | null
-	is_active: boolean
-	created_at: string
-	updated_at: string
-}
-
-export interface DepartmentStats {
-	totalDepartments: number
-	activeDepartments: number
-	inactiveDepartments: number
-	departmentsWithManager: number
-}
-
 interface DepartmentManagementProps {
-	initialDepartments?: Department[]
-	initialStats?: DepartmentStats
-	managers?: Array<{ id: string; first_name: string; last_name: string }>
+	departments: Department[]
+	stats: DepartmentStats
+	managers: Array<{ id: string; first_name: string; last_name: string }>
 }
 
-export function DepartmentManagement({ initialDepartments, initialStats, managers = [] }: DepartmentManagementProps) {
+export function DepartmentManagement({ departments, stats, managers }: DepartmentManagementProps) {
 	const { user } = useSession()
-	const [departments, setDepartments] = useState<Department[]>(initialDepartments || [])
-	const [stats, setStats] = useState<DepartmentStats>(initialStats || {
-		totalDepartments: 0,
-		activeDepartments: 0,
-		inactiveDepartments: 0,
-		departmentsWithManager: 0
-	})
-	const [loading, setLoading] = useState(!initialDepartments)
 	const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
 	const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null)
-
 	const { showToast } = useToast()
 	const [createOpen, setCreateOpen] = useState(false)
 	const [editOpen, setEditOpen] = useState(false)
@@ -60,78 +28,11 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 
 	const canManage = hasAnyRole(user, ['system_admin', 'hr_manager'])
 
-	const loadDepartments = useCallback(async () => {
-		try {
-			setLoading(true)
-			const data = await DepartmentsService.list<Department>()
-			setDepartments(data)
-		} catch (error) {
-			console.error('Error loading departments:', error)
-			showToast({
-				type: 'error',
-				message: 'Failed to load departments',
-				title: 'Error'
-			})
-		} finally {
-			setLoading(false)
-		}
-	}, [showToast])
-
-	const loadStats = useCallback(async () => {
-		try {
-			const data = await DepartmentsService.stats<DepartmentStats>()
-			setStats(data)
-		} catch (error) {
-			console.error('Error loading stats:', error)
-		}
-	}, [])
-
-	const handleCreate = async (data: DepartmentFormData) => {
-		try {
-			await DepartmentsService.create(data)
-			showToast({
-				type: 'success',
-				message: 'Department created successfully',
-				title: 'Success'
-			})
-			setCreateOpen(false)
-			loadDepartments()
-			loadStats()
-		} catch (error) {
-			showToast({
-				type: 'error',
-				message: 'Failed to create department',
-				title: 'Error'
-			})
-		}
-	}
-
-	const handleUpdate = async (data: DepartmentFormData) => {
-		if (!selectedDepartment) return
-		try {
-			await DepartmentsService.update(selectedDepartment.id, data)
-			showToast({
-				type: 'success',
-				message: 'Department updated successfully',
-				title: 'Success'
-			})
-			setEditOpen(false)
-			setSelectedDepartment(null)
-			loadDepartments()
-			loadStats()
-		} catch (error) {
-			showToast({
-				type: 'error',
-				message: 'Failed to update department',
-				title: 'Error'
-			})
-		}
-	}
-
 	const handleDelete = async () => {
 		if (!departmentToDelete) return
+
 		try {
-			await DepartmentsService.remove(departmentToDelete.id)
+			await deleteDepartmentAction(departmentToDelete.id)
 			showToast({
 				type: 'success',
 				message: 'Department deleted successfully',
@@ -139,12 +40,28 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 			})
 			setDeleteOpen(false)
 			setDepartmentToDelete(null)
-			loadDepartments()
-			loadStats()
-		} catch (error) {
+		} catch (error: unknown) {
 			showToast({
 				type: 'error',
-				message: 'Failed to delete department',
+				message: error instanceof Error ? error.message : 'Failed to delete department',
+				title: 'Error'
+			})
+		}
+	}
+
+	const handleToggleStatus = async (deptId: string, currentStatus: boolean) => {
+		try {
+			const newStatus = !currentStatus
+			await toggleDepartmentStatusAction(deptId, newStatus)
+			showToast({
+				type: 'success',
+				message: newStatus ? 'Department activated' : 'Department deactivated',
+				title: 'Success'
+			})
+		} catch (error: unknown) {
+			showToast({
+				type: 'error',
+				message: error instanceof Error ? error.message : 'Failed to update department status',
 				title: 'Error'
 			})
 		}
@@ -184,11 +101,7 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 			</div>
 
 			{/* Table */}
-			{loading ? (
-				<div className='text-center py-8'>
-					<div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto'></div>
-				</div>
-			) : departments.length === 0 ? (
+			{departments.length === 0 ? (
 				<div className='text-center py-12 border border-border rounded-lg bg-card'>
 					<Building2 className='mx-auto h-12 w-12 text-muted-foreground' />
 					<h3 className='mt-2 text-sm font-medium text-foreground'>No departments</h3>
@@ -251,11 +164,12 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 									</td>
 									<td className='px-6 py-4 whitespace-nowrap'>
 										<span
-											className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+											className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer ${
 												department.is_active
 													? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
 													: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
 											}`}
+											onClick={canManage ? () => handleToggleStatus(department.id, department.is_active) : undefined}
 										>
 											{department.is_active ? 'Active' : 'Inactive'}
 										</span>
@@ -298,8 +212,8 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 						<DialogTitle>Create Department</DialogTitle>
 					</DialogHeader>
 					<DepartmentForm
-						onSubmit={handleCreate}
 						onCancel={() => setCreateOpen(false)}
+						onSuccess={() => setCreateOpen(false)}
 						managers={managers}
 					/>
 				</DialogContent>
@@ -313,9 +227,12 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 					</DialogHeader>
 					{selectedDepartment && (
 						<DepartmentForm
-							initialData={selectedDepartment}
-							onSubmit={handleUpdate}
+							department={selectedDepartment}
 							onCancel={() => {
+								setEditOpen(false)
+								setSelectedDepartment(null)
+							}}
+							onSuccess={() => {
 								setEditOpen(false)
 								setSelectedDepartment(null)
 							}}
@@ -331,7 +248,7 @@ export function DepartmentManagement({ initialDepartments, initialStats, manager
 					<AlertDialogHeader>
 						<AlertDialogTitle>Are you sure?</AlertDialogTitle>
 						<AlertDialogDescription>
-							This will permanently delete the department "{departmentToDelete?.name}". This action cannot be undone.
+							This will permanently delete the department &quot;{departmentToDelete?.name}&quot;. This action cannot be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

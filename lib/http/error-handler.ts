@@ -23,7 +23,7 @@ export class ApiError extends Error {
 }
 
 export function handleServiceError(error: unknown, context: string, defaultMessage: string = 'An unknown error occurred'): never {
-	console.error(`Error in ${context}:`, error)
+	// Error logging disabled for production
 
 	if (error instanceof ApiError) {
 		throw error

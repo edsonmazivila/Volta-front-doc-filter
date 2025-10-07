@@ -2,8 +2,15 @@
 import { useState, useTransition } from 'react'
 import { TimesheetTable } from '@/components/timesheets/timesheet-table'
 import { TimesheetFormDialog, type TimesheetFormValues } from '@/components/timesheets/timesheet-form-dialog'
-import { TimesheetsService } from '@/lib/services/timesheets'
-import type { TimesheetListItem } from '@/lib/services/timesheets-server'
+import type { TimesheetListItem } from '@/lib/services/timesheets'
+import {
+  createTimesheetAction,
+  updateTimesheetAction,
+  submitTimesheetAction,
+  approveTimesheetAction,
+  rejectTimesheetAction,
+  deleteTimesheetAction,
+} from '@/lib/services/timesheets'
 import { Button } from '@/components/ui'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
@@ -31,35 +38,37 @@ export function TimesheetsSection({ items }: TimesheetsSectionProps) {
 				total_hours: values.totalHours,
 				notes: values.notes,
 			}
-			if (editId) {
-				await TimesheetsService.update(editId, payload)
+      if (editId) {
+        const res = await updateTimesheetAction(editId, payload)
+        if ('errors' in res && res.errors?._form?.length) throw new Error(res.errors._form[0])
 				toast.success('Timesheet updated')
 			} else {
-				await TimesheetsService.create(payload)
+        const res = await createTimesheetAction(payload)
+        if ('errors' in res && res.errors?._form?.length) throw new Error(res.errors._form[0])
 				toast.success('Timesheet created')
 			}
 			startTransition(() => router.refresh())
-		} catch (e) {
+		} catch {
 			toast.error('Failed to save timesheet')
 		}
 	}
 
 async function handleSubmitTimesheet(id: string) {
-	try {
-		await TimesheetsService.submit(id)
+  try {
+    await submitTimesheetAction(id)
 		toast.success('Timesheet submitted')
 		startTransition(() => router.refresh())
-	} catch (e) {
+	} catch {
 		toast.error('Failed to submit timesheet')
 	}
 }
 
 async function handleApprove(id: string) {
-	try {
-		await TimesheetsService.approve(id)
+  try {
+    await approveTimesheetAction(id)
 		toast.success('Timesheet approved')
 		startTransition(() => router.refresh())
-	} catch (e) {
+	} catch {
 		toast.error('Failed to approve timesheet')
 	}
 }
@@ -87,7 +96,7 @@ return (
 				onDelete={(id) => {
 					// Simple confirm; can be replaced by a styled dialog later
 					if (!confirm('Delete this timesheet?')) return
-					TimesheetsService.remove(id)
+          deleteTimesheetAction(id)
 						.then(() => { toast.success('Timesheet deleted'); startTransition(() => router.refresh()) })
 						.catch(() => toast.error('Failed to delete timesheet'))
 				}}
@@ -124,13 +133,13 @@ return (
 							variant='destructive'
 							onClick={async () => {
 								if (!rejectId) return
-								try {
-									await TimesheetsService.reject(rejectId, rejectReason || undefined)
+                try {
+                    await rejectTimesheetAction(rejectId, rejectReason || undefined)
 									toast.success('Timesheet rejected')
 									setRejectOpen(false)
 									startTransition(() => router.refresh())
-								} catch (e) {
-									toast.error('Failed to reject timesheet')
+					} catch {
+						toast.error('Failed to reject timesheet')
 								}
 							}}
 						>

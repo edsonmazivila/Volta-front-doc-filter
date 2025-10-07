@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import type { ReportsListItem, PayrollChartData, EmployeeMetricsData, TaxTrendData } from '@/lib/services/reports-server'
+import type { ReportsListItem, PayrollChartData, EmployeeMetricsData, TaxTrendData } from '@/lib/services/reports'
 import { Button } from '@/components/ui'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { PayrollLineChart, DoughnutChart, StackedBarChart } from './charts'

@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import type { LeaveRequestItem } from '@/lib/services/leaves-server'
+import type { LeaveRequestItem } from '@/lib/services/leaves'
 import { Button, Skeleton } from '@/components/ui'
 
 interface LeaveTableProps {

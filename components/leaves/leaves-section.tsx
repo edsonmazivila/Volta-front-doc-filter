@@ -1,10 +1,19 @@
 'use client'
 import { useMemo, useState } from 'react'
-import type { LeaveRequestItem, LeaveBalanceItem } from '@/lib/services/leaves-server'
+import type { LeaveRequestItem, LeaveBalanceItem, TeamBalanceItem } from '@/lib/services/leaves'
 import { LeaveTable } from '@/components/leaves/leave-table'
 import { PendingApprovalsTable } from '@/components/leaves/pending-approvals-table'
-import { LeavesService } from '@/lib/services/leaves'
+import { TeamBalancesTable } from '@/components/leaves/team-balances-table'
+import {
+  createLeaveRequestAction,
+  submitLeaveRequestAction,
+  cancelLeaveRequestAction,
+  approveL1Action,
+  approveFinalAction,
+  rejectLeaveRequestAction,
+} from '@/lib/services/leaves'
 import { Button } from '@/components/ui'
+import { Calendar } from 'lucide-react'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -15,9 +24,10 @@ interface LeavesSectionProps {
   requests: LeaveRequestItem[]
   balances: LeaveBalanceItem[]
   pending: LeaveRequestItem[]
+  teamBalances: TeamBalanceItem[]
 }
 
-export function LeavesSection({ requests, balances, pending }: LeavesSectionProps) {
+export function LeavesSection({ requests, balances, pending, teamBalances }: LeavesSectionProps) {
   const router = useRouter()
   const toast = useToastHelpers()
   const [open, setOpen] = useState(false)
@@ -32,6 +42,9 @@ export function LeavesSection({ requests, balances, pending }: LeavesSectionProp
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rejectId, setRejectId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [operationInProgress, setOperationInProgress] = useState<Record<string, boolean>>({})
+  const [viewOpen, setViewOpen] = useState(false)
+  const [viewItem, setViewItem] = useState<LeaveRequestItem | null>(null)
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -49,7 +62,18 @@ export function LeavesSection({ requests, balances, pending }: LeavesSectionProp
       return
     }
     try {
-      await LeavesService.create({ leave_type: leaveType, start_date: `${startDate}T00:00:00Z`, end_date: `${endDate}T23:59:59Z`, reason, is_half_day: isHalfDay })
+      const form = new FormData()
+      form.append('leave_type', leaveType)
+      form.append('start_date', `${startDate}T00:00:00Z`)
+      form.append('end_date', `${endDate}T23:59:59Z`)
+      form.append('reason', reason)
+      form.append('is_half_day', isHalfDay ? 'true' : 'false')
+
+      const result = await createLeaveRequestAction(null, form)
+      if (result.errors) {
+        toast.error(result.errors._form?.[0] || 'Failed to create request')
+        return
+      }
       toast.success('Leave request created')
       setOpen(false)
       setLeaveType('vacation'); setStartDate(''); setEndDate(''); setReason(''); setIsHalfDay(false)
@@ -67,13 +91,35 @@ export function LeavesSection({ requests, balances, pending }: LeavesSectionProp
         </TabsList>
         <TabsContent value='my'>
           <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-        {balances.map(b => (
-          <div key={b.leave_type} className='p-3 border rounded balance-card'>
-            <div className='text-xs text-muted-foreground capitalize'>{b.leave_type}</div>
-            <div className='text-lg font-semibold'>{(b.remaining_days ?? 0).toFixed(1)}</div>
-            {b.pending_days ? <div className='text-xs text-muted-foreground'>Pending: {b.pending_days}</div> : null}
-          </div>
-        ))}
+            {balances.map(b => (
+              <div
+                key={b.leave_type}
+                className='relative overflow-hidden rounded-xl border bg-gradient-to-br from-background to-muted/40 p-4 hover:shadow-md transition-colors mb-4'
+              >
+                <div className='absolute right-0 top-0 h-20 w-20 rounded-bl-[48px] bg-primary/5' />
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='flex items-center gap-2'>
+                    <div className='h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center'>
+                      <Calendar className='h-4 w-4' />
+                    </div>
+                    <span className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                      {b.leave_type}
+                    </span>
+                  </div>
+                </div>
+                <div className='mt-3 flex items-baseline gap-2'>
+                  <span className='text-2xl font-semibold'>
+                    {(b.remaining_days ?? 0).toFixed(1)}
+                  </span>
+                  <span className='text-xs text-muted-foreground'>days left</span>
+                </div>
+                {b.pending_days ? (
+                  <div className='mt-1 text-xs text-muted-foreground'>
+                    Pending: <span className='font-medium'>{b.pending_days}</span>
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </div>
 
           <div className='flex items-center justify-between gap-3 flex-wrap mb-4'>
@@ -95,30 +141,97 @@ export function LeavesSection({ requests, balances, pending }: LeavesSectionProp
           <LeaveTable
         items={filtered}
         onNew={() => setOpen(true)}
-        onView={() => {}}
-        onSubmit={async (id) => { try { await LeavesService.submit(id); toast.success('Submitted'); router.refresh() } catch { toast.error('Failed to submit') } }}
-        onCancel={async (id) => { const reason = prompt('Cancel reason (optional):') || undefined; try { await LeavesService.cancel(id, reason); toast.success('Cancelled'); router.refresh() } catch { toast.error('Failed to cancel') } }}
+        onView={(id) => { const it = requests.find(r => r.id === id) || null; setViewItem(it); setViewOpen(!!it) }}
+        onSubmit={async (id) => {
+          if (operationInProgress[id]) return;
+          setOperationInProgress(prev => ({ ...prev, [id]: true }));
+          try {
+            await submitLeaveRequestAction(id);
+            toast.success('Submitted');
+            router.refresh();
+          } catch {
+            toast.error('Failed to submit');
+          } finally {
+            setOperationInProgress(prev => ({ ...prev, [id]: false }));
+          }
+        }}
+        onCancel={async (id) => {
+          if (operationInProgress[id]) return;
+          const reason = prompt('Cancel reason (optional):') || undefined;
+          setOperationInProgress(prev => ({ ...prev, [id]: true }));
+          try {
+            await cancelLeaveRequestAction(id, reason);
+            toast.success('Cancelled');
+            router.refresh();
+          } catch {
+            toast.error('Failed to cancel');
+          } finally {
+            setOperationInProgress(prev => ({ ...prev, [id]: false }));
+          }
+        }}
       />
+        
+        <Dialog open={viewOpen} onOpenChange={(v) => { if (!v) setViewItem(null); setViewOpen(v) }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Leave Request Details</DialogTitle>
+            </DialogHeader>
+            {viewItem ? (
+              <div className='grid gap-2 text-sm'>
+                <div><span className='text-muted-foreground'>Status:</span> <span className='capitalize'>{viewItem.status.toLowerCase()}</span></div>
+                <div><span className='text-muted-foreground'>Type:</span> <span className='capitalize'>{viewItem.leave_type}</span></div>
+                <div><span className='text-muted-foreground'>Dates:</span> {viewItem.start_date?.slice(0,10)} - {viewItem.end_date?.slice(0,10)}</div>
+                <div><span className='text-muted-foreground'>Days:</span> {viewItem.total_days}{viewItem.is_half_day ? ' (Half Day)' : ''}</div>
+                <div><span className='text-muted-foreground'>Reason:</span> {viewItem.reason || '-'}</div>
+                <div><span className='text-muted-foreground'>Created:</span> {viewItem.created_at?.slice(0,10) || '-'}</div>
+              </div>
+            ) : null}
+          </DialogContent>
+        </Dialog>
         </TabsContent>
 
         <TabsContent value='pending'>
           <PendingApprovalsTable
             items={pending}
-            onApproveL1={async (id) => { try { await LeavesService.approveL1(id); toast.success('Approved L1'); router.refresh() } catch { toast.error('Failed') } }}
-            onApproveFinal={async (id) => { try { await LeavesService.approveFinal(id); toast.success('Approved'); router.refresh() } catch { toast.error('Failed') } }}
-            onReject={(id) => { setRejectId(id); setRejectReason(''); setRejectOpen(true) }}
+            onApproveL1={async (id) => {
+              if (operationInProgress[id]) return;
+              setOperationInProgress(prev => ({ ...prev, [id]: true }));
+              try {
+                await approveL1Action(id);
+                toast.success('Approved L1');
+                router.refresh();
+              } catch {
+                toast.error('Failed');
+              } finally {
+                setOperationInProgress(prev => ({ ...prev, [id]: false }));
+              }
+            }}
+            onApproveFinal={async (id) => {
+              if (operationInProgress[id]) return;
+              setOperationInProgress(prev => ({ ...prev, [id]: true }));
+              try {
+                await approveFinalAction(id);
+                toast.success('Approved');
+                router.refresh();
+              } catch {
+                toast.error('Failed');
+              } finally {
+                setOperationInProgress(prev => ({ ...prev, [id]: false }));
+              }
+            }}
+            onReject={(id) => {
+              if (operationInProgress[id]) return;
+              setRejectId(id);
+              setRejectReason('');
+              setRejectOpen(true);
+            }}
           />
         </TabsContent>
 
         <TabsContent value='balances'>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-            {balances.map(b => (
-              <div key={b.leave_type} className='p-3 border rounded balance-card'>
-                <div className='text-xs text-muted-foreground capitalize'>{b.leave_type}</div>
-                <div className='text-lg font-semibold'>{(b.remaining_days ?? 0).toFixed(1)}</div>
-                {b.pending_days ? <div className='text-xs text-muted-foreground'>Pending: {b.pending_days}</div> : null}
-              </div>
-            ))}
+          <div className='space-y-4'>
+            <h3 className='text-sm font-medium text-muted-foreground'>Team Leave Balances</h3>
+            <TeamBalancesTable teamBalances={teamBalances} />
           </div>
         </TabsContent>
       </Tabs>
@@ -171,7 +284,26 @@ export function LeavesSection({ requests, balances, pending }: LeavesSectionProp
           </div>
           <div className='flex justify-end gap-2 pt-2'>
             <Button variant='secondary' onClick={() => setRejectOpen(false)}>Cancel</Button>
-            <Button variant='destructive' onClick={async () => { if (!rejectId || !rejectReason.trim()) return; try { await LeavesService.reject(rejectId, rejectReason.trim()); toast.success('Rejected'); setRejectOpen(false); router.refresh() } catch { toast.error('Failed to reject') } }}>Reject</Button>
+            <Button
+              variant='destructive'
+              disabled={operationInProgress['reject']}
+              onClick={async () => {
+                if (!rejectId || !rejectReason.trim() || operationInProgress['reject']) return;
+                setOperationInProgress(prev => ({ ...prev, reject: true }));
+                try {
+                  await rejectLeaveRequestAction(rejectId, rejectReason.trim());
+                  toast.success('Rejected');
+                  setRejectOpen(false);
+                  router.refresh();
+                } catch {
+                  toast.error('Failed to reject');
+                } finally {
+                  setOperationInProgress(prev => ({ ...prev, reject: false }));
+                }
+              }}
+            >
+              {operationInProgress['reject'] ? 'Rejecting...' : 'Reject'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

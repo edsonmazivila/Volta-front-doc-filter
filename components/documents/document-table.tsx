@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import type { DocumentListItem } from '@/lib/services/documents-server'
+import type { DocumentListItem } from '@/lib/services/documents'
 import { Button, Skeleton } from '@/components/ui'
 import { format } from 'date-fns'
 

@@ -68,19 +68,13 @@ export class ApiClient {
 		const safe = { ...headers }
 		if (safe['Authorization']) safe['Authorization'] = 'Bearer [REDACTED]'
 		if (safe['X-CSRF-Token']) safe['X-CSRF-Token'] = '[REDACTED]'
-		console.group(`API Request: ${method} ${url}`)
-		console.log('Headers:', safe)
-		if (body) console.log('Body:', typeof body === 'object' ? this.redactSensitiveInfo(body) : body)
-		console.groupEnd()
+		// Logging disabled for production
 	}
 
 	private logResponse(method: string, url: string, status: number, data: unknown, start: number): void {
 		if (!this.enableLogging) return
 		const duration = Date.now() - start
-		console.group(`API Response: ${method} ${url} (${status}) - ${duration}ms`)
-		console.log('Status:', status)
-		console.log('Data:', typeof data === 'object' ? this.redactSensitiveInfo(data) : data)
-		console.groupEnd()
+		// Logging disabled for production
 	}
 
 	private async doFetch(method: string, endpoint: string, body?: unknown, _token?: string, config?: ApiRequestConfig): Promise<Response> {
@@ -123,10 +117,7 @@ export class ApiClient {
 			}
 			const text = await response.text()
 			if (this.enableLogging && !config?.disableLogging) {
-				console.group(`API Error: ${method} ${url} (${response.status})`)
-				console.error('Status:', response.status)
-				console.error('Response:', text)
-				console.groupEnd()
+				// Error logging disabled for production
 			}
 			try {
 				if (text.trim().startsWith('{')) {

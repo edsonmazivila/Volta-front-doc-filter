@@ -2,10 +2,11 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { Button } from '@/components/ui'
-import { requireUser } from '@/lib/auth/dal'
+import { requireRole } from '@/lib/rbac/server'
 
 export default async function SettingsPage() {
-  await requireUser()
+  // Only system admins can access settings
+  await requireRole(['system_admin'])
   return (
     <div className='min-h-dvh flex app-background'>
       <Sidebar />

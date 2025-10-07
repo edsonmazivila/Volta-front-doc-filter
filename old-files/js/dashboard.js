@@ -571,7 +571,7 @@ document.addEventListener('htmx:afterRequest', function(event) {
 });
 
 // Global utility functions
-window.JechPayDashboard = {
+window.NexuPayrollDashboard = {
     showToast: showToast,
     loadStats: loadDashboardStats,
     updateStatCard: updateStatCard

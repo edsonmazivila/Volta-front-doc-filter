@@ -1,9 +1,9 @@
-// Timesheets JavaScript for JECH Pay
+// Timesheets JavaScript for NEXUpayroll
 (function(){
 	if (window.__timesheetsInitialized) return;
 	window.__timesheetsInitialized = true;
 	document.addEventListener('DOMContentLoaded', function() {
-		console.log('JECH Pay Timesheets - Ready');
+		console.log('NEXUpayroll Timesheets - Ready');
 		initializeTimesheetsPage();
 	}, { once: true });
 

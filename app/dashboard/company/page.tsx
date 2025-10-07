@@ -1,32 +1,33 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
-import { requireUser } from '@/lib/auth/dal'
+import { requireRole } from '@/lib/rbac/server'
 import { CompanyProfile as CompanyProfileComponent } from '@/components/company/company-profile'
-import { fetchCompany, fetchLeavePoliciesServer, fetchPaySchedulesServer } from '@/lib/services/company-server'
+import { getCompany, getLeavePolicies, getPaySchedules } from '@/lib/services/company'
 
 export default async function CompanyPage() {
-  await requireUser()
+  // Only HR managers and admins can manage company settings
+  await requireRole(['hr_manager', 'system_admin'])
   const [company, paySchedules, leavePolicies] = await Promise.all([
-    fetchCompany(),
-    fetchPaySchedulesServer(),
-    fetchLeavePoliciesServer(),
+    getCompany(),
+    getPaySchedules(),
+    getLeavePolicies(),
   ])
   const safeCompany = company ?? {
     id: '',
     name: '',
-    registration_number: '',
-    tax_number: '',
+    legal_name: '',
+    tax_id: '',
+    email: '',
+    phone: '',
+    website: '',
     address_line1: '',
     address_line2: '',
     city: '',
     state: '',
     postal_code: '',
     country: '',
-    bank_name: '',
-    bank_account: '',
-    bank_iban: '',
-    bank_swift: '',
+    logo: '',
   }
   return (
     <div className='min-h-dvh flex app-background'>

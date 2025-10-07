@@ -57,7 +57,7 @@ export function EditEmployeeDialog({
 				<DialogHeader>
 					<DialogTitle>Edit Employee</DialogTitle>
 					<DialogDescription>
-						Update employee information. Click save when you're done.
+						Update employee information. Click save when you&apos;re done.
 					</DialogDescription>
 				</DialogHeader>
 				

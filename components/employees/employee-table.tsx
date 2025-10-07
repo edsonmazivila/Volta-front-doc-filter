@@ -3,7 +3,9 @@ import { useState, useMemo } from "react";
 import {
   type Employee,
   type EmployeeListParams,
-  EmployeesService,
+  createEmployeeAction,
+  updateEmployeeAction,
+  deleteEmployeeAction,
 } from "@/lib/services/employees";
 import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/search-input";
@@ -42,11 +44,18 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const handleAdd = async (data: Partial<Employee>) => {
     setIsSubmitting(true);
     try {
-      await EmployeesService.create(data);
+      const form = new FormData();
+      if (data.first_name) form.append("first_name", String(data.first_name));
+      if (data.last_name) form.append("last_name", String(data.last_name));
+      if (data.email) form.append("email", String(data.email));
+      if (data.department) form.append("department", String(data.department));
+      if (typeof data.is_active === "boolean") form.append("is_active", data.is_active ? "true" : "false");
+      const res = await createEmployeeAction(null, form);
+      if ("errors" in res) throw new Error("validation");
       showToast({ type: "success", message: "Employee created successfully" });
       setShowAddDialog(false);
       router.refresh();
-    } catch (error) {
+    } catch {
       showToast({ type: "error", message: "Failed to create employee" });
     } finally {
       setIsSubmitting(false);
@@ -56,11 +65,18 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const handleEdit = async (employee: Employee, updates: Partial<Employee>) => {
     setIsSubmitting(true);
     try {
-      await EmployeesService.update(employee.id, updates);
+      const form = new FormData();
+      if (typeof updates.first_name !== "undefined") form.append("first_name", String(updates.first_name ?? ""));
+      if (typeof updates.last_name !== "undefined") form.append("last_name", String(updates.last_name ?? ""));
+      if (typeof updates.email !== "undefined") form.append("email", String(updates.email ?? ""));
+      if (typeof updates.department !== "undefined") form.append("department", String(updates.department ?? ""));
+      if (typeof updates.is_active !== "undefined") form.append("is_active", updates.is_active ? "true" : "false");
+      const res = await updateEmployeeAction(employee.id, null, form);
+      if ("errors" in res) throw new Error("validation");
       showToast({ type: "success", message: "Employee updated successfully" });
       setEditingEmployee(null);
       router.refresh();
-    } catch (error) {
+    } catch {
       showToast({ type: "error", message: "Failed to update employee" });
     } finally {
       setIsSubmitting(false);
@@ -70,11 +86,11 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const handleDelete = async (employee: Employee) => {
     setIsSubmitting(true);
     try {
-      await EmployeesService.remove(employee.id);
+      await deleteEmployeeAction(employee.id);
       showToast({ type: "success", message: "Employee deleted successfully" });
       setDeletingEmployee(null);
       router.refresh();
-    } catch (error) {
+    } catch {
       showToast({ type: "error", message: "Failed to delete employee" });
     } finally {
       setIsSubmitting(false);
@@ -84,18 +100,40 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const handleBulkDelete = async () => {
     setIsSubmitting(true);
     try {
-      await Promise.all(
-        Array.from(selectedIds).map((id) => EmployeesService.remove(id))
+      // Use Promise.allSettled to handle partial failures gracefully
+      const results = await Promise.allSettled(
+        Array.from(selectedIds).map((id) => deleteEmployeeAction(id))
       );
-      showToast({
-        type: "success",
-        message: `Deleted ${selectedIds.size} employees`,
-      });
+
+      const succeeded = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      // Clear selection and close dialog regardless of outcome
       setSelectedIds(new Set());
       setShowBulkDelete(false);
       router.refresh();
-    } catch (error) {
-      showToast({ type: "error", message: "Failed to delete some employees" });
+
+      // Provide detailed feedback based on results
+      if (failed === 0) {
+        showToast({
+          type: "success",
+          message: `Successfully deleted ${succeeded} employee${succeeded > 1 ? "s" : ""}`,
+        });
+      } else if (succeeded === 0) {
+        showToast({
+          type: "error",
+          message: `Failed to delete all ${failed} employees. Please try again.`,
+        });
+      } else {
+        showToast({
+          type: "warning",
+          message: `Deleted ${succeeded} employee${succeeded > 1 ? "s" : ""}, but ${failed} failed. Please review and retry.`,
+        });
+      }
+    } catch {
+      showToast({ type: "error", message: "An unexpected error occurred" });
+      setSelectedIds(new Set());
+      setShowBulkDelete(false);
     } finally {
       setIsSubmitting(false);
     }

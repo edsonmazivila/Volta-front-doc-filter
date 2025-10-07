@@ -1,45 +1,447 @@
-import { apiClient } from '@/lib/http/api-client'
-import { handleServiceError } from '@/lib/http/error-handler'
+'use server'
+import { cache } from 'react'
+import { revalidateEntityMutation } from '@/lib/cache-utils'
+import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
+import { z } from 'zod'
 
-export class CompanyService {
-	static async update(payload: Record<string, unknown>): Promise<void> {
-		try {
-			await apiClient.put(`${API_BASE_URL}/api/company`, payload)
-		} catch (error) {
-			return handleServiceError(error, 'CompanyService.update', 'Failed to update company')
-		}
-	}
+// Types
+export interface CompanyProfile {
+  id: string
+  name: string
+  legal_name?: string
+  tax_id?: string
+  email?: string
+  phone?: string
+  website?: string
+  address_line1?: string
+  address_line2?: string
+  city?: string
+  state?: string
+  postal_code?: string
+  country?: string
+  logo?: string
 }
 
-export class PaySchedulesService {
-	static async create(payload: Record<string, unknown>): Promise<void> {
-		try { await apiClient.post(`${API_BASE_URL}/api/pay-schedules`, payload) }
-		catch (error) { return handleServiceError(error, 'PaySchedulesService.create', 'Failed to create pay schedule') }
-	}
-    static async update(id: string, payload: Record<string, unknown>): Promise<void> {
-        try { await apiClient.put(`${API_BASE_URL}/api/pay-schedules/${id}`, payload) }
-        catch (error) { return handleServiceError(error, 'PaySchedulesService.update', 'Failed to update pay schedule') }
-    }
-    static async remove(id: string): Promise<void> {
-        try { await apiClient.delete(`${API_BASE_URL}/api/pay-schedules/${id}`) }
-        catch (error) { return handleServiceError(error, 'PaySchedulesService.remove', 'Failed to delete pay schedule') }
-    }
+export interface PaySchedule {
+  id: string
+  name: string
+  frequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly'
+  start_date: string
+  is_active: boolean
 }
 
-export class LeavePoliciesService {
-	static async create(payload: Record<string, unknown>): Promise<void> {
-		try { await apiClient.post(`${API_BASE_URL}/api/leave-policies`, payload) }
-		catch (error) { return handleServiceError(error, 'LeavePoliciesService.create', 'Failed to create leave policy') }
-	}
-    static async update(id: string, payload: Record<string, unknown>): Promise<void> {
-        try { await apiClient.put(`${API_BASE_URL}/api/leave-policies/${id}`, payload) }
-        catch (error) { return handleServiceError(error, 'LeavePoliciesService.update', 'Failed to update leave policy') }
+export interface LeavePolicy {
+  id: string
+  name: string
+  leave_type: string
+  annual_allocation_days: number
+}
+
+export interface ActionResult {
+  success?: boolean
+  data?: unknown
+  errors?: {
+    _form?: string[]
+    [key: string]: string[] | undefined
+  }
+}
+
+// Validation schemas
+const updateCompanySchema = z.object({
+  name: z.string().min(1, 'Company name is required'),
+  legal_name: z.string().optional(),
+  tax_id: z.string().optional(),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  phone: z.string().optional(),
+  website: z.string().optional(),
+  address_line1: z.string().optional(),
+  address_line2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postal_code: z.string().optional(),
+  country: z.string().optional(),
+})
+
+const payScheduleSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  frequency: z.enum(['weekly', 'biweekly', 'semimonthly', 'monthly']),
+  start_date: z.string().min(1, 'Start date is required'),
+  is_active: z.boolean().default(true),
+})
+
+const leavePolicySchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  leave_type: z.string().min(1, 'Leave type is required'),
+  annual_allocation_days: z.number().min(0, 'Allocation days must be positive'),
+})
+
+// READ operations (cached)
+export const getCompany = cache(async (): Promise<CompanyProfile | null> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/company`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['company'], revalidate: 60 },
+    })
+
+    if (!res.ok) return null
+
+    const json = await res.json().catch(() => ({}))
+    const data = json.data ?? json
+    if (!data || (!data.id && !data.name)) return null
+
+    const company = data
+    return {
+      id: String(company.id || ''),
+      name: String(company.name || ''),
+      legal_name: company.legal_name || '',
+      tax_id: company.tax_id || company.tax_number || company.vat_number || '',
+      email: company.email || company.email_address || '',
+      phone: company.phone || company.phone_number || company.telephone || '',
+      website: company.website || company.web_url || '',
+      address_line1: company.address_line1 || company.address1 || company.address || '',
+      address_line2: company.address_line2 || company.address2 || '',
+      city: company.city || '',
+      state: company.state || company.province || company.region || '',
+      postal_code: company.postal_code || company.zip || company.zip_code || '',
+      country: company.country || '',
+      logo: company.logo || company.logo_url || '',
     }
-    static async remove(id: string): Promise<void> {
-        try { await apiClient.delete(`${API_BASE_URL}/api/leave-policies/${id}`) }
-        catch (error) { return handleServiceError(error, 'LeavePoliciesService.remove', 'Failed to delete leave policy') }
+  } catch {
+    return null
+  }
+})
+
+export const getPaySchedules = cache(async (): Promise<PaySchedule[]> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/pay-schedules`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['pay-schedules'], revalidate: 60 },
+    })
+
+    if (!res.ok) return []
+
+    const json = await res.json().catch(() => ({}))
+    interface RawPaySchedule {
+      id?: string | number;
+      name?: string;
+      frequency?: string;
+      start_date?: string;
+      start?: string;
+      is_active?: boolean;
     }
+    const list: RawPaySchedule[] = Array.isArray(json) ? json : json.data || json.pay_schedules || []
+
+    return list.map((s) => ({
+      id: String(s.id || ''),
+      name: String(s.name || ''),
+      frequency: (s.frequency || 'monthly') as PaySchedule['frequency'],
+      start_date: String(s.start_date || s.start || ''),
+      is_active: Boolean(s.is_active),
+    }))
+  } catch {
+    return []
+  }
+})
+
+export const getLeavePolicies = cache(async (): Promise<LeavePolicy[]> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/leave-policies`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['leave-policies'], revalidate: 60 },
+    })
+
+    if (!res.ok) return []
+
+    const json = await res.json().catch(() => ({}))
+    interface RawLeavePolicy {
+      id?: string | number;
+      name?: string;
+      leave_type?: string;
+      type?: string;
+      annual_allocation_days?: number;
+      allocation_days?: number;
+    }
+    const list: RawLeavePolicy[] = Array.isArray(json) ? json : json.data || json.policies || []
+
+    return list.map((p) => ({
+      id: String(p.id || ''),
+      name: String(p.name || ''),
+      leave_type: String(p.leave_type || p.type || ''),
+      annual_allocation_days: Number(p.annual_allocation_days ?? p.allocation_days ?? 0) || 0,
+    }))
+  } catch {
+    return []
+  }
+})
+
+// Server Actions for mutations
+
+export async function updateCompanyAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = updateCompanySchema.safeParse({
+    name: formData.get('name'),
+    legal_name: formData.get('legal_name') || '',
+    tax_id: formData.get('tax_id') || '',
+    email: formData.get('email') || '',
+    phone: formData.get('phone') || '',
+    website: formData.get('website') || '',
+    address_line1: formData.get('address_line1') || '',
+    address_line2: formData.get('address_line2') || '',
+    city: formData.get('city') || '',
+    state: formData.get('state') || '',
+    postal_code: formData.get('postal_code') || '',
+    country: formData.get('country') || '',
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    
+    // Log what we're sending
+    console.log('[Company Update] Sending to backend:', JSON.stringify(parsed.data, null, 2))
+    
+    const res = await fetch(`${API_BASE_URL}/api/company`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    const responseText = await res.text()
+
+    if (!res.ok) {
+      console.error('[Company Update] Error response:', res.status, responseText)
+      let error
+      try {
+        error = JSON.parse(responseText)
+      } catch {
+        error = { 
+          message: `Server error (${res.status}): ${responseText.substring(0, 200)}${responseText.length > 200 ? '...' : ''}` 
+        }
+      }
+      return { errors: { _form: [error.message || error.error || 'Failed to update company'] } }
+    }
+
+    let data
+    try {
+      data = JSON.parse(responseText)
+      console.log('[Company Update] Success response:', JSON.stringify(data, null, 2))
+    } catch {
+      console.error('[Company Update] Failed to parse response:', responseText)
+      return { errors: { _form: ['Server returned invalid response'] } }
+    }
+    
+    revalidateEntityMutation('COMPANY')
+    return { success: true, data }
+  } catch (error) {
+    console.error('[Company Update] Exception:', error)
+    return { errors: { _form: ['Failed to update company: ' + (error instanceof Error ? error.message : 'Unknown error')] } }
+  }
+}
+
+export async function createPayScheduleAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = payScheduleSchema.safeParse({
+    name: formData.get('name'),
+    frequency: formData.get('frequency'),
+    start_date: formData.get('start_date'),
+    is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/pay-schedules`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to create pay schedule'] } }
+    }
+
+    const data = await res.json()
+    // Revalidate company and all dependent caches
+    revalidateEntityMutation('COMPANY')
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to create pay schedule'] } }
+  }
+}
+
+export async function updatePayScheduleAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = payScheduleSchema.safeParse({
+    name: formData.get('name'),
+    frequency: formData.get('frequency'),
+    start_date: formData.get('start_date'),
+    is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/pay-schedules/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to update pay schedule'] } }
+    }
+
+    const data = await res.json()
+    // Revalidate company and all dependent caches
+    revalidateEntityMutation('COMPANY')
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to update pay schedule'] } }
+  }
+}
+
+export async function deletePayScheduleAction(id: string): Promise<void> {
+  const cookieHeader = await getAuthCookieHeader()
+  const res = await fetch(`${API_BASE_URL}/api/pay-schedules/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cookieHeader && { Cookie: cookieHeader }),
+    },
+  })
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || 'Failed to delete pay schedule')
+  }
+
+  // Revalidate company and all dependent caches
+  revalidateEntityMutation('COMPANY')
+}
+
+export async function createLeavePolicyAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = leavePolicySchema.safeParse({
+    name: formData.get('name'),
+    leave_type: formData.get('leave_type'),
+    annual_allocation_days: Number(formData.get('annual_allocation_days')),
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/leave-policies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to create leave policy'] } }
+    }
+
+    const data = await res.json()
+    // Revalidate company and all dependent caches
+    revalidateEntityMutation('COMPANY')
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to create leave policy'] } }
+  }
+}
+
+export async function updateLeavePolicyAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = leavePolicySchema.safeParse({
+    name: formData.get('name'),
+    leave_type: formData.get('leave_type'),
+    annual_allocation_days: Number(formData.get('annual_allocation_days')),
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/leave-policies/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to update leave policy'] } }
+    }
+
+    const data = await res.json()
+    // Revalidate company and all dependent caches
+    revalidateEntityMutation('COMPANY')
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to update leave policy'] } }
+  }
+}
+
+export async function deleteLeavePolicyAction(id: string): Promise<void> {
+  const cookieHeader = await getAuthCookieHeader()
+  const res = await fetch(`${API_BASE_URL}/api/leave-policies/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cookieHeader && { Cookie: cookieHeader }),
+    },
+  })
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.message || 'Failed to delete leave policy')
+  }
+
+  // Revalidate company and all dependent caches
+  revalidateEntityMutation('COMPANY')
 }
 
 

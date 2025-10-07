@@ -1,17 +1,18 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
-import { requireUser } from '@/lib/auth/dal'
-import { fetchReportsList, fetchPayrollChart, fetchEmployeeMetrics, fetchTaxTrend } from '@/lib/services/reports-server'
+import { requireRole } from '@/lib/rbac/server'
+import { getReportsList, getPayrollChart, getEmployeeMetrics, getTaxTrend } from '@/lib/services/reports'
 import { ReportsSection } from '@/components/reports/reports-section'
 
 export default async function ReportsPage() {
-  await requireUser()
+  // Only managers and admins can access reports
+  await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
   const [list, payroll, employee, tax] = await Promise.all([
-    fetchReportsList(),
-    fetchPayrollChart('monthly'),
-    fetchEmployeeMetrics(),
-    fetchTaxTrend('monthly'),
+    getReportsList(),
+    getPayrollChart('monthly'),
+    getEmployeeMetrics(),
+    getTaxTrend('monthly'),
   ])
   return (
     <div className='min-h-dvh flex app-background'>
@@ -28,5 +29,3 @@ export default async function ReportsPage() {
     </div>
   )
 }
-
-

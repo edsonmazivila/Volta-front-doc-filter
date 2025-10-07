@@ -1,13 +1,14 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader, Stat } from '@/components/dashboard/card'
-import { requireUser } from '@/lib/auth/dal'
-import { fetchPayrollRuns, fetchPayrollStats } from '@/lib/services/payroll-server'
+import { requireRole } from '@/lib/rbac/server'
+import { getPayrollRuns, getPayrollStats } from '@/lib/services/payroll'
 import { PayrollSection } from '@/components/payroll/payroll-section'
 
 export default async function PayrollPage() {
-  await requireUser()
-  const [runs, stats] = await Promise.all([fetchPayrollRuns(), fetchPayrollStats()])
+  // Only HR, Payroll managers and admins can access payroll
+  await requireRole(['payroll_manager', 'system_admin'])
+  const [runs, stats] = await Promise.all([getPayrollRuns(), getPayrollStats()])
   return (
     <div className='min-h-dvh flex app-background'>
       <Sidebar />
@@ -29,5 +30,3 @@ export default async function PayrollPage() {
     </div>
   )
 }
-
-

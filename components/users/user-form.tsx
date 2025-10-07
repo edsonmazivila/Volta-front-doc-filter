@@ -9,7 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FormField, Input, Checkbox } from '@/components/auth/form-field'
 import { PasswordInput } from '@/components/auth/password-input'
 import { ROLES, ROLE_DISPLAY_NAMES } from '@/lib/rbac/types'
-import { User } from './user-management'
+import type { UserRole } from '@/lib/auth/types'
+import { User, createUserAction, updateUserAction } from '@/lib/services/users'
+import { useToast } from '@/components/ui/toast'
 
 // Form schemas
 const createUserSchema = z.object({
@@ -17,7 +19,7 @@ const createUserSchema = z.object({
 	last_name: z.string().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
 	email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
 	password: z.string().min(8, 'Password must be at least 8 characters'),
-	role: z.enum([ROLES.EMPLOYEE, ROLES.OPERATIONAL_MANAGER, ROLES.HR_MANAGER, ROLES.PAYROLL_MANAGER, ROLES.SYSTEM_ADMIN, ROLES.ADMIN, ROLES.MANAGER]),
+	role: z.enum([ROLES.EMPLOYEE, ROLES.OPERATIONAL_MANAGER, ROLES.HR_MANAGER, ROLES.PAYROLL_MANAGER, ROLES.SYSTEM_ADMIN]),
 	is_active: z.boolean().default(true)
 })
 
@@ -26,21 +28,23 @@ const editUserSchema = z.object({
 	last_name: z.string().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
 	email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
 	password: z.string().optional(),
-	role: z.enum([ROLES.EMPLOYEE, ROLES.OPERATIONAL_MANAGER, ROLES.HR_MANAGER, ROLES.PAYROLL_MANAGER, ROLES.SYSTEM_ADMIN, ROLES.ADMIN, ROLES.MANAGER]),
+	role: z.enum([ROLES.EMPLOYEE, ROLES.OPERATIONAL_MANAGER, ROLES.HR_MANAGER, ROLES.PAYROLL_MANAGER, ROLES.SYSTEM_ADMIN]),
 	is_active: z.boolean().default(true)
 })
 
 // Schema types are inferred automatically
 
 interface UserFormProps {
-	mode: 'create' | 'edit'
+	mode?: 'create' | 'edit'
 	user?: User | null
-	onSubmit: (data: unknown) => void
+	onSubmit?: (data: unknown) => void
+	onSuccess?: () => void
 	onCancel: () => void
 }
 
-export function UserForm({ mode, user, onSubmit, onCancel }: UserFormProps) {
+export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel }: UserFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const { showToast } = useToast()
 	
 	const schema = mode === 'create' ? createUserSchema : editUserSchema
 	const isEditMode = mode === 'edit'
@@ -58,7 +62,7 @@ export function UserForm({ mode, user, onSubmit, onCancel }: UserFormProps) {
 			last_name: user?.last_name || '',
 			email: user?.email || '',
 			password: '',
-			role: user?.role || ROLES.EMPLOYEE,
+			role: (user?.role as UserRole) || ROLES.EMPLOYEE,
 			is_active: user?.is_active ?? true
 		}
 	})
@@ -71,7 +75,7 @@ export function UserForm({ mode, user, onSubmit, onCancel }: UserFormProps) {
 				last_name: user.last_name,
 				email: user.email,
 				password: '',
-				role: user.role,
+				role: user.role as UserRole,
 				is_active: user.is_active
 			})
 		}
@@ -85,9 +89,48 @@ export function UserForm({ mode, user, onSubmit, onCancel }: UserFormProps) {
 				delete data.password
 			}
 			
-			await onSubmit(data)
-		} catch (error) {
-			console.error('Form submission error:', error)
+			if (onSubmit) {
+				await onSubmit(data)
+			} else {
+				// Default behavior - perform the actual operation
+				const formData = new FormData()
+				Object.entries(data).forEach(([key, value]) => {
+					if (value !== undefined && value !== null) {
+						formData.append(key, String(value))
+					}
+				})
+
+				let result
+				if (isEditMode && user) {
+					result = await updateUserAction(user.id, null, formData)
+				} else {
+					result = await createUserAction(null, formData)
+				}
+
+				if ('errors' in result) {
+					// Handle validation errors
+					const errorMessages = Object.values(result.errors).flat()
+					showToast({
+						type: 'error',
+						message: errorMessages.join(', '),
+						title: 'Validation Error'
+					})
+				} else {
+					// Success
+					showToast({
+						type: 'success',
+						message: isEditMode ? 'User updated successfully' : 'User created successfully',
+						title: 'Success'
+					})
+					onSuccess?.()
+				}
+			}
+		} catch {
+			showToast({
+				type: 'error',
+				message: 'An unexpected error occurred',
+				title: 'Error'
+			})
 		} finally {
 			setIsSubmitting(false)
 		}

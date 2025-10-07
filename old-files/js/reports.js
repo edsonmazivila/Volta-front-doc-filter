@@ -1,6 +1,6 @@
 // Reports JavaScript for Nexus Pay
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('JECH Pay Reports - Ready');
+    console.log('NEXUpayroll Reports - Ready');
     try {
         initializeReportsPage();
     } catch (e) {
@@ -646,7 +646,7 @@ function printChart(chartId) {
             </style>
         </head>
         <body>
-            <h1>JECH Pay - Chart Report</h1>
+            <h1>NEXUpayroll - Chart Report</h1>
             <img src="${canvas.toDataURL()}" alt="Chart" />
             <script>window.print(); window.close();</script>
         </body>
@@ -727,7 +727,7 @@ function exportChartAsPDF(chartId, filename) {
         
         // Add title
         pdf.setFontSize(16);
-        pdf.text('JECH Pay - Chart Report', 20, 20);
+        pdf.text('NEXUpayroll - Chart Report', 20, 20);
         pdf.setFontSize(12);
         pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
         

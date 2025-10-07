@@ -154,21 +154,12 @@ Effective roles:
 
 ---
 
-## Summary Mapping (English)
+## Summary Mapping
 
 - Employee: can register own timesheets and documents, request leaves, create meetings, and register attendance (check in/out).
 - Operational Manager: everything an employee can do, plus view/approve team timesheets and documents, manage team leave requests, access attendance admin, and manage departments.
 - Payroll Manager: everything an employee can do, plus view all timesheets, approve timesheets, calculate and run payroll, and access payroll reports/exports.
 - HR Manager: everything an employee can do, plus approve leave requests, manage company and employee documents, manage departments/users, and view/export reports.
 - System Administrator: full control, including company documents, pay schedules, leave policies, company basic info, departments, users, audit logs, settings, payroll, and reports.
-
----
-
-## Notes and Code Grounding
-
-- Roles are defined in `internal/models/user.go` and `internal/models/rbac.go` (default permission matrix).
-- Route guards and middleware live in `internal/middleware/*` and are applied in `cmd/server/main.go`.
-- Timesheet approval for Payroll Manager is enabled via RBAC permissions on the API routes, even though a helper in `user.go` focuses approval on managers/admin; API uses RBAC checks.
-- Document approval/edit access is enforced by `internal/middleware/document_access.go` (HR/Admin universally; Operational Manager within department/direct reports; Payroll Manager allowed to edit by middleware).
 
 

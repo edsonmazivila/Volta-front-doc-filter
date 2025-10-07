@@ -1,5 +1,5 @@
 
-import type { LeaveRequestItem } from '@/lib/services/leaves-server'
+import type { LeaveRequestItem } from '@/lib/services/leaves'
 import { Button } from '@/components/ui'
 
 interface PendingApprovalsTableProps {

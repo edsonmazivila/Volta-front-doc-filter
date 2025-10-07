@@ -1,11 +1,19 @@
 import { z } from 'zod'
 
+// Role types matching backend - exactly 5 roles
+export type UserRole =
+	| 'employee'
+	| 'operational_manager'
+	| 'hr_manager'
+	| 'payroll_manager'
+	| 'system_admin'
+
 // User types
 export interface User {
 	id: string
 	email: string
 	name: string
-	role: 'admin' | 'hr' | 'employee'
+	role: UserRole
 	companyId?: string
 	avatar?: string
 	createdAt: string
@@ -17,7 +25,7 @@ export interface ClientUser {
 	id: string
 	email: string
 	name: string
-	role: 'admin' | 'hr' | 'employee'
+	role: UserRole
 	avatar?: string
 	createdAt: string
 	updatedAt: string
@@ -41,12 +49,16 @@ export type LoginFormData = z.infer<typeof loginSchema>
 
 // Signup form schema
 export const signupSchema = z.object({
-	name: z.string().min(1, 'Name is required'),
-	email: z.string().min(1, 'Email is required'),
-	password: z.string().min(1, 'Password is required'),
-	confirmPassword: z.string().min(1, 'Please confirm your password'),
-	companyName: z.string().min(1, 'Company name is required'),
-	termsAccepted: z.boolean()
+    companyName: z.string().min(1, 'Company name is required'),
+    name: z.string().min(1, 'Name is required'),
+    email: z.string().min(1, 'Email is required'),
+    password: z.string().min(1, 'Password is required'),
+    // Optional employee profile fields
+    employmentType: z.string().optional(),
+    hireDate: z.string().optional(),
+    jobTitle: z.string().optional(),
+    employeeNumber: z.string().optional(),
+    termsAccepted: z.boolean()
 })
 
 export type SignupFormData = z.infer<typeof signupSchema>

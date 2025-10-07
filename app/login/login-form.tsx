@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   AuthForm,
   EmailField,
@@ -13,11 +13,9 @@ import Link from "next/link";
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get redirect URL and success message from search params
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  // Get success message from search params
   const successMessage = searchParams.get("message");
 
   return (
@@ -43,15 +41,17 @@ export function LoginForm() {
         action={async (formData) => {
           setError(null);
           const result = await loginAction(undefined, formData);
-          if ('errors' in result) {
-            const formErrors = (result.errors as Record<string, string[] | undefined>)._form;
+          if ("errors" in result) {
+            const formErrors = (
+              result.errors as Record<string, string[] | undefined>
+            )._form;
             if (formErrors && formErrors.length) {
               setError(formErrors[0]);
               return;
             }
           }
-          router.refresh(); // Clear server cache
-          router.push(redirectTo);
+          // Force full page reload to dashboard so server picks up new session cookie
+          window.location.href = '/dashboard';
         }}
         schema={loginSchema}
         submitText="Sign in"

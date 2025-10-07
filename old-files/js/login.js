@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Utility functions for HTMX integration
-window.JechPay = {
+window.NexuPayroll = {
     showToast: function(message, type = 'info') {
         // Same toast function for global access
         const existingToasts = document.querySelectorAll('.toast');

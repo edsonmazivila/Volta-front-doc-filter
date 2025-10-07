@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the Role-Based Access Control (RBAC) system implemented for the JECH Pay payroll system. The RBAC system provides granular permissions management with department-level access control and follows 2025 security best practices.
+This document describes the Role-Based Access Control (RBAC) system implemented for the NEXUpayroll payroll system. The RBAC system provides granular permissions management with department-level access control and follows 2025 security best practices.
 
 ## Role Hierarchy
 
@@ -99,26 +99,6 @@ Permissions follow a hierarchical format: `resource:action[:scope]`
    - API endpoints for role management
    - Permission matrix generation
    - Configuration export (JSON/YAML)
-
-### JWT Integration
-
-The system enhances JWT tokens with additional claims:
-
-```go
-type Claims struct {
-    UserID       uuid.UUID            `json:"user_id"`
-    Email        string               `json:"email"`
-    Role         models.UserRole      `json:"role"`         // Legacy role
-    RoleType     models.RoleType      `json:"role_type"`    // New role type
-    CompanyID    *uuid.UUID           `json:"company_id,omitempty"`
-    DepartmentID *uuid.UUID           `json:"department_id,omitempty"`
-    EmployeeID   *uuid.UUID           `json:"employee_id,omitempty"`
-    ManagerID    *uuid.UUID           `json:"manager_id,omitempty"`
-    Permissions  []models.Permission  `json:"permissions"`
-    TokenType    string               `json:"token_type"`
-    jwt.RegisteredClaims
-}
-```
 
 ## API Endpoints
 
@@ -271,80 +251,8 @@ if userContext.HasPermission(models.PermissionManageEmployees) {
 }
 ```
 
-### Environment Variables
-
-- `JWT_SECRET_KEY` - JWT signing secret
-- `JWT_ACCESS_TTL_HOURS` - Access token TTL (default: 24)
-- `JWT_REFRESH_TTL_DAYS` - Refresh token TTL (default: 7)
-
-## Security Considerations
-
-1. **Principle of Least Privilege**: Users are granted only the minimum permissions needed
-2. **Department Isolation**: Operational managers can only access their department's data
-3. **Audit Trail**: All permission checks are logged for security auditing
-4. **Token Security**: JWT tokens include permission claims to reduce database queries
-5. **Resource-Level Access**: Fine-grained control over individual resources
-
-## Testing
-
-### Unit Tests
-
-Test files are located in `internal/auth/*_test.go` and include:
-- Permission checking logic
-- Role hierarchy validation
-- Department-level access control
-- JWT claim validation
-
-### Integration Tests
-
-API tests verify:
-- Endpoint access control
-- Permission enforcement
-- Error handling
-- Resource isolation
-
-## Performance Considerations
-
-1. **JWT Claims**: Permissions are embedded in JWT tokens to reduce database queries
-2. **Caching**: Role configurations are cached in memory
-3. **Lazy Loading**: Employee context is loaded only when needed
-4. **Efficient Queries**: Database queries are optimized for permission checking
-
-## Monitoring and Observability
-
-1. **Access Logs**: All permission checks are logged
-2. **Metrics**: Permission denial rates and access patterns
-3. **Alerts**: Suspicious access attempts or privilege escalation
-4. **Audit Trail**: Complete audit log of permission changes
-
-## Future Enhancements
-
-1. **Dynamic Permissions**: Runtime permission assignment
-2. **Resource-Based Permissions**: Object-level access control
-3. **Temporary Permissions**: Time-limited access grants
-4. **Permission Inheritance**: Hierarchical permission inheritance
-5. **External Identity Providers**: SAML/OAuth2 integration
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Permission Denied**: Check user's role and permissions in JWT token
-2. **Department Access**: Verify employee's department assignment
-3. **Token Expiry**: Ensure access tokens are refreshed properly
-4. **Role Migration**: Verify legacy roles are properly converted
-
 ### Debug Endpoints
 
 - `GET /api/rbac/my-permissions` - View current user's permissions
 - `GET /api/rbac/permission-matrix` - View complete permission matrix
 - `GET /api/rbac/hierarchy` - View role hierarchy
-
-## Support
-
-For questions or issues with the RBAC implementation:
-
-1. Check this documentation
-2. Review the permission matrix at `/api/rbac/permission-matrix`
-3. Verify user permissions at `/api/rbac/my-permissions`
-4. Contact the development team with specific error messages and user context 

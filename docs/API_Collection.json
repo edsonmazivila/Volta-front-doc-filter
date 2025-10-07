@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "JECH Pay API - Complete Test Suite",
-    "description": "Comprehensive API test collection for JECH Pay Payroll System\n\nThis collection tests all implemented endpoints including:\n- Authentication (Login, Register, Profile Management)\n- Employee Management (CRUD, Search, Filtering)\n- Company Management\n- Department Management\n- Timesheet Management\n- Time Entry Management\n- Employee Self-Service\n- Utility Endpoints\n\nVersion: 1.0\nEnvironment: Development\nBase URL: http://localhost:8080",
+    "name": "NEXUpayroll API - Complete Test Suite",
+    "description": "Comprehensive API test collection for NEXUpayroll Payroll System\n\nThis collection tests all implemented endpoints including:\n- Authentication (Login, Register, Profile Management)\n- Employee Management (CRUD, Search, Filtering)\n- Company Management\n- Department Management\n- Timesheet Management\n- Time Entry Management\n- Employee Self-Service\n- Utility Endpoints\n\nVersion: 1.0\nEnvironment: Development\nBase URL: http://localhost:8080",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -58,7 +58,7 @@
     },
     {
       "key": "admin_email",
-      "value": "admin@jechpay.com",
+      "value": "admin@nexupayroll.com",
       "type": "string"
     },
     {

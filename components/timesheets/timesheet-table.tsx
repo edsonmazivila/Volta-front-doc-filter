@@ -1,6 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
-import type { TimesheetListItem } from '@/lib/services/timesheets-server'
+import type { TimesheetListItem } from '@/lib/services/timesheets'
 import { Button, Skeleton } from '@/components/ui'
 import { format } from 'date-fns'
 

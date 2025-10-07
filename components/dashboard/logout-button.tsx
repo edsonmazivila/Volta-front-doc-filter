@@ -1,21 +1,16 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { LogOut } from 'lucide-react'
 import { useSession } from '@/components/auth/session-context'
+import { logoutAction } from '@/lib/auth/session-actions'
 
 export function LogoutButton({ className = '' }: { className?: string }) {
-	const router = useRouter()
 	const { setUser } = useSession()
 
 	const handleLogout = async () => {
-		try {
-			await fetch('/api/auth/logout', { method: 'POST' })
-		} catch {}
-		setUser(null) // Clear client session
-		router.refresh() // Clear server cache
-		router.push('/login')
+		setUser(null) // Clear client session immediately
+		await logoutAction() // Server Action handles cookie deletion and redirect
 	}
 
     return (
