@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import {
   type Employee,
   type EmployeeListParams,
-  createEmployeeAction,
   updateEmployeeAction,
   deleteEmployeeAction,
 } from "@/lib/services/employees";
@@ -11,9 +10,9 @@ import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/search-input";
 import { EditEmployeeDialog } from "./edit-employee-dialog";
 import { DeleteEmployeeDialog } from "./delete-employee-dialog";
-import { AddEmployeeDialog } from "./add-employee-dialog";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EmployeeTableProps {
   initialEmployees: Employee[];
@@ -34,33 +33,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(
     null
   );
-  const [showAddDialog, setShowAddDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkDelete, setShowBulkDelete] = useState(false);
 
-  const handleAdd = async (data: Partial<Employee>) => {
-    setIsSubmitting(true);
-    try {
-      const form = new FormData();
-      if (data.first_name) form.append("first_name", String(data.first_name));
-      if (data.last_name) form.append("last_name", String(data.last_name));
-      if (data.email) form.append("email", String(data.email));
-      if (data.department) form.append("department", String(data.department));
-      if (typeof data.is_active === "boolean") form.append("is_active", data.is_active ? "true" : "false");
-      const res = await createEmployeeAction(null, form);
-      if ("errors" in res) throw new Error("validation");
-      showToast({ type: "success", message: "Employee created successfully" });
-      setShowAddDialog(false);
-      router.refresh();
-    } catch {
-      showToast({ type: "error", message: "Failed to create employee" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleEdit = async (employee: Employee, updates: Partial<Employee>) => {
     setIsSubmitting(true);
@@ -249,53 +227,50 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           onChange={setQuery}
           placeholder="Search employees"
         />
-        <select
-          value={department}
-          onChange={(e) => setDepartment(e.target.value)}
-          className="rounded-md bg-background border border-[var(--border)] px-3 py-2"
-        >
-          <option value="">All Departments</option>
-          {departments.map((dept) => (
-            <option key={dept} value={dept}>
-              {dept}
-            </option>
-          ))}
-        </select>
-        <select
-          value={status}
-          onChange={(e) =>
-            setStatus(e.target.value as EmployeeListParams["status"])
-          }
-          className="rounded-md bg-background border border-[var(--border)] px-3 py-2"
-        >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-        <select
-          value={sort}
-          onChange={(e) =>
-            setSort(e.target.value as EmployeeListParams["sort"])
-          }
-          className="rounded-md bg-background border border-[var(--border)] px-3 py-2"
-        >
-          <option value="name">Name</option>
-          <option value="status">Status</option>
-          <option value="department">Department</option>
-        </select>
-        <select
-          value={order}
-          onChange={(e) =>
-            setOrder(e.target.value as EmployeeListParams["order"])
-          }
-          className="rounded-md bg-background border border-[var(--border)] px-3 py-2"
-        >
-          <option value="asc">Asc</option>
-          <option value="desc">Desc</option>
-        </select>
+		<Select value={department || 'all'} onValueChange={(v)=> setDepartment(v === 'all' ? '' : v)}>
+          <SelectTrigger className="w-[180px] bg-background border-[var(--border)]">
+            <SelectValue placeholder="All Departments" />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-[var(--border)]">
+				<SelectItem value="all">All Departments</SelectItem>
+				{departments.map((dept) => {
+					const val = String(dept || '')
+					return (<SelectItem key={val} value={val}>{val}</SelectItem>)
+				})}
+          </SelectContent>
+        </Select>
+        <Select value={status} onValueChange={(v) => setStatus(v as EmployeeListParams["status"]) }>
+          <SelectTrigger className="w-[150px] bg-background border-[var(--border)]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-[var(--border)]">
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sort} onValueChange={(v) => setSort(v as EmployeeListParams["sort"]) }>
+          <SelectTrigger className="w-[160px] bg-background border-[var(--border)]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-[var(--border)]">
+            <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="status">Status</SelectItem>
+            <SelectItem value="department">Department</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={order} onValueChange={(v) => setOrder(v as EmployeeListParams["order"]) }>
+          <SelectTrigger className="w-[120px] bg-background border-[var(--border)]">
+            <SelectValue placeholder="Order" />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-[var(--border)]">
+            <SelectItem value="asc">Asc</SelectItem>
+            <SelectItem value="desc">Desc</SelectItem>
+          </SelectContent>
+        </Select>
         <Button
           size="sm"
-          onClick={() => setShowAddDialog(true)}
+          onClick={() => router.push('/dashboard/employees/new')}
           className="ml-auto"
         >
           Add Employee
@@ -392,14 +367,6 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           isSubmitting={isSubmitting}
         />
       )}
-
-      {/* Add Dialog */}
-      <AddEmployeeDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        onSave={handleAdd}
-        isSubmitting={isSubmitting}
-      />
 
       {/* Delete Confirmation Dialog */}
       {deletingEmployee && (

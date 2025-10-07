@@ -16,7 +16,7 @@ export const PAGE_PERMISSIONS: Record<string, UserRole[]> = {
 
 	// Management Section
 	'/dashboard/employees': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
-	'/dashboard/timesheets': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
+	'/dashboard/timesheets': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'], // Now accessible by all - backend filters by role
 	'/dashboard/attendance': ['operational_manager', 'hr_manager', 'system_admin'],
 	'/dashboard/leaves': ['operational_manager', 'hr_manager', 'system_admin'],
 	'/dashboard/payroll': ['payroll_manager', 'system_admin'],
@@ -25,7 +25,6 @@ export const PAGE_PERMISSIONS: Record<string, UserRole[]> = {
 
 	// Self Service - Everyone (all roles can access own data)
 	'/dashboard/paystubs': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
-	'/dashboard/my-timesheets': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 	'/dashboard/my-leaves': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 	'/dashboard/my-documents': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 

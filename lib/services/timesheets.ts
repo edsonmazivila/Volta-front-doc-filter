@@ -9,10 +9,13 @@ export type TimesheetStatus = 'draft' | 'submitted' | 'approved' | 'rejected'
 
 export interface TimesheetListItem {
 	id: string
+	employeeId?: string
 	employeeName: string
 	periodStart: string
 	periodEnd: string
 	status: TimesheetStatus
+	regularHours?: number
+	overtimeHours?: number
 	totalHours: number
 	submittedAt?: string
 	notes?: string
@@ -47,9 +50,11 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 				id?: string | number;
 				ts_id?: string | number;
 				uuid?: string;
-				employee?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
-				user?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
-				employee_info?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
+				employee_id?: string;
+				employeeId?: string;
+				employee?: { id?: string; user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
+				user?: { id?: string; user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
+				employee_info?: { id?: string; user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
 				employeeName?: string;
 				employee_name?: string;
 				employee_email?: string;
@@ -68,6 +73,10 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 				submitted_at?: string;
 				submitted?: string;
 				status?: string;
+				regularHours?: number;
+				regular_hours?: number;
+				overtimeHours?: number;
+				overtime_hours?: number;
 				totalHours?: number;
 				total_hours?: number;
 				hours?: number;
@@ -95,10 +104,13 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 
 				return {
 					id: String(t.id ?? t.ts_id ?? t.uuid ?? ''),
+					employeeId: t.employee_id ?? t.employeeId ?? emp?.id ?? undefined,
 					employeeName,
 					periodStart,
 					periodEnd,
 					status: ((t.status ?? 'draft') as TimesheetStatus),
+					regularHours: Number(t.regularHours ?? t.regular_hours ?? 0) || 0,
+					overtimeHours: Number(t.overtimeHours ?? t.overtime_hours ?? 0) || 0,
 					totalHours: Number(t.totalHours ?? t.total_hours ?? t.hours ?? 0) || 0,
 					submittedAt,
 					notes: ((t.notes ?? t.note ?? undefined) as string | undefined),

@@ -3,6 +3,7 @@ import { useState, useTransition } from 'react'
 import { TimesheetTable } from '@/components/timesheets/timesheet-table'
 import { TimesheetFormDialog, type TimesheetFormValues } from '@/components/timesheets/timesheet-form-dialog'
 import type { TimesheetListItem } from '@/lib/services/timesheets'
+import type { Employee } from '@/lib/services/employees'
 import {
   createTimesheetAction,
   updateTimesheetAction,
@@ -18,9 +19,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 interface TimesheetsSectionProps {
 	items: TimesheetListItem[]
+	employees?: Employee[]
 }
 
-export function TimesheetsSection({ items }: TimesheetsSectionProps) {
+export function TimesheetsSection({ items, employees = [] }: TimesheetsSectionProps) {
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
 	const [isPending, startTransition] = useTransition()
@@ -32,11 +34,16 @@ export function TimesheetsSection({ items }: TimesheetsSectionProps) {
 
   async function handleSave(values: TimesheetFormValues) {
 		try {
+			const totalHours = (values.regularHours || 0) + (values.overtimeHours || 0)
 			const payload = {
+				employee_id: values.employee_id,
 				period_start: values.periodStart,
 				period_end: values.periodEnd,
-				total_hours: values.totalHours,
-				notes: values.notes,
+				regular_hours: values.regularHours,
+				overtime_hours: values.overtimeHours,
+				total_hours: totalHours,
+				status: values.status,
+				notes: values.notes || '',
 			}
       if (editId) {
         const res = await updateTimesheetAction(editId, payload)
@@ -104,12 +111,16 @@ return (
 			<TimesheetFormDialog
 				open={open}
 				onOpenChange={(v) => { if (!v) setEditId(null); setOpen(v) }}
+				employees={employees}
 				defaultValues={editId ? (() => {
 					const item = items.find(i => i.id === editId)
 					return item ? {
+						employee_id: item.employeeId || '',
 						periodStart: (item.periodStart ? new Date(item.periodStart).toISOString().slice(0, 10) : ''),
 						periodEnd: (item.periodEnd ? new Date(item.periodEnd).toISOString().slice(0, 10) : ''),
-						totalHours: item.totalHours,
+						regularHours: item.regularHours || 0,
+						overtimeHours: item.overtimeHours || 0,
+						status: (item.status as 'draft' | 'submitted') || 'draft',
 						notes: item.notes || '',
 					} : undefined
 				})() : undefined}

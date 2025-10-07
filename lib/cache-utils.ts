@@ -47,9 +47,6 @@ export const CACHE_DEPENDENCIES: Record<string, string[]> = {
   // My documents are employee-specific
   'my-documents': ['documents'],
 
-  // My timesheets are employee-specific
-  'my-timesheets': ['timesheets'],
-
   // Company settings affect all data
   company: ['users', 'departments', 'employees', 'payroll-runs', 'leaves', 'attendance', 'meetings'],
 
@@ -193,7 +190,6 @@ export const CacheTags = {
   MEETING_STATS: 'meeting-stats',
   PAYSTUBS: 'paystubs',
   MY_DOCUMENTS: 'my-documents',
-  MY_TIMESHEETS: 'my-timesheets',
   COMPANY: 'company',
   COMPANY_STATS: 'company-stats',
   DASHBOARD: 'dashboard',
@@ -214,7 +210,6 @@ export const CachePaths = {
   DEPARTMENTS: '/dashboard/departments',
   EMPLOYEES: '/dashboard/employees',
   TIMESHEETS: '/dashboard/timesheets',
-  MY_TIMESHEETS: '/dashboard/my-timesheets',
   LEAVES: '/dashboard/leaves',
   DOCUMENTS: '/dashboard/documents',
   MY_DOCUMENTS: '/dashboard/my-documents',
@@ -234,7 +229,7 @@ export function getPathsForEntity(entity: keyof typeof CacheTags): string[] {
     USERS: [CachePaths.USERS, CachePaths.DASHBOARD],
     DEPARTMENTS: [CachePaths.DEPARTMENTS, CachePaths.DASHBOARD],
     EMPLOYEES: [CachePaths.EMPLOYEES, CachePaths.DASHBOARD],
-    TIMESHEETS: [CachePaths.TIMESHEETS, CachePaths.MY_TIMESHEETS, CachePaths.PAYROLL, CachePaths.DASHBOARD],
+    TIMESHEETS: [CachePaths.TIMESHEETS, CachePaths.PAYROLL, CachePaths.DASHBOARD],
     LEAVES: [CachePaths.LEAVES, CachePaths.DASHBOARD],
     DOCUMENTS: [CachePaths.DOCUMENTS, CachePaths.MY_DOCUMENTS, CachePaths.DASHBOARD],
     PAYROLL_RUNS: [CachePaths.PAYROLL, CachePaths.PAYSTUBS, CachePaths.DASHBOARD],
@@ -242,7 +237,7 @@ export function getPathsForEntity(entity: keyof typeof CacheTags): string[] {
     MEETINGS: [CachePaths.MEETINGS, CachePaths.DASHBOARD],
     PAYSTUBS: [CachePaths.PAYSTUBS, CachePaths.DASHBOARD],
     MY_DOCUMENTS: [CachePaths.MY_DOCUMENTS, CachePaths.DOCUMENTS, CachePaths.DASHBOARD],
-    MY_TIMESHEETS: [CachePaths.MY_TIMESHEETS, CachePaths.TIMESHEETS, CachePaths.DASHBOARD],
+    MY_TIMESHEETS: [CachePaths.TIMESHEETS, CachePaths.DASHBOARD],
     COMPANY: [CachePaths.COMPANY, CachePaths.DASHBOARD],
     DASHBOARD: [CachePaths.DASHBOARD],
     REPORTS: [CachePaths.REPORTS],

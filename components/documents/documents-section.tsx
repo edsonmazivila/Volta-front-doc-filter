@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DocumentTable } from "@/components/documents/document-table";
 import type { DocumentListItem, Document } from "@/lib/services/documents";
 import {
@@ -38,8 +38,7 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
   const [expiryDate, setExpiryDate] = useState("");
   const [confidential, setConfidential] = useState(false);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+
   const [employeeOptions, setEmployeeOptions] = useState<
     { id: string; label: string }[]
   >(initialEmployees);
@@ -60,6 +59,10 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
   const [rejectReason, setRejectReason] = useState("");
   const [uploading, setUploading] = useState(false);
   const [operationInProgress, setOperationInProgress] = useState<Record<string, boolean>>({});
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  function openFilePicker() {
+    fileInputRef.current?.click();
+  }
 
   async function handleUpload() {
     if (!file || !employeeId || !docType) {
@@ -114,21 +117,11 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
             .toLowerCase()
             .includes(q)
         );
-      const matchesType = !typeFilter || i.type === typeFilter;
-      const matchesStatus = !statusFilter || i.status === statusFilter;
-      return matchesQ && matchesType && matchesStatus;
+      return matchesQ;
     });
-  }, [items, search, typeFilter, statusFilter]);
+  }, [items, search]);
 
-  const typeOptions = useMemo(
-    () => Array.from(new Set(items.map((i) => i.type).filter(Boolean))).sort(),
-    [items]
-  );
-  const statusOptions = useMemo(
-    () =>
-      Array.from(new Set(items.map((i) => i.status).filter(Boolean))).sort(),
-    [items]
-  );
+
 
   return (
     <div className="grid gap-4">
@@ -140,30 +133,6 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
             onChange={setSearch}
             placeholder="Search documents..."
           />
-          <select
-            className="border rounded-md px-2 py-2 bg-background"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="">All types</option>
-            {typeOptions.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <select
-            className="border rounded-md px-2 py-2 bg-background"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All status</option>
-            {statusOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
           <Button onClick={() => setOpen(true)}>Upload</Button>
         </div>
       </div>
@@ -297,10 +266,42 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm">File</label>
-              <input
-                type="file"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
+              {/* Styled dropzone-like uploader */}
+              <div
+                className="w-full rounded-md border border-dashed border-[var(--border)] bg-muted/20 p-4 text-center cursor-pointer hover:bg-muted/30 transition-colors"
+                onDragOver={(e) => { e.preventDefault() }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const f = e.dataTransfer?.files?.[0]
+                  if (f) setFile(f)
+                }}
+                onClick={() => openFilePicker()}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-sm text-muted-foreground">
+                    {file ? (
+                      <span className="text-foreground">{file.name}</span>
+                    ) : (
+                      <>
+                        <span className="font-medium text-foreground">Click to upload</span>
+                        <span>or drag and drop</span>
+                        <span className="text-xs">PDF, DOCX, PNG, JPG</span>
+                      </>
+                    )}
+                  </div>
+                  <Button type="button" variant="secondary" className="h-8" onClick={(e) => { e.stopPropagation(); openFilePicker() }}>
+                    Choose file
+                  </Button>
+                </div>
+                <input
+                  id="doc-file-input"
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  ref={fileInputRef}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <input

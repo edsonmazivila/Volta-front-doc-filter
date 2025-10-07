@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import type { LeaveRequestItem, LeaveBalanceItem } from '@/lib/services/leaves'
 import { LeaveTable } from '@/components/leaves/leave-table'
 import { Button, Skeleton } from '@/components/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
 import { useToastHelpers } from '@/components/ui/toast'
@@ -42,8 +43,8 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
     const q = search.trim().toLowerCase()
     return requests.filter(r => {
       const matchesQ = !q || [r.leave_type, r.reason, r.status].some(v => String(v || '').toLowerCase().includes(q))
-      const matchesStatus = !statusFilter || r.status === statusFilter
-      const matchesType = !typeFilter || r.leave_type === typeFilter
+      const matchesStatus = statusFilter === 'all' || !statusFilter || r.status === statusFilter
+      const matchesType = typeFilter === 'all' || !typeFilter || r.leave_type === typeFilter
       return matchesQ && matchesStatus && matchesType
     })
   }, [requests, search, statusFilter, typeFilter])
@@ -97,14 +98,28 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
             className='border rounded-md px-3 py-2 bg-background text-sm'
             placeholder='Search requests...'
           />
-          <select className='border rounded-md px-2 py-2 bg-background' value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value=''>All status</option>
-            {['DRAFT','SUBMITTED','APPROVED_L1','APPROVED_FINAL','REJECTED','CANCELLED'].map(s => (<option key={s} value={s}>{s}</option>))}
-          </select>
-          <select className='border rounded-md px-2 py-2 bg-background' value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value=''>All types</option>
-            {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (<option key={t} value={t}>{t}</option>))}
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className='w-[180px] bg-background border border-[var(--border)]'>
+              <SelectValue placeholder='All status' />
+            </SelectTrigger>
+            <SelectContent className='bg-background border border-[var(--border)]'>
+              <SelectItem value='all'>All status</SelectItem>
+              {['DRAFT','SUBMITTED','APPROVED_L1','APPROVED_FINAL','REJECTED','CANCELLED'].map(s => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className='w-[180px] bg-background border border-[var(--border)]'>
+              <SelectValue placeholder='All types' />
+            </SelectTrigger>
+            <SelectContent className='bg-background border border-[var(--border)]'>
+              <SelectItem value='all'>All types</SelectItem>
+              {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button onClick={() => setNewOpen(true)}>New request</Button>
         </div>
       </div>
@@ -151,9 +166,16 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
           <div className='grid gap-3'>
             <div className='flex flex-col gap-1'>
               <label className='text-sm'>Type</label>
-              <select className='w-full border rounded-md px-3 py-2 bg-background' value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
-                {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (<option key={t} value={t}>{t}</option>))}
-              </select>
+              <Select value={leaveType} onValueChange={setLeaveType}>
+                <SelectTrigger className='w-full bg-background border border-[var(--border)]'>
+                  <SelectValue placeholder='Select type' />
+                </SelectTrigger>
+                <SelectContent className='bg-background border border-[var(--border)]'>
+                  {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <div className='flex flex-col gap-1'>
@@ -242,9 +264,16 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
           <div className='grid gap-3'>
             <div className='flex flex-col gap-1'>
               <label className='text-sm'>Type</label>
-              <select className='w-full border rounded-md px-3 py-2 bg-background' value={editType} onChange={(e) => setEditType(e.target.value)}>
-                {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (<option key={t} value={t}>{t}</option>))}
-              </select>
+              <Select value={editType} onValueChange={setEditType}>
+                <SelectTrigger className='w-full bg-background border border-[var(--border)]'>
+                  <SelectValue placeholder='Select type' />
+                </SelectTrigger>
+                <SelectContent className='bg-background border border-[var(--border)]'>
+                  {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <div className='flex flex-col gap-1'>

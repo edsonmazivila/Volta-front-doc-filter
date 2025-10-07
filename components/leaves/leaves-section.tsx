@@ -13,6 +13,7 @@ import {
   rejectLeaveRequestAction,
 } from '@/lib/services/leaves'
 import { Button } from '@/components/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from 'lucide-react'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
@@ -50,8 +51,8 @@ export function LeavesSection({ requests, balances, pending, teamBalances }: Lea
     const q = search.trim().toLowerCase()
     return requests.filter(r => {
       const matchesQ = !q || [r.leave_type, r.reason, r.status].some(v => String(v || '').toLowerCase().includes(q))
-      const matchesStatus = !statusFilter || r.status === statusFilter
-      const matchesType = !typeFilter || r.leave_type === typeFilter
+      const matchesStatus = statusFilter === 'all' || !statusFilter || r.status === statusFilter
+      const matchesType = typeFilter === 'all' || !typeFilter || r.leave_type === typeFilter
       return matchesQ && matchesStatus && matchesType
     })
   }, [requests, search, statusFilter, typeFilter])
@@ -126,14 +127,28 @@ export function LeavesSection({ requests, balances, pending, teamBalances }: Lea
         <h2 className='text-sm font-medium'>My Leave Requests</h2>
         <div className='flex items-center gap-2 flex-1 justify-end'>
           <SearchInput value={search} onChange={setSearch} placeholder='Search requests...' />
-          <select className='border rounded-md px-2 py-2 bg-background' value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value=''>All status</option>
-            {['DRAFT','SUBMITTED','APPROVED_L1','APPROVED_FINAL','REJECTED','CANCELLED'].map(s => (<option key={s} value={s}>{s}</option>))}
-          </select>
-          <select className='border rounded-md px-2 py-2 bg-background' value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value=''>All types</option>
-            {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (<option key={t} value={t}>{t}</option>))}
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className='w-[180px] bg-background border border-[var(--border)]'>
+              <SelectValue placeholder='All status' />
+            </SelectTrigger>
+            <SelectContent className='bg-background border border-[var(--border)]'>
+              <SelectItem value='all'>All status</SelectItem>
+              {['DRAFT','SUBMITTED','APPROVED_L1','APPROVED_FINAL','REJECTED','CANCELLED'].map(s => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className='w-[180px] bg-background border border-[var(--border)]'>
+              <SelectValue placeholder='All types' />
+            </SelectTrigger>
+            <SelectContent className='bg-background border border-[var(--border)]'>
+              <SelectItem value='all'>All types</SelectItem>
+              {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button onClick={() => setOpen(true)}>New request</Button>
         </div>
           </div>

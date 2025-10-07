@@ -117,6 +117,7 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
 
 /**
  * Get payroll statistics
+ * Backend returns: { data: { current_month, monthly_total, total_runs }, success }
  */
 export const getPayrollStats = cache(async (): Promise<PayrollStats> => {
   try {
@@ -158,9 +159,9 @@ export const getPayrollStats = cache(async (): Promise<PayrollStats> => {
 
     return {
       totalEmployees,
-      gross: Number(data.gross ?? data.total_gross ?? data.gross_amount ?? data.monthly_total ?? 0) || 0,
-      net: Number(data.net ?? data.net_pay ?? data.net_amount ?? 0) || 0,
-      taxes: Number(data.taxes ?? data.tax_withholding ?? data.tax ?? data.tax_amount ?? 0) || 0,
+      gross: Number(data.monthly_gross ?? 0) || 0,
+      net: Number(data.monthly_net ?? 0) || 0,
+      taxes: Number(data.monthly_taxes ?? 0) || 0,
     }
   } catch {
     // Error handling - stats unavailable

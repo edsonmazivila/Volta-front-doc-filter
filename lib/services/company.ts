@@ -212,9 +212,6 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
   try {
     const cookieHeader = await getAuthCookieHeader()
     
-    // Log what we're sending
-    console.log('[Company Update] Sending to backend:', JSON.stringify(parsed.data, null, 2))
-    
     const res = await fetch(`${API_BASE_URL}/api/company`, {
       method: 'PUT',
       headers: {
@@ -227,7 +224,6 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
     const responseText = await res.text()
 
     if (!res.ok) {
-      console.error('[Company Update] Error response:', res.status, responseText)
       let error
       try {
         error = JSON.parse(responseText)
@@ -242,16 +238,13 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
     let data
     try {
       data = JSON.parse(responseText)
-      console.log('[Company Update] Success response:', JSON.stringify(data, null, 2))
     } catch {
-      console.error('[Company Update] Failed to parse response:', responseText)
       return { errors: { _form: ['Server returned invalid response'] } }
     }
     
     revalidateEntityMutation('COMPANY')
     return { success: true, data }
   } catch (error) {
-    console.error('[Company Update] Exception:', error)
     return { errors: { _form: ['Failed to update company: ' + (error instanceof Error ? error.message : 'Unknown error')] } }
   }
 }
