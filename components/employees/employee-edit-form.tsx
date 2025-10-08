@@ -14,25 +14,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToastHelpers } from "@/components/ui/toast";
-import { createEmployeeAction } from "@/lib/services/employees";
+import { updateEmployeeAction, type Employee } from "@/lib/services/employees";
 import { ChevronLeft } from "lucide-react";
 
 const schema = z.object({
   // Account & User
   full_name: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.string().min(1, "Role is required"),
+  role: z.string().optional(),
 
   // Employment & Organization
   department: z.string().optional(),
   employee_number: z.string().optional(),
   job_title: z.string().optional(),
-  employment_type: z.string().min(1, "Employment type is required"),
-  hire_date: z.string().min(1, "Hire date is required"),
+  employment_type: z.string().optional(),
+  employment_status: z.string().optional(),
+  hire_date: z.string().optional(),
 
   // Contact & Address
-  primary_phone: z.string().optional(),
+  phone_primary: z.string().optional(),
   secondary_phone: z.string().optional(),
   date_of_birth: z.string().optional(),
   address_line1: z.string().optional(),
@@ -56,12 +56,13 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-interface EmployeeCreateFormProps {
+interface EmployeeEditFormProps {
+  employee: Employee;
   companyName: string;
-  departments: { id: string; name: string }[];
+  departments?: { id: string; name: string }[];
 }
 
-export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateFormProps) {
+export function EmployeeEditForm({ employee, companyName, departments }: EmployeeEditFormProps) {
   const router = useRouter();
   const toast = useToastHelpers();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,16 +75,16 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      full_name: "",
-      email: "",
-      password: "",
+      full_name: employee.full_name || "",
+      email: employee.email || "",
       role: "",
-      department: "",
-      employee_number: "",
-      job_title: "",
-      employment_type: "",
-      hire_date: "",
-      primary_phone: "",
+      department: employee.department || "",
+      employee_number: employee.employee_number || "",
+      job_title: employee.job_title || "",
+      employment_type: employee.employment_type || "",
+      employment_status: employee.employment_status || "active",
+      hire_date: employee.hire_date ? employee.hire_date.split('T')[0] : "",
+      phone_primary: employee.phone_primary || "",
       secondary_phone: "",
       date_of_birth: "",
       address_line1: "",
@@ -106,25 +107,24 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append('full_name', values.full_name);
+      
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'full_name') return;
         if (value) formData.append(key, String(value));
       });
 
-      const result = await createEmployeeAction(null, formData);
+      const result = await updateEmployeeAction(employee.id, null, formData);
       if ("errors" in result && result.errors) {
         const errorMsg =
           result.errors._form?.[0] ||
           Object.values(result.errors).flat().join(", ");
         toast.error(errorMsg);
       } else {
-        toast.success("Employee created successfully");
+        toast.success("Employee updated successfully");
         router.push("/dashboard/employees");
         router.refresh();
       }
     } catch {
-      toast.error("Failed to create employee");
+      toast.error("Failed to update employee");
     } finally {
       setIsSubmitting(false);
     }
@@ -150,7 +150,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
           <div>
             <h3 className="text-lg font-semibold mb-1">Account & User</h3>
             <p className="text-sm text-muted-foreground">
-              Create the user account that will be linked to the employee.
+              Update the employee&apos;s basic information.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -166,7 +166,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-sm font-medium">Email *</label>
               <Input
                 type="email"
@@ -176,49 +176,6 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               {errors.email && (
                 <span className="text-xs text-destructive">
                   {errors.email.message}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Password *</label>
-              <Input
-                type="password"
-                {...register("password")}
-                placeholder="Min 8 characters"
-              />
-              {errors.password && (
-                <span className="text-xs text-destructive">
-                  {errors.password.message}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Role *</label>
-              <Controller
-                name="role"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="operational_manager">
-                        Operational Manager
-                      </SelectItem>
-                      <SelectItem value="hr_manager">HR Manager</SelectItem>
-                      <SelectItem value="payroll_manager">
-                        Payroll Manager
-                      </SelectItem>
-                      <SelectItem value="system_admin">System Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.role && (
-                <span className="text-xs text-destructive">
-                  {errors.role.message}
                 </span>
               )}
             </div>
@@ -232,7 +189,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               Employment & Organization
             </h3>
             <p className="text-sm text-muted-foreground">
-              Link the employee to the company and define their role.
+              Update the employee&apos;s role and organizational details.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -256,7 +213,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
-                      {departments.map((d) => (
+                      {(departments || []).map((d) => (
                         <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -279,7 +236,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Employment Type *</label>
+              <label className="text-sm font-medium">Employment Type</label>
               <Controller
                 name="employment_type"
                 control={control}
@@ -298,20 +255,30 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                   </Select>
                 )}
               />
-              {errors.employment_type && (
-                <span className="text-xs text-destructive">
-                  {errors.employment_type.message}
-                </span>
-              )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Hire Date *</label>
+              <label className="text-sm font-medium">Employment Status</label>
+              <Controller
+                name="employment_status"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="terminated">Terminated</SelectItem>
+                      <SelectItem value="on_leave">On Leave</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Hire Date</label>
               <Input type="date" {...register("hire_date")} />
-              {errors.hire_date && (
-                <span className="text-xs text-destructive">
-                  {errors.hire_date.message}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -329,7 +296,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               <label className="text-sm font-medium">Primary Phone</label>
               <Input
                 type="tel"
-                {...register("primary_phone")}
+                {...register("phone_primary")}
                 placeholder="+1 (555) 000-0000"
               />
             </div>
@@ -502,10 +469,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Employee"}
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </form>
     </div>
   );
 }
+

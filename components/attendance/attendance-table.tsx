@@ -11,26 +11,28 @@ interface AttendanceTableProps {
   onEdit?: (record: AttendanceRecord) => void
 }
 
-const STATUS_COLORS = {
+const STATUS_COLORS: Record<'present'|'absent'|'late'|'half_day'|'on_leave'|'justified', string> = {
   present: 'bg-green-100 text-green-800',
   absent: 'bg-red-100 text-red-800',
   late: 'bg-yellow-100 text-yellow-800',
   half_day: 'bg-blue-100 text-blue-800',
   on_leave: 'bg-purple-100 text-purple-800',
+  justified: 'bg-gray-100 text-gray-800',
 }
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<'present'|'absent'|'late'|'half_day'|'on_leave'|'justified', string> = {
   present: 'Present',
   absent: 'Absent',
   late: 'Late',
   half_day: 'Half Day',
   on_leave: 'On Leave',
+  justified: 'Justified',
 }
 
 export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
-  const [deleting, setDeleting] = useState<Record<number, boolean>>({})
+  const [deleting, setDeleting] = useState<Record<string, boolean>>({})
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this attendance record?')) return
 
     setDeleting((prev) => ({ ...prev, [id]: true }))

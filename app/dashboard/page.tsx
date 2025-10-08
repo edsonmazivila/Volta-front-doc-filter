@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white text-sm mb-0.5">Timesheets</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">Timesheets</h3>
                         <p className="text-xs text-muted-foreground">Submit and track hours</p>
                       </div>
                     </div>
@@ -114,7 +114,7 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white text-sm mb-0.5">My Paystubs</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">My Paystubs</h3>
                         <p className="text-xs text-muted-foreground">View payment history</p>
                       </div>
                     </div>
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white text-sm mb-0.5">My Documents</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">My Documents</h3>
                         <p className="text-xs text-muted-foreground">Access your files</p>
                       </div>
                     </div>
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white text-sm mb-0.5">Manage Employees</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">Manage Employees</h3>
                         <p className="text-xs text-muted-foreground">Add and update members</p>
                       </div>
                     </div>
@@ -162,7 +162,7 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white text-sm mb-0.5">View Timesheets</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">View Timesheets</h3>
                         <p className="text-xs text-muted-foreground">Review and approve</p>
                       </div>
                     </div>
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white text-sm mb-0.5">Run Payroll</h3>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">Run Payroll</h3>
                         <p className="text-xs text-muted-foreground">Process payments</p>
                       </div>
                     </div>

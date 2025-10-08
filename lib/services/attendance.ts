@@ -14,6 +14,7 @@ import {
   CacheTags,
   fetchWithGracefulFallback,
 } from "@/lib/cache-utils";
+import { toIsoUtc } from "@/lib/utils";
 
 // Get attendance records with optional filters
 export const getAttendanceRecords = cache(
@@ -25,7 +26,7 @@ export const getAttendanceRecords = cache(
         const params = new URLSearchParams();
         if (filters?.month) params.append("month", filters.month);
         if (filters?.employee_id)
-          params.append("employee_id", filters.employee_id.toString());
+          params.append("employee_id", String(filters.employee_id));
         if (filters?.status) params.append("status", filters.status);
 
         const url = `${API_BASE_URL}/api/attendance${
@@ -42,7 +43,29 @@ export const getAttendanceRecords = cache(
 
         if (!res.ok) throw new Error("Failed to fetch attendance");
         const data = await res.json();
-        return data.data || [];
+        const raw = Array.isArray(data) ? data : (data.data || data.records || []);
+        // Normalize fields from various API shapes
+        return raw.map((r: Record<string, unknown>) => {
+          const emp = (r.employee || r.user || r.employee_info) as Record<string, unknown> | undefined
+          const empUser = emp?.user as Record<string, unknown> | undefined
+          const first = empUser?.first_name as string | undefined ?? emp?.first_name as string | undefined
+          const last = empUser?.last_name as string | undefined ?? emp?.last_name as string | undefined
+          const joined = [first, last].filter(Boolean).join(' ')
+          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.employee_name as string | undefined
+          return {
+            id: String(r.id ?? r.attendance_id ?? ''),
+            employee_id: String(r.employee_id ?? r.user_id ?? ''),
+            date: String(r.date ?? r.day ?? ''),
+            status: String(r.status ?? 'present'),
+            clock_in: r.clock_in ?? undefined,
+            clock_out: r.clock_out ?? undefined,
+            hours_worked: r.hours_worked ?? r.hours ?? undefined,
+            justification: r.justification ?? r.reason ?? undefined,
+            employee_name: String(nameField || joined || r.employee_name || `Employee #${r.employee_id ?? r.user_id}`),
+            created_at: r.created_at ?? undefined,
+            updated_at: r.updated_at ?? undefined,
+          }
+        })
       },
       [],
       { errorContext: "getAttendanceRecords" }
@@ -146,8 +169,8 @@ export const getMyAttendance = cache(
 
 // Server Actions
 const attendanceSchema = z.object({
-  employee_id: z.number().positive(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  employee_id: z.string().min(1, 'Employee is required'),
+  date: z.string().min(1, 'Date is required'),
   status: z.enum(["present", "absent", "late", "half_day", "on_leave"]),
   clock_in: z.string().optional(),
   clock_out: z.string().optional(),
@@ -158,6 +181,76 @@ export type ActionResult =
   | { success: true; data?: unknown }
   | { errors: { _form?: string[]; [key: string]: string[] | undefined } };
 
+// My Attendance (current user) Actions
+const myAttendanceSchema = z.object({
+  date: z.string().min(1, 'Date is required'),
+  status: z.enum(["present", "absent", "late", "half_day", "on_leave", "justified"]).optional(),
+  clock_in: z.string().optional(),
+  clock_out: z.string().optional(),
+  justification: z.string().optional(),
+})
+
+export async function createMyAttendanceAction(
+  _prevState: unknown,
+  formData: FormData
+): Promise<ActionResult> {
+  const cookieHeader = await getAuthCookieHeader();
+  const raw = {
+    date: String(formData.get('date') || ''),
+    status: String(formData.get('status') || ''),
+    clock_in: (formData.get('clock_in') as string) || undefined,
+    clock_out: (formData.get('clock_out') as string) || undefined,
+    justification: (formData.get('justification') as string) || undefined,
+  }
+  const parsed = myAttendanceSchema.safeParse(raw)
+  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
+  try {
+    const payload = { ...parsed.data, date: toIsoUtc(parsed.data.date) || parsed.data.date }
+    const res = await fetch(`${API_BASE_URL}/api/attendance/my`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to record attendance'] } }
+    }
+    revalidateEntityMutation('MY_ATTENDANCE')
+    return { success: true }
+  } catch {
+    return { errors: { _form: ['Network error'] } }
+  }
+}
+
+export async function updateMyAttendanceAction(
+  _prevState: unknown,
+  id: string,
+  formData: FormData
+): Promise<ActionResult> {
+  const cookieHeader = await getAuthCookieHeader();
+  const raw = {
+    status: (formData.get('status') as string) || undefined,
+    clock_in: (formData.get('clock_in') as string) || undefined,
+    clock_out: (formData.get('clock_out') as string) || undefined,
+    justification: (formData.get('justification') as string) || undefined,
+  }
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/attendance/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
+      body: JSON.stringify(raw),
+    })
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to update attendance'] } }
+    }
+    revalidateEntityMutation('MY_ATTENDANCE')
+    return { success: true }
+  } catch {
+    return { errors: { _form: ['Network error'] } }
+  }
+}
+
 export async function createAttendanceAction(
   prevState: unknown,
   formData: FormData
@@ -165,7 +258,7 @@ export async function createAttendanceAction(
   const cookieHeader = await getAuthCookieHeader();
 
   const rawData = {
-    employee_id: Number(formData.get("employee_id")),
+    employee_id: String(formData.get("employee_id") || ''),
     date: formData.get("date") as string,
     status: formData.get("status") as string,
     clock_in: (formData.get("clock_in") as string) || undefined,
@@ -179,13 +272,18 @@ export async function createAttendanceAction(
   }
 
   try {
+    const payload = {
+      ...result.data,
+      // Normalize date to ISO UTC to satisfy backend expectations
+      date: toIsoUtc(result.data.date) || result.data.date,
+    }
     const res = await fetch(`${API_BASE_URL}/api/attendance`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(cookieHeader && { Cookie: cookieHeader }),
       },
-      body: JSON.stringify(result.data),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -241,7 +339,7 @@ export async function updateAttendanceAction(
 }
 
 export async function deleteAttendanceAction(
-  id: number
+  id: string
 ): Promise<ActionResult> {
   const cookieHeader = await getAuthCookieHeader();
 
@@ -268,7 +366,7 @@ export async function deleteAttendanceAction(
 }
 
 export async function approveJustificationAction(
-  justificationId: number
+  justificationId: string
 ): Promise<ActionResult> {
   const cookieHeader = await getAuthCookieHeader();
 
@@ -298,7 +396,7 @@ export async function approveJustificationAction(
 }
 
 export async function rejectJustificationAction(
-  justificationId: number
+  justificationId: string
 ): Promise<ActionResult> {
   const cookieHeader = await getAuthCookieHeader();
 

@@ -110,12 +110,12 @@ export function TimesheetFormDialog({
 										<SelectValue placeholder="Select employee" />
 									</SelectTrigger>
 									<SelectContent className="bg-background border-[var(--border)]">
-										{employees.length === 0 ? (
+											{employees.length === 0 ? (
 											<SelectItem value="" disabled>No employees found</SelectItem>
 										) : (
 											employees.map((emp) => (
 												<SelectItem key={emp.id} value={emp.id}>
-													{emp.first_name} {emp.last_name} - {emp.email}
+														{emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim()} - {emp.email}
 												</SelectItem>
 											))
 										)}

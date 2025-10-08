@@ -142,11 +142,15 @@ export const getDepartmentStats = cache(async (): Promise<DepartmentStats> => {
 type ActionResult = { errors: Record<string, string[]> } | { success: true; data?: unknown }
 
 export async function createDepartmentAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+	// Handle duplicate fields (hidden false + checkbox true). Prefer any true value.
+	const isActiveValues = formData.getAll('is_active').map(String)
+	const isActive = isActiveValues.some(v => v === 'true' || v === 'on')
+
 	const parsed = createDepartmentSchema.safeParse({
 		name: formData.get('name'),
 		description: formData.get('description'),
 		manager_id: formData.get('manager_id') || null,
-		is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
+		is_active: isActive,
 	})
 
 	if (!parsed.success) {
@@ -180,11 +184,16 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 }
 
 export async function updateDepartmentAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+	// Prefer any true value if multiple are present; undefined if no field present
+	const isActiveValues = formData.getAll('is_active').map(String)
+	const hasIsActiveField = isActiveValues.length > 0
+	const isActive = hasIsActiveField ? isActiveValues.some(v => v === 'true' || v === 'on') : undefined
+
 	const parsed = updateDepartmentSchema.safeParse({
 		name: formData.get('name') || undefined,
 		description: formData.get('description') || undefined,
 		manager_id: formData.get('manager_id') || null,
-		is_active: formData.get('is_active') ? formData.get('is_active') === 'true' || formData.get('is_active') === 'on' : undefined,
+		is_active: isActive,
 	})
 
 	if (!parsed.success) {

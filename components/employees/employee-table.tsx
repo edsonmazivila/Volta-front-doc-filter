@@ -3,12 +3,10 @@ import { useState, useMemo } from "react";
 import {
   type Employee,
   type EmployeeListParams,
-  updateEmployeeAction,
   deleteEmployeeAction,
 } from "@/lib/services/employees";
 import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/search-input";
-import { EditEmployeeDialog } from "./edit-employee-dialog";
 import { DeleteEmployeeDialog } from "./delete-employee-dialog";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
@@ -29,7 +27,6 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const [sort, setSort] = useState<EmployeeListParams["sort"]>("name");
   const [order, setOrder] = useState<EmployeeListParams["order"]>("asc");
 
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(
     null
   );
@@ -38,28 +35,6 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   // Bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkDelete, setShowBulkDelete] = useState(false);
-
-
-  const handleEdit = async (employee: Employee, updates: Partial<Employee>) => {
-    setIsSubmitting(true);
-    try {
-      const form = new FormData();
-      if (typeof updates.first_name !== "undefined") form.append("first_name", String(updates.first_name ?? ""));
-      if (typeof updates.last_name !== "undefined") form.append("last_name", String(updates.last_name ?? ""));
-      if (typeof updates.email !== "undefined") form.append("email", String(updates.email ?? ""));
-      if (typeof updates.department !== "undefined") form.append("department", String(updates.department ?? ""));
-      if (typeof updates.is_active !== "undefined") form.append("is_active", updates.is_active ? "true" : "false");
-      const res = await updateEmployeeAction(employee.id, null, form);
-      if ("errors" in res) throw new Error("validation");
-      showToast({ type: "success", message: "Employee updated successfully" });
-      setEditingEmployee(null);
-      router.refresh();
-    } catch {
-      showToast({ type: "error", message: "Failed to update employee" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleDelete = async (employee: Employee) => {
     setIsSubmitting(true);
@@ -143,7 +118,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
     if (query) {
       const lowerQuery = query.toLowerCase();
       filtered = filtered.filter((e) =>
-        `${e.first_name} ${e.last_name} ${e.email} ${e.department || ""}`
+        `${e.full_name} ${e.email} ${e.department || ""} ${e.job_title || ""}`
           .toLowerCase()
           .includes(lowerQuery)
       );
@@ -167,9 +142,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
 
       switch (sort) {
         case "name":
-          compareValue = `${a.first_name} ${a.last_name}`.localeCompare(
-            `${b.first_name} ${b.last_name}`
-          );
+          compareValue = (a.full_name || '').localeCompare(b.full_name || '');
           break;
         case "status":
           compareValue = a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1;
@@ -317,7 +290,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                     />
                   </td>
                   <td className="p-3">
-                    {e.first_name} {e.last_name}
+                    {e.full_name}
                   </td>
                   <td className="p-3">{e.email}</td>
                   <td className="p-3">{e.department || "-"}</td>
@@ -337,7 +310,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => setEditingEmployee(e)}
+                        onClick={() => router.push(`/dashboard/employees/${e.id}`)}
                       >
                         Edit
                       </Button>
@@ -357,17 +330,6 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
         </table>
       </div>
 
-      {/* Edit Dialog */}
-      {editingEmployee && (
-        <EditEmployeeDialog
-          employee={editingEmployee}
-          open={!!editingEmployee}
-          onOpenChange={(open) => !open && setEditingEmployee(null)}
-          onSave={(updates) => handleEdit(editingEmployee, updates)}
-          isSubmitting={isSubmitting}
-        />
-      )}
-
       {/* Delete Confirmation Dialog */}
       {deletingEmployee && (
         <DeleteEmployeeDialog
@@ -384,10 +346,9 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
         <DeleteEmployeeDialog
           employee={{
             id: "",
-            first_name: `${selectedIds.size} employees`,
-            last_name: "",
+            full_name: `${selectedIds.size} employees`,
             email: "",
-            department: "",
+            employment_status: "active",
             is_active: true,
           }}
           open={showBulkDelete}

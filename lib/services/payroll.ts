@@ -52,7 +52,7 @@ const processPayrollSchema = z.object({
  */
 export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
   const cookieHeader = await getAuthCookieHeader()
-  const res = await fetch(`${API_BASE_URL}/api/dashboard/payroll`, {
+  const res = await fetch(`${API_BASE_URL}/api/payroll/history`, {
     headers: {
       'Content-Type': 'application/json',
       ...(cookieHeader && { Cookie: cookieHeader }),
@@ -77,6 +77,7 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
     id?: string | number;
     run_id?: string | number;
     uuid?: string;
+    date?: string;
     pay_period_start?: string;
     periodStart?: string;
     period_start?: string;
@@ -89,12 +90,15 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
     status?: string;
     total_hours?: number;
     totalHours?: number;
+    employees?: number;
     gross_amount?: number;
     grossAmount?: number;
     gross?: number;
+    gross_pay?: number;
     net_amount?: number;
     netAmount?: number;
     net?: number;
+    net_pay?: number;
     employees_count?: number;
     employeesCount?: number;
   }
@@ -102,15 +106,15 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
     id: String(r.id ?? r.run_id ?? r.uuid ?? ''),
     periodStart: String(r.pay_period_start ?? r.periodStart ?? r.period_start ?? r.start ?? ''),
     periodEnd: String(r.pay_period_end ?? r.periodEnd ?? r.period_end ?? r.end ?? ''),
-    payDate: r.pay_date ? String(r.pay_date) : undefined,
+    payDate: r.pay_date ? String(r.pay_date) : (r.date ? String(r.date) : undefined),
     status: r.status ? String(r.status) : undefined,
     totalHours: Number(r.total_hours ?? r.totalHours ?? 0) || 0,
-    grossAmount: Number(r.gross_amount ?? r.grossAmount ?? r.gross ?? 0) || 0,
-    netAmount: r.net_amount !== undefined || r.netAmount !== undefined || r.net !== undefined
-      ? Number(r.net_amount ?? r.netAmount ?? r.net ?? 0) || 0
+    grossAmount: Number(r.gross_amount ?? r.grossAmount ?? r.gross ?? r.gross_pay ?? 0) || 0,
+    netAmount: (r.net_amount !== undefined || r.netAmount !== undefined || r.net !== undefined || r.net_pay !== undefined)
+      ? Number(r.net_amount ?? r.netAmount ?? r.net ?? r.net_pay ?? 0) || 0
       : undefined,
-    employeesCount: r.employees_count !== undefined || r.employeesCount !== undefined
-      ? Number(r.employees_count ?? r.employeesCount ?? 0) || 0
+    employeesCount: (r.employees_count !== undefined || r.employeesCount !== undefined || r.employees !== undefined)
+      ? Number(r.employees_count ?? r.employeesCount ?? r.employees ?? 0) || 0
       : undefined,
   }))
 })

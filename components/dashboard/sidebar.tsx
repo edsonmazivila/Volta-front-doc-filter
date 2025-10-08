@@ -47,6 +47,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'Self Service',
     items: [
       { href: '/dashboard/paystubs', label: 'My Paystubs', icon: FileCheck },
+      { href: '/dashboard/my-attendance', label: 'My Attendance', icon: Clock },
       { href: '/dashboard/my-leaves', label: 'My Leaves', icon: CalendarCheck },
       { href: '/dashboard/my-documents', label: 'My Documents', icon: FolderOpen },
     ]
@@ -90,7 +91,9 @@ export function Sidebar() {
   const { canAccessPage } = usePermissions()
 
   // Compute filtered sections directly each render to reflect current role immediately
+  const hideSelfService = user?.role === 'system_admin'
   const filteredSections = NAV_SECTIONS
+    .filter(section => !(hideSelfService && section.title === 'Self Service'))
     .map(section => ({
       ...section,
       items: section.items.filter(item => canAccessPage(item.href))
@@ -167,7 +170,9 @@ function SidebarDrawer() {
   const { canAccessPage } = usePermissions()
 
   // Compute filtered sections directly each render
+  const hideSelfService = user?.role === 'system_admin'
   const filteredSections = NAV_SECTIONS
+    .filter(section => !(hideSelfService && section.title === 'Self Service'))
     .map(section => ({
       ...section,
       items: section.items.filter(item => canAccessPage(item.href))

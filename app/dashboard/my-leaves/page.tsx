@@ -1,11 +1,11 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
-import { requireUser } from '@/lib/auth/dal'
+import { requireRole } from '@/lib/rbac/server'
 import { getMyLeaveRequests, getLeaveBalances } from '@/lib/services/leaves'
 import { MyLeavesSection } from '@/components/leaves/my-leaves-section'
 
 export default async function MyLeavesPage() {
-  await requireUser()
+  await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
   const [requests, balances] = await Promise.all([
     getMyLeaveRequests().catch(() => []),
     getLeaveBalances().catch(() => []),

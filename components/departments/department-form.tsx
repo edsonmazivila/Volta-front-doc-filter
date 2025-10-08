@@ -31,16 +31,28 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 	const action = isEditing ? updateAction : createAction
 	const pending = isEditing ? updatePending : createPending
 
+	// Stabilize callbacks to avoid effect loops from changing function identities
+	const onSuccessRef = React.useRef(onSuccess)
+	const showToastRef = React.useRef(showToast)
+	const isEditingRef = React.useRef(isEditing)
+
 	React.useEffect(() => {
-		if (state && 'success' in state && state.success) {
-			showToast({
-				type: 'success',
-				message: isEditing ? 'Department updated successfully' : 'Department created successfully',
-				title: 'Success'
-			})
-			onSuccess()
-		}
-	}, [state, isEditing, showToast, onSuccess])
+		onSuccessRef.current = onSuccess
+		showToastRef.current = showToast
+		isEditingRef.current = isEditing
+	}, [onSuccess, showToast, isEditing])
+
+	// Only react to success flag change to prevent infinite re-renders
+	const isSuccess = !!(state && 'success' in state && state.success)
+	React.useEffect(() => {
+		if (!isSuccess) return
+		showToastRef.current({
+			type: 'success',
+			message: isEditingRef.current ? 'Department updated successfully' : 'Department created successfully',
+			title: 'Success',
+		})
+		onSuccessRef.current()
+	}, [isSuccess])
 
 	return (
 		<form action={action} className='space-y-4'>
@@ -98,6 +110,8 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 			</div>
 
 			<div className='flex items-center gap-2'>
+				{/* Ensure a value is always submitted when checkbox is unchecked */}
+				<input type='hidden' name='is_active' value='false' />
 				<input
 					id='is_active'
 					name='is_active'

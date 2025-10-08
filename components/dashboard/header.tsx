@@ -1,9 +1,10 @@
 "use client"
 import Link from 'next/link'
+import React from 'react'
 import { ThemeToggle } from '@/components/dashboard/theme-toggle'
-import { Button } from '@/components/ui'
 import { LogoutButton } from '@/components/dashboard/logout-button'
-import { Bell, Settings } from 'lucide-react'
+import { Settings } from 'lucide-react'
+import { NotificationsMenu } from '@/components/dashboard/notifications-menu'
 import { useSession } from '@/components/auth/session-context'
 import {
   DropdownMenu,
@@ -54,25 +55,7 @@ export function Header({ title }: { title: string }) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button aria-label='Notifications' className='rounded-full p-1 hover:bg-accent focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'>
-                <Bell size={16} />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-80'>
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-              <div className='max-h-64 overflow-auto divide-y divide-[var(--border)]'>
-                <div className='px-2 py-2 text-sm opacity-70'>No notifications</div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Button variant='ghost' className='px-2 py-0 h-auto text-xs' asChild>
-                  <Link href='/notifications'>View all</Link>
-                </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationsMenu />
         </div>
       </div>
     </header>

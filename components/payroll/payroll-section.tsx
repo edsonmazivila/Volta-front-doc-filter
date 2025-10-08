@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { Button, Skeleton } from '@/components/ui'
+import { Button } from '@/components/ui'
+import { formatNumberFixed } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useToastHelpers } from '@/components/ui/toast'
 import { usePermissions } from '@/lib/rbac/hooks'
@@ -126,78 +127,103 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
     }
   }
 
-  return (
-    <div className='grid gap-4'>
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
-        <div className='flex flex-col gap-1'>
-          <label className='text-sm'>Period start</label>
-          <input
-            type='date'
-            className='w-full border rounded-md px-3 py-2 bg-background'
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className='flex flex-col gap-1'>
-          <label className='text-sm'>Period end</label>
-          <input
-            type='date'
-            className='w-full border rounded-md px-3 py-2 bg-background'
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-        <div className='flex items-center flex-wrap gap-2 justify-end w-full'>
-          {isPayrollActor && (
-            <Button onClick={handleProcess} disabled={isSubmitting}>
-              {isSubmitting ? 'Processing…' : 'Calculate'}
-            </Button>
-          )}
-          {isPayrollActor && (
-            <Button variant='secondary' onClick={handleRun}>
-              Run
-            </Button>
-          )}
-          {isPayrollActor && (
-            <Button variant='outline' onClick={() => handleExport('excel')}>
-              Export Excel
-            </Button>
-          )}
-          {isPayrollActor && (
-            <Button variant='outline' onClick={() => handleExport('bci')}>
-              Export BCI
-            </Button>
-          )}
-        </div>
-      </div>
+  function formatNumber(n?: number) {
+    return formatNumberFixed(n)
+  }
 
-      <div className='flex items-center justify-between gap-3 flex-wrap'>
-        <h2 className='text-sm font-medium'>Recent Runs</h2>
-      </div>
+  function StatusBadge({ status }: { status?: string }) {
+    const s = (status || '—').toLowerCase()
+    const map: Record<string, string> = {
+      processed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      calculated: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      failed: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+    }
+    const cls = map[s] || 'bg-muted text-foreground'
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
+        {status || '—'}
+      </span>
+    )
+  }
+
+  return (
+		<div className='grid gap-4'>
+			{/* Header with period selection and actions */}
+			<div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
+				<h2 className='text-base font-semibold tracking-tight'>Payroll Processing</h2>
+				<div className='flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3 w-full md:w-auto'>
+					<div className='flex-1 min-w-[180px]'>
+						<label className='block text-xs text-muted-foreground mb-1'>Period start</label>
+						<input
+							type='date'
+							className='w-full border rounded-md px-3 py-2 bg-background'
+							value={startDate}
+							onChange={(e) => setStartDate(e.target.value)}
+						/>
+					</div>
+					<div className='flex-1 min-w-[180px]'>
+						<label className='block text-xs text-muted-foreground mb-1'>Period end</label>
+						<input
+							type='date'
+							className='w-full border rounded-md px-3 py-2 bg-background'
+							value={endDate}
+							onChange={(e) => setEndDate(e.target.value)}
+						/>
+					</div>
+					<div className='flex items-center gap-2 sm:ml-auto'>
+						{isPayrollActor && (
+							<Button onClick={handleProcess} disabled={isSubmitting}>
+								{isSubmitting ? 'Processing…' : 'Calculate'}
+							</Button>
+						)}
+						{isPayrollActor && (
+							<Button variant='secondary' onClick={handleRun}>
+								Run
+							</Button>
+						)}
+						{isPayrollActor && (
+							<Button variant='outline' onClick={() => handleExport('excel')}>
+								Export Excel
+							</Button>
+						)}
+						{isPayrollActor && (
+							<Button variant='outline' onClick={() => handleExport('bci')}>
+								Export BCI
+							</Button>
+						)}
+					</div>
+				</div>
+			</div>
+
+			<div className='flex items-center justify-between gap-3 flex-wrap'>
+				<h2 className='text-sm font-medium'>Recent Runs</h2>
+			</div>
 
       <div className='grid gap-2'>
         {runs.length > 0 ? (
-          <div className='w-full overflow-x-auto'>
+          <div className='w-full overflow-x-auto rounded-lg border border-border bg-card shadow-sm'>
             <table className='w-full text-sm'>
-              <thead className='text-left text-muted-foreground'>
+              <thead className='text-left text-muted-foreground bg-muted/60'>
                 <tr>
-                  <th className='py-2 px-2'>Pay Date</th>
-                  <th className='py-2 px-2'>Employees</th>
-                  <th className='py-2 px-2'>Gross Pay</th>
-                  <th className='py-2 px-2'>Net Pay</th>
-                  <th className='py-2 px-2'>Status</th>
-                  <th className='py-2 px-2'>Actions</th>
+                  <th className='py-2.5 px-3 font-medium'>Pay Date</th>
+                  <th className='py-2.5 px-3 font-medium'>Employees</th>
+                  <th className='py-2.5 px-3 font-medium'>Gross Pay</th>
+                  <th className='py-2.5 px-3 font-medium'>Net Pay</th>
+                  <th className='py-2.5 px-3 font-medium'>Status</th>
+                  <th className='py-2.5 px-3 font-medium text-right'>Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {runs.map((r) => (
-                  <tr key={r.id} className='border-t'>
-                    <td className='py-2 px-2'>{r.payDate || '—'}</td>
-                    <td className='py-2 px-2'>{(r.employeesCount ?? 0).toLocaleString()}</td>
-                    <td className='py-2 px-2'>{(r.grossAmount ?? 0).toLocaleString()}</td>
-                    <td className='py-2 px-2'>{(r.netAmount ?? 0).toLocaleString()}</td>
-                    <td className='py-2 px-2'>{r.status || '—'}</td>
-                    <td className='py-2 px-2 whitespace-nowrap'>
+              <tbody className='divide-y divide-border'>
+                {runs.map((r, idx) => (
+                  <tr key={r.id} className={idx % 2 === 0 ? 'hover:bg-muted/40' : 'bg-muted/20 hover:bg-muted/40'}>
+                    <td className='py-2.5 px-3'>{r.payDate || '—'}</td>
+                    <td className='py-2.5 px-3'>{formatNumber(r.employeesCount)}</td>
+                    <td className='py-2.5 px-3 text-emerald-600 dark:text-emerald-400'>{formatNumber(r.grossAmount)}</td>
+                    <td className='py-2.5 px-3 text-sky-600 dark:text-sky-400'>{formatNumber(r.netAmount)}</td>
+                    <td className='py-2.5 px-3'>
+                      <StatusBadge status={r.status} />
+                    </td>
+                    <td className='py-2.5 px-3 whitespace-nowrap text-right'>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant='outline' aria-label='Actions'>

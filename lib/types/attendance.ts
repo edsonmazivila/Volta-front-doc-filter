@@ -1,9 +1,9 @@
 export interface AttendanceRecord {
-  id: number
-  employee_id: number
+  id: string
+  employee_id: string
   employee_name?: string
   date: string
-  status: 'present' | 'absent' | 'late' | 'half_day' | 'on_leave'
+  status: 'present' | 'absent' | 'late' | 'half_day' | 'on_leave' | 'justified'
   clock_in?: string
   clock_out?: string
   hours_worked?: number
@@ -22,9 +22,9 @@ export interface AttendanceStats {
 }
 
 export interface AttendanceJustification {
-  id: number
-  attendance_id: number
-  employee_id: number
+  id: string
+  attendance_id: string
+  employee_id: string
   employee_name?: string
   date: string
   reason: string
@@ -35,7 +35,7 @@ export interface AttendanceJustification {
 }
 
 export interface CreateAttendanceInput {
-  employee_id: number
+  employee_id: string
   date: string
   status: 'present' | 'absent' | 'late' | 'half_day' | 'on_leave'
   clock_in?: string
@@ -52,6 +52,6 @@ export interface UpdateAttendanceInput {
 
 export interface AttendanceFilters {
   month?: string
-  employee_id?: number
+  employee_id?: string
   status?: string
 }

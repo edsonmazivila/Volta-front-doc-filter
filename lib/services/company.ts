@@ -34,8 +34,31 @@ export interface PaySchedule {
 export interface LeavePolicy {
   id: string
   name: string
+  description?: string
+  policy_type: string
   leave_type: string
+  company_id?: string
   annual_allocation_days: number
+  accrual_rate: number
+  accrual_frequency: string
+  allow_carry_over: boolean
+  max_carry_over_days: number
+  carry_over_expiry_months: number
+  min_request_days: number
+  max_request_days: number
+  max_consecutive_days: number
+  min_advance_notice_days: number
+  requires_manager_approval: boolean
+  requires_hr_approval: boolean
+  auto_approval_threshold: number
+  allow_half_days: boolean
+  allow_negative_balance: boolean
+  effective_date: string
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
+  created_by?: string
+  updated_by?: string
 }
 
 export interface CompanyDocument {
@@ -98,8 +121,26 @@ const payScheduleSchema = z.object({
 
 const leavePolicySchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  policy_type: z.string().min(1, 'Policy type is required'),
   leave_type: z.string().min(1, 'Leave type is required'),
   annual_allocation_days: z.number().min(0, 'Allocation days must be positive'),
+  accrual_rate: z.number().min(0, 'Accrual rate must be positive'),
+  accrual_frequency: z.string().min(1, 'Accrual frequency is required'),
+  allow_carry_over: z.boolean().default(false),
+  max_carry_over_days: z.number().min(0).default(0),
+  carry_over_expiry_months: z.number().min(0).default(0),
+  min_request_days: z.number().min(0).default(0),
+  max_request_days: z.number().min(0).default(0),
+  max_consecutive_days: z.number().min(0).default(0),
+  min_advance_notice_days: z.number().min(0).default(0),
+  requires_manager_approval: z.boolean().default(false),
+  requires_hr_approval: z.boolean().default(false),
+  auto_approval_threshold: z.number().min(0).default(0),
+  allow_half_days: z.boolean().default(false),
+  allow_negative_balance: z.boolean().default(false),
+  effective_date: z.string().min(1, 'Effective date is required'),
+  is_active: z.boolean().default(true),
 })
 
 const updateCompanyDocumentSchema = z.object({
@@ -152,7 +193,9 @@ export const getCompany = cache(async (): Promise<CompanyProfile | null> => {
 export const getPaySchedules = cache(async (): Promise<PaySchedule[]> => {
   try {
     const cookieHeader = await getAuthCookieHeader()
-    const res = await fetch(`${API_BASE_URL}/api/pay-schedules`, {
+    const url = `${API_BASE_URL}/api/pay-schedules`
+    console.log('[getPaySchedules] GET', url)
+    const res = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
         ...(cookieHeader && { Cookie: cookieHeader }),
@@ -160,9 +203,11 @@ export const getPaySchedules = cache(async (): Promise<PaySchedule[]> => {
       next: { tags: ['pay-schedules'], revalidate: 60 },
     })
 
+    console.log('[getPaySchedules] status', res.status, res.statusText)
     if (!res.ok) return []
 
     const json = await res.json().catch(() => ({}))
+    console.log('[getPaySchedules] keys', Object.keys(json || {}))
     interface RawPaySchedule {
       id?: string | number;
       name?: string;
@@ -171,7 +216,7 @@ export const getPaySchedules = cache(async (): Promise<PaySchedule[]> => {
       start?: string;
       is_active?: boolean;
     }
-    const list: RawPaySchedule[] = Array.isArray(json) ? json : json.data || json.pay_schedules || []
+    const list: RawPaySchedule[] = Array.isArray(json) ? json : json.pay_schedules || json.data || []
 
     return list.map((s) => ({
       id: String(s.id || ''),
@@ -202,18 +247,64 @@ export const getLeavePolicies = cache(async (): Promise<LeavePolicy[]> => {
     interface RawLeavePolicy {
       id?: string | number;
       name?: string;
+      description?: string;
+      policy_type?: string;
       leave_type?: string;
       type?: string;
+      company_id?: string;
       annual_allocation_days?: number;
       allocation_days?: number;
+      accrual_rate?: number;
+      accrual_frequency?: string;
+      allow_carry_over?: boolean;
+      max_carry_over_days?: number;
+      carry_over_expiry_months?: number;
+      min_request_days?: number;
+      max_request_days?: number;
+      max_consecutive_days?: number;
+      min_advance_notice_days?: number;
+      requires_manager_approval?: boolean;
+      requires_hr_approval?: boolean;
+      auto_approval_threshold?: number;
+      allow_half_days?: boolean;
+      allow_negative_balance?: boolean;
+      effective_date?: string;
+      is_active?: boolean;
+      created_at?: string;
+      updated_at?: string;
+      created_by?: string;
+      updated_by?: string;
     }
-    const list: RawLeavePolicy[] = Array.isArray(json) ? json : json.data || json.policies || []
+    const list: RawLeavePolicy[] = Array.isArray(json) ? json : json.policies || json.data || []
 
     return list.map((p) => ({
       id: String(p.id || ''),
       name: String(p.name || ''),
+      description: p.description || '',
+      policy_type: String(p.policy_type || 'company'),
       leave_type: String(p.leave_type || p.type || ''),
+      company_id: p.company_id || '',
       annual_allocation_days: Number(p.annual_allocation_days ?? p.allocation_days ?? 0) || 0,
+      accrual_rate: Number(p.accrual_rate ?? 0) || 0,
+      accrual_frequency: String(p.accrual_frequency || 'monthly'),
+      allow_carry_over: Boolean(p.allow_carry_over),
+      max_carry_over_days: Number(p.max_carry_over_days ?? 0) || 0,
+      carry_over_expiry_months: Number(p.carry_over_expiry_months ?? 0) || 0,
+      min_request_days: Number(p.min_request_days ?? 0) || 0,
+      max_request_days: Number(p.max_request_days ?? 0) || 0,
+      max_consecutive_days: Number(p.max_consecutive_days ?? 0) || 0,
+      min_advance_notice_days: Number(p.min_advance_notice_days ?? 0) || 0,
+      requires_manager_approval: Boolean(p.requires_manager_approval),
+      requires_hr_approval: Boolean(p.requires_hr_approval),
+      auto_approval_threshold: Number(p.auto_approval_threshold ?? 0) || 0,
+      allow_half_days: Boolean(p.allow_half_days),
+      allow_negative_balance: Boolean(p.allow_negative_balance),
+      effective_date: String(p.effective_date || ''),
+      is_active: Boolean(p.is_active ?? true),
+      created_at: p.created_at || '',
+      updated_at: p.updated_at || '',
+      created_by: p.created_by || '',
+      updated_by: p.updated_by || '',
     }))
   } catch {
     return []
@@ -340,10 +431,12 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
 }
 
 export async function createPayScheduleAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const startDateStr = (formData.get('start_date') as string) || ''
+  const startDateIso = startDateStr ? new Date(startDateStr).toISOString() : ''
   const parsed = payScheduleSchema.safeParse({
-    name: formData.get('name'),
-    frequency: formData.get('frequency'),
-    start_date: formData.get('start_date'),
+    name: String(formData.get('name') || ''),
+    frequency: String(formData.get('frequency') || ''),
+    start_date: startDateIso,
     is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
   })
 
@@ -353,7 +446,9 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 
   try {
     const cookieHeader = await getAuthCookieHeader()
-    const res = await fetch(`${API_BASE_URL}/api/pay-schedules`, {
+    const url = `${API_BASE_URL}/api/pay-schedules`
+    console.log('[createPayScheduleAction] POST', url, parsed.data)
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -363,13 +458,16 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
     })
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({}))
+      const responseText = await res.text()
+      console.error('[createPayScheduleAction] error', res.status, responseText)
+      let error
+      try { error = JSON.parse(responseText) } catch { error = { message: responseText } }
       return { errors: { _form: [error.message || 'Failed to create pay schedule'] } }
     }
 
     const data = await res.json()
-    // Revalidate company and all dependent caches
-    revalidateEntityMutation('COMPANY')
+    // Revalidate caches so lists update immediately
+    revalidateEntityMutation('COMPANY', { additionalTags: ['pay-schedules'] })
 
     return { success: true, data }
   } catch {
@@ -378,10 +476,12 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 }
 
 export async function updatePayScheduleAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const startDateStr = (formData.get('start_date') as string) || ''
+  const startDateIso = startDateStr ? new Date(startDateStr).toISOString() : ''
   const parsed = payScheduleSchema.safeParse({
-    name: formData.get('name'),
-    frequency: formData.get('frequency'),
-    start_date: formData.get('start_date'),
+    name: String(formData.get('name') || ''),
+    frequency: String(formData.get('frequency') || ''),
+    start_date: startDateIso,
     is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
   })
 
@@ -391,7 +491,9 @@ export async function updatePayScheduleAction(id: string, prevState: unknown, fo
 
   try {
     const cookieHeader = await getAuthCookieHeader()
-    const res = await fetch(`${API_BASE_URL}/api/pay-schedules/${id}`, {
+    const url = `${API_BASE_URL}/api/pay-schedules/${id}`
+    console.log('[updatePayScheduleAction] PUT', url, parsed.data)
+    const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -401,13 +503,16 @@ export async function updatePayScheduleAction(id: string, prevState: unknown, fo
     })
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({}))
+      const responseText = await res.text()
+      console.error('[updatePayScheduleAction] error', res.status, responseText)
+      let error
+      try { error = JSON.parse(responseText) } catch { error = { message: responseText } }
       return { errors: { _form: [error.message || 'Failed to update pay schedule'] } }
     }
 
     const data = await res.json()
-    // Revalidate company and all dependent caches
-    revalidateEntityMutation('COMPANY')
+    // Revalidate caches so lists update immediately
+    revalidateEntityMutation('COMPANY', { additionalTags: ['pay-schedules'] })
 
     return { success: true, data }
   } catch {
@@ -417,7 +522,9 @@ export async function updatePayScheduleAction(id: string, prevState: unknown, fo
 
 export async function deletePayScheduleAction(id: string): Promise<void> {
   const cookieHeader = await getAuthCookieHeader()
-  const res = await fetch(`${API_BASE_URL}/api/pay-schedules/${id}`, {
+  const url = `${API_BASE_URL}/api/pay-schedules/${id}`
+  console.log('[deletePayScheduleAction] DELETE', url)
+  const res = await fetch(url, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -426,27 +533,63 @@ export async function deletePayScheduleAction(id: string): Promise<void> {
   })
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}))
+    const responseText = await res.text()
+    console.error('[deletePayScheduleAction] error', res.status, responseText)
+    let error
+    try { error = JSON.parse(responseText) } catch { error = { message: responseText } }
     throw new Error(error.message || 'Failed to delete pay schedule')
   }
 
-  // Revalidate company and all dependent caches
-  revalidateEntityMutation('COMPANY')
+  // Revalidate caches so lists update immediately
+  revalidateEntityMutation('COMPANY', { additionalTags: ['pay-schedules'] })
 }
 
 export async function createLeavePolicyAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
-  const parsed = leavePolicySchema.safeParse({
+  console.log('=== SERVER ACTION: createLeavePolicyAction ===')
+  
+  const effectiveDateStr = formData.get('effective_date') as string
+  const effectiveDate = effectiveDateStr ? new Date(effectiveDateStr).toISOString() : new Date().toISOString()
+  
+  const dataToValidate = {
     name: formData.get('name'),
+    description: formData.get('description') || '',
+    policy_type: formData.get('policy_type') || 'company',
     leave_type: formData.get('leave_type'),
     annual_allocation_days: Number(formData.get('annual_allocation_days')),
-  })
+    accrual_rate: Number(formData.get('accrual_rate')),
+    accrual_frequency: formData.get('accrual_frequency') || 'monthly',
+    allow_carry_over: formData.get('allow_carry_over') === 'true' || formData.get('allow_carry_over') === 'on',
+    max_carry_over_days: Number(formData.get('max_carry_over_days') || 0),
+    carry_over_expiry_months: Number(formData.get('carry_over_expiry_months') || 0),
+    min_request_days: Number(formData.get('min_request_days') || 0),
+    max_request_days: Number(formData.get('max_request_days') || 0),
+    max_consecutive_days: Number(formData.get('max_consecutive_days') || 0),
+    min_advance_notice_days: Number(formData.get('min_advance_notice_days') || 0),
+    requires_manager_approval: formData.get('requires_manager_approval') === 'true' || formData.get('requires_manager_approval') === 'on',
+    requires_hr_approval: formData.get('requires_hr_approval') === 'true' || formData.get('requires_hr_approval') === 'on',
+    auto_approval_threshold: Number(formData.get('auto_approval_threshold') || 0),
+    allow_half_days: formData.get('allow_half_days') === 'true' || formData.get('allow_half_days') === 'on',
+    allow_negative_balance: formData.get('allow_negative_balance') === 'true' || formData.get('allow_negative_balance') === 'on',
+    effective_date: effectiveDate,
+    is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on' || !formData.get('is_active'),
+  }
+  
+  console.log('Data to validate:', dataToValidate)
+
+  const parsed = leavePolicySchema.safeParse(dataToValidate)
 
   if (!parsed.success) {
+    console.error('Validation failed:', parsed.error.flatten())
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
+  console.log('Validation passed! Parsed data:', parsed.data)
+
   try {
     const cookieHeader = await getAuthCookieHeader()
+    console.log('Sending POST to:', `${API_BASE_URL}/api/leave-policies`)
+    console.log('Request body:', JSON.stringify(parsed.data, null, 2))
+    
     const res = await fetch(`${API_BASE_URL}/api/leave-policies`, {
       method: 'POST',
       headers: {
@@ -456,26 +599,61 @@ export async function createLeavePolicyAction(prevState: unknown, formData: Form
       body: JSON.stringify(parsed.data),
     })
 
+    console.log('Response status:', res.status, res.statusText)
+    const responseText = await res.text()
+    console.log('Response body:', responseText)
+
     if (!res.ok) {
-      const error = await res.json().catch(() => ({}))
-      return { errors: { _form: [error.message || 'Failed to create leave policy'] } }
+      let error
+      try {
+        error = JSON.parse(responseText)
+      } catch {
+        error = { message: `Server error (${res.status}): ${responseText}` }
+      }
+      console.error('Server error response:', error)
+      return { errors: { _form: [error.message || error.error || `Failed to create leave policy (${res.status})`] } }
     }
 
-    const data = await res.json()
-    // Revalidate company and all dependent caches
-    revalidateEntityMutation('COMPANY')
+    const data = JSON.parse(responseText)
+    console.log('Success response:', data)
+    
+    // Revalidate caches so lists update immediately
+    revalidateEntityMutation('COMPANY', { additionalTags: ['leave-policies'] })
+    console.log('Cache revalidated')
 
     return { success: true, data }
-  } catch {
-    return { errors: { _form: ['Failed to create leave policy'] } }
+  } catch (error) {
+    console.error('Exception in createLeavePolicyAction:', error)
+    return { errors: { _form: ['Failed to create leave policy: ' + (error instanceof Error ? error.message : 'Unknown error')] } }
   }
 }
 
 export async function updateLeavePolicyAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const effectiveDateStr = formData.get('effective_date') as string
+  const effectiveDate = effectiveDateStr ? new Date(effectiveDateStr).toISOString() : new Date().toISOString()
+  
   const parsed = leavePolicySchema.safeParse({
     name: formData.get('name'),
+    description: formData.get('description') || '',
+    policy_type: formData.get('policy_type') || 'company',
     leave_type: formData.get('leave_type'),
     annual_allocation_days: Number(formData.get('annual_allocation_days')),
+    accrual_rate: Number(formData.get('accrual_rate')),
+    accrual_frequency: formData.get('accrual_frequency') || 'monthly',
+    allow_carry_over: formData.get('allow_carry_over') === 'true' || formData.get('allow_carry_over') === 'on',
+    max_carry_over_days: Number(formData.get('max_carry_over_days') || 0),
+    carry_over_expiry_months: Number(formData.get('carry_over_expiry_months') || 0),
+    min_request_days: Number(formData.get('min_request_days') || 0),
+    max_request_days: Number(formData.get('max_request_days') || 0),
+    max_consecutive_days: Number(formData.get('max_consecutive_days') || 0),
+    min_advance_notice_days: Number(formData.get('min_advance_notice_days') || 0),
+    requires_manager_approval: formData.get('requires_manager_approval') === 'true' || formData.get('requires_manager_approval') === 'on',
+    requires_hr_approval: formData.get('requires_hr_approval') === 'true' || formData.get('requires_hr_approval') === 'on',
+    auto_approval_threshold: Number(formData.get('auto_approval_threshold') || 0),
+    allow_half_days: formData.get('allow_half_days') === 'true' || formData.get('allow_half_days') === 'on',
+    allow_negative_balance: formData.get('allow_negative_balance') === 'true' || formData.get('allow_negative_balance') === 'on',
+    effective_date: effectiveDate,
+    is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on' || !formData.get('is_active'),
   })
 
   if (!parsed.success) {

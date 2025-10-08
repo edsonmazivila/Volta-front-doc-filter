@@ -3,6 +3,16 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { 
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { FormField, Input } from '@/components/auth/form-field'
 import { 
 	uploadCompanyDocumentAction, 
@@ -13,20 +23,22 @@ import {
 } from '@/lib/services/company'
 import { Download, Eye, Edit, Trash2, Upload, FileText } from 'lucide-react'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 interface CompanyDocumentsSectionProps {
 	documents: CompanyDocument[]
 	total: number
-	page: number
-	limit: number
 }
 
-export function CompanyDocumentsSection({ documents, total, page, limit }: CompanyDocumentsSectionProps) {
+export function CompanyDocumentsSection({ documents, total }: CompanyDocumentsSectionProps) {
 	const [uploadOpen, setUploadOpen] = useState(false)
 	const [editOpen, setEditOpen] = useState(false)
 	const [previewOpen, setPreviewOpen] = useState(false)
 	const [selectedDoc, setSelectedDoc] = useState<CompanyDocument | null>(null)
 	const [loading, setLoading] = useState(false)
+	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [deleteTarget, setDeleteTarget] = useState<CompanyDocument | null>(null)
+	const [deleting, setDeleting] = useState(false)
 
 	const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -45,7 +57,7 @@ export function CompanyDocumentsSection({ documents, total, page, limit }: Compa
 				const errorMsg = result.errors._form?.[0] || 'Failed to upload document'
 				toast.error(errorMsg)
 			}
-		} catch (error) {
+		} catch {
 			toast.error('Failed to upload document')
 		} finally {
 			setLoading(false)
@@ -71,22 +83,31 @@ export function CompanyDocumentsSection({ documents, total, page, limit }: Compa
 				const errorMsg = result.errors._form?.[0] || 'Failed to update document'
 				toast.error(errorMsg)
 			}
-		} catch (error) {
+		} catch {
 			toast.error('Failed to update document')
 		} finally {
 			setLoading(false)
 		}
 	}
 
-	const handleDelete = async (doc: CompanyDocument) => {
-		if (!confirm(`Delete "${doc.name}"?`)) return
+	const openDeleteDialog = (doc: CompanyDocument) => {
+		setDeleteTarget(doc)
+		setDeleteOpen(true)
+	}
 
+	const confirmDelete = async () => {
+		if (!deleteTarget) return
+		setDeleting(true)
 		try {
-			await deleteCompanyDocumentAction(doc.id)
+			await deleteCompanyDocumentAction(deleteTarget.id)
 			toast.success('Document deleted successfully')
+			setDeleteOpen(false)
+			setDeleteTarget(null)
 			window.location.reload()
-		} catch (error) {
+		} catch {
 			toast.error('Failed to delete document')
+		} finally {
+			setDeleting(false)
 		}
 	}
 
@@ -213,13 +234,13 @@ export function CompanyDocumentsSection({ documents, total, page, limit }: Compa
 											>
 												<Edit className='h-4 w-4' />
 											</Button>
-											<Button
-												variant='ghost'
-												size='sm'
-												onClick={() => handleDelete(doc)}
-												title='Delete'
-												className='text-destructive hover:text-destructive'
-											>
+									<Button
+										variant='ghost'
+										size='sm'
+										onClick={() => openDeleteDialog(doc)}
+										title='Delete'
+										className='text-destructive hover:text-destructive'
+									>
 												<Trash2 className='h-4 w-4' />
 											</Button>
 										</div>
@@ -435,10 +456,12 @@ export function CompanyDocumentsSection({ documents, total, page, limit }: Compa
 								/>
 							) : selectedDoc.mime_type?.startsWith('image/') ? (
 								<div className='w-full h-full flex items-center justify-center bg-muted/50'>
-									<img
+									<Image
 										src={`/api/company-documents/${selectedDoc.id}/preview`}
 										alt={selectedDoc.name}
 										className='max-w-full max-h-full object-contain'
+										width={400}
+										height={400}
 									/>
 								</div>
 							) : (
@@ -459,6 +482,24 @@ export function CompanyDocumentsSection({ documents, total, page, limit }: Compa
 					)}
 				</DialogContent>
 			</Dialog>
+
+		{/* Delete Confirmation Dialog */}
+		<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Delete document?</AlertDialogTitle>
+					<AlertDialogDescription>
+						This action cannot be undone. This will permanently delete {deleteTarget?.name} and remove the file from the system.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+					<AlertDialogAction onClick={confirmDelete} disabled={deleting} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+						{deleting ? 'Deleting…' : 'Delete'}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 		</div>
 	)
 }

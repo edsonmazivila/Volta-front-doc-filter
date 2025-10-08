@@ -17,9 +17,9 @@ const STATUS_COLORS = {
 }
 
 export function JustificationsTable({ justifications }: JustificationsTableProps) {
-  const [processing, setProcessing] = useState<Record<number, boolean>>({})
+  const [processing, setProcessing] = useState<Record<string, boolean>>({})
 
-  const handleApprove = async (id: number) => {
+  const handleApprove = async (id: string) => {
     setProcessing((prev) => ({ ...prev, [id]: true }))
     try {
       const result = await approveJustificationAction(id)
@@ -35,7 +35,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
     }
   }
 
-  const handleReject = async (id: number) => {
+  const handleReject = async (id: string) => {
     setProcessing((prev) => ({ ...prev, [id]: true }))
     try {
       const result = await rejectJustificationAction(id)
@@ -109,7 +109,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleApprove(justification.id)}
+                    onClick={() => handleApprove(justification.id)}
                       disabled={processing[justification.id]}
                       className="text-green-600 hover:text-green-700"
                     >
@@ -118,7 +118,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleReject(justification.id)}
+                    onClick={() => handleReject(justification.id)}
                       disabled={processing[justification.id]}
                       className="text-red-600 hover:text-red-700"
                     >

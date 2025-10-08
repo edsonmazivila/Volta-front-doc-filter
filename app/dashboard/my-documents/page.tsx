@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
-import { requireUser, verifySession } from '@/lib/auth/dal'
+import { verifySession } from '@/lib/auth/dal'
+import { requireRole } from '@/lib/rbac/server'
 import { getMyDocuments, getDocumentTypes } from '@/lib/services/documents'
 import { MyDocumentsSection } from '@/components/my-documents/my-documents-section'
 
@@ -10,7 +11,7 @@ export const metadata = {
 }
 
 export default async function MyDocumentsPage() {
-  await requireUser()
+  await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
   const session = await verifySession()
 
   const [documents, documentTypes] = await Promise.all([

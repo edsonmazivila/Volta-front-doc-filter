@@ -37,8 +37,8 @@ export function TimesheetsSection({ items, employees = [] }: TimesheetsSectionPr
 			const totalHours = (values.regularHours || 0) + (values.overtimeHours || 0)
 			const payload = {
 				employee_id: values.employee_id,
-				period_start: values.periodStart,
-				period_end: values.periodEnd,
+				period_start: new Date(values.periodStart).toISOString(),
+				period_end: new Date(values.periodEnd).toISOString(),
 				regular_hours: values.regularHours,
 				overtime_hours: values.overtimeHours,
 				total_hours: totalHours,

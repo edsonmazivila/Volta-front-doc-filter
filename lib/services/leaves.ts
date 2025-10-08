@@ -55,6 +55,7 @@ export interface ActionResult {
 // Validation schemas
 const createLeaveSchema = z.object({
   leave_type: z.string().min(1, "Leave type is required"),
+  // Accept either YYYY-MM-DD or full ISO; normalize later
   start_date: z.string().min(1, "Start date is required"),
   end_date: z.string().min(1, "End date is required"),
   is_half_day: z.boolean().default(false),
@@ -247,10 +248,16 @@ export async function createLeaveRequestAction(
   prevState: unknown,
   formData: FormData
 ): Promise<ActionResult> {
+  const startRaw = String(formData.get("start_date") || "")
+  const endRaw = String(formData.get("end_date") || "")
+  // Backend expects RFC3339 timestamps
+  const start_date = startRaw.includes('T') ? startRaw : `${startRaw}T00:00:00Z`
+  const end_date = endRaw.includes('T') ? endRaw : `${endRaw}T23:59:59Z`
+
   const parsed = createLeaveSchema.safeParse({
     leave_type: formData.get("leave_type"),
-    start_date: formData.get("start_date"),
-    end_date: formData.get("end_date"),
+    start_date,
+    end_date,
     is_half_day:
       formData.get("is_half_day") === "true" ||
       formData.get("is_half_day") === "on",
@@ -258,11 +265,13 @@ export async function createLeaveRequestAction(
   });
 
   if (!parsed.success) {
+    console.error('[leaves] createLeaveRequestAction validation failed', parsed.error.flatten())
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
   try {
     const cookieHeader = await getAuthCookieHeader();
+    console.debug('[leaves] createLeaveRequestAction payload', parsed.data)
     const res = await fetch(`${API_BASE_URL}/api/leave-requests`, {
       method: "POST",
       headers: {
@@ -273,18 +282,23 @@ export async function createLeaveRequestAction(
     });
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
+      const text = await res.text().catch(() => '')
+      console.error('[leaves] createLeaveRequestAction failed', res.status, text)
+      let error: { message?: string } = {}
+      try { error = text ? JSON.parse(text) : {} } catch {}
       return {
         errors: { _form: [error.message || "Failed to create leave request"] },
       };
     }
 
     const data = await res.json();
+    console.debug('[leaves] createLeaveRequestAction success', data)
     // Revalidate leaves and all dependent caches
     revalidateEntityMutation("LEAVES");
 
     return { success: true, data };
   } catch {
+    console.error('[leaves] createLeaveRequestAction threw')
     return { errors: { _form: ["Failed to create leave request"] } };
   }
 }

@@ -199,20 +199,25 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
               <Button variant='secondary' onClick={() => setNewOpen(false)}>Cancel</Button>
               <Button onClick={async () => {
                 if (!leaveType || !startDate || !endDate) { toast.error('Type, start and end dates are required'); return }
+                if (new Date(startDate) > new Date(endDate)) { toast.error('End date must be after start date'); return }
                 try {
                   const form = new FormData()
                   form.append('leave_type', leaveType)
+                  // Send RFC3339 timestamps expected by backend
                   form.append('start_date', `${startDate}T00:00:00Z`)
                   form.append('end_date', `${endDate}T23:59:59Z`)
-                  form.append('reason', reason)
+                  if (reason.trim()) form.append('reason', reason.trim())
                   form.append('is_half_day', isHalfDay ? 'true' : 'false')
+                  console.log('[leaves] submit create payload', Object.fromEntries(form.entries()))
                   const result = await createLeaveRequestAction(null, form)
-                  if (result.errors) { toast.error(result.errors._form?.[0] || 'Failed to create request'); return }
+                  console.log('[leaves] submit create result', result)
+                  if ('errors' in result) { const errs = result.errors as Record<string, string[]>; const msg = errs._form?.[0] || Object.values(errs)[0]?.[0] || 'Failed to create request'; console.error('[leaves] create error', errs); toast.error(msg); return }
                   toast.success('Leave request created')
                   setNewOpen(false)
                   setLeaveType('vacation'); setStartDate(''); setEndDate(''); setReason(''); setIsHalfDay(false)
                   router.refresh()
                 } catch {
+                  console.error('[leaves] submit create threw')
                   toast.error('Failed to create request')
                 }
               }}>Create</Button>

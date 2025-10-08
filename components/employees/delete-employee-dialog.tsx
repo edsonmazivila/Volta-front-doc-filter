@@ -32,13 +32,13 @@ export function DeleteEmployeeDialog({
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-					<AlertDialogDescription>
-						This will permanently delete{' '}
-						<span className="font-semibold text-foreground">
-							{employee.first_name} {employee.last_name}
-						</span>{' '}
-						from the system. This action cannot be undone.
-					</AlertDialogDescription>
+				<AlertDialogDescription>
+					This will permanently delete{' '}
+					<span className="font-semibold text-foreground">
+						{employee.full_name}
+					</span>{' '}
+					from the system. This action cannot be undone.
+				</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={isSubmitting}>

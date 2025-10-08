@@ -16,6 +16,19 @@ import { Edit, Trash2, Upload } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
+import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
+import type { CompanyDocumentsResponse } from '@/lib/services/company'
+import { 
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 interface CompanyProfileProps {
 	company: {
@@ -35,10 +48,11 @@ interface CompanyProfileProps {
 		logo?: string
 	}
 	paySchedules: { id: string, name: string, frequency: string, start_date: string, is_active: boolean }[]
-	leavePolicies: { id: string, name: string, leave_type: string, annual_allocation_days: number }[]
+	leavePolicies: { id: string, name: string, description?: string, policy_type: string, leave_type: string, annual_allocation_days: number, accrual_rate: number, accrual_frequency: string, allow_carry_over: boolean, max_carry_over_days: number, carry_over_expiry_months: number, min_request_days: number, max_request_days: number, max_consecutive_days: number, min_advance_notice_days: number, requires_manager_approval: boolean, requires_hr_approval: boolean, auto_approval_threshold: number, allow_half_days: boolean, allow_negative_balance: boolean, effective_date: string, is_active: boolean }[]
+	companyDocuments?: CompanyDocumentsResponse
 }
 
-export function CompanyProfile({ company, paySchedules, leavePolicies }: CompanyProfileProps) {
+export function CompanyProfile({ company, paySchedules, leavePolicies, companyDocuments }: CompanyProfileProps) {
 	const [editOpen, setEditOpen] = useState(false)
 	const [psOpen, setPsOpen] = useState(false)
 	const [lpOpen, setLpOpen] = useState(false)
@@ -59,9 +73,54 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 	})
 
 	const [psForm, setPsForm] = useState({ name: '', frequency: 'monthly', start_date: '' })
-	const [lpForm, setLpForm] = useState({ name: '', leave_type: 'annual', annual_allocation_days: 0 })
+	const [lpForm, setLpForm] = useState({
+		name: '',
+		description: '',
+		policy_type: 'company',
+		leave_type: 'vacation',
+		annual_allocation_days: 0,
+		accrual_rate: 0,
+		accrual_frequency: 'monthly',
+		allow_carry_over: false,
+		max_carry_over_days: 0,
+		carry_over_expiry_months: 0,
+		min_request_days: 0,
+		max_request_days: 0,
+		max_consecutive_days: 0,
+		min_advance_notice_days: 0,
+		requires_manager_approval: false,
+		requires_hr_approval: false,
+		auto_approval_threshold: 0,
+		allow_half_days: false,
+		allow_negative_balance: false,
+		effective_date: '',
+		is_active: true,
+	})
 	const [saving, setSaving] = useState(false)
 	const [error, setError] = useState<string | null>(null)
+
+	// Local state to avoid full page reloads on delete
+	const [leavePoliciesState, setLeavePoliciesState] = useState(leavePolicies)
+	const [deletePolicyOpen, setDeletePolicyOpen] = useState(false)
+	const [deletePolicyTarget, setDeletePolicyTarget] = useState<{ id: string, name: string } | null>(null)
+	const [deletingPolicy, setDeletingPolicy] = useState(false)
+
+	async function handleDeletePolicyConfirm() {
+		if (!deletePolicyTarget) return
+		setDeletingPolicy(true)
+		try {
+			await deleteLeavePolicyAction(deletePolicyTarget.id)
+			setLeavePoliciesState(prev => prev.filter(x => x.id !== deletePolicyTarget.id))
+			toast.success('Leave policy deleted')
+			setDeletePolicyOpen(false)
+			setDeletePolicyTarget(null)
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Failed to delete leave policy'
+			toast.error(message)
+		} finally {
+			setDeletingPolicy(false)
+		}
+	}
 
 	async function handleCompanySave() {
 		setSaving(true)
@@ -108,19 +167,51 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 	}
 
 	async function handleCreateLeavePolicy() {
+		console.log('=== CREATE LEAVE POLICY START ===')
+		console.log('Form data:', lpForm)
+		
 		setSaving(true)
 		try {
 			const formData = new FormData()
-			formData.append('name', lpForm.name)
-			formData.append('leave_type', lpForm.leave_type)
-			formData.append('annual_allocation_days', String(lpForm.annual_allocation_days))
-			await createLeavePolicyAction(null, formData)
-			window.location.reload()
-		} finally { setSaving(false); setLpOpen(false) }
+			Object.entries(lpForm).forEach(([key, value]) => {
+				console.log(`Appending ${key}:`, value, `(type: ${typeof value})`)
+				formData.append(key, String(value))
+			})
+			
+			console.log('FormData entries:')
+			for (const [key, value] of formData.entries()) {
+				console.log(`  ${key}: ${value}`)
+			}
+			
+			console.log('Calling createLeavePolicyAction...')
+			const result = await createLeavePolicyAction(null, formData)
+			console.log('Server response:', result)
+			
+			if (result.success) {
+				console.log('Success! Reloading page...')
+				toast.success('Leave policy created successfully')
+				window.location.reload()
+			} else if (result.errors) {
+				console.error('Validation errors:', result.errors)
+				const errorMsg = result.errors._form?.[0] || Object.entries(result.errors).map(([k, v]) => `${k}: ${v?.join(', ')}`).join('; ') || 'Failed to create leave policy'
+				toast.error(errorMsg)
+				setSaving(false)
+			} else {
+				console.error('Unknown response format:', result)
+				toast.error('Unexpected response from server')
+				setSaving(false)
+			}
+		} catch (err) {
+			console.error('Exception during create:', err)
+			toast.error('Failed to create leave policy: ' + (err instanceof Error ? err.message : 'Unknown error'))
+			setSaving(false)
+		}
+		console.log('=== CREATE LEAVE POLICY END ===')
 	}
 
 	return (
-		<div className='glass rounded-xl p-4'>
+		<>
+			<div className='glass rounded-xl p-4'>
 			<Tabs defaultValue='basic' className='w-full'>
 				<div className='flex items-center justify-between'>
 					<TabsList>
@@ -132,7 +223,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 
 				<TabsContent value='basic'>
 					<div className='flex items-center justify-between mt-4'>
-						<h3 className='text-sm font-medium text-white'>Company Information</h3>
+					<h3 className='text-sm font-medium text-foreground'>Company Information</h3>
 						<Button onClick={() => setEditOpen(true)}>Edit</Button>
 					</div>
 					<div className='mt-3 grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6'>
@@ -140,9 +231,9 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 							{company.logo ? (
 								<Image src={company.logo} alt='Company Logo' className='h-24 w-24 rounded-lg object-cover border border-white/10' width={96} height={96} />
 							) : (
-								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400'>Logo</div>
+								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground'>Logo</div>
 							)}
-							<label className='text-xs text-neutral-300 inline-flex items-center gap-2 cursor-pointer'>
+							<label className='text-xs text-muted-foreground inline-flex items-center gap-2 cursor-pointer'>
 								<Upload className='h-3.5 w-3.5' />
 								<span>Upload logo</span>
 								<input type='file' accept='image/*' className='hidden' onChange={async (e)=>{
@@ -155,57 +246,77 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 								}} />
 							</label>
 						</div>
-						<div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-neutral-300'>
-							<div><div className='text-xs text-neutral-400'>Company Name</div><div>{company.name || '—'}</div></div>
-							<div><div className='text-xs text-neutral-400'>Legal Name</div><div>{company.legal_name || '—'}</div></div>
-							<div><div className='text-xs text-neutral-400'>Tax ID</div><div>{company.tax_id || '—'}</div></div>
-							<div><div className='text-xs text-neutral-400'>Email</div><div>{company.email || '—'}</div></div>
-							<div><div className='text-xs text-neutral-400'>Phone</div><div>{company.phone || '—'}</div></div>
-							<div><div className='text-xs text-neutral-400'>Website</div><div>{company.website || '—'}</div></div>
-							<div className='md:col-span-2'><div className='text-xs text-neutral-400'>Address</div><div>{[company.address_line1, company.address_line2, company.city, company.state, company.postal_code, company.country].filter(Boolean).join(', ') || '—'}</div></div>
+						<div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-foreground'>
+							<div><div className='text-xs text-muted-foreground'>Company Name</div><div>{company.name || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>Legal Name</div><div>{company.legal_name || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>Tax ID</div><div>{company.tax_id || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>Email</div><div>{company.email || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>Phone</div><div>{company.phone || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>Website</div><div>{company.website || '—'}</div></div>
+							<div className='md:col-span-2'><div className='text-xs text-muted-foreground'>Address</div><div>{[company.address_line1, company.address_line2, company.city, company.state, company.postal_code, company.country].filter(Boolean).join(', ') || '—'}</div></div>
 						</div>
 					</div>
+
+					{/* Company Documents - only visible on Basic tab */}
+					{companyDocuments && (
+						<div className='mt-6 border-t border-white/10 pt-6'>
+							<h3 className='text-sm font-medium text-foreground mb-2'>Company Documents</h3>
+							<CompanyDocumentsSection 
+								documents={companyDocuments.documents}
+								total={companyDocuments.total}
+							/>
+						</div>
+					)}
 				</TabsContent>
 
 				<TabsContent value='policies'>
 					<div className='flex items-center justify-between mt-4'>
-						<h3 className='text-sm font-medium text-white'>Company Leave Policies</h3>
+						<h3 className='text-sm font-medium text-foreground'>Company Leave Policies</h3>
 						<Button onClick={() => setLpOpen(true)}>Create</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
-                            {leavePolicies.length ? leavePolicies.map(p => (
+						{leavePoliciesState.length ? leavePoliciesState.map(p => (
                                 <div key={p.id} className='border border-white/10 rounded-lg p-3 flex items-center justify-between'>
-                                    <div>
-                                        <div className='text-white'>{p.name}</div>
-                                        <div className='text-xs text-neutral-400 capitalize'>Type: {p.leave_type} • Allocation: {p.annual_allocation_days} days</div>
+                                    <div className='flex-1 min-w-0'>
+										<div className='text-foreground font-medium'>{p.name}</div>
+										<div className='text-xs text-muted-foreground capitalize mt-0.5'>
+											Type: {p.leave_type} • Allocation: {p.annual_allocation_days} days/year
+											{p.description && <span className='block mt-1'>{p.description}</span>}
+										</div>
+										<div className='text-xs text-muted-foreground mt-1 flex flex-wrap gap-2'>
+											{p.requires_manager_approval && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500'>Manager Approval</span>}
+											{p.requires_hr_approval && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500'>HR Approval</span>}
+											{p.allow_half_days && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-green-500/10 text-green-500'>Half Days</span>}
+											{!p.is_active && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-red-500/10 text-red-500'>Inactive</span>}
+										</div>
                                     </div>
-                                    <div className='flex items-center gap-2'>
-                                        <Button variant='outline' onClick={()=>{ setLpOpen(true); setLpForm({ name: p.name, leave_type: p.leave_type, annual_allocation_days: p.annual_allocation_days }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
-                                        <Button variant='destructive' onClick={async ()=>{ await deleteLeavePolicyAction(p.id); window.location.reload() }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
+                                    <div className='flex items-center gap-2 shrink-0'>
+                                        <Button variant='outline' onClick={()=>{ setLpOpen(true); setLpForm({ name: p.name, description: p.description || '', policy_type: p.policy_type, leave_type: p.leave_type, annual_allocation_days: p.annual_allocation_days, accrual_rate: p.accrual_rate, accrual_frequency: p.accrual_frequency, allow_carry_over: p.allow_carry_over, max_carry_over_days: p.max_carry_over_days, carry_over_expiry_months: p.carry_over_expiry_months, min_request_days: p.min_request_days, max_request_days: p.max_request_days, max_consecutive_days: p.max_consecutive_days, min_advance_notice_days: p.min_advance_notice_days, requires_manager_approval: p.requires_manager_approval, requires_hr_approval: p.requires_hr_approval, auto_approval_threshold: p.auto_approval_threshold, allow_half_days: p.allow_half_days, allow_negative_balance: p.allow_negative_balance, effective_date: p.effective_date.split('T')[0], is_active: p.is_active }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
+										<Button variant='destructive' onClick={()=>{ setDeletePolicyTarget({ id: p.id, name: p.name }); setDeletePolicyOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
-                            )) : (<div className='text-neutral-400 text-sm'>No leave policies found.</div>)}
+						)) : (<div className='text-muted-foreground text-sm'>No leave policies found.</div>)}
                         </div>
 				</TabsContent>
 
 				<TabsContent value='schedules'>
 					<div className='flex items-center justify-between mt-4'>
-						<h3 className='text-sm font-medium text-white'>Pay Schedules</h3>
+						<h3 className='text-sm font-medium text-foreground'>Pay Schedules</h3>
 						<Button onClick={() => setPsOpen(true)}>Create</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
                             {paySchedules.length ? paySchedules.map(s => (
                                 <div key={s.id} className='border border-white/10 rounded-lg p-3 flex items-center justify-between'>
                                     <div>
-                                        <div className='text-white'>{s.name}</div>
-                                        <div className='text-xs text-neutral-400'>Frequency: {s.frequency} • Start: {s.start_date} • {s.is_active ? 'Active' : 'Inactive'}</div>
+										<div className='text-foreground'>{s.name}</div>
+										<div className='text-xs text-muted-foreground'>Frequency: {s.frequency} • Start: {s.start_date} • {s.is_active ? 'Active' : 'Inactive'}</div>
                                     </div>
                                     <div className='flex items-center gap-2'>
                                         <Button variant='outline' onClick={()=>{ setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').slice(0,10) }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
                                         <Button variant='destructive' onClick={async ()=>{ await deletePayScheduleAction(s.id); window.location.reload() }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
-                            )) : (<div className='text-neutral-400 text-sm'>No pay schedules found.</div>)}
+							)) : (<div className='text-muted-foreground text-sm'>No pay schedules found.</div>)}
                         </div>
 				</TabsContent>
 			</Tabs>
@@ -292,22 +403,191 @@ export function CompanyProfile({ company, paySchedules, leavePolicies }: Company
 				</DialogContent>
 			</Dialog>
 
-			{/* Create Leave Policy */}
+			{/* Create/Edit Leave Policy */}
 			<Dialog open={lpOpen} onOpenChange={setLpOpen}>
-				<DialogContent className='sm:max-w-lg'>
-					<DialogHeader><DialogTitle>Create Leave Policy</DialogTitle></DialogHeader>
-                    <div className='grid gap-3'>
-                        <FormField label='Name'><Input value={lpForm.name} onChange={(e)=>setLpForm({ ...lpForm, name: e.target.value })} /></FormField>
-                        <FormField label='Type'><Input value={lpForm.leave_type} onChange={(e)=>setLpForm({ ...lpForm, leave_type: e.target.value })} /></FormField>
-                        <FormField label='Annual Allocation (days)'><Input type='number' value={lpForm.annual_allocation_days} onChange={(e)=>setLpForm({ ...lpForm, annual_allocation_days: Number(e.target.value) })} /></FormField>
+				<DialogContent className='sm:max-w-3xl max-h-[90vh] overflow-y-auto'>
+					<DialogHeader><DialogTitle>{leavePolicies.find(x=>x.name===lpForm.name) ? 'Edit' : 'Create'} Leave Policy</DialogTitle></DialogHeader>
+                    <div className='grid gap-4'>
+						{/* Basic Information */}
+						<div className='space-y-3'>
+							<h4 className='text-sm font-medium'>Basic Information</h4>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+								<FormField label='Policy Name' required>
+									<Input value={lpForm.name} onChange={(e)=>setLpForm({ ...lpForm, name: e.target.value })} placeholder='e.g., Annual Leave' />
+								</FormField>
+								<FormField label='Leave Type' required>
+									<Select value={lpForm.leave_type} onValueChange={(v)=>setLpForm({ ...lpForm, leave_type: v })}>
+										<SelectTrigger className='w-full bg-background border-input'>
+											<SelectValue placeholder='Select leave type' />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value='vacation'>Vacation</SelectItem>
+											<SelectItem value='sick'>Sick Leave</SelectItem>
+											<SelectItem value='personal'>Personal Leave</SelectItem>
+											<SelectItem value='maternity'>Maternity Leave</SelectItem>
+											<SelectItem value='paternity'>Paternity Leave</SelectItem>
+											<SelectItem value='bereavement'>Bereavement Leave</SelectItem>
+											<SelectItem value='emergency'>Emergency Leave</SelectItem>
+										</SelectContent>
+									</Select>
+								</FormField>
+								<FormField label='Effective Date' required className='md:col-span-2'>
+									<Input type='date' value={lpForm.effective_date} onChange={(e)=>setLpForm({ ...lpForm, effective_date: e.target.value })} />
+								</FormField>
+								<FormField label='Description' className='md:col-span-2'>
+									<textarea
+										value={lpForm.description}
+										onChange={(e)=>setLpForm({ ...lpForm, description: e.target.value })}
+										rows={2}
+										placeholder='Optional description or notes'
+										className='w-full px-3 py-2 text-sm border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-none'
+									/>
+								</FormField>
+							</div>
+						</div>
+
+						{/* Allocation & Accrual */}
+						<div className='space-y-3 pt-3 border-t'>
+							<h4 className='text-sm font-medium'>Allocation & Accrual</h4>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+								<FormField label='Annual Allocation (days)' required>
+									<Input type='number' min='0' value={lpForm.annual_allocation_days} onChange={(e)=>setLpForm({ ...lpForm, annual_allocation_days: Number(e.target.value) })} />
+								</FormField>
+								<FormField label='Accrual Rate (per month)' required>
+									<Input type='number' min='0' step='0.1' value={lpForm.accrual_rate} onChange={(e)=>setLpForm({ ...lpForm, accrual_rate: Number(e.target.value) })} />
+								</FormField>
+							</div>
+						</div>
+
+						{/* Carry Over Settings */}
+						<div className='space-y-3 pt-3 border-t'>
+							<h4 className='text-sm font-medium'>Carry Over Settings</h4>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+								<div className='md:col-span-2 flex items-center gap-2'>
+									<input
+										type='checkbox'
+										id='allow_carry_over'
+										checked={lpForm.allow_carry_over}
+										onChange={(e)=>setLpForm({ ...lpForm, allow_carry_over: e.target.checked })}
+										className='h-4 w-4 rounded border-input'
+									/>
+									<label htmlFor='allow_carry_over' className='text-sm cursor-pointer'>Allow carry over to next period</label>
+								</div>
+								{lpForm.allow_carry_over && (
+									<>
+										<FormField label='Max Carry Over Days'>
+											<Input type='number' min='0' value={lpForm.max_carry_over_days} onChange={(e)=>setLpForm({ ...lpForm, max_carry_over_days: Number(e.target.value) })} />
+										</FormField>
+										<FormField label='Carry Over Expiry (months)'>
+											<Input type='number' min='0' value={lpForm.carry_over_expiry_months} onChange={(e)=>setLpForm({ ...lpForm, carry_over_expiry_months: Number(e.target.value) })} />
+										</FormField>
+									</>
+								)}
+							</div>
+						</div>
+
+						{/* Request Limits */}
+						<div className='space-y-3 pt-3 border-t'>
+							<h4 className='text-sm font-medium'>Request Limits</h4>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+								<FormField label='Min Request Days'>
+									<Input type='number' min='0' value={lpForm.min_request_days} onChange={(e)=>setLpForm({ ...lpForm, min_request_days: Number(e.target.value) })} />
+								</FormField>
+								<FormField label='Max Request Days'>
+									<Input type='number' min='0' value={lpForm.max_request_days} onChange={(e)=>setLpForm({ ...lpForm, max_request_days: Number(e.target.value) })} />
+								</FormField>
+								<FormField label='Max Consecutive Days'>
+									<Input type='number' min='0' value={lpForm.max_consecutive_days} onChange={(e)=>setLpForm({ ...lpForm, max_consecutive_days: Number(e.target.value) })} />
+								</FormField>
+								<FormField label='Min Advance Notice (days)'>
+									<Input type='number' min='0' value={lpForm.min_advance_notice_days} onChange={(e)=>setLpForm({ ...lpForm, min_advance_notice_days: Number(e.target.value) })} />
+								</FormField>
+							</div>
+						</div>
+
+						{/* Approval & Options */}
+						<div className='space-y-3 pt-3 border-t'>
+							<h4 className='text-sm font-medium'>Approval & Options</h4>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+								<div className='flex items-center gap-2'>
+									<input
+										type='checkbox'
+										id='requires_manager_approval'
+										checked={lpForm.requires_manager_approval}
+										onChange={(e)=>setLpForm({ ...lpForm, requires_manager_approval: e.target.checked })}
+										className='h-4 w-4 rounded border-input'
+									/>
+									<label htmlFor='requires_manager_approval' className='text-sm cursor-pointer'>Requires Manager Approval</label>
+								</div>
+								<div className='flex items-center gap-2'>
+									<input
+										type='checkbox'
+										id='requires_hr_approval'
+										checked={lpForm.requires_hr_approval}
+										onChange={(e)=>setLpForm({ ...lpForm, requires_hr_approval: e.target.checked })}
+										className='h-4 w-4 rounded border-input'
+									/>
+									<label htmlFor='requires_hr_approval' className='text-sm cursor-pointer'>Requires HR Approval</label>
+								</div>
+								<div className='flex items-center gap-2'>
+									<input
+										type='checkbox'
+										id='allow_half_days'
+										checked={lpForm.allow_half_days}
+										onChange={(e)=>setLpForm({ ...lpForm, allow_half_days: e.target.checked })}
+										className='h-4 w-4 rounded border-input'
+									/>
+									<label htmlFor='allow_half_days' className='text-sm cursor-pointer'>Allow Half Days</label>
+								</div>
+								<div className='flex items-center gap-2'>
+									<input
+										type='checkbox'
+										id='allow_negative_balance'
+										checked={lpForm.allow_negative_balance}
+										onChange={(e)=>setLpForm({ ...lpForm, allow_negative_balance: e.target.checked })}
+										className='h-4 w-4 rounded border-input'
+									/>
+									<label htmlFor='allow_negative_balance' className='text-sm cursor-pointer'>Allow Negative Balance</label>
+								</div>
+								<div className='flex items-center gap-2'>
+									<input
+										type='checkbox'
+										id='is_active'
+										checked={lpForm.is_active}
+										onChange={(e)=>setLpForm({ ...lpForm, is_active: e.target.checked })}
+										className='h-4 w-4 rounded border-input'
+									/>
+									<label htmlFor='is_active' className='text-sm cursor-pointer font-medium'>Active Policy</label>
+								</div>
+							</div>
+						</div>
                     </div>
-					<div className='flex justify-end gap-2 pt-4'>
-                        <Button variant='ghost' onClick={()=>setLpOpen(false)}>Cancel</Button>
-                        <Button onClick={async ()=>{ if (leavePolicies.find(x=>x.name===lpForm.name)) { const id = (leavePolicies.find(x=>x.name===lpForm.name) as { id: string }).id; const formData = new FormData(); formData.append('name', lpForm.name); formData.append('leave_type', lpForm.leave_type); formData.append('annual_allocation_days', String(lpForm.annual_allocation_days)); await updateLeavePolicyAction(id, null, formData); window.location.reload() } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+					<div className='flex justify-end gap-2 pt-4 border-t'>
+                        <Button variant='ghost' onClick={()=>{ setLpOpen(false); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }) }}>Cancel</Button>
+                        <Button onClick={async ()=>{ if (leavePolicies.find(x=>x.name===lpForm.name)) { const id = (leavePolicies.find(x=>x.name===lpForm.name) as { id: string }).id; const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(id, null, formData); window.location.reload() } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
 		</div>
+
+		{/* Delete Leave Policy Confirmation */}
+		<AlertDialog open={deletePolicyOpen} onOpenChange={setDeletePolicyOpen}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Delete leave policy?</AlertDialogTitle>
+					<AlertDialogDescription>
+						This action cannot be undone. This will permanently delete {deletePolicyTarget?.name}.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel disabled={deletingPolicy}>Cancel</AlertDialogCancel>
+					<AlertDialogAction onClick={handleDeletePolicyConfirm} disabled={deletingPolicy} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+						{deletingPolicy ? 'Deleting…' : 'Delete'}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+		</>
 	)
 }
 

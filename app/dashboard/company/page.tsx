@@ -4,8 +4,6 @@ import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { CompanyProfile as CompanyProfileComponent } from '@/components/company/company-profile'
 import { getCompany, getLeavePolicies, getPaySchedules, getCompanyDocuments } from '@/lib/services/company'
-import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
-
 export default async function CompanyPage() {
   // Only HR managers and admins can manage company settings
   await requireRole(['hr_manager', 'system_admin'])
@@ -39,16 +37,11 @@ export default async function CompanyPage() {
         <section className='p-4 grid gap-4'>
           <Card>
             <CardHeader title='Company Profile' />
-            <CompanyProfileComponent company={safeCompany} paySchedules={paySchedules || []} leavePolicies={leavePolicies || []} />
-          </Card>
-          
-          <Card>
-            <CardHeader title='Company Documents' />
-            <CompanyDocumentsSection 
-              documents={companyDocuments.documents} 
-              total={companyDocuments.total}
-              page={companyDocuments.page}
-              limit={companyDocuments.limit}
+            <CompanyProfileComponent 
+              company={safeCompany} 
+              paySchedules={paySchedules || []} 
+              leavePolicies={leavePolicies || []}
+              companyDocuments={companyDocuments}
             />
           </Card>
         </section>

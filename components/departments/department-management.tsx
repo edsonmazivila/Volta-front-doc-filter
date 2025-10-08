@@ -26,6 +26,28 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 	const [editOpen, setEditOpen] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
 
+	// Stable handlers to avoid triggering controlled <Dialog> state loops
+	const handleCreateOpenChange = React.useCallback((open: boolean) => {
+		setCreateOpen(open)
+		if (!open) {
+			// ensure any transient state related to create is cleared
+		}
+	}, [])
+
+	const handleEditOpenChange = React.useCallback((open: boolean) => {
+		setEditOpen(open)
+		if (!open) {
+			setSelectedDepartment(null)
+		}
+	}, [])
+
+	const handleDeleteOpenChange = React.useCallback((open: boolean) => {
+		setDeleteOpen(open)
+		if (!open) {
+			setDepartmentToDelete(null)
+		}
+	}, [])
+
 	const canManage = hasAnyRole(user, ['system_admin', 'hr_manager'])
 
 	const handleDelete = async () => {
@@ -206,21 +228,21 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 			)}
 
 			{/* Create Dialog */}
-			<Dialog open={createOpen} onOpenChange={setCreateOpen}>
+			<Dialog open={createOpen} onOpenChange={handleCreateOpenChange}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Create Department</DialogTitle>
 					</DialogHeader>
 					<DepartmentForm
-						onCancel={() => setCreateOpen(false)}
-						onSuccess={() => setCreateOpen(false)}
+						onCancel={() => handleCreateOpenChange(false)}
+						onSuccess={() => handleCreateOpenChange(false)}
 						managers={managers}
 					/>
 				</DialogContent>
 			</Dialog>
 
 			{/* Edit Dialog */}
-			<Dialog open={editOpen} onOpenChange={setEditOpen}>
+			<Dialog open={editOpen} onOpenChange={handleEditOpenChange}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Edit Department</DialogTitle>
@@ -228,14 +250,8 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 					{selectedDepartment && (
 						<DepartmentForm
 							department={selectedDepartment}
-							onCancel={() => {
-								setEditOpen(false)
-								setSelectedDepartment(null)
-							}}
-							onSuccess={() => {
-								setEditOpen(false)
-								setSelectedDepartment(null)
-							}}
+							onCancel={() => handleEditOpenChange(false)}
+							onSuccess={() => handleEditOpenChange(false)}
 							managers={managers}
 						/>
 					)}
@@ -243,7 +259,7 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 			</Dialog>
 
 			{/* Delete Confirmation */}
-			<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+			<AlertDialog open={deleteOpen} onOpenChange={handleDeleteOpenChange}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -252,7 +268,7 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setDepartmentToDelete(null)}>Cancel</AlertDialogCancel>
+						<AlertDialogCancel onClick={() => handleDeleteOpenChange(false)}>Cancel</AlertDialogCancel>
 						<AlertDialogAction onClick={handleDelete} className='bg-red-600 hover:bg-red-700'>
 							Delete
 						</AlertDialogAction>

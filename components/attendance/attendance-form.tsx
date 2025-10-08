@@ -23,7 +23,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
 
   const [updateState, updateAction, updatePending] = useActionState(
     async (_prevState: unknown, formData: FormData) =>
-      editRecord ? updateAttendanceAction(_prevState, editRecord.id, formData) : { errors: { _form: ['No record'] } },
+      editRecord ? updateAttendanceAction(_prevState, Number(editRecord.id), formData) : { errors: { _form: ['No record'] } },
     null
   )
 
@@ -59,7 +59,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
             <option value="" className="bg-background text-foreground">Select employee</option>
             {employees.map((emp) => (
               <option key={emp.id} value={emp.id} className="bg-background text-foreground">
-                {emp.first_name} {emp.last_name} - {emp.email}
+                {emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim()} - {emp.email}
               </option>
             ))}
           </select>

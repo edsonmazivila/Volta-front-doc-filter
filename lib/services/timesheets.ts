@@ -4,6 +4,7 @@ import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
 import { z } from 'zod'
 import { revalidateEntityMutation, CacheTags, fetchWithGracefulFallback } from '@/lib/cache-utils'
+import { toIsoUtc } from '@/lib/utils'
 
 export type TimesheetStatus = 'draft' | 'submitted' | 'approved' | 'rejected'
 
@@ -124,9 +125,13 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 
 // Validation schemas
 const upsertSchema = z.object({
+	employee_id: z.string().min(1, 'Employee is required'),
 	period_start: z.string().min(1, 'Period start is required'),
 	period_end: z.string().min(1, 'Period end is required'),
+	regular_hours: z.number().min(0, 'Regular hours must be >= 0').default(0),
+	overtime_hours: z.number().min(0, 'Overtime hours must be >= 0').default(0),
 	total_hours: z.number().min(0, 'Total hours must be >= 0'),
+	status: z.enum(['draft', 'submitted']).default('draft'),
 	notes: z.string().optional(),
 })
 
@@ -137,13 +142,17 @@ export interface ActionResult {
 }
 
 // MUTATIONS (server actions)
-export async function createTimesheetAction(input: { period_start: string; period_end: string; total_hours: number; notes?: string | null }): Promise<ActionResult> {
-	const parsed = upsertSchema.safeParse({
-		period_start: input.period_start,
-		period_end: input.period_end,
-		total_hours: Number(input.total_hours),
-		notes: input.notes || undefined,
-	})
+export async function createTimesheetAction(input: { employee_id: string; period_start: string; period_end: string; regular_hours?: number; overtime_hours?: number; total_hours: number; status?: 'draft' | 'submitted'; notes?: string | null }): Promise<ActionResult> {
+    const parsed = upsertSchema.safeParse({
+        employee_id: String(input.employee_id || ''),
+        period_start: toIsoUtc(input.period_start),
+        period_end: toIsoUtc(input.period_end),
+        regular_hours: Number(input.regular_hours ?? 0),
+        overtime_hours: Number(input.overtime_hours ?? 0),
+        total_hours: Number(input.total_hours),
+        status: input.status || 'draft',
+        notes: input.notes || undefined,
+    })
 	if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
 	const cookieHeader = await getAuthCookieHeader()
@@ -162,13 +171,17 @@ export async function createTimesheetAction(input: { period_start: string; perio
 	return { success: true, data }
 }
 
-export async function updateTimesheetAction(id: string, input: { period_start: string; period_end: string; total_hours: number; notes?: string | null }): Promise<ActionResult> {
-	const parsed = upsertSchema.safeParse({
-		period_start: input.period_start,
-		period_end: input.period_end,
-		total_hours: Number(input.total_hours),
-		notes: input.notes || undefined,
-	})
+export async function updateTimesheetAction(id: string, input: { employee_id: string; period_start: string; period_end: string; regular_hours?: number; overtime_hours?: number; total_hours: number; status?: 'draft' | 'submitted'; notes?: string | null }): Promise<ActionResult> {
+    const parsed = upsertSchema.safeParse({
+        employee_id: String(input.employee_id || ''),
+        period_start: toIsoUtc(input.period_start),
+        period_end: toIsoUtc(input.period_end),
+        regular_hours: Number(input.regular_hours ?? 0),
+        overtime_hours: Number(input.overtime_hours ?? 0),
+        total_hours: Number(input.total_hours),
+        status: input.status || 'draft',
+        notes: input.notes || undefined,
+    })
 	if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
 	const cookieHeader = await getAuthCookieHeader()
