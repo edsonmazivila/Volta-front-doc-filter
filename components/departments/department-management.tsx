@@ -6,7 +6,7 @@ import { Button } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { deleteDepartmentAction, toggleDepartmentStatusAction, type Department, type DepartmentStats } from '@/lib/services/departments'
+import { deleteDepartmentAction, type Department, type DepartmentStats } from '@/lib/services/departments'
 import { DepartmentForm } from './department-form'
 import { useSession } from '@/components/auth/session-context'
 import { hasAnyRole } from '@/lib/auth/utils'
@@ -71,23 +71,6 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 		}
 	}
 
-	const handleToggleStatus = async (deptId: string, currentStatus: boolean) => {
-		try {
-			const newStatus = !currentStatus
-			await toggleDepartmentStatusAction(deptId, newStatus)
-			showToast({
-				type: 'success',
-				message: newStatus ? 'Department activated' : 'Department deactivated',
-				title: 'Success'
-			})
-		} catch (error: unknown) {
-			showToast({
-				type: 'error',
-				message: error instanceof Error ? error.message : 'Failed to update department status',
-				title: 'Error'
-			})
-		}
-	}
 
 	return (
 		<div className='space-y-4'>
@@ -186,12 +169,11 @@ export function DepartmentManagement({ departments, stats, managers }: Departmen
 									</td>
 									<td className='px-6 py-4 whitespace-nowrap'>
 										<span
-											className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer ${
+											className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
 												department.is_active
 													? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
 													: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
 											}`}
-											onClick={canManage ? () => handleToggleStatus(department.id, department.is_active) : undefined}
 										>
 											{department.is_active ? 'Active' : 'Inactive'}
 										</span>

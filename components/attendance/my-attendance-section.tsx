@@ -6,7 +6,8 @@ import { Button, Skeleton } from '@/components/ui'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { createMyAttendanceAction } from '@/lib/services/attendance'
+import { createMyAttendanceAction, updateMyAttendanceAction } from '@/lib/services/attendance'
+import { AttendanceFormDialog } from './attendance-form-dialog'
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 
 interface MyAttendanceSectionProps {
@@ -43,7 +44,10 @@ const STATUS_ICONS = {
 
 export function MyAttendanceSection({ records, isLoading = false }: MyAttendanceSectionProps) {
 	const router = useRouter()
-	const [clockingIn, setCloiningIn] = useState(false)
+	const [clockingIn, setClockingIn] = useState(false)
+	const [clockingOut, setClockingOut] = useState(false)
+	const [attendanceDialogOpen, setAttendanceDialogOpen] = useState(false)
+	const [editingAttendance, setEditingAttendance] = useState<AttendanceRecord | null>(null)
 	const [monthFilter, setMonthFilter] = useState(() => {
 		const now = new Date()
 		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -64,7 +68,7 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 	}, [records])
 
 	const handleClockIn = async () => {
-		setCloiningIn(true)
+		setClockingIn(true)
 		try {
 			const now = new Date()
 			const formData = new FormData()
@@ -82,8 +86,46 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 		} catch {
 			toast.error('Failed to clock in')
 		} finally {
-			setCloiningIn(false)
+			setClockingIn(false)
 		}
+	}
+
+	const handleClockOut = async () => {
+		if (!todayRecord?.id) return
+		
+		setClockingOut(true)
+		try {
+			const now = new Date()
+			const formData = new FormData()
+			formData.append('clock_out', now.toTimeString().slice(0, 5))
+			
+			const result = await updateMyAttendanceAction(null, todayRecord.id, formData)
+			if ('errors' in result) {
+				toast.error(result.errors._form?.[0] || 'Failed to clock out')
+			} else {
+				toast.success('Clocked out successfully')
+				router.refresh()
+			}
+		} catch {
+			toast.error('Failed to clock out')
+		} finally {
+			setClockingOut(false)
+		}
+	}
+
+	const handleOpenAttendanceDialog = () => {
+		setEditingAttendance(null)
+		setAttendanceDialogOpen(true)
+	}
+
+	const handleEditAttendance = (attendance: AttendanceRecord) => {
+		setEditingAttendance(attendance)
+		setAttendanceDialogOpen(true)
+	}
+
+	const handleCloseAttendanceDialog = () => {
+		setAttendanceDialogOpen(false)
+		setEditingAttendance(null)
 	}
 
 	return (
@@ -122,7 +164,13 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 							})}
 						</p>
 					</div>
-					<Clock className='h-8 w-8 text-muted-foreground' />
+					<Button 
+						variant="outline" 
+						size="sm"
+						onClick={handleOpenAttendanceDialog}
+					>
+						Record Attendance
+					</Button>
 				</div>
 
 				{todayRecord ? (
@@ -159,6 +207,28 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 								<span className='text-sm font-medium'>{todayRecord.hours_worked.toFixed(1)}h</span>
 							</div>
 						)}
+						
+						{/* Action Buttons */}
+						<div className='mt-4 pt-4 border-t border-[var(--border)] space-y-2'>
+							{todayRecord.clock_in && !todayRecord.clock_out && (
+								<Button 
+									onClick={handleClockOut} 
+									disabled={clockingOut} 
+									variant="outline"
+									className="w-full"
+								>
+									{clockingOut ? 'Clocking Out...' : 'Clock Out'}
+								</Button>
+							)}
+							<Button 
+								onClick={() => handleEditAttendance(todayRecord)} 
+								variant="outline"
+								className="w-full"
+								size="sm"
+							>
+								Edit Today&apos;s Attendance
+							</Button>
+						</div>
 					</div>
 				) : (
 					<div className='text-center py-6'>
@@ -258,6 +328,14 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 					</table>
 				</div>
 			</Card>
+
+			{/* Attendance Form Dialog */}
+			<AttendanceFormDialog
+				open={attendanceDialogOpen}
+				onOpenChange={handleCloseAttendanceDialog}
+				attendance={editingAttendance}
+				isEdit={!!editingAttendance}
+			/>
 		</div>
 	)
 }

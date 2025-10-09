@@ -40,7 +40,7 @@ export default async function DashboardPage() {
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
   }
 
-  const [stats, payrollRuns, timesheets, _employeesData, leaveRequests] = await Promise.all([
+  const [stats, payrollRuns, timesheets, , leaveRequests] = await Promise.all([
     statsPromise,
     payrollRunsPromise,
     timesheetsPromise,

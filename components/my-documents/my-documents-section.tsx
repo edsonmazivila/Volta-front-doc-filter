@@ -6,6 +6,7 @@ import type {
 } from "@/lib/services/documents";
 import { DocumentCard } from "@/components/my-documents/document-card";
 import { UploadDocumentDialog } from "@/components/my-documents/upload-document-dialog";
+import { EditDocumentDialog } from "@/components/my-documents/edit-document-dialog";
 import { deleteDocumentAction } from "@/lib/services/documents";
 import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui";
@@ -32,6 +33,9 @@ export function MyDocumentsSection({
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingDocument, setEditingDocument] =
+    useState<DocumentListItem | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -46,19 +50,6 @@ export function MyDocumentsSection({
     });
   }, [documents, search, typeFilter, statusFilter]);
 
-  async function handleDownload(id: string) {
-    try {
-      const link = document.createElement("a");
-      link.href = `/api/documents/${id}/download`;
-      link.download = `document-${id}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Download started");
-    } catch {
-      toast.error("Failed to download document");
-    }
-  }
 
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this document?")) return;
@@ -70,6 +61,16 @@ export function MyDocumentsSection({
     } catch {
       toast.error("Failed to delete document");
     }
+  }
+
+  function handleEdit(document: DocumentListItem) {
+    setEditingDocument(document);
+    setEditDialogOpen(true);
+  }
+
+  function handleCloseEditDialog() {
+    setEditDialogOpen(false);
+    setEditingDocument(null);
   }
 
   const uniqueTypes = Array.from(new Set(documents.map((d) => d.type)));
@@ -183,7 +184,7 @@ export function MyDocumentsSection({
             <DocumentCard
               key={doc.id}
               document={doc}
-              onDownload={handleDownload}
+              onEdit={handleEdit}
               onDelete={handleDelete}
             />
           ))}
@@ -195,6 +196,14 @@ export function MyDocumentsSection({
         open={uploadDialogOpen}
         onOpenChange={setUploadDialogOpen}
         employeeId={employeeId}
+        documentTypes={documentTypes}
+      />
+
+      {/* Edit Dialog */}
+      <EditDocumentDialog
+        open={editDialogOpen}
+        onOpenChange={handleCloseEditDialog}
+        document={editingDocument}
         documentTypes={documentTypes}
       />
     </div>

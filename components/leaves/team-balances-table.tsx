@@ -9,35 +9,28 @@ interface TeamBalancesTableProps {
 export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
   if (teamBalances.length === 0) {
     return (
-      <div className="text-center py-12 bg-card border border-[var(--border)] rounded-lg">
-        <p className="text-muted-foreground">No team balances available</p>
+      <div className="glass rounded-xl overflow-hidden">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No team balances available</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="overflow-x-auto bg-card border border-[var(--border)] rounded-lg">
-      <table className="min-w-full divide-y divide-[var(--border)]">
-        <thead>
-          <tr className="bg-muted/50">
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Employee
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Vacation
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Sick
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Personal
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Other
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[var(--border)]">
+    <div className="glass rounded-xl overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="border-b border-[var(--border)] text-neutral-400">
+            <tr>
+              <th className="text-left p-3">Employee</th>
+              <th className="text-left p-3">Vacation</th>
+              <th className="text-left p-3">Sick</th>
+              <th className="text-left p-3">Personal</th>
+              <th className="text-left p-3">Other</th>
+            </tr>
+          </thead>
+          <tbody>
           {teamBalances.map((member) => {
             const vacationBalance = member.balances.find(b => b.leave_type === 'vacation')
             const sickBalance = member.balances.find(b => b.leave_type === 'sick')
@@ -47,8 +40,8 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
             )
 
             return (
-              <tr key={member.employee_id} className="hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3">
+              <tr key={member.employee_id} className="border-b border-[var(--border)] hover:bg-muted/50 transition-colors">
+                <td className="p-3">
                   <div className="flex items-center gap-2">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
                       <User className="w-4 h-4" />
@@ -61,7 +54,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3">
+                <td className="p-3">
                   <div className="text-sm font-medium">
                     {vacationBalance ? vacationBalance.remaining_days.toFixed(1) : '0.0'}
                   </div>
@@ -71,7 +64,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                   ) : null}
                 </td>
-                <td className="px-4 py-3">
+                <td className="p-3">
                   <div className="text-sm font-medium">
                     {sickBalance ? sickBalance.remaining_days.toFixed(1) : '0.0'}
                   </div>
@@ -81,7 +74,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                   ) : null}
                 </td>
-                <td className="px-4 py-3">
+                <td className="p-3">
                   <div className="text-sm font-medium">
                     {personalBalance ? personalBalance.remaining_days.toFixed(1) : '0.0'}
                   </div>
@@ -91,7 +84,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                   ) : null}
                 </td>
-                <td className="px-4 py-3">
+                <td className="p-3">
                   {otherBalances.length > 0 ? (
                     <div className="space-y-1">
                       {otherBalances.map((balance) => (
@@ -108,8 +101,9 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
               </tr>
             )
           })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

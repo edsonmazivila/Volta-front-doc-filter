@@ -6,6 +6,40 @@ import { z } from "zod";
 import { revalidateEntityMutation, CacheTags } from "@/lib/cache-utils";
 import type { Meeting, ActionResult } from "@/lib/types/meetings";
 
+// Type definitions for API responses
+interface ApiUserResponse {
+  id: string | number;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+}
+
+interface ApiEmployeeResponse {
+  id: string | number;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+}
+
+interface ApiMeetingResponse {
+  id: string;
+  title: string;
+  description?: string;
+  datetime: string;
+  location?: string;
+  status: string;
+  organizer_id: string;
+  participants?: string[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface UserMapEntry {
+  name: string;
+  email: string;
+}
+
 // Validation schemas
 const createMeetingSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -14,6 +48,120 @@ const createMeetingSchema = z.object({
   location: z.string().optional(),
   participant_ids: z.array(z.string()).optional(),
 });
+
+// Helper function to enrich meetings with user/employee data
+async function enrichMeetingsWithEmployeeData(meetings: ApiMeetingResponse[]): Promise<Meeting[]> {
+  try {
+    const cookieHeader = await getAuthCookieHeader();
+    
+    // Fetch both users and employees to cover all possible ID mappings
+    const [usersRes, employeesRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/users`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
+        next: { tags: ["users"], revalidate: 300 },
+      }),
+      fetch(`${API_BASE_URL}/api/employees`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
+        next: { tags: ["employees"], revalidate: 300 },
+      })
+    ]);
+
+    // Create a combined map of all user/employee IDs to names
+    const userMap = new Map<string, UserMapEntry>();
+    
+    // Add users to the map
+    if (usersRes.ok) {
+      const usersData = await usersRes.json();
+      const users = Array.isArray(usersData) ? usersData : (usersData.users || usersData.data || []);
+      users.forEach((user: ApiUserResponse) => {
+        const userId = String(user.id);
+        const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        userMap.set(userId, {
+          name: userName,
+          email: user.email || '',
+        });
+      });
+    }
+    
+    // Add employees to the map (may overlap with users)
+    if (employeesRes.ok) {
+      const employeesData = await employeesRes.json();
+      const employees = Array.isArray(employeesData) ? employeesData : (employeesData.employees || employeesData.data || []);
+      employees.forEach((emp: ApiEmployeeResponse) => {
+        const empId = String(emp.id);
+        const empName = emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim();
+        userMap.set(empId, {
+          name: empName,
+          email: emp.email || '',
+        });
+      });
+    }
+
+    // Enrich meetings with organizer names and participant data
+    // We need to fetch individual meeting details to get participants
+    const enrichedMeetings = await Promise.all(
+      meetings.map(async (meeting: ApiMeetingResponse) => {
+        // Fetch full meeting details to get participants
+        let fullMeeting: ApiMeetingResponse = meeting;
+        try {
+          const meetingRes = await fetch(`${API_BASE_URL}/api/meetings/${meeting.id}`, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(cookieHeader && { Cookie: cookieHeader }),
+            },
+            next: { tags: [CacheTags.MEETINGS], revalidate: 60 },
+          });
+          
+          if (meetingRes.ok) {
+            const meetingData = await meetingRes.json();
+            fullMeeting = meetingData.meeting || meetingData;
+          }
+        } catch (error) {
+          console.warn('Failed to fetch full meeting details for:', meeting.id, error);
+        }
+        
+        // Handle participants - API returns array of user IDs
+        let enrichedParticipants: Array<{ user_id: string; name: string; status: 'pending' }> = [];
+        if (fullMeeting.participants && Array.isArray(fullMeeting.participants)) {
+          enrichedParticipants = fullMeeting.participants.map((userId: string) => {
+            const user = userMap.get(String(userId));
+            return {
+              user_id: userId,
+              name: user?.name || 'Unknown',
+              status: 'pending' as const, // Default status since API doesn't provide it
+            };
+          });
+        }
+
+        const organizerName = userMap.get(meeting.organizer_id)?.name || 'Unknown';
+
+        return {
+          ...meeting,
+          ...fullMeeting, // Include any additional fields from full meeting details
+          status: fullMeeting.status as 'scheduled' | 'cancelled' | 'completed',
+          organizer_name: organizerName,
+          participants: enrichedParticipants,
+        } as Meeting;
+      })
+    );
+
+    return enrichedMeetings;
+  } catch (error) {
+    console.error("Error enriching meetings with user/employee data:", error);
+    return meetings.map(meeting => ({
+      ...meeting,
+      status: meeting.status as 'scheduled' | 'cancelled' | 'completed',
+      organizer_name: 'Unknown',
+      participants: [],
+    } as Meeting));
+  }
+}
 
 // READ operations (cached)
 export const getMyMeetings = cache(
@@ -39,7 +187,10 @@ export const getMyMeetings = cache(
       }
 
       const data = await res.json();
-      return data?.meetings || [];
+      const meetings = Array.isArray(data) ? data : (data?.meetings || []);
+      
+      // Enrich meetings with organizer names and participant data
+      return await enrichMeetingsWithEmployeeData(meetings);
     } catch (error) {
       console.error("Error fetching meetings:", error);
       return [];
@@ -63,7 +214,10 @@ export const getAllMeetings = cache(async (): Promise<Meeting[]> => {
     }
 
     const data = await res.json();
-    return data?.meetings || [];
+    const meetings = Array.isArray(data) ? data : (data?.meetings || []);
+    
+    // Enrich meetings with organizer names and participant data
+    return await enrichMeetingsWithEmployeeData(meetings);
   } catch (error) {
     console.error("Error fetching meetings:", error);
     return [];
@@ -87,7 +241,12 @@ export const getMeetingById = cache(
       }
 
       const data = await res.json();
-      return data?.meeting || null;
+      const meeting = data?.meeting || data;
+      if (!meeting) return null;
+      
+      // Enrich single meeting with employee data
+      const enrichedMeetings = await enrichMeetingsWithEmployeeData([meeting]);
+      return enrichedMeetings[0] || null;
     } catch (error) {
       console.error("Error fetching meeting:", error);
       return null;
@@ -109,11 +268,41 @@ export const getAvailableParticipants = cache(
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch users: ${res.status}`);
+        // If users endpoint fails (403 for employees), try employees endpoint
+        console.log("Users endpoint failed, trying employees endpoint...");
+        const empRes = await fetch(`${API_BASE_URL}/api/employees`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          next: { tags: ["employees"], revalidate: 300 },
+        });
+
+        if (!empRes.ok) {
+          console.warn("Both users and employees endpoints failed, returning empty participants list");
+          return [];
+        }
+
+        const empData = await empRes.json();
+        const employees = Array.isArray(empData) ? empData : (empData.employees || empData.data || []);
+        
+        // Map employees to participant format
+        return employees.map((emp: ApiEmployeeResponse) => ({
+          id: String(emp.id || ''),
+          name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email || emp.id,
+          email: emp.email || '',
+        }));
       }
 
       const data = await res.json();
-      return data?.users || [];
+      const users = Array.isArray(data) ? data : (data.users || data.data || []);
+      
+      // Map users to participant format
+      return users.map((user: ApiUserResponse) => ({
+        id: String(user.id || ''),
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        email: user.email || '',
+      }));
     } catch (error) {
       console.error("Error fetching users:", error);
       return [];

@@ -128,7 +128,6 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
         items={filtered}
         isLoading={isLoading}
         onNew={() => setNewOpen(true)}
-        onView={(id) => { const it = requests.find(r => r.id === id) || null; setViewItem(it); setViewOpen(!!it) }}
         onSubmit={async (id) => {
           if (operationInProgress[id]) return
           setOperationInProgress(prev => ({ ...prev, [id]: true }))
@@ -152,6 +151,32 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
             router.refresh()
           } catch {
             toast.error('Failed to cancel')
+          } finally {
+            setOperationInProgress(prev => ({ ...prev, [id]: false }))
+          }
+        }}
+        onEdit={(id) => { 
+          const it = requests.find(r => r.id === id) || null
+          if (it) {
+            setEditItem(it)
+            setEditType(it.leave_type)
+            setEditStart(it.start_date?.slice(0,10) || '')
+            setEditEnd(it.end_date?.slice(0,10) || '')
+            setEditReason(it.reason || '')
+            setEditHalfDay(!!it.is_half_day)
+            setEditOpen(true)
+          }
+        }}
+        onDelete={async (id) => {
+          if (operationInProgress[id]) return
+          if (!confirm('Are you sure you want to delete this leave request?')) return
+          setOperationInProgress(prev => ({ ...prev, [id]: true }))
+          try {
+            await cancelLeaveRequestAction(id, 'Deleted by user')
+            toast.success('Deleted')
+            router.refresh()
+          } catch {
+            toast.error('Failed to delete')
           } finally {
             setOperationInProgress(prev => ({ ...prev, [id]: false }))
           }

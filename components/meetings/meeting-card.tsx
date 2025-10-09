@@ -21,7 +21,12 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
   const [isProcessing, setIsProcessing] = useState(false)
   const [responseStatus, setResponseStatus] = useState<string | null>(null)
 
+
   const isOrganizer = meeting.is_organizer || meeting.organizer_id === currentUserId
+  
+  // Find current user's participant status
+  const currentUserParticipant = meeting.participants?.find(p => p.user_id === currentUserId)
+  const userResponseStatus = currentUserParticipant?.status || 'pending'
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -134,15 +139,15 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
         </div>
 
         <div className="flex items-center gap-2 ml-4">
-          {responseStatus ? (
+          {responseStatus || (userResponseStatus !== 'pending' && !isOrganizer) ? (
             <span
               className={`text-sm px-3 py-1.5 rounded border ${
-                responseStatus === 'accepted'
+                (responseStatus || userResponseStatus) === 'accepted'
                   ? 'bg-green-50 text-green-700 border-green-200'
                   : 'bg-gray-200 text-gray-800 border-gray-300'
               }`}
             >
-              {responseStatus === 'accepted' ? 'Accepted' : 'Declined'}
+              {(responseStatus || userResponseStatus) === 'accepted' ? 'Accepted' : 'Declined'}
             </span>
           ) : isOrganizer ? (
             <>
@@ -166,7 +171,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                 Cancel
               </Button>
             </>
-          ) : (
+          ) : !isOrganizer && userResponseStatus === 'pending' ? (
             <>
               <Button
                 size="sm"
@@ -185,11 +190,11 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                 Decline
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
 
-      {meeting.participants && meeting.participants.length > 0 && (
+      {meeting.participants && meeting.participants.length > 0 ? (
         <div className="mt-3 pt-3 border-t border-[var(--border)]">
           <div className="text-xs text-muted-foreground mb-2">Participants</div>
           <div className="flex flex-wrap gap-2">
@@ -205,6 +210,10 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
               </span>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="mt-3 pt-3 border-t border-[var(--border)]">
+          <div className="text-xs text-muted-foreground">No participants listed</div>
         </div>
       )}
     </div>

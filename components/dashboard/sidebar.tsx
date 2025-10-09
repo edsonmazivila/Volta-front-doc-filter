@@ -48,6 +48,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/dashboard/paystubs', label: 'My Paystubs', icon: FileCheck },
       { href: '/dashboard/my-attendance', label: 'My Attendance', icon: Clock },
+      { href: '/dashboard/my-timesheets', label: 'My Timesheets', icon: Clock },
       { href: '/dashboard/my-leaves', label: 'My Leaves', icon: CalendarCheck },
       { href: '/dashboard/my-documents', label: 'My Documents', icon: FolderOpen },
     ]

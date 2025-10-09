@@ -24,6 +24,26 @@ export interface Employee {
 	created_at?: string
 }
 
+// Extended employee interface with all available fields
+export interface EmployeeDetails extends Employee {
+	role?: string
+	secondary_phone?: string
+	date_of_birth?: string
+	address_line1?: string
+	address_line2?: string
+	city?: string
+	state?: string
+	postal_code?: string
+	country?: string
+	emergency_contact_name?: string
+	emergency_contact_phone?: string
+	emergency_contact_relationship?: string
+	pay_type?: string
+	pay_frequency?: string
+	overtime_rate?: string
+	standard_hours?: string
+}
+
 export interface EmployeeListParams {
 	q?: string
 	status?: 'active' | 'inactive' | 'all'
@@ -127,6 +147,67 @@ export const getEmployees = cache(async (params: EmployeeListParams = {}): Promi
 		},
 		{ items: [], total: 0 },
 		{ errorContext: 'getEmployees' }
+	)
+})
+
+// Get detailed employee information
+export const getEmployeeDetails = cache(async (id: string): Promise<EmployeeDetails | null> => {
+	return fetchWithGracefulFallback(
+		async () => {
+			const cookieHeader = await getAuthCookieHeader()
+			const url = `${API_BASE_URL}/api/employees/${id}`
+
+			const res = await fetch(url, {
+				headers: {
+					'Content-Type': 'application/json',
+					...(cookieHeader && { Cookie: cookieHeader }),
+				},
+				next: { tags: [CacheTags.EMPLOYEES], revalidate: 60 },
+			})
+
+			if (!res.ok) {
+				if (res.status === 404) return null
+				throw new Error(`Failed to fetch employee details: ${res.status}`)
+			}
+
+			const emp = await res.json()
+			
+			// Map API response to EmployeeDetails interface
+			return {
+				id: String(emp.id || ''),
+				employee_number: emp.employee_number || '',
+				full_name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim(),
+				first_name: emp.first_name || '',
+				last_name: emp.last_name || '',
+				email: emp.email || '',
+				job_title: emp.job_title || '',
+				department: emp.department || '',
+				employment_type: emp.employment_type || '',
+				employment_status: emp.employment_status || 'active',
+				is_active: emp.employment_status === 'active' || emp.is_active === true,
+				hire_date: emp.hire_date || '',
+				phone_primary: emp.phone_primary || '',
+				created_at: emp.created_at || '',
+				role: emp.role || '',
+				secondary_phone: emp.secondary_phone || '',
+				date_of_birth: emp.date_of_birth || '',
+				address_line1: emp.address_line1 || '',
+				address_line2: emp.address_line2 || '',
+				city: emp.city || '',
+				state: emp.state || '',
+				postal_code: emp.postal_code || '',
+				country: emp.country || '',
+				emergency_contact_name: emp.emergency_contact_name || '',
+				emergency_contact_phone: emp.emergency_contact_phone || '',
+				emergency_contact_relationship: emp.emergency_contact_relationship || '',
+				pay_type: emp.pay_type || '',
+				pay_frequency: emp.pay_frequency || '',
+				overtime_rate: emp.overtime_rate || '',
+				standard_hours: emp.standard_hours || '',
+			}
+		},
+		null,
+		{ errorContext: 'getEmployeeDetails' }
 	)
 })
 

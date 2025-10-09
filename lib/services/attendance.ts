@@ -149,7 +149,7 @@ export const getMyAttendance = cache(
         const authHeader = await getAuthCookieHeader();
 
         const params = month ? `?month=${month}` : "";
-        const res = await fetch(`${API_BASE_URL}/api/attendance/my${params}`, {
+        const res = await fetch(`${API_BASE_URL}/api/attendance${params}`, {
           headers: {
             "Content-Type": "application/json",
             ...(authHeader && { Cookie: authHeader }),
@@ -206,7 +206,7 @@ export async function createMyAttendanceAction(
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
   try {
     const payload = { ...parsed.data, date: toIsoUtc(parsed.data.date) || parsed.data.date }
-    const res = await fetch(`${API_BASE_URL}/api/attendance/my`, {
+    const res = await fetch(`${API_BASE_URL}/api/attendance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
       body: JSON.stringify(payload),

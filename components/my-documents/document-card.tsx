@@ -1,46 +1,45 @@
-'use client'
-import type { DocumentListItem } from '@/lib/services/documents'
-import { Button } from '@/components/ui'
-import { Badge } from '@/components/ui/badge'
-import { FileText, Download, Trash2 } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
+"use client";
+import type { DocumentListItem } from "@/lib/services/documents";
+import { Button } from "@/components/ui";
+import { Badge } from "@/components/ui/badge";
+import { FileText, Edit, Trash2 } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 interface DocumentCardProps {
-  document: DocumentListItem
-  onDownload: (id: string) => void
-  onDelete?: (id: string) => void
+  document: DocumentListItem;
+  onEdit?: (document: DocumentListItem) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function DocumentCard({ document, onDownload, onDelete }: DocumentCardProps) {
+export function DocumentCard({
+  document,
+  onEdit,
+  onDelete,
+}: DocumentCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'rejected':
-        return 'bg-red-100 text-red-800'
-      case 'uploaded':
-        return 'bg-blue-100 text-blue-800'
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "uploaded":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800'
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return 'Unknown size'
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
+
 
   const formattedDate = document.createdAt
-    ? format(parseISO(document.createdAt), 'MMM d, yyyy')
-    : 'Unknown date'
+    ? format(parseISO(document.createdAt), "MMM d, yyyy")
+    : "Unknown date";
 
   const displayType = document.type
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div className="border border-[var(--border)] rounded-lg p-4 bg-card hover:shadow-md transition-shadow">
@@ -66,22 +65,19 @@ export function DocumentCard({ document, onDownload, onDelete }: DocumentCardPro
             </span>
           </div>
 
-          <div className="text-xs text-muted-foreground mb-3">
-            {formatFileSize(document.sizeBytes)}
-          </div>
-
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDownload(document.id)}
-              className="flex-1"
-              disabled={document.canDownload === false}
-              title={document.canDownload === false ? 'Download not available' : 'Download document'}
-            >
-              <Download className="h-3 w-3 mr-1" />
-              Download
-            </Button>
+            {onEdit && document.canEdit !== false && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(document)}
+                className="flex-1"
+                title="Edit document"
+              >
+                <Edit className="h-3 w-3 mr-1" />
+                Edit
+              </Button>
+            )}
             {onDelete && document.canEdit !== false && (
               <Button
                 variant="outline"
@@ -97,5 +93,5 @@ export function DocumentCard({ document, onDownload, onDelete }: DocumentCardPro
         </div>
       </div>
     </div>
-  )
+  );
 }

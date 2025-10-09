@@ -201,68 +201,72 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 
       <div className='grid gap-2'>
         {runs.length > 0 ? (
-          <div className='w-full overflow-x-auto rounded-lg border border-border bg-card shadow-sm'>
-            <table className='w-full text-sm'>
-              <thead className='text-left text-muted-foreground bg-muted/60'>
-                <tr>
-                  <th className='py-2.5 px-3 font-medium'>Pay Date</th>
-                  <th className='py-2.5 px-3 font-medium'>Employees</th>
-                  <th className='py-2.5 px-3 font-medium'>Gross Pay</th>
-                  <th className='py-2.5 px-3 font-medium'>Net Pay</th>
-                  <th className='py-2.5 px-3 font-medium'>Status</th>
-                  <th className='py-2.5 px-3 font-medium text-right'>Actions</th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-border'>
-                {runs.map((r, idx) => (
-                  <tr key={r.id} className={idx % 2 === 0 ? 'hover:bg-muted/40' : 'bg-muted/20 hover:bg-muted/40'}>
-                    <td className='py-2.5 px-3'>{r.payDate || '—'}</td>
-                    <td className='py-2.5 px-3'>{formatNumber(r.employeesCount)}</td>
-                    <td className='py-2.5 px-3 text-emerald-600 dark:text-emerald-400'>{formatNumber(r.grossAmount)}</td>
-                    <td className='py-2.5 px-3 text-sky-600 dark:text-sky-400'>{formatNumber(r.netAmount)}</td>
-                    <td className='py-2.5 px-3'>
-                      <StatusBadge status={r.status} />
-                    </td>
-                    <td className='py-2.5 px-3 whitespace-nowrap text-right'>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant='outline' aria-label='Actions'>
-                            <svg
-                              xmlns='http://www.w3.org/2000/svg'
-                              viewBox='0 0 20 20'
-                              fill='currentColor'
-                              className='h-4 w-4'
-                            >
-                              <path d='M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z' />
-                            </svg>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='end'>
-                          <DropdownMenuItem onClick={() => handleRowExport(r.id, 'excel')}>
-                            Export Summary
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleRowExport(r.id, 'bci')}>
-                            Export BCI
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleRowExport(r.id, 'tabela')}>
-                            Export Tabela
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
+          <div className="glass rounded-xl overflow-hidden">
+            <div className='w-full overflow-x-auto'>
+              <table className='w-full text-sm'>
+                <thead className='border-b border-[var(--border)] text-neutral-400'>
+                  <tr>
+                    <th className='text-left p-3'>Pay Date</th>
+                    <th className='text-left p-3'>Employees</th>
+                    <th className='text-left p-3'>Gross Pay</th>
+                    <th className='text-left p-3'>Net Pay</th>
+                    <th className='text-left p-3'>Status</th>
+                    <th className='text-left p-3'>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {runs.map((r) => (
+                    <tr key={r.id} className="border-b border-[var(--border)] hover:bg-muted/50 transition-colors">
+                      <td className='p-3'>{r.payDate || '—'}</td>
+                      <td className='p-3'>{formatNumber(r.employeesCount)}</td>
+                      <td className='p-3 text-emerald-600 dark:text-emerald-400'>{formatNumber(r.grossAmount)}</td>
+                      <td className='p-3 text-sky-600 dark:text-sky-400'>{formatNumber(r.netAmount)}</td>
+                      <td className='p-3'>
+                        <StatusBadge status={r.status} />
+                      </td>
+                      <td className='p-3'>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant='ghost' size="sm" className="h-8 w-8 p-0">
+                              <svg
+                                xmlns='http://www.w3.org/2000/svg'
+                                viewBox='0 0 20 20'
+                                fill='currentColor'
+                                className='h-4 w-4'
+                              >
+                                <path d='M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z' />
+                              </svg>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align='end'>
+                            <DropdownMenuItem onClick={() => handleRowExport(r.id, 'excel')}>
+                              Export Summary
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRowExport(r.id, 'bci')}>
+                              Export BCI
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRowExport(r.id, 'tabela')}>
+                              Export Tabela
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
-          <div className='border border-dashed border-border rounded-lg p-8 text-center'>
-            <div className='flex flex-col items-center gap-2'>
-              <svg className='w-12 h-12 text-muted-foreground/50' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
-              </svg>
-              <p className='text-sm text-muted-foreground'>No payroll runs yet</p>
-              <p className='text-xs text-muted-foreground/70'>Calculate payroll to get started</p>
+          <div className="glass rounded-xl overflow-hidden">
+            <div className='p-8 text-center'>
+              <div className='flex flex-col items-center gap-2'>
+                <svg className='w-12 h-12 text-muted-foreground/50' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
+                </svg>
+                <p className='text-sm text-muted-foreground'>No payroll runs yet</p>
+                <p className='text-xs text-muted-foreground/70'>Calculate payroll to get started</p>
+              </div>
             </div>
           </div>
         )}

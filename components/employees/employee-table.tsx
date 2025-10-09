@@ -8,9 +8,17 @@ import {
 import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/search-input";
 import { DeleteEmployeeDialog } from "./delete-employee-dialog";
+import { EmployeeViewDialog } from "./employee-view-dialog";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 
 interface EmployeeTableProps {
   initialEmployees: Employee[];
@@ -30,11 +38,26 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(
     null
   );
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkDelete, setShowBulkDelete] = useState(false);
+
+  const handleRowClick = (employee: Employee, event: React.MouseEvent) => {
+    // Don't open dialog if clicking on checkbox, buttons, or other interactive elements
+    const target = event.target as HTMLElement;
+    if (
+      (target as HTMLInputElement).type === 'checkbox' ||
+      target.closest('button') ||
+      target.closest('input') ||
+      target.closest('[role="button"]')
+    ) {
+      return;
+    }
+    setViewingEmployee(employee);
+  };
 
   const handleDelete = async (employee: Employee) => {
     setIsSubmitting(true);
@@ -264,7 +287,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                   className="h-4 w-4 rounded border-[var(--border)]"
                 />
               </th>
-              <th className="text-left p-3">Name</th>
+              <th className="text-left p-3">
+                <div className="flex items-center gap-2">
+                  Name
+                  <span className="text-xs text-muted-foreground">(click to view details)</span>
+                </div>
+              </th>
               <th className="text-left p-3">Email</th>
               <th className="text-left p-3">Department</th>
               <th className="text-left p-3">Status</th>
@@ -280,7 +308,11 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
               </tr>
             ) : (
               filteredAndSortedItems.map((e) => (
-                <tr key={e.id} className="border-b border-[var(--border)]">
+                <tr 
+                  key={e.id} 
+                  className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={(event) => handleRowClick(e, event)}
+                >
                   <td className="p-3">
                     <input
                       type="checkbox"
@@ -306,22 +338,55 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                     </span>
                   </td>
                   <td className="p-3">
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => router.push(`/dashboard/employees/${e.id}`)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setDeletingEmployee(e)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(event) => event.stopPropagation()}
+                          className="h-8 w-8 p-0"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setViewingEmployee(e);
+                          }}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (e.id) {
+                              router.push(`/dashboard/employees/${e.id}`);
+                            } else {
+                              showToast({ 
+                                type: "error", 
+                                message: "Cannot edit employee: Invalid employee ID" 
+                              });
+                            }
+                          }}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setDeletingEmployee(e);
+                          }}
+                          className="text-red-400 focus:text-red-400"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))
@@ -329,6 +394,15 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           </tbody>
         </table>
       </div>
+
+      {/* Employee View Dialog */}
+      {viewingEmployee && (
+        <EmployeeViewDialog
+          employee={viewingEmployee}
+          open={!!viewingEmployee}
+          onOpenChange={(open) => !open && setViewingEmployee(null)}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       {deletingEmployee && (

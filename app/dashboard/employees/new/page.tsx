@@ -6,7 +6,7 @@ import { getCompany } from '@/lib/services/company'
 import { getDepartments } from '@/lib/services/departments'
 
 export default async function NewEmployeePage() {
-	await requireRole(['hr_manager', 'system_admin'])
+	await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
 	
 	const [company, departments] = await Promise.all([
 		getCompany(),

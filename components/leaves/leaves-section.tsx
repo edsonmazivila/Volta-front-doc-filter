@@ -156,7 +156,6 @@ export function LeavesSection({ requests, balances, pending, teamBalances }: Lea
           <LeaveTable
         items={filtered}
         onNew={() => setOpen(true)}
-        onView={(id) => { const it = requests.find(r => r.id === id) || null; setViewItem(it); setViewOpen(!!it) }}
         onSubmit={async (id) => {
           if (operationInProgress[id]) return;
           setOperationInProgress(prev => ({ ...prev, [id]: true }));
