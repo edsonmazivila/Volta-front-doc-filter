@@ -245,6 +245,53 @@ export const getDocument = cache(async (id: string): Promise<Document | null> =>
 })
 
 /**
+ * Get a document for edit screen
+ * Endpoint: GET /api/documents/:id/edit
+ */
+export const getDocumentForEdit = cache(async (id: string): Promise<Document | null> => {
+  const cookieHeader = await getAuthCookieHeader()
+  const res = await fetch(`${API_BASE_URL}/api/documents/${id}/edit`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cookieHeader && { Cookie: cookieHeader }),
+    },
+    next: { tags: [`document-${id}`], revalidate: 60 },
+  })
+
+  if (!res.ok) {
+    if (res.status === 404) return null
+    throw new Error(`Failed to fetch document for edit: ${res.status}`)
+  }
+
+  const json = await res.json()
+  const d = json.document || json.data || json
+
+  const emp = d.employee || d.user || undefined
+  const empUser = emp?.user || emp
+  const first = empUser?.first_name ?? empUser?.firstName ?? ''
+  const last = empUser?.last_name ?? empUser?.lastName ?? ''
+  const email = empUser?.email ?? ''
+  const name = [first, last].filter(Boolean).join(' ') || email || '—'
+
+  return {
+    id: String(d.id ?? ''),
+    employee_id: String(d.employee_id ?? ''),
+    employee_name: String(d.employee_name ?? name),
+    title: String(d.title ?? ''),
+    document_type: String(d.document_type ?? ''),
+    document_status: (d.document_status ?? 'uploaded') as DocumentStatus,
+    original_filename: d.original_filename ? String(d.original_filename) : undefined,
+    file_path: d.file_path ? String(d.file_path) : undefined,
+    file_size: typeof d.file_size === 'number' ? d.file_size : undefined,
+    is_confidential: Boolean(d.is_confidential),
+    description: d.description ? String(d.description) : undefined,
+    expiry_date: d.expiry_date ? String(d.expiry_date) : undefined,
+    created_at: d.created_at ? String(d.created_at) : undefined,
+    updated_at: d.updated_at ? String(d.updated_at) : undefined,
+  }
+})
+
+/**
  * Get available document types
  * Endpoint: GET /api/documents/types
  * Note: Uses 300s (5 min) cache instead of standard 60s because document types
@@ -366,6 +413,47 @@ export async function updateDocumentAction(id: string, prevState: unknown, formD
     const cookieHeader = await getAuthCookieHeader()
     const res = await fetch(`${API_BASE_URL}/api/documents/${id}`, {
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: JSON.stringify(parsed.data),
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to update document'] } }
+    }
+
+    const data = await res.json()
+    revalidateEntityMutation('DOCUMENTS')
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to update document'] } }
+  }
+}
+
+/**
+ * Partially update document metadata
+ * Endpoint: PATCH /api/documents/:id
+ */
+export async function patchDocumentAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const parsed = updateDocumentSchema.partial().safeParse({
+    title: formData.get('title') ?? undefined,
+    description: formData.get('description') ?? undefined,
+    expiry_date: formData.get('expiry_date') ?? undefined,
+    is_confidential: formData.get('is_confidential') === 'true' ? true : undefined,
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/documents/${id}`, {
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         ...(cookieHeader && { Cookie: cookieHeader }),

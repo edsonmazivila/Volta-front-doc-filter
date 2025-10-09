@@ -2,12 +2,13 @@
 import { useMemo, useState } from 'react'
 import type { LeaveRequestItem, LeaveBalanceItem } from '@/lib/services/leaves'
 import { LeaveTable } from '@/components/leaves/leave-table'
+import { LeaveRequestFormDialog } from '@/components/leaves/leave-request-form-dialog'
 import { Button, Skeleton } from '@/components/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useRouter } from 'next/navigation'
 import { useToastHelpers } from '@/components/ui/toast'
-import { createLeaveRequestAction, submitLeaveRequestAction, cancelLeaveRequestAction, updateLeaveRequestAction } from '@/lib/services/leaves'
+import { submitLeaveRequestAction, cancelLeaveRequestAction } from '@/lib/services/leaves'
 import { Calendar } from 'lucide-react'
 
 interface MyLeavesSectionProps {
@@ -22,22 +23,12 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
   const [typeFilter, setTypeFilter] = useState('')
   const router = useRouter()
   const toast = useToastHelpers()
-  const [newOpen, setNewOpen] = useState(false)
+  const [formOpen, setFormOpen] = useState(false)
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create')
+  const [editItem, setEditItem] = useState<LeaveRequestItem | null>(null)
   const [viewOpen, setViewOpen] = useState(false)
   const [viewItem, setViewItem] = useState<LeaveRequestItem | null>(null)
-  const [leaveType, setLeaveType] = useState('vacation')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [reason, setReason] = useState('')
-  const [isHalfDay, setIsHalfDay] = useState(false)
   const [operationInProgress, setOperationInProgress] = useState<Record<string, boolean>>({})
-  const [editOpen, setEditOpen] = useState(false)
-  const [editItem, setEditItem] = useState<LeaveRequestItem | null>(null)
-  const [editType, setEditType] = useState('vacation')
-  const [editStart, setEditStart] = useState('')
-  const [editEnd, setEditEnd] = useState('')
-  const [editReason, setEditReason] = useState('')
-  const [editHalfDay, setEditHalfDay] = useState(false)
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -120,14 +111,22 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => setNewOpen(true)}>New request</Button>
+          <Button onClick={() => {
+            setFormMode('create')
+            setEditItem(null)
+            setFormOpen(true)
+          }}>New request</Button>
         </div>
       </div>
 
       <LeaveTable
         items={filtered}
         isLoading={isLoading}
-        onNew={() => setNewOpen(true)}
+        onNew={() => {
+          setFormMode('create')
+          setEditItem(null)
+          setFormOpen(true)
+        }}
         onSubmit={async (id) => {
           if (operationInProgress[id]) return
           setOperationInProgress(prev => ({ ...prev, [id]: true }))
@@ -159,12 +158,8 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
           const it = requests.find(r => r.id === id) || null
           if (it) {
             setEditItem(it)
-            setEditType(it.leave_type)
-            setEditStart(it.start_date?.slice(0,10) || '')
-            setEditEnd(it.end_date?.slice(0,10) || '')
-            setEditReason(it.reason || '')
-            setEditHalfDay(!!it.is_half_day)
-            setEditOpen(true)
+            setFormMode('edit')
+            setFormOpen(true)
           }
         }}
         onDelete={async (id) => {
@@ -183,74 +178,15 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
         }}
       />
 
-      <Dialog open={newOpen} onOpenChange={setNewOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Leave Request</DialogTitle>
-          </DialogHeader>
-          <div className='grid gap-3'>
-            <div className='flex flex-col gap-1'>
-              <label className='text-sm'>Type</label>
-              <Select value={leaveType} onValueChange={setLeaveType}>
-                <SelectTrigger className='w-full bg-background border border-[var(--border)]'>
-                  <SelectValue placeholder='Select type' />
-                </SelectTrigger>
-                <SelectContent className='bg-background border border-[var(--border)]'>
-                  {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm'>Start date</label>
-                <input type='date' className='w-full border rounded-md px-3 py-2 bg-background' value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </div>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm'>End date</label>
-                <input type='date' className='w-full border rounded-md px-3 py-2 bg-background' value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </div>
-            </div>
-            <div className='flex items-center gap-2'>
-              <input id='half-day' type='checkbox' checked={isHalfDay} onChange={(e) => setIsHalfDay(e.target.checked)} />
-              <label htmlFor='half-day' className='text-sm'>Half day</label>
-            </div>
-            <div className='flex flex-col gap-1'>
-              <label className='text-sm'>Reason</label>
-              <textarea className='w-full border rounded-md px-3 py-2 bg-background' rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
-            </div>
-            <div className='flex justify-end gap-2 pt-2'>
-              <Button variant='secondary' onClick={() => setNewOpen(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                if (!leaveType || !startDate || !endDate) { toast.error('Type, start and end dates are required'); return }
-                if (new Date(startDate) > new Date(endDate)) { toast.error('End date must be after start date'); return }
-                try {
-                  const form = new FormData()
-                  form.append('leave_type', leaveType)
-                  // Send RFC3339 timestamps expected by backend
-                  form.append('start_date', `${startDate}T00:00:00Z`)
-                  form.append('end_date', `${endDate}T23:59:59Z`)
-                  if (reason.trim()) form.append('reason', reason.trim())
-                  form.append('is_half_day', isHalfDay ? 'true' : 'false')
-                  console.log('[leaves] submit create payload', Object.fromEntries(form.entries()))
-                  const result = await createLeaveRequestAction(null, form)
-                  console.log('[leaves] submit create result', result)
-                  if ('errors' in result) { const errs = result.errors as Record<string, string[]>; const msg = errs._form?.[0] || Object.values(errs)[0]?.[0] || 'Failed to create request'; console.error('[leaves] create error', errs); toast.error(msg); return }
-                  toast.success('Leave request created')
-                  setNewOpen(false)
-                  setLeaveType('vacation'); setStartDate(''); setEndDate(''); setReason(''); setIsHalfDay(false)
-                  router.refresh()
-                } catch {
-                  console.error('[leaves] submit create threw')
-                  toast.error('Failed to create request')
-                }
-              }}>Create</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Leave Request Form Dialog */}
+      <LeaveRequestFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        editItem={editItem}
+        mode={formMode}
+      />
 
+      {/* View Details Dialog */}
       <Dialog open={viewOpen} onOpenChange={(v) => { if (!v) setViewItem(null); setViewOpen(v) }}>
         <DialogContent>
           <DialogHeader>
@@ -270,12 +206,8 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
                     size='sm'
                     onClick={() => {
                       setEditItem(viewItem)
-                      setEditType(viewItem.leave_type)
-                      setEditStart(viewItem.start_date?.slice(0,10) || '')
-                      setEditEnd(viewItem.end_date?.slice(0,10) || '')
-                      setEditReason(viewItem.reason || '')
-                      setEditHalfDay(!!viewItem.is_half_day)
-                      setEditOpen(true)
+                      setFormMode('edit')
+                      setFormOpen(true)
                       setViewOpen(false)
                     }}
                   >Edit draft</Button>
@@ -283,70 +215,6 @@ export function MyLeavesSection({ requests, balances, isLoading = false }: MyLea
               ) : null}
             </div>
           ) : null}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={editOpen} onOpenChange={(v) => { if (!v) setEditItem(null); setEditOpen(v) }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Leave Draft</DialogTitle>
-          </DialogHeader>
-          <div className='grid gap-3'>
-            <div className='flex flex-col gap-1'>
-              <label className='text-sm'>Type</label>
-              <Select value={editType} onValueChange={setEditType}>
-                <SelectTrigger className='w-full bg-background border border-[var(--border)]'>
-                  <SelectValue placeholder='Select type' />
-                </SelectTrigger>
-                <SelectContent className='bg-background border border-[var(--border)]'>
-                  {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm'>Start date</label>
-                <input type='date' className='w-full border rounded-md px-3 py-2 bg-background' value={editStart} onChange={(e) => setEditStart(e.target.value)} />
-              </div>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm'>End date</label>
-                <input type='date' className='w-full border rounded-md px-3 py-2 bg-background' value={editEnd} onChange={(e) => setEditEnd(e.target.value)} />
-              </div>
-            </div>
-            <div className='flex items-center gap-2'>
-              <input id='edit-half-day' type='checkbox' checked={editHalfDay} onChange={(e) => setEditHalfDay(e.target.checked)} />
-              <label htmlFor='edit-half-day' className='text-sm'>Half day</label>
-            </div>
-            <div className='flex flex-col gap-1'>
-              <label className='text-sm'>Reason</label>
-              <textarea className='w-full border rounded-md px-3 py-2 bg-background' rows={3} value={editReason} onChange={(e) => setEditReason(e.target.value)} />
-            </div>
-            <div className='flex justify-end gap-2 pt-2'>
-              <Button variant='secondary' onClick={() => setEditOpen(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                if (!editItem) return
-                if (!editType || !editStart || !editEnd) { toast.error('Type, start and end dates are required'); return }
-                try {
-                  const form = new FormData()
-                  form.append('leave_type', editType)
-                  form.append('start_date', `${editStart}T00:00:00Z`)
-                  form.append('end_date', `${editEnd}T23:59:59Z`)
-                  form.append('reason', editReason)
-                  form.append('is_half_day', editHalfDay ? 'true' : 'false')
-                  const result = await updateLeaveRequestAction(editItem.id, null, form)
-                  if (result.errors) { toast.error(result.errors._form?.[0] || 'Failed to update request'); return }
-                  toast.success('Leave request updated')
-                  setEditOpen(false)
-                  setEditItem(null)
-                  router.refresh()
-                } catch {
-                  toast.error('Failed to update request')
-                }
-              }}>Save</Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </div>

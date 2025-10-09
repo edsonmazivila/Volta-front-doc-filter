@@ -2,10 +2,10 @@
 import { useMemo, useState } from 'react'
 import type { LeaveRequestItem, LeaveBalanceItem, TeamBalanceItem } from '@/lib/services/leaves'
 import { LeaveTable } from '@/components/leaves/leave-table'
+import { LeaveRequestFormDialog } from '@/components/leaves/leave-request-form-dialog'
 import { PendingApprovalsTable } from '@/components/leaves/pending-approvals-table'
 import { TeamBalancesTable } from '@/components/leaves/team-balances-table'
 import {
-  createLeaveRequestAction,
   submitLeaveRequestAction,
   cancelLeaveRequestAction,
   approveL1Action,
@@ -31,12 +31,7 @@ interface LeavesSectionProps {
 export function LeavesSection({ requests, balances, pending, teamBalances }: LeavesSectionProps) {
   const router = useRouter()
   const toast = useToastHelpers()
-  const [open, setOpen] = useState(false)
-  const [leaveType, setLeaveType] = useState('vacation')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [reason, setReason] = useState('')
-  const [isHalfDay, setIsHalfDay] = useState(false)
+  const [formOpen, setFormOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
@@ -56,31 +51,6 @@ export function LeavesSection({ requests, balances, pending, teamBalances }: Lea
       return matchesQ && matchesStatus && matchesType
     })
   }, [requests, search, statusFilter, typeFilter])
-
-  async function handleCreate() {
-    if (!leaveType || !startDate || !endDate) {
-      toast.error('Type, start and end dates are required')
-      return
-    }
-    try {
-      const form = new FormData()
-      form.append('leave_type', leaveType)
-      form.append('start_date', `${startDate}T00:00:00Z`)
-      form.append('end_date', `${endDate}T23:59:59Z`)
-      form.append('reason', reason)
-      form.append('is_half_day', isHalfDay ? 'true' : 'false')
-
-      const result = await createLeaveRequestAction(null, form)
-      if (result.errors) {
-        toast.error(result.errors._form?.[0] || 'Failed to create request')
-        return
-      }
-      toast.success('Leave request created')
-      setOpen(false)
-      setLeaveType('vacation'); setStartDate(''); setEndDate(''); setReason(''); setIsHalfDay(false)
-      router.refresh()
-    } catch { toast.error('Failed to create request') }
-  }
 
   return (
     <div className='grid gap-4'>
@@ -149,13 +119,13 @@ export function LeavesSection({ requests, balances, pending, teamBalances }: Lea
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => setOpen(true)}>New request</Button>
+          <Button onClick={() => setFormOpen(true)}>New request</Button>
         </div>
           </div>
 
           <LeaveTable
         items={filtered}
-        onNew={() => setOpen(true)}
+        onNew={() => setFormOpen(true)}
         onSubmit={async (id) => {
           if (operationInProgress[id]) return;
           setOperationInProgress(prev => ({ ...prev, [id]: true }));
@@ -250,43 +220,14 @@ export function LeavesSection({ requests, balances, pending, teamBalances }: Lea
         </TabsContent>
       </Tabs>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Leave Request</DialogTitle>
-          </DialogHeader>
-          <div className='grid gap-3'>
-            <div className='flex flex-col gap-1'>
-              <label className='text-sm'>Type</label>
-              <select className='w-full border rounded-md px-3 py-2 bg-background' value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
-                {['vacation','sick','personal','maternity','paternity','bereavement','emergency'].map(t => (<option key={t} value={t}>{t}</option>))}
-              </select>
-            </div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm'>Start date</label>
-                <input type='date' className='w-full border rounded-md px-3 py-2 bg-background' value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </div>
-              <div className='flex flex-col gap-1'>
-                <label className='text-sm'>End date</label>
-                <input type='date' className='w-full border rounded-md px-3 py-2 bg-background' value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </div>
-            </div>
-            <div className='flex items-center gap-2'>
-              <input id='half-day' type='checkbox' checked={isHalfDay} onChange={(e) => setIsHalfDay(e.target.checked)} />
-              <label htmlFor='half-day' className='text-sm'>Half day</label>
-            </div>
-            <div className='flex flex-col gap-1'>
-              <label className='text-sm'>Reason</label>
-              <textarea className='w-full border rounded-md px-3 py-2 bg-background' rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
-            </div>
-            <div className='flex justify-end gap-2 pt-2'>
-              <Button variant='secondary' onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={handleCreate}>Create</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Leave Request Form Dialog */}
+      <LeaveRequestFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        mode='create'
+      />
+
+      {/* Reject Dialog */}
       <Dialog open={rejectOpen} onOpenChange={(v) => { if (!v) { setRejectId(null); setRejectReason('') } setRejectOpen(v) }}>
         <DialogContent>
           <DialogHeader>

@@ -1,7 +1,3 @@
-'use client'
-
-import { apiClient } from '@/lib/http/api-client'
-
 export interface NotificationItem {
 	id: string
 	title?: string
@@ -18,8 +14,15 @@ export interface NotificationsResponse {
 }
 
 export async function getNotifications(limit = 10): Promise<NotificationItem[]> {
-	const json = await apiClient.get<unknown>('/api/notifications', undefined, { searchParams: { limit } })
-	const data = (json as Record<string, unknown>) || {}
+	const url = new URL(`/api/notifications`, typeof window === 'undefined' ? 'http://localhost' : window.location.origin)
+	url.searchParams.set('limit', String(limit))
+	const res = await fetch(url.toString(), {
+		method: 'GET',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+	})
+	if (!res.ok) return []
+	const data = (await res.json().catch(() => ({}))) as Record<string, unknown>
 	const list = (data.notifications || data.items || data.data || []) as unknown[]
 	return Array.isArray(list)
 		? list.map((n: unknown) => {
@@ -40,8 +43,13 @@ export async function getNotifications(limit = 10): Promise<NotificationItem[]> 
 
 export async function getUnreadCount(): Promise<number> {
 	try {
-		const json = await apiClient.get<unknown>('/api/notifications/count')
-		const data = json as Record<string, unknown>
+		const res = await fetch(`/api/notifications/count`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+		})
+		if (!res.ok) return 0
+		const data = (await res.json().catch(() => ({}))) as Record<string, unknown>
 		return Number(data.unread_count ?? data.unread ?? 0) || 0
 	} catch {
 		return 0
@@ -49,15 +57,41 @@ export async function getUnreadCount(): Promise<number> {
 }
 
 export async function markAsRead(id: string): Promise<void> {
-	await apiClient.put(`/api/notifications/${id}/read`, {})
+	const res = await fetch(`/api/notifications/${encodeURIComponent(id)}/read`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({}),
+	})
+	if (!res.ok) throw new Error(`Failed to mark as read: ${res.status}`)
+}
+
+export async function markAllRead(): Promise<void> {
+	const res = await fetch(`/api/notifications/mark-all-read`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+		body: JSON.stringify({}),
+	})
+	if (!res.ok) throw new Error(`Failed to mark all read: ${res.status}`)
 }
 
 export async function deleteNotification(id: string): Promise<void> {
-	await apiClient.delete(`/api/notifications/${id}`)
+	const res = await fetch(`/api/notifications/${encodeURIComponent(id)}`, {
+		method: 'DELETE',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+	})
+	if (!res.ok) throw new Error(`Failed to delete notification: ${res.status}`)
 }
 
 export async function clearAllNotifications(): Promise<void> {
-	await apiClient.delete('/api/notifications/clear')
+	const res = await fetch(`/api/notifications/clear`, {
+		method: 'DELETE',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include',
+	})
+	if (!res.ok) throw new Error(`Failed to clear notifications: ${res.status}`)
 }
 
 

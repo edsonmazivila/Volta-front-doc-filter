@@ -42,6 +42,12 @@ export function NotificationsMenu() {
     await refreshNotifications()
   }
 
+  async function handleMarkAllRead() {
+    const { markAllRead } = await import('@/lib/services/notifications')
+    await markAllRead()
+    await refreshNotifications()
+  }
+
   return (
     <DropdownMenu onOpenChange={(open) => { if (open) void refreshNotifications() }}>
       <DropdownMenuTrigger asChild>
@@ -88,7 +94,10 @@ export function NotificationsMenu() {
         <DropdownMenuSeparator />
         <div className='px-2 py-1 flex items-center justify-between'>
           <button className='text-xs underline hover:no-underline opacity-80' onClick={() => void refreshNotifications()}>Refresh</button>
-          <button className='text-xs underline hover:no-underline opacity-80' onClick={() => void handleClearAll()}>Clear all</button>
+          <div className='flex items-center gap-3'>
+            <button className='text-xs underline hover:no-underline opacity-80' onClick={() => void handleMarkAllRead()}>Mark all read</button>
+            <button className='text-xs underline hover:no-underline opacity-80' onClick={() => void handleClearAll()}>Clear all</button>
+          </div>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
