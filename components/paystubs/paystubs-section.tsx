@@ -37,8 +37,14 @@ export function PaystubsSection({
         p.pay_period_end?.toLowerCase().includes(q);
       const matchesAmount =
         p.net_pay?.toString().includes(q) ||
-        p.gross_pay?.toString().includes(q);
-      return matchesPayDate || matchesPeriod || matchesAmount;
+        p.gross_pay?.toString().includes(q) ||
+        p.regular_pay?.toString().includes(q) ||
+        p.overtime_pay?.toString().includes(q) ||
+        p.bonus_pay?.toString().includes(q) ||
+        p.commission_pay?.toString().includes(q);
+      const matchesStatus = p.status?.toLowerCase().includes(q);
+      const matchesPayrollRun = p.payroll_run_id?.toLowerCase().includes(q);
+      return matchesPayDate || matchesPeriod || matchesAmount || matchesStatus || matchesPayrollRun;
     });
   }, [paystubs, search]);
 

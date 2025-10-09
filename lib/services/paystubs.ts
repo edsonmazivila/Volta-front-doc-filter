@@ -64,6 +64,73 @@ export const getPaystubById = cache(async (id: string): Promise<PaystubDetail | 
   }
 })
 
+export const getEmployeePaystubs = cache(async (employeeId: string, params?: { year?: string }): Promise<Paystub[]> => {
+  try {
+    const qs = new URLSearchParams()
+    if (params?.year) qs.append('year', params.year)
+
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/paystubs/employee/${employeeId}${qs.toString() ? `?${qs}` : ''}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['paystubs', `employee-${employeeId}`], revalidate: 60 },
+    })
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch employee paystubs: ${res.status}`)
+    }
+
+    const data = await res.json()
+    const candidates = [
+      data?.paystubs,
+      data?.data?.paystubs,
+      data?.data,
+      data?.items,
+      data?.results,
+      data,
+    ]
+    const firstArray = candidates.find((c) => Array.isArray(c))
+    return Array.isArray(firstArray) ? (firstArray as Paystub[]) : []
+  } catch (error) {
+    console.error('Error fetching employee paystubs:', error)
+    return []
+  }
+})
+
+export const getPayrollRunPaystubs = cache(async (payrollRunId: string): Promise<Paystub[]> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/paystubs/payroll-run/${payrollRunId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['paystubs', `payroll-run-${payrollRunId}`], revalidate: 60 },
+    })
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch payroll run paystubs: ${res.status}`)
+    }
+
+    const data = await res.json()
+    const candidates = [
+      data?.paystubs,
+      data?.data?.paystubs,
+      data?.data,
+      data?.items,
+      data?.results,
+      data,
+    ]
+    const firstArray = candidates.find((c) => Array.isArray(c))
+    return Array.isArray(firstArray) ? (firstArray as Paystub[]) : []
+  } catch (error) {
+    console.error('Error fetching payroll run paystubs:', error)
+    return []
+  }
+})
+
 // Download paystub as PDF
 export async function downloadPaystubPDF(id: string): Promise<Blob | null> {
   try {

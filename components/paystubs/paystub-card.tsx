@@ -19,12 +19,24 @@ export function PaystubCard({ paystub, onView, onDownload }: PaystubCardProps) {
     ? format(parseISO(paystub.pay_date), 'MMM d, yyyy')
     : 'N/A'
 
+  const totalHours = (paystub.regular_hours || 0) + (paystub.overtime_hours || 0)
+  const hasAdditionalPay = (paystub.bonus_pay || 0) > 0 || (paystub.commission_pay || 0) > 0
+
   return (
     <div className="border border-[var(--border)] rounded-lg p-4 bg-card hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-sm font-medium text-card-foreground">Pay Period</h3>
+            {paystub.status && (
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                paystub.status === 'paid' ? 'bg-green-500/20 text-green-400' :
+                paystub.status === 'published' ? 'bg-blue-500/20 text-blue-400' :
+                'bg-yellow-500/20 text-yellow-400'
+              }`}>
+                {paystub.status}
+              </span>
+            )}
           </div>
           <p className="text-sm text-muted-foreground mb-1">{formattedPeriod}</p>
           <p className="text-xs text-muted-foreground">
@@ -41,7 +53,7 @@ export function PaystubCard({ paystub, onView, onDownload }: PaystubCardProps) {
       </div>
 
       <div className="mt-4 pt-4 border-t border-[var(--border)]">
-        <div className="grid grid-cols-3 gap-4 text-sm mb-4">
+        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
           <div>
             <div className="text-xs text-muted-foreground mb-1">Gross Pay</div>
             <div className="font-medium">${paystub.gross_pay?.toFixed(2) || '0.00'}</div>
@@ -50,14 +62,52 @@ export function PaystubCard({ paystub, onView, onDownload }: PaystubCardProps) {
             <div className="text-xs text-muted-foreground mb-1">Deductions</div>
             <div className="font-medium">${paystub.total_deductions?.toFixed(2) || '0.00'}</div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
           <div>
             <div className="text-xs text-muted-foreground mb-1">Hours</div>
             <div className="font-medium">
-              {paystub.regular_hours || 0}h
-              {paystub.overtime_hours ? ` + ${paystub.overtime_hours}h OT` : ''}
+              {totalHours}h
+              {paystub.overtime_hours && paystub.overtime_hours > 0 && (
+                <span className="text-xs text-muted-foreground ml-1">
+                  ({paystub.regular_hours || 0}R + {paystub.overtime_hours}OT)
+                </span>
+              )}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">Rate</div>
+            <div className="font-medium">
+              ${paystub.regular_rate?.toFixed(2) || '0.00'}/h
+              {paystub.overtime_rate && paystub.overtime_rate !== paystub.regular_rate && (
+                <span className="text-xs text-muted-foreground ml-1">
+                  (OT: ${paystub.overtime_rate?.toFixed(2)})
+                </span>
+              )}
             </div>
           </div>
         </div>
+
+        {hasAdditionalPay && (
+          <div className="text-sm mb-4 p-2 bg-accent/20 rounded">
+            <div className="text-xs text-muted-foreground mb-1">Additional Pay</div>
+            <div className="space-y-1">
+              {paystub.bonus_pay && paystub.bonus_pay > 0 && (
+                <div className="flex justify-between text-xs">
+                  <span>Bonus:</span>
+                  <span className="font-medium">${paystub.bonus_pay.toFixed(2)}</span>
+                </div>
+              )}
+              {paystub.commission_pay && paystub.commission_pay > 0 && (
+                <div className="flex justify-between text-xs">
+                  <span>Commission:</span>
+                  <span className="font-medium">${paystub.commission_pay.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button

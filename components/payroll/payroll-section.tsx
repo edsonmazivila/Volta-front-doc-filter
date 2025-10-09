@@ -5,6 +5,7 @@ import { formatNumberFixed } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useToastHelpers } from '@/components/ui/toast'
 import { usePermissions } from '@/lib/rbac/hooks'
+import { useRouter } from 'next/navigation'
 import {
   processPayrollAction,
   runPayrollAction,
@@ -20,6 +21,7 @@ interface PayrollSectionProps {
 
 export function PayrollSection({ runs }: PayrollSectionProps) {
   const toast = useToastHelpers()
+  const router = useRouter()
   const { role } = usePermissions()
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -125,6 +127,13 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Export failed')
     }
+  }
+
+  function handleViewPaystubs(runId: string) {
+    // Navigate to a paystubs page filtered by payroll run
+    // For now, we'll navigate to the general paystubs page
+    // In the future, you could create a specific route like /dashboard/paystubs?payrollRunId=${runId}
+    router.push('/dashboard/paystubs')
   }
 
   function formatNumber(n?: number) {
@@ -239,6 +248,9 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align='end'>
+                            <DropdownMenuItem onClick={() => handleViewPaystubs(r.id)}>
+                              View Paystubs
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRowExport(r.id, 'excel')}>
                               Export Summary
                             </DropdownMenuItem>
