@@ -130,10 +130,8 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
   }
 
   function handleViewPaystubs(runId: string) {
-    // Navigate to a paystubs page filtered by payroll run
-    // For now, we'll navigate to the general paystubs page
-    // In the future, you could create a specific route like /dashboard/paystubs?payrollRunId=${runId}
-    router.push('/dashboard/paystubs')
+    // Navigate to paystubs page filtered by payroll run
+    router.push(`/dashboard/paystubs?payrollRunId=${runId}`)
   }
 
   function formatNumber(n?: number) {

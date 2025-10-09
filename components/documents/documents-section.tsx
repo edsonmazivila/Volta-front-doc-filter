@@ -86,7 +86,6 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
       </div>
       <DocumentTable
         items={filtered}
-        onUpload={() => setUploadOpen(true)}
         onApprove={async (id) => {
           if (operationInProgress[id]) return; // Prevent double-click
           setOperationInProgress(prev => ({ ...prev, [id]: true }));
