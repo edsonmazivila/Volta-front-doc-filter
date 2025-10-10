@@ -178,7 +178,7 @@ export async function updateMyTimesheetAction(
 export async function submitMyTimesheetAction(id: string): Promise<void> {
   const cookieHeader = await getAuthCookieHeader()
   const res = await fetch(`${API_BASE_URL}/api/timesheets/${id}/submit`, {
-    method: 'PATCH',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(cookieHeader && { Cookie: cookieHeader }),

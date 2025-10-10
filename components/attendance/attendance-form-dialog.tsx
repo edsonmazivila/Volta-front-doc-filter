@@ -9,6 +9,7 @@ import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { Calendar, Clock, FileText } from 'lucide-react'
 import type { AttendanceRecord } from '@/lib/types/attendance'
+import { formatTimeForInput } from '@/lib/utils'
 
 interface AttendanceFormDialogProps {
   open: boolean
@@ -50,8 +51,10 @@ export function AttendanceFormDialog({
         // Edit mode - populate with existing data
         setDate(attendance.date ? attendance.date.split('T')[0] : '')
         setStatus(attendance.status || 'present')
-        setClockIn(attendance.clock_in || '')
-        setClockOut(attendance.clock_out || '')
+        
+     
+        setClockIn(formatTimeForInput(attendance.clock_in))
+        setClockOut(formatTimeForInput(attendance.clock_out))
         setJustification(attendance.justification || '')
       } else {
         // Create mode - set defaults

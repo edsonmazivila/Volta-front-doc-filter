@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
+import { toIsoUtc } from '@/lib/utils'
 
 interface MeetingFormDialogProps {
   open: boolean
@@ -42,9 +43,15 @@ export function MeetingFormDialog({
 
       // Parse datetime
       if (meeting.datetime) {
-        const dt = new Date(meeting.datetime)
-        setDate(format(dt, 'yyyy-MM-dd'))
-        setTime(format(dt, 'HH:mm'))
+        try {
+          const dt = new Date(meeting.datetime)
+          if (!isNaN(dt.getTime())) {
+            setDate(format(dt, 'yyyy-MM-dd'))
+            setTime(format(dt, 'HH:mm'))
+          }
+        } catch (error) {
+          console.warn('Failed to parse meeting datetime:', meeting.datetime, error)
+        }
       }
 
       // Set participants
@@ -72,10 +79,19 @@ export function MeetingFormDialog({
 
     setIsSubmitting(true)
     try {
+      // Create proper ISO datetime string
+      const datetimeString = `${date}T${time}`
+      const isoDateTime = toIsoUtc(datetimeString)
+      
+      if (!isoDateTime) {
+        toast.error('Invalid date or time format')
+        return
+      }
+
       const formData = new FormData()
       formData.append('title', title.trim())
       formData.append('description', description.trim())
-      formData.append('datetime', `${date}T${time}`)
+      formData.append('datetime', isoDateTime)
       formData.append('location', location.trim())
 
       // Append participants

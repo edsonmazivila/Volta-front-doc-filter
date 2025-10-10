@@ -28,7 +28,7 @@ export function Header({ title }: { title: string }) {
         <div className='flex items-center gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button aria-label='User menu' className='rounded-full h-8 w-8 bg-gradient-to-br from-purple-500 to-blue-600 text-white flex items-center justify-center text-xs font-bold focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'>
+				<button aria-label='User menu' className='rounded-full h-10 w-10 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'>
                 {(user?.name || user?.email || 'U').substring(0,1).toUpperCase()}
               </button>
             </DropdownMenuTrigger>

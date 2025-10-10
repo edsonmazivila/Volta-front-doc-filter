@@ -217,7 +217,7 @@ export async function deleteTimesheetAction(id: string): Promise<void> {
 export async function submitTimesheetAction(id: string): Promise<void> {
 	const cookieHeader = await getAuthCookieHeader()
 	const res = await fetch(`${API_BASE_URL}/api/timesheets/${id}/submit`, {
-		method: 'PATCH',
+		method: 'POST',
 		headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
 		body: JSON.stringify({}),
 	})
@@ -232,7 +232,7 @@ export async function submitTimesheetAction(id: string): Promise<void> {
 export async function approveTimesheetAction(id: string): Promise<void> {
 	const cookieHeader = await getAuthCookieHeader()
 	const res = await fetch(`${API_BASE_URL}/api/timesheets/${id}/approve`, {
-		method: 'PATCH',
+		method: 'POST',
 		headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
 		body: JSON.stringify({}),
 	})
@@ -247,7 +247,7 @@ export async function approveTimesheetAction(id: string): Promise<void> {
 export async function rejectTimesheetAction(id: string, reason?: string): Promise<void> {
 	const cookieHeader = await getAuthCookieHeader()
 	const res = await fetch(`${API_BASE_URL}/api/timesheets/${id}/reject`, {
-		method: 'PATCH',
+		method: 'POST',
 		headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
 		body: JSON.stringify({ reason }),
 	})

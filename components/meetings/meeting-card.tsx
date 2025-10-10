@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, User } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
+import { formatDateTime } from '@/lib/utils'
 
 interface MeetingCardProps {
   meeting: Meeting
@@ -101,7 +101,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
   }
 
   const formattedDateTime = meeting.datetime
-    ? format(parseISO(meeting.datetime), 'MMM d, yyyy h:mm a')
+    ? formatDateTime(meeting.datetime)
     : 'Date TBD'
 
   return (

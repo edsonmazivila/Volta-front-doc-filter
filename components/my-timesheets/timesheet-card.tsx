@@ -8,6 +8,7 @@ import type { MyTimesheet } from '@/lib/types/my-timesheets'
 import { submitMyTimesheetAction, deleteMyTimesheetAction } from '@/lib/services/my-timesheets'
 import { toast } from 'sonner'
 import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface TimesheetCardProps {
   timesheet: MyTimesheet
@@ -16,6 +17,7 @@ interface TimesheetCardProps {
 
 export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const statusColors = {
     draft: 'bg-gray-500',
@@ -35,6 +37,7 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
       try {
         await submitMyTimesheetAction(timesheet.id)
         toast.success('Timesheet submitted successfully')
+        router.refresh()
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Failed to submit timesheet')
       }
@@ -50,6 +53,7 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
       try {
         await deleteMyTimesheetAction(timesheet.id)
         toast.success('Timesheet deleted successfully')
+        router.refresh()
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Failed to delete timesheet')
       }

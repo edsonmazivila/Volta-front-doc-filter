@@ -16,7 +16,7 @@ import {
 	Trash2 
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatTime } from '@/lib/utils'
 
 interface AttendanceTableProps {
   records: AttendanceRecord[]
@@ -124,10 +124,10 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
                   </span>
                 </td>
                 <td className="p-3 text-sm text-muted-foreground">
-                  {record.clock_in || '-'}
+                  {record.clock_in ? formatTime(record.clock_in) : '-'}
                 </td>
                 <td className="p-3 text-sm text-muted-foreground">
-                  {record.clock_out || '-'}
+                  {record.clock_out ? formatTime(record.clock_out) : '-'}
                 </td>
                 <td className="p-3 text-sm text-muted-foreground">
                   {record.hours_worked ? `${record.hours_worked.toFixed(1)}h` : '-'}

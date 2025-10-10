@@ -6,9 +6,10 @@ import { Button, Skeleton } from '@/components/ui'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { createMyAttendanceAction, updateMyAttendanceAction } from '@/lib/services/attendance'
+import { createMyAttendanceAction, clockOutMyAttendanceAction } from '@/lib/services/attendance'
 import { AttendanceFormDialog } from './attendance-form-dialog'
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { formatTime } from '@/lib/utils'
 
 interface MyAttendanceSectionProps {
 	records: AttendanceRecord[]
@@ -98,8 +99,9 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 			const now = new Date()
 			const formData = new FormData()
 			formData.append('clock_out', now.toTimeString().slice(0, 5))
+			formData.append('attendance_id', todayRecord.id)
 			
-			const result = await updateMyAttendanceAction(null, todayRecord.id, formData)
+			const result = await clockOutMyAttendanceAction(null, formData)
 			if ('errors' in result) {
 				toast.error(result.errors._form?.[0] || 'Failed to clock out')
 			} else {
@@ -192,13 +194,13 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 						{todayRecord.clock_in && (
 							<div className='flex items-center gap-3'>
 								<span className='text-sm text-muted-foreground'>Clock In:</span>
-								<span className='text-sm font-medium'>{todayRecord.clock_in}</span>
+								<span className='text-sm font-medium'>{formatTime(todayRecord.clock_in)}</span>
 							</div>
 						)}
 						{todayRecord.clock_out && (
 							<div className='flex items-center gap-3'>
 								<span className='text-sm text-muted-foreground'>Clock Out:</span>
-								<span className='text-sm font-medium'>{todayRecord.clock_out}</span>
+								<span className='text-sm font-medium'>{formatTime(todayRecord.clock_out)}</span>
 							</div>
 						)}
 						{todayRecord.hours_worked !== undefined && todayRecord.hours_worked !== null && (
@@ -304,10 +306,10 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 											</span>
 										</td>
 										<td className='px-4 py-3 text-sm text-muted-foreground'>
-											{record.clock_in || '-'}
+											{record.clock_in ? formatTime(record.clock_in) : '-'}
 										</td>
 										<td className='px-4 py-3 text-sm text-muted-foreground'>
-											{record.clock_out || '-'}
+											{record.clock_out ? formatTime(record.clock_out) : '-'}
 										</td>
 										<td className='px-4 py-3 text-sm text-muted-foreground'>
 											{record.hours_worked ? `${record.hours_worked.toFixed(1)}h` : '-'}

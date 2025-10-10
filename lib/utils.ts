@@ -41,6 +41,18 @@ export function optionalIsoUtc(dateInput: string | null | undefined): string | u
   return iso || undefined
 }
 
+// Converts ISO date string to YYYY-MM-DD format for API compatibility
+export function toDateOnly(isoDate: string | Date | null | undefined): string {
+  if (!isoDate) return ''
+  try {
+    const date = typeof isoDate === 'string' ? new Date(isoDate) : isoDate
+    if (isNaN(date.getTime())) return ''
+    return date.toISOString().split('T')[0]
+  } catch {
+    return ''
+  }
+}
+
 // Deterministic number formatting for SSR/CSR parity
 const NUMBER_FORMATTER = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
@@ -81,6 +93,41 @@ export function formatDateTime(dateInput: string | Date | null | undefined): str
     })
   } catch {
     return "Invalid date"
+  }
+}
+
+// Format time only (HH:MM AM/PM)
+export function formatTime(timeInput: string | Date | null | undefined): string {
+  if (!timeInput) return "Not provided"
+  try {
+    const time = typeof timeInput === 'string' ? new Date(timeInput) : timeInput
+    if (isNaN(time.getTime())) return "Invalid time"
+    return time.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  } catch {
+    return "Invalid time"
+  }
+}
+
+// Format time for HTML time input (HH:mm format)
+export function formatTimeForInput(timeInput: string | null | undefined): string {
+  if (!timeInput) return ''
+  try {
+    // Handle formats like "0000-01-01T18:18:00Z" or "18:18:00"
+    if (timeInput.includes('T')) {
+      // Extract time part from ISO string
+      const timePart = timeInput.split('T')[1].split('.')[0].split('Z')[0]
+      return timePart.substring(0, 5) // Get HH:mm part
+    } else if (timeInput.includes(':')) {
+      // Already in time format, just take HH:mm part
+      return timeInput.substring(0, 5)
+    }
+    return ''
+  } catch {
+    return ''
   }
 }
 

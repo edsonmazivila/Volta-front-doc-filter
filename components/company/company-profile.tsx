@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui'
 import { FormField, Input } from '@/components/auth/form-field'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { formatDate } from '@/lib/utils'
 import {
   updateCompanyAction,
   createPayScheduleAction,
@@ -100,10 +101,31 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 	const [error, setError] = useState<string | null>(null)
 
 	// Local state to avoid full page reloads on delete
+	const [paySchedulesState, setPaySchedulesState] = useState(paySchedules)
 	const [leavePoliciesState, setLeavePoliciesState] = useState(leavePolicies)
 	const [deletePolicyOpen, setDeletePolicyOpen] = useState(false)
 	const [deletePolicyTarget, setDeletePolicyTarget] = useState<{ id: string, name: string } | null>(null)
+	const [deletePayScheduleOpen, setDeletePayScheduleOpen] = useState(false)
+	const [deletePayScheduleTarget, setDeletePayScheduleTarget] = useState<{ id: string, name: string } | null>(null)
 	const [deletingPolicy, setDeletingPolicy] = useState(false)
+	const [deletingPaySchedule, setDeletingPaySchedule] = useState(false)
+
+	async function handleDeletePayScheduleConfirm() {
+		if (!deletePayScheduleTarget) return
+		setDeletingPaySchedule(true)
+		try {
+			await deletePayScheduleAction(deletePayScheduleTarget.id)
+			setPaySchedulesState(prev => prev.filter(x => x.id !== deletePayScheduleTarget.id))
+			toast.success('Pay schedule deleted')
+			setDeletePayScheduleOpen(false)
+			setDeletePayScheduleTarget(null)
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Failed to delete pay schedule'
+			toast.error(message)
+		} finally {
+			setDeletingPaySchedule(false)
+		}
+	}
 
 	async function handleDeletePolicyConfirm() {
 		if (!deletePolicyTarget) return
@@ -305,15 +327,15 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 						<Button onClick={() => setPsOpen(true)}>Create</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
-                            {paySchedules.length ? paySchedules.map(s => (
+                            {paySchedulesState.length ? paySchedulesState.map(s => (
                                 <div key={s.id} className='border border-white/10 rounded-lg p-3 flex items-center justify-between'>
                                     <div>
 										<div className='text-foreground'>{s.name}</div>
-										<div className='text-xs text-muted-foreground'>Frequency: {s.frequency} • Start: {s.start_date} • {s.is_active ? 'Active' : 'Inactive'}</div>
+										<div className='text-xs text-muted-foreground'>Frequency: {s.frequency} • Start: {formatDate(s.start_date)} • {s.is_active ? 'Active' : 'Inactive'}</div>
                                     </div>
                                     <div className='flex items-center gap-2'>
                                         <Button variant='outline' onClick={()=>{ setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').slice(0,10) }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
-                                        <Button variant='destructive' onClick={async ()=>{ await deletePayScheduleAction(s.id); window.location.reload() }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
+                                        <Button variant='destructive' onClick={() => { setDeletePayScheduleTarget({ id: s.id, name: s.name }); setDeletePayScheduleOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
 							)) : (<div className='text-muted-foreground text-sm'>No pay schedules found.</div>)}
@@ -583,6 +605,24 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 					<AlertDialogCancel disabled={deletingPolicy}>Cancel</AlertDialogCancel>
 					<AlertDialogAction onClick={handleDeletePolicyConfirm} disabled={deletingPolicy} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
 						{deletingPolicy ? 'Deleting…' : 'Delete'}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+
+		{/* Delete Pay Schedule Confirmation */}
+		<AlertDialog open={deletePayScheduleOpen} onOpenChange={setDeletePayScheduleOpen}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Delete pay schedule?</AlertDialogTitle>
+					<AlertDialogDescription>
+						This action cannot be undone. This will permanently delete {deletePayScheduleTarget?.name}.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel disabled={deletingPaySchedule}>Cancel</AlertDialogCancel>
+					<AlertDialogAction onClick={handleDeletePayScheduleConfirm} disabled={deletingPaySchedule} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+						{deletingPaySchedule ? 'Deleting…' : 'Delete'}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

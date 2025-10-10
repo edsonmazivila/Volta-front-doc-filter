@@ -6,7 +6,7 @@ import { requireRole } from '@/lib/rbac/server'
 
 export default async function SettingsPage() {
   // Only system admins can access settings
-  await requireRole(['system_admin'])
+  await requireRole(['system_admin','hr_manager','payroll_manager'])
   return (
     <div className='min-h-dvh flex app-background'>
       <Sidebar />

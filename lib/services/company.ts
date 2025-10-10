@@ -3,6 +3,7 @@ import { cache } from 'react'
 import { revalidateEntityMutation } from '@/lib/cache-utils'
 import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
+import { toDateOnly } from '@/lib/utils'
 import { z } from 'zod'
 
 // Types
@@ -194,7 +195,6 @@ export const getPaySchedules = cache(async (): Promise<PaySchedule[]> => {
   try {
     const cookieHeader = await getAuthCookieHeader()
     const url = `${API_BASE_URL}/api/pay-schedules`
-    console.log('[getPaySchedules] GET', url)
     const res = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -203,11 +203,9 @@ export const getPaySchedules = cache(async (): Promise<PaySchedule[]> => {
       next: { tags: ['pay-schedules'], revalidate: 60 },
     })
 
-    console.log('[getPaySchedules] status', res.status, res.statusText)
     if (!res.ok) return []
 
     const json = await res.json().catch(() => ({}))
-    console.log('[getPaySchedules] keys', Object.keys(json || {}))
     interface RawPaySchedule {
       id?: string | number;
       name?: string;
@@ -432,11 +430,11 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
 
 export async function createPayScheduleAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  const startDateIso = startDateStr ? new Date(startDateStr).toISOString() : ''
+  const startDateFormatted = toDateOnly(startDateStr)
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),
-    start_date: startDateIso,
+    start_date: startDateFormatted,
     is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
   })
 
@@ -447,7 +445,6 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
   try {
     const cookieHeader = await getAuthCookieHeader()
     const url = `${API_BASE_URL}/api/pay-schedules`
-    console.log('[createPayScheduleAction] POST', url, parsed.data)
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -459,7 +456,7 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 
     if (!res.ok) {
       const responseText = await res.text()
-      console.error('[createPayScheduleAction] error', res.status, responseText)
+      
       let error
       try { error = JSON.parse(responseText) } catch { error = { message: responseText } }
       return { errors: { _form: [error.message || 'Failed to create pay schedule'] } }
@@ -477,11 +474,11 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 
 export async function updatePayScheduleAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  const startDateIso = startDateStr ? new Date(startDateStr).toISOString() : ''
+  const startDateFormatted = toDateOnly(startDateStr)
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),
-    start_date: startDateIso,
+    start_date: startDateFormatted,
     is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
   })
 
@@ -492,7 +489,7 @@ export async function updatePayScheduleAction(id: string, prevState: unknown, fo
   try {
     const cookieHeader = await getAuthCookieHeader()
     const url = `${API_BASE_URL}/api/pay-schedules/${id}`
-    console.log('[updatePayScheduleAction] PUT', url, parsed.data)
+  
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -677,8 +674,8 @@ export async function updateLeavePolicyAction(id: string, prevState: unknown, fo
     }
 
     const data = await res.json()
-    // Revalidate company and all dependent caches
-    revalidateEntityMutation('COMPANY')
+    // Revalidate company and leave policies caches so lists update immediately
+    revalidateEntityMutation('COMPANY', { additionalTags: ['leave-policies'] })
 
     return { success: true, data }
   } catch {
@@ -697,12 +694,30 @@ export async function deleteLeavePolicyAction(id: string): Promise<void> {
   })
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to delete leave policy')
+    const responseText = await res.text()
+    let errorMessage = 'Failed to delete leave policy'
+    
+    try {
+      const error = JSON.parse(responseText)
+      errorMessage = error.message || error.error || errorMessage
+    } catch {
+      // If response is not JSON, use the raw text or status-based message
+      if (res.status === 403) {
+        errorMessage = 'You are not authorized to delete this leave policy'
+      } else if (res.status === 409) {
+        errorMessage = 'Cannot delete this leave policy because it is currently being used by employees or has existing leave requests. Please remove all dependencies first.'
+      } else if (res.status === 404) {
+        errorMessage = 'Leave policy not found'
+      } else {
+        errorMessage = `Server error (${res.status}): ${responseText.substring(0, 200)}${responseText.length > 200 ? '...' : ''}`
+      }
+    }
+    
+    throw new Error(errorMessage)
   }
 
-  // Revalidate company and all dependent caches
-  revalidateEntityMutation('COMPANY')
+  // Revalidate company and leave policies caches so lists update immediately
+  revalidateEntityMutation('COMPANY', { additionalTags: ['leave-policies'] })
 }
 
 /**
