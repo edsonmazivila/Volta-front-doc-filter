@@ -1,9 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import type { Paystub } from "@/lib/types/paystubs";
 import { PaystubCard } from "@/components/paystubs/paystub-card";
 import { PaystubDetailDialog } from "@/components/paystubs/paystub-detail-dialog";
-import { SearchInput } from "@/components/search-input";
 import { useToastHelpers } from "@/components/ui/toast";
 
 interface PaystubsSectionProps {
@@ -21,32 +20,8 @@ export function PaystubsSection({
   employeeInfo,
 }: PaystubsSectionProps) {
   const toast = useToastHelpers();
-  const [search, setSearch] = useState("");
   const [selectedPaystub, setSelectedPaystub] = useState<Paystub | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-
-  const filtered = useMemo(() => {
-    const list = Array.isArray(paystubs) ? paystubs : [];
-    const q = search.trim().toLowerCase();
-    if (!q) return list;
-
-    return list.filter((p) => {
-      const matchesPayDate = p.pay_date?.toLowerCase().includes(q);
-      const matchesPeriod =
-        p.pay_period_start?.toLowerCase().includes(q) ||
-        p.pay_period_end?.toLowerCase().includes(q);
-      const matchesAmount =
-        p.net_pay?.toString().includes(q) ||
-        p.gross_pay?.toString().includes(q) ||
-        p.regular_pay?.toString().includes(q) ||
-        p.overtime_pay?.toString().includes(q) ||
-        p.bonus_pay?.toString().includes(q) ||
-        p.commission_pay?.toString().includes(q);
-      const matchesStatus = p.status?.toLowerCase().includes(q);
-      const matchesPayrollRun = p.payroll_run_id?.toLowerCase().includes(q);
-      return matchesPayDate || matchesPeriod || matchesAmount || matchesStatus || matchesPayrollRun;
-    });
-  }, [paystubs, search]);
 
   function handleView(paystub: Paystub) {
     setSelectedPaystub(paystub);
@@ -99,38 +74,27 @@ export function PaystubsSection({
         </div>
       )}
 
-      {/* Search and Filter */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-sm font-medium">Paystub History</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            View and download your paystubs
-          </p>
-        </div>
-        <div className="flex-1 max-w-md">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search by date or amount..."
-          />
-        </div>
+      {/* Paystub History Header */}
+      <div>
+        <h2 className="text-lg font-medium">Paystub History</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          View and download your paystubs
+        </p>
       </div>
 
       {/* Paystubs Grid */}
-      {filtered.length === 0 ? (
+      {paystubs.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-[var(--border)] rounded-lg">
           <div className="text-muted-foreground">
-            {search ? "No paystubs match your search" : "No paystubs found"}
+            No paystubs found
           </div>
-          {!search && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Your paystubs will appear here once they are generated
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground mt-2">
+            Your paystubs will appear here once they are generated
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((paystub) => (
+          {paystubs.map((paystub) => (
             <PaystubCard
               key={paystub.id}
               paystub={paystub}

@@ -91,17 +91,17 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
   return (
     <div className="glass rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-[var(--border)] text-neutral-400">
+        <table className="w-full text-sm min-w-[900px]">
+          <thead className="border-b border-[var(--border)] text-neutral-400 sticky top-0 bg-background z-10 shadow-sm">
             <tr>
-              <th className="text-left p-3">Employee</th>
-              <th className="text-left p-3">Date</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Clock In</th>
-              <th className="text-left p-3">Clock Out</th>
-              <th className="text-left p-3">Hours</th>
-              <th className="text-left p-3">Justification</th>
-              <th className="text-left p-3">Actions</th>
+              <th className="text-left p-3 min-w-[150px]">Employee</th>
+              <th className="text-left p-3 min-w-[100px]">Date</th>
+              <th className="text-left p-3 min-w-[100px]">Status</th>
+              <th className="text-left p-3 min-w-[100px]">Clock In</th>
+              <th className="text-left p-3 min-w-[100px]">Clock Out</th>
+              <th className="text-left p-3 min-w-[80px]">Hours</th>
+              <th className="text-left p-3 min-w-[150px]">Justification</th>
+              <th className="text-left p-3 min-w-[100px]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -110,29 +110,29 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
                 key={record.id} 
                 className="border-b border-[var(--border)] hover:bg-muted/50 transition-colors"
               >
-                <td className="p-3 text-sm font-medium">
+                <td className="p-3 text-sm font-medium min-w-[150px]">
                   {record.employee_name || `Employee #${record.employee_id}`}
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="p-3 text-sm text-muted-foreground min-w-[100px]">
                   {formatDate(record.date)}
                 </td>
-                <td className="p-3">
+                <td className="p-3 min-w-[100px]">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[record.status]}`}
                   >
                     {STATUS_LABELS[record.status]}
                   </span>
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="p-3 text-sm text-muted-foreground min-w-[100px]">
                   {record.clock_in ? formatTime(record.clock_in) : '-'}
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="p-3 text-sm text-muted-foreground min-w-[100px]">
                   {record.clock_out ? formatTime(record.clock_out) : '-'}
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="p-3 text-sm text-muted-foreground min-w-[80px]">
                   {record.hours_worked ? `${record.hours_worked.toFixed(1)}h` : '-'}
                 </td>
-                <td className="p-3 text-sm">
+                <td className="p-3 text-sm min-w-[150px]">
                   {record.justification ? (
                     <span className="text-muted-foreground max-w-xs truncate block">
                       {record.justification}
@@ -141,7 +141,7 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
                     <span className="text-muted-foreground">-</span>
                   )}
                 </td>
-                <td className="p-3">
+                <td className="p-3 min-w-[100px]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button

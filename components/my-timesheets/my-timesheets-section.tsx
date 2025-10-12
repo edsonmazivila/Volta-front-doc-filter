@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TimesheetCard } from './timesheet-card'
 import { TimesheetFormDialog } from './timesheet-form-dialog'
 import type { MyTimesheet } from '@/lib/types/my-timesheets'
@@ -15,7 +16,7 @@ export function MyTimesheetsSection({ timesheets }: MyTimesheetsSectionProps) {
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [selectedTimesheet, setSelectedTimesheet] = useState<MyTimesheet | null>(null)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const filteredTimesheets = useMemo(() => {
     return timesheets.filter((ts) => {
@@ -24,7 +25,7 @@ export function MyTimesheetsSection({ timesheets }: MyTimesheetsSectionProps) {
         ts.period_end.includes(search) ||
         ts.notes?.toLowerCase().includes(search.toLowerCase())
 
-      const matchesStatus = !statusFilter || ts.status === statusFilter
+      const matchesStatus = statusFilter === 'all' || ts.status === statusFilter
 
       return matchesSearch && matchesStatus
     })
@@ -75,17 +76,18 @@ export function MyTimesheetsSection({ timesheets }: MyTimesheetsSectionProps) {
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-md border border-[var(--border)] bg-background text-foreground text-sm"
-          >
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="submitted">Submitted</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[180px] bg-background border border-[var(--border)]">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-[var(--border)]">
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats */}

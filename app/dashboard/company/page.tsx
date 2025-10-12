@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
@@ -30,23 +29,20 @@ export default async function CompanyPage() {
     logo: '',
   }
   return (
-    <div className='min-h-dvh flex app-background'>
-      <Sidebar />
-      <main className='flex-1'>
-        <Header title='Company Management' />
-        <section className='p-4 grid gap-4'>
-          <Card>
-            <CardHeader title='Company Profile' />
-            <CompanyProfileComponent 
-              company={safeCompany} 
-              paySchedules={paySchedules || []} 
-              leavePolicies={leavePolicies || []}
-              companyDocuments={companyDocuments}
-            />
-          </Card>
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title='Company Management' />
+      <section className='p-2 grid gap-4 overflow-y-auto overflow-x-hidden'>
+        <Card className="overflow-hidden">
+          <CardHeader title='Company Profile' />
+          <CompanyProfileComponent 
+            company={safeCompany} 
+            paySchedules={paySchedules || []} 
+            leavePolicies={leavePolicies || []}
+            companyDocuments={companyDocuments}
+          />
+        </Card>
+      </section>
+    </>
   )
 }
 

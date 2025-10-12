@@ -1,4 +1,3 @@
-import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { Card, CardHeader } from "@/components/dashboard/card";
 import { StatsCard } from "@/components/dashboard/stats-card";
@@ -93,10 +92,9 @@ export default async function DashboardPage() {
   }).length
 
   return (
-    <div className="min-h-dvh flex app-background">
-      <Sidebar />
-      <main className="flex-1">
-        <Header title="Dashboard" />
+    <>
+      <Header title="Dashboard" />
+      <div className="overflow-y-auto">
         {!isEmployee && (
           <section className={`p-4 grid grid-cols-1 ${statsGridCols} gap-4`}>
             <StatsCard label="Total Employees" value={stats.totalEmployees} />
@@ -395,7 +393,7 @@ export default async function DashboardPage() {
             </Card>
           </section>
         )}
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

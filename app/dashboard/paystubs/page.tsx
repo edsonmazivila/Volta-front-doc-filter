@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { verifySession } from '@/lib/auth/dal'
 import { requireRole } from '@/lib/rbac/server'
@@ -17,20 +16,17 @@ export default async function PaystubsPage() {
   const paystubs = await getMyPaystubs()
 
   return (
-    <div className="min-h-dvh flex app-background">
-      <Sidebar />
-      <main className="flex-1">
-        <Header title="My Paystubs" />
-        <section className="p-4">
-          <PaystubsSection
-            paystubs={paystubs}
-            employeeName={session?.user?.name}
-            employeeInfo={{
-              employeeId: session?.user?.id,
-            }}
-          />
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title="My Paystubs" />
+      <section className="p-4 overflow-y-auto">
+        <PaystubsSection
+          paystubs={paystubs}
+          employeeName={session?.user?.name}
+          employeeInfo={{
+            employeeId: session?.user?.id,
+          }}
+        />
+      </section>
+    </>
   )
 }

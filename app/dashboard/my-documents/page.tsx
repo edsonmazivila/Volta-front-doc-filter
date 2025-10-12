@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { verifySession } from '@/lib/auth/dal'
 import { requireRole } from '@/lib/rbac/server'
@@ -20,19 +19,16 @@ export default async function MyDocumentsPage() {
   ])
 
   return (
-    <div className="min-h-dvh flex app-background">
-      <Sidebar />
-      <main className="flex-1">
-        <Header title="My Documents" />
-        <section className="p-4">
-          <MyDocumentsSection
-            documents={documents}
-            employeeId={session?.user?.id}
-            employeeName={session?.user?.name}
-            documentTypes={documentTypes}
-          />
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title="My Documents" />
+      <section className="p-4 overflow-y-auto">
+        <MyDocumentsSection
+          documents={documents}
+          employeeId={session?.user?.id}
+          employeeName={session?.user?.name}
+          documentTypes={documentTypes}
+        />
+      </section>
+    </>
   )
 }

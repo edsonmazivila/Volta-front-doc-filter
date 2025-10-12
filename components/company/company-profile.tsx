@@ -17,8 +17,6 @@ import { Edit, Trash2, Upload } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
-import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
-import type { CompanyDocumentsResponse } from '@/lib/services/company'
 import { 
     AlertDialog,
     AlertDialogAction,
@@ -29,6 +27,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
+import type { CompanyDocumentsResponse } from '@/lib/services/company'
 import { toast } from 'sonner'
 
 interface CompanyProfileProps {
@@ -233,7 +233,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 
 	return (
 		<>
-			<div className='glass rounded-xl p-4'>
+			<div className='glass rounded-xl overflow-hidden'>
 			<Tabs defaultValue='basic' className='w-full'>
 				<div className='flex items-center justify-between'>
 					<TabsList>

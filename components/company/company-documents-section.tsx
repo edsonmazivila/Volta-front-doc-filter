@@ -3,6 +3,12 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { 
     AlertDialog,
     AlertDialogAction,
@@ -21,7 +27,7 @@ import {
 
 	type CompanyDocument 
 } from '@/lib/services/company'
-import { Download, Eye, Edit, Trash2, Upload, FileText } from 'lucide-react'
+import { Download, Eye, Edit, Trash2, Upload, FileText, MoreHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 
@@ -149,6 +155,19 @@ export function CompanyDocumentsSection({ documents, total }: CompanyDocumentsSe
 		return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 	}
 
+	const handleRowClick = (doc: CompanyDocument, event: React.MouseEvent) => {
+		// Don't open dialog if clicking on buttons or other interactive elements
+		const target = event.target as HTMLElement
+		if (
+			target.closest('button') ||
+			target.closest('input') ||
+			target.closest('[role="button"]')
+		) {
+			return
+		}
+		handlePreview(doc)
+	}
+
 	return (
 		<div className='space-y-4'>
 			<div className='flex justify-between items-center'>
@@ -167,88 +186,108 @@ export function CompanyDocumentsSection({ documents, total }: CompanyDocumentsSe
 					<p>No company documents uploaded yet</p>
 				</div>
 			) : (
-				<div className='border rounded-lg overflow-hidden'>
-					<table className='w-full'>
-						<thead className='bg-muted/50 border-b'>
-							<tr>
-								<th className='text-left px-4 py-3 text-sm font-medium'>Name</th>
-								<th className='text-left px-4 py-3 text-sm font-medium'>Type</th>
-								<th className='text-left px-4 py-3 text-sm font-medium'>Size</th>
-								<th className='text-left px-4 py-3 text-sm font-medium'>Expiry Date</th>
-								<th className='text-left px-4 py-3 text-sm font-medium'>Uploaded</th>
-								<th className='text-right px-4 py-3 text-sm font-medium'>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{documents.map(doc => (
-								<tr key={doc.id} className='border-b hover:bg-muted/30 transition-colors'>
-									<td className='px-4 py-3'>
-										<div>
-											<div className='font-medium text-sm'>{doc.name}</div>
-											{doc.description && (
-												<div className='text-xs text-muted-foreground'>{doc.description}</div>
-											)}
-											<div className='text-xs text-muted-foreground mt-0.5'>{doc.original_filename}</div>
-										</div>
-									</td>
-									<td className='px-4 py-3 text-sm'>
-										<span className='inline-flex items-center px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 text-xs'>
-											{formatDocumentType(doc.document_type)}
-										</span>
-									</td>
-									<td className='px-4 py-3 text-sm text-muted-foreground'>
-										{formatFileSize(doc.file_size)}
-									</td>
-									<td className='px-4 py-3 text-sm text-muted-foreground'>
-										{doc.expiry_date ? formatDate(doc.expiry_date) : '—'}
-									</td>
-									<td className='px-4 py-3 text-sm text-muted-foreground'>
-										{formatDate(doc.created_at)}
-									</td>
-									<td className='px-4 py-3'>
-										<div className='flex items-center justify-end gap-2'>
-											<Button
-												variant='ghost'
-												size='sm'
-												onClick={() => handlePreview(doc)}
-												title='Preview'
-											>
-												<Eye className='h-4 w-4' />
-											</Button>
-											<Button
-												variant='ghost'
-												size='sm'
-												onClick={() => handleDownload(doc)}
-												title='Download'
-											>
-												<Download className='h-4 w-4' />
-											</Button>
-											<Button
-												variant='ghost'
-												size='sm'
-												onClick={() => {
-													setSelectedDoc(doc)
-													setEditOpen(true)
-												}}
-												title='Edit'
-											>
-												<Edit className='h-4 w-4' />
-											</Button>
-									<Button
-										variant='ghost'
-										size='sm'
-										onClick={() => openDeleteDialog(doc)}
-										title='Delete'
-										className='text-destructive hover:text-destructive'
-									>
-												<Trash2 className='h-4 w-4' />
-											</Button>
-										</div>
-									</td>
+				<div className="glass rounded-xl overflow-hidden">
+					<div className="overflow-x-auto">
+						<table className="w-full text-sm min-w-[800px]">
+							<thead className="border-b border-[var(--border)] text-neutral-400 sticky top-0 bg-background z-10 shadow-sm">
+								<tr>
+									<th className="text-left p-3 min-w-[200px]">Name</th>
+									<th className="text-left p-3 min-w-[120px]">Type</th>
+									<th className="text-left p-3 min-w-[80px]">Size</th>
+									<th className="text-left p-3 min-w-[120px]">Expiry Date</th>
+									<th className="text-left p-3 min-w-[120px]">Uploaded</th>
+									<th className="text-left p-3 min-w-[120px]">Actions</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{documents.map(doc => (
+									<tr 
+										key={doc.id} 
+										className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer transition-colors"
+										onClick={(event) => handleRowClick(doc, event)}
+									>
+										<td className="p-3">
+											<div>
+												<div className='font-medium text-sm'>{doc.name}</div>
+												{doc.description && (
+													<div className='text-xs text-muted-foreground'>{doc.description}</div>
+												)}
+												<div className='text-xs text-muted-foreground mt-0.5'>{doc.original_filename}</div>
+											</div>
+										</td>
+										<td className="p-3 text-sm">
+											<span className='inline-flex items-center px-2 py-1 rounded-md bg-blue-500/10 text-blue-500 text-xs'>
+												{formatDocumentType(doc.document_type)}
+											</span>
+										</td>
+										<td className="p-3 text-sm text-muted-foreground">
+											{formatFileSize(doc.file_size)}
+										</td>
+										<td className="p-3 text-sm text-muted-foreground">
+											{doc.expiry_date ? formatDate(doc.expiry_date) : '—'}
+										</td>
+										<td className="p-3 text-sm text-muted-foreground">
+											{formatDate(doc.created_at)}
+										</td>
+										<td className="p-3">
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														size="sm"
+														variant="ghost"
+														onClick={(event) => event.stopPropagation()}
+														className="h-8 w-8 p-0"
+													>
+														<MoreHorizontal className="h-4 w-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end">
+													<DropdownMenuItem
+														onClick={(event) => {
+															event.stopPropagation()
+															handlePreview(doc)
+														}}
+													>
+														<Eye className="mr-2 h-4 w-4" />
+														View Details
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={(event) => {
+															event.stopPropagation()
+															handleDownload(doc)
+														}}
+													>
+														<Download className="mr-2 h-4 w-4" />
+														Download
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={(event) => {
+															event.stopPropagation()
+															setSelectedDoc(doc)
+															setEditOpen(true)
+														}}
+													>
+														<Edit className="mr-2 h-4 w-4" />
+														Edit
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={(event) => {
+															event.stopPropagation()
+															openDeleteDialog(doc)
+														}}
+														className="text-red-400 focus:text-red-400"
+													>
+														<Trash2 className="mr-2 h-4 w-4" />
+														Delete
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			)}
 

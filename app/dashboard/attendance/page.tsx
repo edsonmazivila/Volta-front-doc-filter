@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { requireRole } from '@/lib/rbac/server'
 import {
@@ -9,7 +8,6 @@ import { getEmployees } from '@/lib/services/employees'
 import { AttendanceSection } from '@/components/attendance/attendance-section'
 
 export default async function AttendancePage() {
-  // Only managers and admins can access attendance management
   await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
 
   const now = new Date()
@@ -24,18 +22,15 @@ export default async function AttendancePage() {
   const employees = employeesData.items || []
 
   return (
-    <div className="min-h-dvh flex app-background">
-      <Sidebar />
-      <main className="flex-1">
-        <Header title="Attendance Management" />
-        <section className="p-4">
-          <AttendanceSection
-            initialRecords={attendanceRecords}
-            initialJustifications={justifications}
-            employees={employees}
-          />
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title="Attendance Management" />
+      <section className="p-4 overflow-y-auto">
+        <AttendanceSection
+          initialRecords={attendanceRecords}
+          initialJustifications={justifications}
+          employees={employees}
+        />
+      </section>
+    </>
   )
 }

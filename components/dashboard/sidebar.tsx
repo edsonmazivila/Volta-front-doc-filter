@@ -125,7 +125,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 }
 
 export function Sidebar() {
-  const { user, isAuthenticated } = useSession();
+  const { user } = useSession();
   const pathname = usePathname();
   const { canAccessPage } = usePermissions();
 
@@ -152,24 +152,6 @@ export function Sidebar() {
         />
       </div>
 
-      {isAuthenticated && (
-        <div className="p-4 border-b border-border">
-          <p className="text-sm text-muted-foreground mb-2">Welcome back,</p>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-              {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-medium truncate text-sm">
-                {user?.name || user?.email}
-              </div>
-              <div className="text-xs text-muted-foreground capitalize">
-                {user?.role?.replace(/_/g, " ")}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-6">
         {filteredSections.map((section) => (
@@ -221,7 +203,7 @@ export function SidebarTrigger({ className = "" }: { className?: string }) {
 
 function SidebarDrawer() {
   const { open, closeDrawer } = useSidebar();
-  const { user, isAuthenticated } = useSession();
+  const { user } = useSession();
   const pathname = usePathname();
   const { canAccessPage } = usePermissions();
 
@@ -269,24 +251,6 @@ function SidebarDrawer() {
           </button>
         </div>
 
-        {isAuthenticated && (
-          <div className="p-4 border-b border-border">
-            <p className="text-xs text-muted-foreground mb-2">Welcome back,</p>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium truncate text-sm">
-                  {user?.name || user?.email}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {user?.role?.replace(/_/g, " ")}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-6">
           {filteredSections.map((section) => (

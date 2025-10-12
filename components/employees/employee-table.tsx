@@ -11,12 +11,18 @@ import { DeleteEmployeeDialog } from "./delete-employee-dialog";
 import { EmployeeViewDialog } from "./employee-view-dialog";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 
@@ -49,9 +55,9 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
     // Don't open dialog if clicking on checkbox, buttons, or other interactive elements
     const target = event.target as HTMLElement;
     if (
-      (target as HTMLInputElement).type === 'checkbox' ||
-      target.closest('button') ||
-      target.closest('input') ||
+      (target as HTMLInputElement).type === "checkbox" ||
+      target.closest("button") ||
+      target.closest("input") ||
       target.closest('[role="button"]')
     ) {
       return;
@@ -93,7 +99,9 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       if (failed === 0) {
         showToast({
           type: "success",
-          message: `Successfully deleted ${succeeded} employee${succeeded > 1 ? "s" : ""}`,
+          message: `Successfully deleted ${succeeded} employee${
+            succeeded > 1 ? "s" : ""
+          }`,
         });
       } else if (succeeded === 0) {
         showToast({
@@ -103,7 +111,9 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       } else {
         showToast({
           type: "warning",
-          message: `Deleted ${succeeded} employee${succeeded > 1 ? "s" : ""}, but ${failed} failed. Please review and retry.`,
+          message: `Deleted ${succeeded} employee${
+            succeeded > 1 ? "s" : ""
+          }, but ${failed} failed. Please review and retry.`,
         });
       }
     } catch {
@@ -165,7 +175,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
 
       switch (sort) {
         case "name":
-          compareValue = (a.full_name || '').localeCompare(b.full_name || '');
+          compareValue = (a.full_name || "").localeCompare(b.full_name || "");
           break;
         case "status":
           compareValue = a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1;
@@ -193,8 +203,8 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
     <div className="glass rounded-xl overflow-hidden">
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
-        <div className="p-3 bg-blue-500/10 border-b border-blue-500/20 flex items-center justify-between">
-          <span className="text-sm font-medium">
+        <div className="p-2 bg-blue-500/10 border-b border-blue-500/20 flex sm:items-center flex-col sm:flex-row sm:justify-between">
+          <span className="text-sm font-medium mb-3 sm:mb-0">
             {selectedIds.size} selected
           </span>
           <div className="flex gap-2">
@@ -217,26 +227,36 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       )}
 
       {/* Filters */}
-      <div className="p-3 flex items-center gap-2 border-b border-[var(--border)] flex-wrap">
+      <div className="p-2 flex gap-2 border-b border-[var(--border)] flex-wrap sm:flex-row">
         <SearchInput
           value={query}
           onChange={setQuery}
           placeholder="Search employees"
         />
-		<Select value={department || 'all'} onValueChange={(v)=> setDepartment(v === 'all' ? '' : v)}>
-          <SelectTrigger className="w-[180px] bg-background border-[var(--border)]">
+        <Select
+          value={department || "all"}
+          onValueChange={(v) => setDepartment(v === "all" ? "" : v)}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
             <SelectValue placeholder="All Departments" />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
-				<SelectItem value="all">All Departments</SelectItem>
-				{departments.map((dept) => {
-					const val = String(dept || '')
-					return (<SelectItem key={val} value={val}>{val}</SelectItem>)
-				})}
+            <SelectItem value="all">All Departments</SelectItem>
+            {departments.map((dept) => {
+              const val = String(dept || "");
+              return (
+                <SelectItem key={val} value={val}>
+                  {val}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
-        <Select value={status} onValueChange={(v) => setStatus(v as EmployeeListParams["status"]) }>
-          <SelectTrigger className="w-[150px] bg-background border-[var(--border)]">
+        <Select
+          value={status}
+          onValueChange={(v) => setStatus(v as EmployeeListParams["status"])}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
@@ -245,8 +265,11 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={sort} onValueChange={(v) => setSort(v as EmployeeListParams["sort"]) }>
-          <SelectTrigger className="w-[160px] bg-background border-[var(--border)]">
+        <Select
+          value={sort}
+          onValueChange={(v) => setSort(v as EmployeeListParams["sort"])}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
@@ -255,8 +278,11 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
             <SelectItem value="department">Department</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={order} onValueChange={(v) => setOrder(v as EmployeeListParams["order"]) }>
-          <SelectTrigger className="w-[120px] bg-background border-[var(--border)]">
+        <Select
+          value={order}
+          onValueChange={(v) => setOrder(v as EmployeeListParams["order"])}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
             <SelectValue placeholder="Order" />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
@@ -266,17 +292,17 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
         </Select>
         <Button
           size="sm"
-          onClick={() => router.push('/dashboard/employees/new')}
-          className="ml-auto"
+          onClick={() => router.push("/dashboard/employees/new")}
+          className="w-full sm:w-auto sm:ml-auto"
         >
           Add Employee
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-[var(--border)] text-neutral-400">
+        <table className="w-full text-sm min-w-[800px]">
+          <thead className="border-b border-[var(--border)] text-neutral-400 sticky top-0 bg-background z-10 shadow-sm">
             <tr>
-              <th className="w-12 p-3">
+              <th className="w-12 p-3 min-w-[48px]">
                 <input
                   type="checkbox"
                   checked={
@@ -287,16 +313,18 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                   className="h-4 w-4 rounded border-[var(--border)]"
                 />
               </th>
-              <th className="text-left p-3">
+              <th className="text-left p-3 min-w-[200px]">
                 <div className="flex items-center gap-2">
                   Name
-                  <span className="text-xs text-muted-foreground">(click to view details)</span>
+                  <span className="text-xs text-muted-foreground">
+                    (click to view details)
+                  </span>
                 </div>
               </th>
-              <th className="text-left p-3">Email</th>
-              <th className="text-left p-3">Department</th>
-              <th className="text-left p-3">Status</th>
-              <th className="text-left p-3">Actions</th>
+              <th className="text-left p-3 min-w-[180px]">Email</th>
+              <th className="text-left p-3 min-w-[120px]">Department</th>
+              <th className="text-left p-3 min-w-[100px]">Status</th>
+              <th className="text-left p-3 min-w-[100px]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -308,12 +336,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
               </tr>
             ) : (
               filteredAndSortedItems.map((e) => (
-                <tr 
-                  key={e.id} 
+                <tr
+                  key={e.id}
                   className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer transition-colors"
                   onClick={(event) => handleRowClick(e, event)}
                 >
-                  <td className="p-3">
+                  <td className="p-3 min-w-[48px]">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(e.id)}
@@ -321,12 +349,10 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                       className="h-4 w-4 rounded border-[var(--border)]"
                     />
                   </td>
-                  <td className="p-3">
-                    {e.full_name}
-                  </td>
-                  <td className="p-3">{e.email}</td>
-                  <td className="p-3">{e.department || "-"}</td>
-                  <td className="p-3">
+                  <td className="p-3 min-w-[200px]">{e.full_name}</td>
+                  <td className="p-3 min-w-[180px]">{e.email}</td>
+                  <td className="p-3 min-w-[120px]">{e.department || "-"}</td>
+                  <td className="p-3 min-w-[100px]">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         e.is_active
@@ -337,7 +363,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                       {e.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 min-w-[100px]">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -365,9 +391,10 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                             if (e.id) {
                               router.push(`/dashboard/employees/${e.id}`);
                             } else {
-                              showToast({ 
-                                type: "error", 
-                                message: "Cannot edit employee: Invalid employee ID" 
+                              showToast({
+                                type: "error",
+                                message:
+                                  "Cannot edit employee: Invalid employee ID",
                               });
                             }
                           }}

@@ -1,6 +1,4 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
-import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { DepartmentManagement } from '@/components/departments/department-management'
 import { getDepartments, getDepartmentStats } from '@/lib/services/departments'
@@ -26,22 +24,21 @@ export default async function DepartmentsPage() {
     }))
 
   return (
-    <div className='min-h-dvh flex app-background'>
-      <Sidebar />
-      <main className='flex-1'>
-        <Header title='Departments' />
-        <section className='p-4 grid gap-4'>
-          <Card>
-            <CardHeader title='Department Management' />
-            <DepartmentManagement
-              departments={departments}
-              stats={stats}
-              managers={managers}
-            />
-          </Card>
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title='Departments' />
+      <section className='p-4 overflow-y-auto'>
+        <div>
+          <h1 className="text-xl font-bold mb-2">
+            Manage departments and organizational structure
+          </h1>
+        </div>
+        <DepartmentManagement
+          departments={departments}
+          stats={stats}
+          managers={managers}
+        />
+      </section>
+    </>
   )
 }
 

@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { requireUser } from '@/lib/auth/dal'
 import { getMyLeaveRequests, getLeaveBalances } from '@/lib/services/leaves'
@@ -13,15 +12,12 @@ export default async function MyLeavesPage() {
   ])
   
   return (
-    <div className='min-h-dvh flex app-background'>
-      <Sidebar />
-      <main className='flex-1'>
-        <Header title='My Leaves' />
-        <section className='p-4 grid gap-4'>
-          <MyLeavesSection requests={requests} balances={balances} />
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title='My Leaves' />
+      <section className='p-4 grid gap-4 overflow-y-auto'>
+        <MyLeavesSection requests={requests} balances={balances} />
+      </section>
+    </>
   )
 }
 

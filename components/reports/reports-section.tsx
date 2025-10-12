@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import type { ReportsListItem, PayrollChartData, EmployeeMetricsData, TaxTrendData } from '@/lib/services/reports'
 import { Button } from '@/components/ui'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Download, FileImage, FileText, FileSpreadsheet, ChevronDown } from 'lucide-react'
 import { PayrollLineChart, DoughnutChart, StackedBarChart } from './charts'
 import { User, UserCheck, Clock3, Percent } from 'lucide-react'
 import { Card } from '@/components/dashboard/card'
@@ -12,6 +13,41 @@ interface ReportsSectionProps {
 	initialPayroll: PayrollChartData
 	initialEmployee: EmployeeMetricsData
 	initialTax: TaxTrendData
+}
+
+// Download dropdown component
+function DownloadDropdown({ chartName }: { chartName: string }) {
+	const handleDownload = (format: string) => {
+		// TODO: Implement actual download functionality
+		console.log(`Downloading ${chartName} as ${format}`)
+	}
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button size='sm' variant='outline' className='gap-2 hover:bg-accent'>
+					<Download className='h-4 w-4' />
+					Download
+					<ChevronDown className='h-3 w-3 opacity-50' />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align='end' className='w-48'>
+				<DropdownMenuItem onClick={() => handleDownload('PNG')} className='cursor-pointer'>
+					<FileImage className='h-4 w-4 mr-2' />
+					PNG Image
+				</DropdownMenuItem>
+				<DropdownMenuItem onClick={() => handleDownload('PDF')} className='cursor-pointer'>
+					<FileText className='h-4 w-4 mr-2' />
+					PDF Document
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem onClick={() => handleDownload('CSV')} className='cursor-pointer'>
+					<FileSpreadsheet className='h-4 w-4 mr-2' />
+					CSV Data
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	)
 }
 
 export function ReportsSection({ initialReports, initialPayroll, initialEmployee, initialTax }: ReportsSectionProps) {
@@ -36,31 +72,23 @@ export function ReportsSection({ initialReports, initialPayroll, initialEmployee
 				<Card>
 					<div className='flex items-center justify-between'>
 						<h3 className='text-sm font-medium'>Payroll Totals</h3>
-						<div className='flex items-center gap-2'>
-							<Button size='sm' variant='outline'>PNG</Button>
-							<Button size='sm' variant='outline'>PDF</Button>
-							<Button size='sm' variant='outline'>CSV</Button>
-						</div>
+						<DownloadDropdown chartName='Payroll Totals' />
 					</div>
 					<PayrollLineChart labels={initialPayroll.labels} total={initialPayroll.totalPayroll} net={initialPayroll.netPay} className='w-full h-[300px]' />
 				</Card>
 				<Card>
 					<div className='flex items-center justify-between'>
 						<h3 className='text-sm font-medium'>Tax Liability</h3>
-						<div className='flex items-center gap-2'>
-							<Button size='sm' variant='outline'>PNG</Button>
-							<Button size='sm' variant='outline'>PDF</Button>
-							<Button size='sm' variant='outline'>CSV</Button>
-						</div>
+						<DownloadDropdown chartName='Tax Liability' />
 					</div>
 					<StackedBarChart labels={initialTax.labels}
 						datasets={[
 							{ label: 'Federal', color: '#3b82f6', data: initialTax.federalTax || [] },
-							{ label: 'State', color: '#1e40af', data: initialTax.stateTax || [] },
-							{ label: 'Social Sec', color: '#10b981', data: initialTax.socialSecurity || [] },
-							{ label: 'Medicare', color: '#059669', data: initialTax.medicare || [] },
+							{ label: 'State', color: '#8b5cf6', data: initialTax.stateTax || [] },
+							{ label: 'Social Sec', color: '#06b6d4', data: initialTax.socialSecurity || [] },
+							{ label: 'Medicare', color: '#10b981', data: initialTax.medicare || [] },
 							{ label: 'FUTA', color: '#f59e0b', data: initialTax.futa || [] },
-							{ label: 'SUTA', color: '#d97706', data: initialTax.suta || [] },
+							{ label: 'SUTA', color: '#ef4444', data: initialTax.suta || [] },
 						]}
 						className='w-full h-[300px]'
 					/>
@@ -105,6 +133,7 @@ export function ReportsSection({ initialReports, initialPayroll, initialEmployee
 				<Card>
 					<div className='flex items-center justify-between mb-2'>
 						<h3 className='text-sm font-medium'>Employment Types</h3>
+						<DownloadDropdown chartName='Employment Types' />
 					</div>
 					<div className='flex items-center gap-4'>
 						<DoughnutChart labels={initialEmployee.employmentTypes.labels} data={initialEmployee.employmentTypes.data} className='w-[180px] h-[180px]' />
@@ -118,6 +147,7 @@ export function ReportsSection({ initialReports, initialPayroll, initialEmployee
 				<Card>
 					<div className='flex items-center justify-between mb-2'>
 						<h3 className='text-sm font-medium'>Department Distribution</h3>
+						<DownloadDropdown chartName='Department Distribution' />
 					</div>
 					<div className='flex items-center gap-4'>
 						<DoughnutChart labels={initialEmployee.departmentDistribution?.labels || []} data={initialEmployee.departmentDistribution?.data || []} className='w-[180px] h-[180px]' />
@@ -131,9 +161,8 @@ export function ReportsSection({ initialReports, initialPayroll, initialEmployee
 			</div>
 
 			<Card>
-				<div className='pb-3 flex items-center justify-between'>
+				<div className='pb-3'>
 					<h3 className='text-sm font-medium'>Recent Reports</h3>
-					<Button id='toggleReportsTable' variant='outline' size='sm'>Hide Table</Button>
 				</div>
 				<div id='recent-reports' className='overflow-x-auto rounded-xl border border-[var(--border)]'>
 					<table className='w-full text-sm'>

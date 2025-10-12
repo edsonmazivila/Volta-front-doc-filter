@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { requireRole } from '@/lib/rbac/server'
 import { EmployeeEditForm } from '@/components/employees/employee-edit-form'
@@ -23,15 +22,12 @@ export default async function EditEmployeePage(props: { params: Promise<{ id: st
 	}
 
 	return (
-		<div className='min-h-dvh flex app-background'>
-			<Sidebar />
-			<main className='flex-1'>
-				<Header title='Edit Employee' />
-				<section className='p-4 md:p-6 max-w-5xl mx-auto'>
-					<EmployeeEditForm employee={employee} companyName={company?.name || 'Company'} departments={departments} />
-				</section>
-			</main>
-		</div>
+		<>
+			<Header title='Edit Employee' />
+			<section className='p-4 md:p-6 max-w-5xl mx-auto overflow-y-auto'>
+				<EmployeeEditForm employee={employee} companyName={company?.name || 'Company'} departments={departments} />
+			</section>
+		</>
 	)
 }
 

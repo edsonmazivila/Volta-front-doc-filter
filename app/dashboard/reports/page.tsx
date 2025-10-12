@@ -1,4 +1,3 @@
-import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
@@ -15,17 +14,14 @@ export default async function ReportsPage() {
     getTaxTrend('monthly'),
   ])
   return (
-    <div className='min-h-dvh flex app-background'>
-      <Sidebar />
-      <main className='flex-1'>
-        <Header title='Reports & Analytics' />
-        <section className='p-4 grid gap-4'>
-          <Card>
-            <CardHeader title='Analytics' />
-            <ReportsSection initialReports={list} initialPayroll={payroll} initialEmployee={employee} initialTax={tax} />
-          </Card>
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title='Reports & Analytics' />
+      <section className='p-4 grid gap-4 overflow-y-auto'>
+        <Card>
+          <CardHeader title='Analytics' />
+          <ReportsSection initialReports={list} initialPayroll={payroll} initialEmployee={employee} initialTax={tax} />
+        </Card>
+      </section>
+    </>
   )
 }

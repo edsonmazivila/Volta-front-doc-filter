@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2, MoreHorizontal, UserCheck, UserX } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { deleteUserAction, toggleUserStatusAction, type User, type UserStats } from '@/lib/services/users'
 import { ROLE_DISPLAY_NAMES, Role } from '@/lib/rbac/types'
 import { useSession } from '@/components/auth/session-context'
@@ -68,7 +69,7 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 	}
 
 	return (
-		<div className='space-y-4'>
+		<div className='space-y-6'>
 			{/* Stats Cards */}
 			<div className='grid grid-cols-1 md:grid-cols-5 gap-4'>
 				<div className='p-4 rounded-lg bg-card border border-border'>
@@ -93,16 +94,18 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 				</div>
 			</div>
 
-			{/* Action Bar */}
-			<div className='flex justify-between items-center'>
-				<h3 className='text-lg font-semibold text-foreground'>Users List</h3>
-				{canManageUsers && (
-					<Button onClick={() => setCreateOpen(true)}>
-						<Plus className='w-4 h-4 mr-2' />
-						Add User
-					</Button>
-				)}
-			</div>
+			{/* Users Table Section */}
+			<div className='space-y-4'>
+				{/* Action Bar */}
+				<div className='flex justify-between items-center'>
+					<h3 className='text-lg font-semibold text-foreground'>Users List</h3>
+					{canManageUsers && (
+						<Button onClick={() => setCreateOpen(true)}>
+							<Plus className='w-4 h-4 mr-2' />
+							Add User
+						</Button>
+					)}
+				</div>
 
 			{/* Table */}
 			{users.length === 0 ? (
@@ -110,67 +113,93 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 					<p className='text-sm text-muted-foreground'>No users found</p>
 				</div>
 			) : (
-				<div className='overflow-x-auto border border-border rounded-lg'>
-					<table className='min-w-full divide-y divide-border'>
-						<thead className='bg-muted'>
+				<div className='overflow-x-auto border-t border-[var(--border)]'>
+					<table className='w-full text-sm min-w-[800px]'>
+						<thead className='border-b border-[var(--border)] text-neutral-400 sticky top-0 bg-background z-10 shadow-sm'>
 							<tr>
-								<th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase'>Name</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase'>Email</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase'>Role</th>
-								<th className='px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase'>Status</th>
+								<th className='text-left p-3 min-w-[200px]'>Name</th>
+								<th className='text-left p-3 min-w-[200px]'>Email</th>
+								<th className='text-left p-3 min-w-[150px]'>Role</th>
+								<th className='text-left p-3 min-w-[100px]'>Status</th>
 								{canManageUsers && (
-									<th className='px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase'>Actions</th>
+									<th className='text-left p-3 min-w-[100px]'>Actions</th>
 								)}
 							</tr>
 						</thead>
-						<tbody className='bg-card divide-y divide-border'>
+						<tbody>
 							{users.map((usr) => (
-								<tr key={usr.id} className='hover:bg-muted/50'>
-									<td className='px-6 py-4 whitespace-nowrap'>
-										<div className='text-sm font-medium text-foreground'>
+								<tr key={usr.id} className='border-b border-[var(--border)] hover:bg-muted/50'>
+									<td className='p-3 min-w-[200px]'>
+										<div className='text-sm font-medium'>
 											{usr.first_name} {usr.last_name}
 										</div>
 									</td>
-									<td className='px-6 py-4 whitespace-nowrap'>
+									<td className='p-3 min-w-[200px]'>
 										<div className='text-sm text-muted-foreground'>{usr.email}</div>
 									</td>
-									<td className='px-6 py-4 whitespace-nowrap'>
-										<div className='text-sm text-foreground'>{ROLE_DISPLAY_NAMES[usr.role as Role]}</div>
+									<td className='p-3 min-w-[150px]'>
+										<div className='text-sm'>{ROLE_DISPLAY_NAMES[usr.role as Role]}</div>
 									</td>
-									<td className='px-6 py-4 whitespace-nowrap'>
+									<td className='p-3 min-w-[100px]'>
 										<span
-											className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer ${
+											className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
 												usr.is_active
 													? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
 													: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
 											}`}
-											onClick={canManageUsers ? () => handleToggleStatus(usr.id, usr.is_active) : undefined}
 										>
 											{usr.is_active ? 'Active' : 'Inactive'}
 										</span>
 									</td>
 									{canManageUsers && (
-										<td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
-											<Button
-												variant='ghost'
-												size='sm'
-												onClick={() => {
-													setSelectedUser(usr)
-													setEditOpen(true)
-												}}
-											>
-												<Edit className='w-4 h-4' />
-											</Button>
-											<Button
-												variant='ghost'
-												size='sm'
-												onClick={() => {
-													setUserToDelete(usr)
-													setDeleteOpen(true)
-												}}
-											>
-												<Trash2 className='w-4 h-4 text-red-600' />
-											</Button>
+										<td className='p-3 min-w-[100px]'>
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														variant='ghost'
+														size='sm'
+														className='h-8 w-8 p-0'
+													>
+														<MoreHorizontal className='h-4 w-4' />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align='end'>
+													<DropdownMenuItem
+														onClick={() => {
+															setSelectedUser(usr)
+															setEditOpen(true)
+														}}
+													>
+														<Edit className='mr-2 h-4 w-4' />
+														Edit
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={() => handleToggleStatus(usr.id, usr.is_active)}
+													>
+														{usr.is_active ? (
+															<>
+																<UserX className='mr-2 h-4 w-4' />
+																Deactivate
+															</>
+														) : (
+															<>
+																<UserCheck className='mr-2 h-4 w-4' />
+																Activate
+															</>
+														)}
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														onClick={() => {
+															setUserToDelete(usr)
+															setDeleteOpen(true)
+														}}
+														className='text-red-400 focus:text-red-400'
+													>
+														<Trash2 className='mr-2 h-4 w-4' />
+														Delete
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
 										</td>
 									)}
 								</tr>
@@ -179,6 +208,7 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 					</table>
 				</div>
 			)}
+			</div>
 
 			{/* Create Dialog */}
 			<Dialog open={createOpen} onOpenChange={setCreateOpen}>

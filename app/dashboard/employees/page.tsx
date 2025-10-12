@@ -1,4 +1,3 @@
-import { Sidebar } from "@/components/dashboard/sidebar";
 import { Header } from "@/components/dashboard/header";
 import { EmployeeTable } from "@/components/employees/employee-table";
 import { getEmployees } from "@/lib/services/employees";
@@ -14,19 +13,16 @@ export default async function EmployeesPage() {
   const { items: employees, total } = await getEmployees();
 
   return (
-    <div className="min-h-dvh flex app-background">
-      <Sidebar />
-      <main className="flex-1">
-        <Header title="Employee Management" />
-        <section className="p-4">
-          <div>
-            <h1 className="text-xl font-bold">
-              Create, edit and manage your workforce.
-            </h1>
-          </div>
-          <EmployeeTable initialEmployees={employees} initialTotal={total} />
-        </section>
-      </main>
-    </div>
+    <>
+      <Header title="Employee Management" />
+      <section className="p-4 overflow-y-auto">
+        <div>
+          <h1 className="text-xl font-bold">
+            Create, edit and manage your workforce.
+          </h1>
+        </div>
+        <EmployeeTable initialEmployees={employees} initialTotal={total} />
+      </section>
+    </>
   );
 }
