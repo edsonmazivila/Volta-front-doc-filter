@@ -34,6 +34,12 @@ export function LeaveTable({ items = [], isLoading = false, onNew, onSubmit, onC
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [viewingLeave, setViewingLeave] = useState<LeaveRequestItem | null>(null)
 
+  const getEmployeeName = (row: LeaveRequestItem) => {
+    if (row.employee_full_name) return row.employee_full_name
+    const name = `${row.employee_first_name || ''} ${row.employee_last_name || ''}`.trim()
+    return name || '—'
+  }
+
   const handleRowClick = (leave: LeaveRequestItem, event: React.MouseEvent) => {
     // Don't open dialog if clicking on interactive elements
     const target = event.target as HTMLElement
@@ -72,9 +78,10 @@ export function LeaveTable({ items = [], isLoading = false, onNew, onSubmit, onC
     <>
       <div className="glass rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <table className="w-full text-sm">
             <thead className="border-b border-[var(--border)] text-neutral-400">
               <tr>
+              <th className="text-left p-3">Employee</th>
                 <th className="text-left p-3">
                   <div className="flex items-center gap-2">
                     Status
@@ -92,7 +99,7 @@ export function LeaveTable({ items = [], isLoading = false, onNew, onSubmit, onC
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td className="p-4" colSpan={7}>
+                <td className="p-4" colSpan={8}>
                     No leave requests found
                   </td>
                 </tr>
@@ -103,6 +110,7 @@ export function LeaveTable({ items = [], isLoading = false, onNew, onSubmit, onC
                     className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer transition-colors"
                     onClick={(event) => handleRowClick(row, event)}
                   >
+                  <td className="p-3">{getEmployeeName(row)}</td>
                     <td className="p-3">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getLeaveStatusColor(row.status)}`}

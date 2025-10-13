@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { Meeting } from '@/lib/types/meetings'
 import { deleteMeetingAction, respondToMeetingAction } from '@/lib/services/meetings'
 import { Button } from '@/components/ui'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
@@ -20,6 +21,8 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
   const toast = useToastHelpers()
   const [isProcessing, setIsProcessing] = useState(false)
   const [responseStatus, setResponseStatus] = useState<string | null>(null)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [isCancelledLocally, setIsCancelledLocally] = useState(false)
 
 
   const isOrganizer = meeting.is_organizer || meeting.organizer_id === currentUserId
@@ -64,8 +67,6 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
   }
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to cancel this meeting?')) return
-
     setIsProcessing(true)
     try {
       const result = await deleteMeetingAction(meeting.id)
@@ -74,6 +75,8 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
         return
       }
       toast.success('Meeting cancelled')
+      setIsCancelledLocally(true)
+      setShowCancelDialog(false)
       router.refresh()
     } catch {
       toast.error('Failed to cancel meeting')
@@ -156,20 +159,38 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                   variant="outline"
                   size="sm"
                   onClick={() => onEdit(meeting)}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isCancelledLocally || meeting.status !== 'scheduled'}
                 >
                   Edit
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDelete}
-                disabled={isProcessing}
-                className="border-red-300 text-red-700 hover:bg-red-50"
-              >
-                Cancel
-              </Button>
+
+              <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isProcessing || isCancelledLocally || meeting.status !== 'scheduled'}
+                    className="border-red-200 text-red-500 hover:bg-red-50 "
+                  >
+                    Cancel
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Cancel meeting?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will cancel the meeting for all participants. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isProcessing}>Keep meeting</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isProcessing} className="bg-red-600 hover:bg-red-600 text-white">
+                      {isProcessing ? 'Cancelling…' : 'Cancel meeting'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </>
           ) : !isOrganizer && userResponseStatus === 'pending' ? (
             <>

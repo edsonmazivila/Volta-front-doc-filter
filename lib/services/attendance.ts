@@ -52,7 +52,7 @@ export const getAttendanceRecords = cache(
           const first = empUser?.first_name as string | undefined ?? emp?.first_name as string | undefined
           const last = empUser?.last_name as string | undefined ?? emp?.last_name as string | undefined
           const joined = [first, last].filter(Boolean).join(' ')
-          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.employee_name as string | undefined
+          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
           return {
             id: String(r.id ?? r.attendance_id ?? ''),
             employee_id: String(r.employee_id ?? r.user_id ?? ''),
@@ -189,7 +189,7 @@ export const getMyAttendance = cache(
           const first = empUser?.first_name as string | undefined ?? emp?.first_name as string | undefined
           const last = empUser?.last_name as string | undefined ?? emp?.last_name as string | undefined
           const joined = [first, last].filter(Boolean).join(' ')
-          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.employee_name as string | undefined
+          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
           return {
             id: String(r.id ?? r.attendance_id ?? ''),
             employee_id: String(r.employee_id ?? r.user_id ?? ''),

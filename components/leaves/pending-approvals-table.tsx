@@ -38,11 +38,9 @@ export function PendingApprovalsTable({
   };
 
   const getEmployeeName = (row: LeaveRequestItem) => {
-    return (
-      `${row.employee_first_name || ""} ${
-        row.employee_last_name || ""
-      }`.trim() || "—"
-    );
+    if (row.employee_full_name) return row.employee_full_name
+    const name = `${row.employee_first_name || ''} ${row.employee_last_name || ''}`.trim()
+    return name || '—'
   };
 
   return (

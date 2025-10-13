@@ -18,6 +18,7 @@ export function DocumentViewDialog({
 	document: doc,
 	documentId
 }: DocumentViewDialogProps) {
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className='max-w-4xl max-h-[90vh] flex flex-col'>
@@ -52,8 +53,34 @@ export function DocumentViewDialog({
 							</div>
 							<div>
 								<span className='text-muted-foreground'>Uploaded:</span>{' '}
-								<span className='font-medium'>{doc.created_at?.slice(0, 10)}</span>
+								<span className='font-medium'>{doc.created_at?.slice(0, 10) || '-'}</span>
 							</div>
+							{doc.access_level && (
+								<div>
+									<span className='text-muted-foreground'>Access level:</span>{' '}
+									<span className='font-medium'>{doc.access_level}</span>
+								</div>
+							)}
+							{(doc.is_confidential !== undefined) && (
+								<div>
+									<span className='text-muted-foreground'>Confidential:</span>{' '}
+									<span className='font-medium'>{doc.is_confidential ? 'Yes' : 'No'}</span>
+								</div>
+							)}
+
+							{doc.approved_by_full_name && (
+								<div>
+									<span className='text-muted-foreground'>Approved by:</span>{' '}
+									<span className='font-medium'>{doc.approved_by_full_name}</span>
+								</div>
+							)}
+							{doc.approved_at && (
+								<div>
+									<span className='text-muted-foreground'>Approved at:</span>{' '}
+									<span className='font-medium'>{doc.approved_at.slice(0, 19).replace('T', ' ')}</span>
+								</div>
+							)}
+
 						</div>
 
 						{/* Document Preview */}

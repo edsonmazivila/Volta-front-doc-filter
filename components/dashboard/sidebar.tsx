@@ -77,6 +77,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: "/dashboard/my-timesheets", label: "Timesheets", icon: Clock },
       { href: "/dashboard/my-leaves", label: "Time Off", icon: CalendarCheck },
       { href: "/dashboard/my-documents", label: "Documents", icon: FolderOpen },
+      { href: "/dashboard/profile", label: "Profile", icon: UserCog },
     ],
   },
   {

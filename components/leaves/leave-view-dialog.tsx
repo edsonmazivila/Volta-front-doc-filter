@@ -64,9 +64,8 @@ export function LeaveViewDialog({
   };
 
   const getEmployeeName = () => {
-    if (leave.employee_first_name && leave.employee_last_name) {
-      return `${leave.employee_first_name} ${leave.employee_last_name}`;
-    }
+    if (leave.employee_full_name) return leave.employee_full_name;
+    if (leave.employee_first_name && leave.employee_last_name) return `${leave.employee_first_name} ${leave.employee_last_name}`;
     return "Employee";
   };
 
@@ -156,6 +155,12 @@ export function LeaveViewDialog({
                     {leave.is_half_day ? "(Half Day)" : "day(s)"}
                   </p>
                 </div>
+                {typeof leave.total_hours === 'number' && (
+                  <div>
+                    <p className="text-sm font-medium">Total Hours</p>
+                    <p className="text-sm text-muted-foreground">{leave.total_hours}</p>
+                  </div>
+                )}
 
                 {leave.created_at && (
                   <div>
@@ -189,6 +194,30 @@ export function LeaveViewDialog({
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {leave.reason}
                 </p>
+              </div>
+            </div>
+          )}
+
+          {/* Final Approval Section */}
+          {leave.status === 'APPROVED_FINAL' && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Final Approval
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {leave.approved_final_at && (
+                  <div>
+                    <p className="text-sm font-medium">Approved At</p>
+                    <p className="text-sm text-muted-foreground">{formatDateTime(leave.approved_final_at)}</p>
+                  </div>
+                )}
+                {leave.approved_final_notes && (
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-medium">Notes</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{leave.approved_final_notes}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

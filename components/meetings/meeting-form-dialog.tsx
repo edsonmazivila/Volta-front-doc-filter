@@ -94,9 +94,9 @@ export function MeetingFormDialog({
       formData.append('datetime', isoDateTime)
       formData.append('location', location.trim())
 
-      // Append participants
+      
       selectedParticipants.forEach((id) => {
-        formData.append('participant_ids', id)
+        formData.append('participants_ids', id)
       })
 
       const result = meeting

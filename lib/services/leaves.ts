@@ -21,6 +21,7 @@ export interface LeaveRequestItem {
   start_date: string;
   end_date: string;
   total_days: number;
+  total_hours?: number;
   is_half_day?: boolean;
   reason?: string;
   status: LeaveStatus;
@@ -28,6 +29,11 @@ export interface LeaveRequestItem {
   submitted_at?: string;
   employee_first_name?: string;
   employee_last_name?: string;
+  employee_full_name?: string;
+  employee_number?: string;
+  approved_final_at?: string;
+  approved_final_by?: string;
+  approved_final_notes?: string;
 }
 
 export interface LeaveBalanceItem {

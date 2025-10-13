@@ -30,7 +30,10 @@ interface ApiMeetingResponse {
   location?: string;
   status: string;
   organizer_id: string;
+  organizer_full_name?: string;
   participants?: string[];
+  participants_ids?: string[];
+  participant_full_names?: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -46,7 +49,7 @@ const createMeetingSchema = z.object({
   description: z.string().optional(),
   datetime: z.string().min(1, "Date and time are required"),
   location: z.string().optional(),
-  participant_ids: z.array(z.string()).optional(),
+  participants_ids: z.array(z.string()).optional(),
 });
 
 // Helper function to enrich meetings with user/employee data
@@ -103,8 +106,8 @@ async function enrichMeetingsWithEmployeeData(meetings: ApiMeetingResponse[]): P
       });
     }
 
-    // Enrich meetings with organizer names and participant data
-    // We need to fetch individual meeting details to get participants
+    // Enrich meetings with organizer/participants
+    // We fetch individual meeting details to get latest fields like participant_full_names
     const enrichedMeetings = await Promise.all(
       meetings.map(async (meeting: ApiMeetingResponse) => {
         // Fetch full meeting details to get participants
@@ -126,20 +129,28 @@ async function enrichMeetingsWithEmployeeData(meetings: ApiMeetingResponse[]): P
           console.warn('Failed to fetch full meeting details for:', meeting.id, error);
         }
         
-        // Handle participants - API returns array of user IDs
+        // Participants: accept ids from either `participants` or `participants_ids` and prefer names from API
         let enrichedParticipants: Array<{ user_id: string; name: string; status: 'pending' }> = [];
-        if (fullMeeting.participants && Array.isArray(fullMeeting.participants)) {
-          enrichedParticipants = fullMeeting.participants.map((userId: string) => {
-            const user = userMap.get(String(userId));
+        const participantIdsFromApi = Array.isArray(fullMeeting.participants)
+          ? fullMeeting.participants
+          : Array.isArray(fullMeeting.participants_ids)
+            ? fullMeeting.participants_ids
+            : [];
+        if (participantIdsFromApi.length > 0) {
+          const names = Array.isArray(fullMeeting.participant_full_names) ? fullMeeting.participant_full_names : [];
+          enrichedParticipants = participantIdsFromApi.map((userId: string, idx: number) => {
+            const apiName = names[idx];
+            const mapped = userMap.get(String(userId));
             return {
               user_id: userId,
-              name: user?.name || 'Unknown',
-              status: 'pending' as const, // Default status since API doesn't provide it
+              name: apiName || mapped?.name || 'Unknown',
+              status: 'pending' as const,
             };
           });
         }
 
-        const organizerName = userMap.get(meeting.organizer_id)?.name || 'Unknown';
+        // Organizer name: prefer API field if present
+        const organizerName = fullMeeting.organizer_full_name || userMap.get(meeting.organizer_id)?.name || 'Unknown';
 
         return {
           ...meeting,
@@ -318,7 +329,7 @@ export async function createMeetingAction(
   try {
     // Parse participants
     const participantIds = formData
-      .getAll("participant_ids")
+      .getAll("participants_ids")
       .filter(Boolean) as string[];
 
     const rawData = {
@@ -326,7 +337,7 @@ export async function createMeetingAction(
       description: formData.get("description") || "",
       datetime: formData.get("datetime"),
       location: formData.get("location") || "",
-      participant_ids: participantIds,
+      participants_ids: participantIds,
     };
 
     const parsed = createMeetingSchema.safeParse(rawData);
@@ -376,7 +387,7 @@ export async function updateMeetingAction(
 ): Promise<ActionResult> {
   try {
     const participantIds = formData
-      .getAll("participant_ids")
+      .getAll("participants_ids")
       .filter(Boolean) as string[];
 
     const rawData = {
@@ -384,7 +395,7 @@ export async function updateMeetingAction(
       description: formData.get("description") || "",
       datetime: formData.get("datetime"),
       location: formData.get("location") || "",
-      participant_ids: participantIds,
+      participants_ids: participantIds,
     };
 
     const parsed = createMeetingSchema.safeParse(rawData);

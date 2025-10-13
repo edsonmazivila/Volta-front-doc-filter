@@ -48,6 +48,18 @@ export interface Document {
   expiry_date?: string
   created_at?: string
   updated_at?: string
+  access_level?: string
+  requires_approval?: boolean
+  approved_by?: string
+  approved_by_full_name?: string
+  approved_at?: string
+  version?: number
+  is_current_version?: boolean
+  storage_provider?: string
+  mime_type?: string
+  virus_scan_status?: string
+  encrypted?: boolean
+  download_count?: number
 }
 
 // List item for tables/grids
@@ -166,6 +178,7 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
     employee?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string };
     user?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string };
     employee_name?: string;
+    employee_full_name?: string;
     title?: string;
     original_filename?: string;
     document_type?: string;
@@ -188,7 +201,7 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
 
     return {
       id: String(d.id ?? d.doc_id ?? d.uuid ?? ''),
-      employeeName: String(d.employee_name ?? name),
+      employeeName: String(d.employee_full_name ?? d.employee_name ?? name),
       title: String(d.title ?? d.original_filename ?? 'Untitled'),
       type: String(d.document_type ?? d.type ?? 'unknown'),
       status: (d.document_status ?? d.status ?? 'uploaded') as DocumentStatus,
@@ -229,7 +242,7 @@ export const getDocument = cache(async (id: string): Promise<Document | null> =>
   return {
     id: String(d.id ?? ''),
     employee_id: String(d.employee_id ?? ''),
-    employee_name: String(d.employee_name ?? name),
+    employee_name: String(d.employee_full_name ?? d.employee_name ?? d.employeeName ?? name),
     title: String(d.title ?? ''),
     document_type: String(d.document_type ?? ''),
     document_status: (d.document_status ?? 'uploaded') as DocumentStatus,
@@ -241,6 +254,18 @@ export const getDocument = cache(async (id: string): Promise<Document | null> =>
     expiry_date: d.expiry_date ? String(d.expiry_date) : undefined,
     created_at: d.created_at ? String(d.created_at) : undefined,
     updated_at: d.updated_at ? String(d.updated_at) : undefined,
+    access_level: d.access_level ? String(d.access_level) : undefined,
+    requires_approval: typeof d.requires_approval === 'boolean' ? d.requires_approval : undefined,
+    approved_by: d.approved_by ? String(d.approved_by) : undefined,
+    approved_by_full_name: d.approved_by_full_name ? String(d.approved_by_full_name) : undefined,
+    approved_at: d.approved_at ? String(d.approved_at) : undefined,
+    version: typeof d.version === 'number' ? d.version : undefined,
+    is_current_version: typeof d.is_current_version === 'boolean' ? d.is_current_version : undefined,
+    storage_provider: d.storage_provider ? String(d.storage_provider) : undefined,
+    mime_type: d.mime_type ? String(d.mime_type) : undefined,
+    virus_scan_status: d.virus_scan_status ? String(d.virus_scan_status) : undefined,
+    encrypted: typeof d.encrypted === 'boolean' ? d.encrypted : undefined,
+    download_count: typeof d.download_count === 'number' ? d.download_count : undefined,
   }
 })
 

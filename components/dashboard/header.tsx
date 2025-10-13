@@ -3,7 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 import { ThemeToggle } from '@/components/dashboard/theme-toggle'
 import { LogoutButton } from '@/components/dashboard/logout-button'
-import { Settings } from 'lucide-react'
+import { Settings, UserCog } from 'lucide-react'
 import { NotificationsMenu } from '@/components/dashboard/notifications-menu'
 import { useSession } from '@/components/auth/session-context'
 import {
@@ -43,6 +43,11 @@ export function Header({ title }: { title: string }) {
                 <span>Theme</span>
                 <ThemeToggle />
               </DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href='/dashboard/profile' className='flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground'>
+                  <UserCog size={14} /> Profile
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href='/dashboard/settings' className='flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground'>
                   <Settings size={14} /> Settings
