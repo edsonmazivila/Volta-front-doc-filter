@@ -23,7 +23,7 @@ export function PasswordInput({ error, className, ...props }: PasswordInputProps
 			<button
 				type="button"
 				onClick={() => setShowPassword(!showPassword)}
-				className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-300 transition-colors"
+				className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:opacity-80 transition-colors"
 				aria-label={showPassword ? 'Hide password' : 'Show password'}
 			>
 				{showPassword ? (
@@ -65,7 +65,7 @@ export function PasswordStrength({ password }: { password: string }) {
 	return (
 		<div className="space-y-2">
 			<div className="flex items-center gap-2">
-				<div className="flex-1 bg-neutral-700 rounded-full h-2">
+				<div className="flex-1 bg-muted rounded-full h-2">
 					<div
 						className={cn(
 							'h-2 rounded-full transition-all duration-300',
@@ -78,9 +78,9 @@ export function PasswordStrength({ password }: { password: string }) {
 				</div>
 				<span className={cn(
 					'text-xs font-medium',
-					strength.color === 'red' && 'text-red-400',
-					strength.color === 'yellow' && 'text-yellow-400',
-					strength.color === 'green' && 'text-green-400'
+					strength.color === 'red' && 'text-red-700 dark:text-red-400',
+					strength.color === 'yellow' && 'text-yellow-700 dark:text-yellow-400',
+					strength.color === 'green' && 'text-green-700 dark:text-green-400'
 				)}>
 					{strength.label}
 				</span>
@@ -91,10 +91,10 @@ export function PasswordStrength({ password }: { password: string }) {
 					<div key={key} className="flex items-center gap-2 text-xs">
 						<div className={cn(
 							'w-1 h-1 rounded-full',
-							passed ? 'bg-green-400' : 'bg-neutral-600'
+							passed ? 'bg-green-500 dark:bg-green-400' : 'bg-muted'
 						)} />
 						<span className={cn(
-							passed ? 'text-green-400' : 'text-neutral-500'
+							passed ? 'text-green-700 dark:text-green-400' : 'text-muted-foreground'
 						)}>
 							{key === 'length' && 'At least 8 characters'}
 							{key === 'lowercase' && 'One lowercase letter'}

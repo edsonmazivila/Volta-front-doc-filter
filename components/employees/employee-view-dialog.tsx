@@ -344,6 +344,13 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 					</div>
 					</div>
 				)}
+
+				{/* Empty state when details are unavailable (e.g., 404 due to RBAC) */}
+				{!isLoading && !error && !employeeDetails && (
+					<div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-400">
+						You do not have permission to view detailed information for this employee.
+					</div>
+				)}
 			</DialogContent>
 		</Dialog>
 	)

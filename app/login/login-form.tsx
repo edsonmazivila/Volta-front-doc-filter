@@ -22,13 +22,13 @@ export function LoginForm() {
     <>
       {successMessage && (
         <div className="mb-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-          <p className="text-sm text-green-400">{successMessage}</p>
+          <p className="text-sm text-green-700 dark:text-green-400">{successMessage}</p>
         </div>
       )}
 
       {error && (
         <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-          <p className="text-sm text-red-400">{error}</p>
+          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
         </div>
       )}
 
@@ -61,7 +61,7 @@ export function LoginForm() {
         <div className="flex justify-end">
           <Link
             href="/forgot-password"
-            className="text-blue-400 hover:text-blue-300 underline"
+            className="text-primary hover:opacity-80 underline"
           >
             Forgot your password?
           </Link>

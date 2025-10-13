@@ -88,7 +88,7 @@ export function HomeHeader() {
             <Button variant="primaryGradient" className="text-md font-semibold px-6 py-3" asChild>
               <Link href="/signup">Sign Up</Link>
             </Button>
-            <Button variant="ghost" className="text-md font-semibold px-6 py-3" asChild>
+            <Button variant="outline" className="text-md font-semibold px-6 py-3 bg-background/70 backdrop-blur-sm border-[var(--border)] text-foreground hover:bg-accent" asChild>
               <Link href="/login">Sign In</Link>
             </Button>
           </div>

@@ -18,13 +18,13 @@ export function FormField({
 }: FormFieldProps) {
 	return (
 		<div className={cn('space-y-2', className)}>
-			<label className="block text-sm font-medium text-neutral-200">
+			<label className="block text-sm font-medium text-foreground">
 				{label}
-				{required && <span className="text-red-400 ml-1">*</span>}
+				{required && <span className="text-red-700 dark:text-red-400 ml-1">*</span>}
 			</label>
 			{children}
 			{error && (
-				<p className="text-sm text-red-400" role="alert">
+				<p className="text-sm text-red-700 dark:text-red-400" role="alert">
 					{error}
 				</p>
 			)}
@@ -41,10 +41,10 @@ export function Input({ error, className, ...props }: InputProps) {
 		<input
 			className={cn(
 				'w-full px-4 py-3 rounded-lg border transition-colors',
-				'bg-white/5 border-white/10 text-white placeholder:text-neutral-400',
-				'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+				'bg-background border-[var(--border)] text-foreground placeholder:text-muted-foreground',
+				'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
 				'disabled:opacity-50 disabled:cursor-not-allowed',
-				error && 'border-red-400 focus:ring-red-400',
+				error && 'border-red-300 dark:border-red-400 focus:ring-red-500 dark:focus:ring-red-400',
 				className
 			)}
 			{...props}
@@ -63,15 +63,15 @@ export function Checkbox({ label, error, className, ...props }: CheckboxProps) {
 			<input
 				type="checkbox"
 				className={cn(
-					'mt-1 h-4 w-4 rounded border-white/20 bg-white/5',
-					'focus:ring-2 focus:ring-blue-500 focus:ring-offset-0',
-					'text-blue-600',
-					error && 'border-red-400',
+					'mt-1 h-4 w-4 rounded border-[var(--border)] bg-background',
+					'focus:ring-2 focus:ring-ring focus:ring-offset-0',
+					'text-primary',
+					error && 'border-red-300 dark:border-red-400',
 					className
 				)}
 				{...props}
 			/>
-			<label className="text-sm text-neutral-300 leading-5">
+			<label className="text-sm text-foreground leading-5">
 				{label}
 			</label>
 		</div>

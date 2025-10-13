@@ -23,8 +23,8 @@ export function SignupForm() {
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
 						</svg>
 					</div>
-					<h1 className="text-xl font-bold text-white mb-2">Account Created!</h1>
-					<p className="text-neutral-400 text-sm">
+					<h1 className="text-xl font-bold text-foreground mb-2">Account Created!</h1>
+					<p className="text-muted-foreground text-sm">
 						Your account has been created successfully. Redirecting to login...
 					</p>
 				</div>
@@ -36,7 +36,7 @@ export function SignupForm() {
 		<>
 			{error && (
 				<div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-					<p className="text-sm text-red-400">{error}</p>
+					<p className="text-sm text-red-700 dark:text-red-400">{error}</p>
 				</div>
 			)}
 			
@@ -69,7 +69,7 @@ export function SignupForm() {
 				{/* Optional fields */}
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div className="flex flex-col gap-1">
-						<label className="text-sm">Employment type (optional)</label>
+						<label className="text-sm text-foreground">Employment type (optional)</label>
 						<select name="employmentType" className="w-full border rounded-md px-3 py-2 bg-background">
 							<option value="">Select type</option>
 							<option value="full_time">Full time</option>
@@ -79,15 +79,15 @@ export function SignupForm() {
 						</select>
 					</div>
 					<div className="flex flex-col gap-1">
-						<label className="text-sm">Hire date (optional)</label>
+						<label className="text-sm text-foreground">Hire date (optional)</label>
 						<input type="date" name="hireDate" className="w-full border rounded-md px-3 py-2 bg-background" />
 					</div>
 					<div className="flex flex-col gap-1">
-						<label className="text-sm">Job title (optional)</label>
+						<label className="text-sm text-foreground">Job title (optional)</label>
 						<input type="text" name="jobTitle" placeholder="e.g., CEO" className="w-full border rounded-md px-3 py-2 bg-background" />
 					</div>
 					<div className="flex flex-col gap-1">
-						<label className="text-sm">Employee number (optional)</label>
+						<label className="text-sm text-foreground">Employee number (optional)</label>
 						<input type="text" name="employeeNumber" placeholder="Auto-generated if empty" className="w-full border rounded-md px-3 py-2 bg-background" />
 					</div>
 				</div>

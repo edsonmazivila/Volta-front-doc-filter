@@ -15,16 +15,16 @@ export default async function SignupPage() {
 	return (
 		<main className="min-h-dvh app-background flex items-center justify-center p-6">
 			<div className="w-full max-w-lg">
-				<Suspense fallback={<div>Loading...</div>}>
+				<Suspense fallback={<div className="text-muted-foreground">Loading...</div>}>
 					<SignupForm />
 				</Suspense>
 				
 				<div className="mt-6 text-center">
-					<p className="text-sm text-neutral-400">
+					<p className="text-sm text-muted-foreground">
 						Already have an account?{' '}
 						<Link 
 							href="/login" 
-							className="text-blue-400 hover:text-blue-300 font-medium underline"
+							className="text-primary hover:opacity-80 font-medium underline"
 						>
 							Sign in
 						</Link>

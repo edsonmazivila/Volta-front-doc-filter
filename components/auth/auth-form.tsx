@@ -54,8 +54,8 @@ export function AuthForm<TSchema extends AnyZodObject>({
     <div className="w-full max-w-xl mx-auto">
       <div className="glass rounded-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">{title}</h1>
-          {subtitle && <p className="text-neutral-400 text-sm">{subtitle}</p>}
+          <h1 className="text-2xl font-bold text-foreground mb-2">{title}</h1>
+          {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
         </div>
 
         <FormProvider {...methods}>

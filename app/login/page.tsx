@@ -21,28 +21,28 @@ export default async function LoginPage({
       <div className="w-full max-w-md">
         {params.session_expired && (
           <div className="mb-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-            <p className="text-sm text-yellow-400">
+            <p className="text-sm text-yellow-700 dark:text-yellow-400">
               Your session has expired. Please log in again.
             </p>
           </div>
         )}
         {params.error === 'auth_check_failed' && (
           <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-            <p className="text-sm text-red-400">
+            <p className="text-sm text-red-700 dark:text-red-400">
               Authentication check failed. Please log in again.
             </p>
           </div>
         )}
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="text-muted-foreground">Loading...</div>}>
           <LoginForm />
         </Suspense>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-neutral-400">
+          <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="text-blue-400 hover:text-blue-300 font-medium underline"
+              className="text-primary hover:opacity-80 font-medium underline"
             >
               Sign up
             </Link>
