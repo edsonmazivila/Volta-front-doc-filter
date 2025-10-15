@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import type { Meeting } from '@/lib/types/meetings'
-import { deleteMeetingAction, respondToMeetingAction } from '@/lib/services/meetings'
+import { deleteMeetingAction, respondToMeetingAction, cancelMeetingAction } from '@/lib/services/meetings'
 import { Button } from '@/components/ui'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +23,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
   const [responseStatus, setResponseStatus] = useState<string | null>(null)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [isCancelledLocally, setIsCancelledLocally] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
 
   const isOrganizer = meeting.is_organizer || meeting.organizer_id === currentUserId
@@ -66,10 +67,10 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
     }
   }
 
-  async function handleDelete() {
+  async function handleCancel() {
     setIsProcessing(true)
     try {
-      const result = await deleteMeetingAction(meeting.id)
+      const result = await cancelMeetingAction(meeting.id)
       if (result.errors) {
         toast.error(result.errors._form?.[0] || 'Failed to cancel meeting')
         return
@@ -80,6 +81,24 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
       router.refresh()
     } catch {
       toast.error('Failed to cancel meeting')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  async function handleDelete() {
+    setIsProcessing(true)
+    try {
+      const result = await deleteMeetingAction(meeting.id)
+      if (result.errors) {
+        toast.error(result.errors._form?.[0] || 'Failed to delete meeting')
+        return
+      }
+      toast.success('Meeting deleted')
+      setShowDeleteDialog(false)
+      router.refresh()
+    } catch {
+      toast.error('Failed to delete meeting')
     } finally {
       setIsProcessing(false)
     }
@@ -185,8 +204,35 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel disabled={isProcessing}>Keep meeting</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} disabled={isProcessing} className="bg-red-600 hover:bg-red-600 text-white">
+                    <AlertDialogAction onClick={handleCancel} disabled={isProcessing} className="bg-red-600 hover:bg-red-600 text-white">
                       {isProcessing ? 'Cancelling…' : 'Cancel meeting'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isProcessing}
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete meeting permanently?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This removes the meeting entirely. Participants will no longer see it. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isProcessing} className="bg-red-700 hover:bg-red-700 text-white">
+                      {isProcessing ? 'Deleting…' : 'Delete meeting'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

@@ -469,6 +469,37 @@ export async function deleteMeetingAction(id: string): Promise<ActionResult> {
   }
 }
 
+export async function cancelMeetingAction(id: string): Promise<ActionResult> {
+  try {
+    const cookieHeader = await getAuthCookieHeader();
+    const res = await fetch(`${API_BASE_URL}/api/meetings/${id}/cancel`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        errors: {
+          _form: [errorData.error || `Failed to cancel meeting: ${res.status}`],
+        },
+      };
+    }
+
+    await revalidateEntityMutation("MEETINGS");
+    return { success: true };
+  } catch {
+    return {
+      errors: {
+        _form: ["An unexpected error occurred"],
+      },
+    };
+  }
+}
+
 export async function respondToMeetingAction(
   id: string,
   decision: "accept" | "decline"

@@ -4,7 +4,8 @@ import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
 import { z } from 'zod'
 import { revalidateEntityMutation, CacheTags, fetchWithGracefulFallback } from '@/lib/cache-utils'
-import { toIsoUtc } from '@/lib/utils'
+import { getCompany } from '@/lib/services/company'
+import { toIsoUtc, optionalIsoUtc } from '@/lib/utils'
 
 // Types
 export interface Employee {
@@ -55,13 +56,31 @@ export interface EmployeeListParams {
 
 // Validation schemas
 const createEmployeeSchema = z.object({
-	full_name: z.string().min(1, 'Full name is required'),
-	email: z.string().email('Invalid email'),
-	job_title: z.string().optional(),
-	department: z.string().optional(),
-	employment_type: z.string().optional(),
-	employment_status: z.string().optional(),
-	is_active: z.boolean().default(true),
+    full_name: z.string().min(1, 'Full name is required'),
+    email: z.string().email('Invalid email'),
+    employee_number: z.string().optional(),
+    job_title: z.string().optional(),
+    department: z.string().optional(),
+    employment_type: z.string().optional(),
+    employment_status: z.string().optional(),
+    is_active: z.boolean().default(true),
+    // Contact & Address
+    primary_phone: z.string().optional(),
+    secondary_phone: z.string().optional(),
+    address_line1: z.string().optional(),
+    address_line2: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    postal_code: z.string().optional(),
+    country: z.string().optional(),
+    // Dates
+    hire_date: z.string().optional(),
+    date_of_birth: z.string().optional(),
+    // Compensation (optional)
+    pay_type: z.string().optional(),
+    pay_frequency: z.string().optional(),
+    overtime_rate: z.string().optional(),
+    standard_hours: z.string().optional(),
 })
 
 const updateEmployeeSchema = z.object({
@@ -215,29 +234,85 @@ export const getEmployeeDetails = cache(async (id: string): Promise<EmployeeDeta
 type ActionResult = { errors: Record<string, string[]> } | { success: true; data?: unknown }
 
 export async function createEmployeeAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
-	const parsed = createEmployeeSchema.safeParse({
-		full_name: formData.get('full_name') || '',
-		email: formData.get('email') || '',
-		job_title: formData.get('job_title') || undefined,
-		department: formData.get('department') || undefined,
-		employment_type: formData.get('employment_type') || undefined,
-		employment_status: formData.get('employment_status') || undefined,
-		is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
-	})
+    // Debug: log incoming form entries
+    try {
+        const debugEntries: Record<string, unknown> = {}
+        formData.forEach((v, k) => {
+            debugEntries[k] = v
+        })
+        console.debug('[employees] createEmployeeAction formData', debugEntries)
+    } catch {}
+
+    const parsed = createEmployeeSchema.safeParse({
+        full_name: formData.get('full_name') || '',
+        email: formData.get('email') || '',
+        employee_number: formData.get('employee_number') || undefined,
+        job_title: formData.get('job_title') || undefined,
+        department: formData.get('department') || undefined,
+        employment_type: formData.get('employment_type') || undefined,
+        employment_status: formData.get('employment_status') || undefined,
+        is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
+        primary_phone: formData.get('primary_phone') || undefined,
+        secondary_phone: formData.get('secondary_phone') || undefined,
+        address_line1: formData.get('address_line1') || undefined,
+        address_line2: formData.get('address_line2') || undefined,
+        city: formData.get('city') || undefined,
+        state: formData.get('state') || undefined,
+        postal_code: formData.get('postal_code') || undefined,
+        country: formData.get('country') || undefined,
+        hire_date: formData.get('hire_date') || undefined,
+        date_of_birth: formData.get('date_of_birth') || undefined,
+        pay_type: formData.get('pay_type') || undefined,
+        pay_frequency: formData.get('pay_frequency') || undefined,
+        overtime_rate: formData.get('overtime_rate') || undefined,
+        standard_hours: formData.get('standard_hours') || undefined,
+    })
 
 	if (!parsed.success) {
-		return { errors: parsed.error.flatten().fieldErrors }
+        const flat = parsed.error.flatten().fieldErrors
+        console.error('[employees] createEmployeeAction validation failed', flat)
+        return { errors: flat }
 	}
 
 	try {
-		const cookieHeader = await getAuthCookieHeader()
-		// Normalize known date fields before send
-		const body = {
-			...parsed.data,
-			// include optional dates if present on formData
-			hire_date: toIsoUtc(String(formData.get('hire_date') || '')) || undefined,
-			date_of_birth: toIsoUtc(String(formData.get('date_of_birth') || '')) || undefined,
-		}
+        const cookieHeader = await getAuthCookieHeader()
+        // Ensure company_id is included as backend requires it
+        const company = await getCompany().catch(() => null)
+        const company_id = company?.id
+        // Build payload mapping UI field names to API expectations
+        const body = {
+            // Required/account fields
+            full_name: parsed.data.full_name,
+            email: parsed.data.email,
+            // Direct mappings
+            employee_number: parsed.data.employee_number || undefined,
+            job_title: parsed.data.job_title || undefined,
+            employment_type: parsed.data.employment_type || undefined,
+            employment_status: parsed.data.employment_status || 'active',
+            is_active: parsed.data.is_active,
+            // Map department (UI) to department_id (API)
+            department_id: parsed.data.department || undefined,
+            company_id,
+            // Phone rename to API naming
+            phone_primary: parsed.data.primary_phone || (formData.get('phone_primary') || undefined),
+            phone_secondary: parsed.data.secondary_phone || (formData.get('phone_secondary') || undefined),
+            // Address
+            address_line1: parsed.data.address_line1 || undefined,
+            address_line2: parsed.data.address_line2 || undefined,
+            city: parsed.data.city || undefined,
+            state: parsed.data.state || undefined,
+            postal_code: parsed.data.postal_code || undefined,
+            country: parsed.data.country || undefined,
+            // Dates normalized to ISO UTC
+            hire_date: optionalIsoUtc(parsed.data.hire_date),
+            date_of_birth: optionalIsoUtc(parsed.data.date_of_birth),
+            // Compensation (convert to numbers if provided)
+            pay_type: parsed.data.pay_type || undefined,
+            pay_frequency: parsed.data.pay_frequency || undefined,
+            overtime_rate: parsed.data.overtime_rate !== undefined && parsed.data.overtime_rate !== '' ? Number(parsed.data.overtime_rate) : undefined,
+            standard_hours: parsed.data.standard_hours !== undefined && parsed.data.standard_hours !== '' ? Number(parsed.data.standard_hours) : undefined,
+        }
+        console.debug('[employees] createEmployeeAction request body', body)
 		const res = await fetch(`${API_BASE_URL}/api/employees`, {
 			method: 'POST',
 			headers: {
@@ -248,8 +323,11 @@ export async function createEmployeeAction(prevState: unknown, formData: FormDat
 		})
 
 		if (!res.ok) {
-			const error = await res.json().catch(() => ({}))
-			return { errors: { _form: [error.message || 'Failed to create employee'] } }
+            const text = await res.text().catch(() => '')
+            let error: { message?: string } = {}
+            try { error = text ? JSON.parse(text) : {} } catch {}
+            console.error('[employees] createEmployeeAction failed', res.status, text)
+            return { errors: { _form: [error.message || `Failed to create employee (${res.status})`] } }
 		}
 
 		const data = await res.json()
@@ -257,8 +335,9 @@ export async function createEmployeeAction(prevState: unknown, formData: FormDat
 		revalidateEntityMutation('EMPLOYEES')
 
 		return { success: true, data }
-	} catch {
-		return { errors: { _form: ['Failed to create employee'] } }
+    } catch (e) {
+        console.error('[employees] createEmployeeAction threw', e)
+        return { errors: { _form: ['Failed to create employee'] } }
 	}
 }
 

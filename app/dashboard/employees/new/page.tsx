@@ -15,7 +15,7 @@ export default async function NewEmployeePage() {
 	return (
 		<>
 			<Header title='Add New Employee' />
-			<section className='p-4 md:p-6 max-w-5xl mx-auto overflow-y-auto'>
+			<section className='p-4 md:p-6'>
 				<EmployeeCreateForm companyName={company?.name || 'Company'} departments={departments} />
 			</section>
 		</>

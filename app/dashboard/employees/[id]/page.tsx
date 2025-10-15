@@ -24,7 +24,7 @@ export default async function EditEmployeePage(props: { params: Promise<{ id: st
 	return (
 		<>
 			<Header title='Edit Employee' />
-			<section className='p-4 md:p-6 max-w-5xl mx-auto overflow-y-auto'>
+			<section className='p-4 md:p-6'>
 				<EmployeeEditForm employee={employee} companyName={company?.name || 'Company'} departments={departments} />
 			</section>
 		</>
