@@ -32,7 +32,6 @@ export const PAGE_PERMISSIONS: Record<string, UserRole[]> = {
 
 	// Administration Section
 	'/dashboard/reports': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
-	'/dashboard/users': ['hr_manager', 'system_admin'],
 	'/dashboard/documents': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 	'/dashboard/company': ['hr_manager', 'system_admin'],
 	'/dashboard/settings': ['system_admin'],

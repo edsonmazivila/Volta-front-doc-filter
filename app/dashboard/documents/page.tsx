@@ -14,9 +14,8 @@ export default async function DocumentsPage() {
     getUsers(),
   ])
 
-  // Filter for employees only
-  const employeeUsers = users.filter(u => u.is_employee)
-  const employees = employeeUsers.map(e => ({
+  // Show all users
+  const employees = users.map(e => ({
     id: e.id,
     label: e.full_name || e.email || e.id
   }))

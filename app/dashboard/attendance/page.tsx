@@ -19,8 +19,8 @@ export default async function AttendancePage() {
     getUsers().catch(() => []),
   ])
 
-  // Filter for employees only
-  const employees = users.filter(u => u.is_employee)
+  // Show all users
+  const employees = users
 
   return (
     <>

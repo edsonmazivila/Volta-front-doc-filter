@@ -13,8 +13,8 @@ export default async function TimesheetsPage() {
     getUsers()
   ])
   
-  // Filter for active employees only
-  const employees = users.filter(u => u.is_employee && u.is_active)
+  // Show all users
+  const employees = users
   
   return (
     <>

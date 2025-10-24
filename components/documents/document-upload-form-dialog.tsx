@@ -77,7 +77,7 @@ export function DocumentUploadFormDialog({
 				handleClose()
 				router.refresh()
 			}
-		} catch {
+		} catch{
 			toast.error('Upload failed')
 		} finally {
 			setUploading(false)

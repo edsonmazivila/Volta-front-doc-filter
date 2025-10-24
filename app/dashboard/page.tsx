@@ -108,14 +108,30 @@ export default async function DashboardPage() {
           <section className="px-4 pb-4 grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-[1] mt-4">
             <Card className="min-h-[200px]">
               <CardHeader title="My Attendance" />
-              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                   <div className="text-sm font-medium">Present this month</div>
                   <span className="text-lg font-semibold">{presentThisMonth}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <div className="text-sm font-medium">Last entry</div>
-                  <span className="text-xs sm:text-sm font-medium capitalize">{lastAttendance ? `${lastAttendance.status || '—'} on ${new Date(lastAttendance.date).toLocaleDateString()}` : '—'}</span>
+                
+                {/* Last Attendance Entry - Full Width */}
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="text-sm font-medium mb-1">Last Attendance Entry</div>
+                  <div className="text-sm text-muted-foreground">
+                    {lastAttendance ? (
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                        <span className="capitalize font-medium">{lastAttendance.status || '—'}</span>
+                        <span className="text-xs">{new Date(lastAttendance.date).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</span>
+                      </div>
+                    ) : (
+                      <span>No attendance recorded</span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="px-4 pb-4">
@@ -127,14 +143,58 @@ export default async function DashboardPage() {
 
             <Card className="min-h-[200px]">
               <CardHeader title="My Leaves" />
-              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex items-center justify-between p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                  <div className="text-sm font-medium">Pending requests</div>
-                  <span className="text-lg font-semibold">{pendingMyLeaves}</span>
+              <div className="p-4 grid grid-cols-1 gap-3">
+                {/* Leave Counts - Single Row */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <div className="text-sm font-medium">Pending</div>
+                    <span className="text-lg font-semibold">{pendingMyLeaves}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                    <div className="text-sm font-medium">Upcoming</div>
+                    <span className="text-lg font-semibold">{upcomingMyLeaves}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                  <div className="text-sm font-medium">Upcoming leaves</div>
-                  <span className="text-lg font-semibold">{upcomingMyLeaves}</span>
+                
+                {/* Recent Leave Request - Full Width */}
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="text-sm font-medium mb-1">Recent Leave Request</div>
+                  <div className="text-sm text-muted-foreground">
+                    {leaveRequests.length > 0 ? (
+                      (() => {
+                        const recentLeave = leaveRequests[0];
+                        const startDate = new Date(recentLeave.start_date);
+                        const endDate = new Date(recentLeave.end_date);
+                        const isSameDay = startDate.toDateString() === endDate.toDateString();
+                        
+                        return (
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                            <span className="capitalize font-medium">{recentLeave.leave_type?.toLowerCase() || 'Leave'}</span>
+                            <span className="text-xs">
+                              {isSameDay 
+                                ? startDate.toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                  })
+                                : `${startDate.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })} - ${endDate.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}`
+                              }
+                            </span>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <span>No leave requests</span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="px-4 pb-4">

@@ -210,7 +210,6 @@ export const CacheTags = {
  */
 export const CachePaths = {
   DASHBOARD: '/dashboard',
-  USERS: '/dashboard/users',
   DEPARTMENTS: '/dashboard/departments',
   EMPLOYEES: '/dashboard/employees',
   TIMESHEETS: '/dashboard/timesheets',
@@ -231,7 +230,6 @@ export const CachePaths = {
  */
 export function getPathsForEntity(entity: keyof typeof CacheTags): string[] {
   const entityToPaths: Record<string, string[]> = {
-    USERS: [CachePaths.USERS, CachePaths.DASHBOARD],
     DEPARTMENTS: [CachePaths.DEPARTMENTS, CachePaths.DASHBOARD],
     EMPLOYEES: [CachePaths.EMPLOYEES, CachePaths.DASHBOARD],
     TIMESHEETS: [CachePaths.TIMESHEETS, CachePaths.MY_TIMESHEETS, CachePaths.PAYROLL, CachePaths.DASHBOARD],

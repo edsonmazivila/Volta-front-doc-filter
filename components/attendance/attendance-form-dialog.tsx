@@ -81,6 +81,11 @@ export function AttendanceFormDialog({
       return
     }
 
+    if (status === 'late' && !justification.trim()) {
+      toast.error('Justification is required for late status')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -101,7 +106,7 @@ export function AttendanceFormDialog({
         return
       }
 
-      toast.success(isEdit ? 'Attendance updated successfully' : 'Attendance recorded successfully')
+      toast.success(isEdit ? 'Attendance updated successfully' : 'Attendance issue reported successfully')
       onOpenChange(false)
       router.refresh()
     } catch {
@@ -123,7 +128,7 @@ export function AttendanceFormDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            {isEdit ? 'Edit Attendance' : 'Record Attendance'}
+            {isEdit ? 'Edit Attendance' : 'Report Attendance Issue'}
           </DialogTitle>
         </DialogHeader>
 
@@ -193,24 +198,26 @@ export function AttendanceFormDialog({
             />
           </div>
 
-          {/* Justification */}
-          <div>
-            <label htmlFor="justification" className="flex items-center gap-1 text-sm font-medium mb-1">
-              <FileText className="h-4 w-4" />
-              Justification
-              {status === 'absent' && <span className="text-red-400">*</span>}
-            </label>
-            <textarea
-              id="justification"
-              value={justification}
-              onChange={(e) => setJustification(e.target.value)}
-              rows={3}
-              className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter reason for absence or additional notes..."
-              disabled={isSubmitting}
-              required={status === 'absent'}
-            />
-          </div>
+          {/* Justification - Show for absent/late status or when editing existing justification */}
+          {(status === 'absent' || status === 'late' || (isEdit && attendance?.justification)) && (
+            <div>
+              <label htmlFor="justification" className="flex items-center gap-1 text-sm font-medium mb-1">
+                <FileText className="h-4 w-4" />
+                Justification
+                {(status === 'absent' || status === 'late') && <span className="text-red-400">*</span>}
+              </label>
+              <textarea
+                id="justification"
+                value={justification}
+                onChange={(e) => setJustification(e.target.value)}
+                rows={3}
+                className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter reason for absence/lateness or additional notes..."
+                disabled={isSubmitting}
+                required={status === 'absent' || status === 'late'}
+              />
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)]">
@@ -220,8 +227,8 @@ export function AttendanceFormDialog({
               className="flex-1"
             >
               {isSubmitting 
-                ? (isEdit ? 'Updating...' : 'Recording...') 
-                : (isEdit ? 'Update Attendance' : 'Record Attendance')
+                ? (isEdit ? 'Updating...' : 'Reporting...') 
+                : (isEdit ? 'Update Attendance' : 'Report Issue')
               }
             </Button>
             <Button

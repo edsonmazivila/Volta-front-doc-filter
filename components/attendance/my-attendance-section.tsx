@@ -169,13 +169,6 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 							})}
 						</p>
 					</div>
-					<Button 
-						variant="outline" 
-						size="sm"
-						onClick={handleOpenAttendanceDialog}
-					>
-						Record Attendance
-					</Button>
 				</div>
 
 				{todayRecord ? (
@@ -238,9 +231,19 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 				) : (
 					<div className='text-center py-6'>
 						<p className='text-muted-foreground mb-4'>No attendance recorded for today</p>
-						<Button onClick={handleClockIn} disabled={clockingIn} size='lg'>
-							{clockingIn ? 'Clocking In...' : 'Clock In'}
-						</Button>
+						<div className='space-y-2'>
+							<Button onClick={handleClockIn} disabled={clockingIn} size='lg' className='w-full'>
+								{clockingIn ? 'Clocking In...' : 'Clock In'}
+							</Button>
+							<Button 
+								onClick={handleOpenAttendanceDialog} 
+								variant="outline" 
+								size="sm" 
+								className='w-full'
+							>
+								Report Issue
+							</Button>
+						</div>
 					</div>
 				)}
 			</Card>

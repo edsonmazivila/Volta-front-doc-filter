@@ -88,7 +88,6 @@ export const NAV_SECTIONS: NavSection[] = [
         label: "Department Management",
         icon: Building2,
       },
-      { href: "/dashboard/users", label: "User Management", icon: UserCog },
       { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
       { href: "/dashboard/company", label: "Company", icon: Briefcase },
       {
