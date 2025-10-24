@@ -2,21 +2,23 @@ import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { getDocuments, getDocumentTypes } from '@/lib/services/documents'
-import { getEmployees } from '@/lib/services/employees'
+import { getUsers } from '@/lib/services/users'
 import { DocumentsSection } from '@/components/documents/documents-section'
 
 export default async function DocumentsPage() {
   // Only managers and admins can access document management
   await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
-  const [items, types, employeesData] = await Promise.all([
+  const [items, types, users] = await Promise.all([
     getDocuments(),
     getDocumentTypes(),
-    getEmployees({ page: 1, pageSize: 50 }),
+    getUsers(),
   ])
 
-  const employees = employeesData.items.map(e => ({
+  // Filter for employees only
+  const employeeUsers = users.filter(u => u.is_employee)
+  const employees = employeeUsers.map(e => ({
     id: e.id,
-    label: `${e.first_name || ''} ${e.last_name || ''}`.trim() || e.email || e.id
+    label: e.full_name || e.email || e.id
   }))
 
   return (

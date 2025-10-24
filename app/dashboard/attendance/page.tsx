@@ -4,7 +4,7 @@ import {
   getAttendanceRecords,
   getPendingJustifications,
 } from '@/lib/services/attendance'
-import { getEmployees } from '@/lib/services/employees'
+import { getUsers } from '@/lib/services/users'
 import { AttendanceSection } from '@/components/attendance/attendance-section'
 
 export default async function AttendancePage() {
@@ -13,13 +13,14 @@ export default async function AttendancePage() {
   const now = new Date()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
-  const [attendanceRecords, justifications, employeesData] = await Promise.all([
+  const [attendanceRecords, justifications, users] = await Promise.all([
     getAttendanceRecords({ month: currentMonth }).catch(() => []),
     getPendingJustifications().catch(() => []),
-    getEmployees().catch(() => ({ items: [], total: 0 })),
+    getUsers().catch(() => []),
   ])
 
-  const employees = employeesData.items || []
+  // Filter for employees only
+  const employees = users.filter(u => u.is_employee)
 
   return (
     <>

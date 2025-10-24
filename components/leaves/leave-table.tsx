@@ -35,9 +35,7 @@ export function LeaveTable({ items = [], isLoading = false, onNew, onSubmit, onC
   const [viewingLeave, setViewingLeave] = useState<LeaveRequestItem | null>(null)
 
   const getEmployeeName = (row: LeaveRequestItem) => {
-    if (row.employee_full_name) return row.employee_full_name
-    const name = `${row.employee_first_name || ''} ${row.employee_last_name || ''}`.trim()
-    return name || '—'
+    return row.employee_full_name || '—'
   }
 
   const handleRowClick = (leave: LeaveRequestItem, event: React.MouseEvent) => {

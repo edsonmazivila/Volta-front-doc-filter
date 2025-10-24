@@ -3,7 +3,7 @@ import { useState, useTransition } from 'react'
 import { TimesheetTable } from '@/components/timesheets/timesheet-table'
 import { TimesheetFormDialog, type TimesheetFormValues } from '@/components/timesheets/timesheet-form-dialog'
 import type { TimesheetListItem } from '@/lib/services/timesheets'
-import type { Employee } from '@/lib/services/employees'
+import type { User } from '@/lib/services/users'
 import {
   createTimesheetAction,
   updateTimesheetAction,
@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 interface TimesheetsSectionProps {
 	items: TimesheetListItem[]
-	employees?: Employee[]
+	employees?: User[]
 }
 
 export function TimesheetsSection({ items, employees = [] }: TimesheetsSectionProps) {
@@ -36,9 +36,9 @@ export function TimesheetsSection({ items, employees = [] }: TimesheetsSectionPr
 		try {
 			const totalHours = (values.regularHours || 0) + (values.overtimeHours || 0)
 			const payload = {
-				employee_id: values.employee_id,
-				period_start: new Date(values.periodStart).toISOString(),
-				period_end: new Date(values.periodEnd).toISOString(),
+				user_id: values.employee_id,
+				pay_period_start: values.periodStart,
+				pay_period_end: values.periodEnd,
 				regular_hours: values.regularHours,
 				overtime_hours: values.overtimeHours,
 				total_hours: totalHours,
@@ -115,11 +115,11 @@ return (
 				defaultValues={editId ? (() => {
 					const item = items.find(i => i.id === editId)
 					return item ? {
-						employee_id: item.employeeId || '',
-						periodStart: (item.periodStart ? new Date(item.periodStart).toISOString().slice(0, 10) : ''),
-						periodEnd: (item.periodEnd ? new Date(item.periodEnd).toISOString().slice(0, 10) : ''),
-						regularHours: item.regularHours || 0,
-						overtimeHours: item.overtimeHours || 0,
+						employee_id: item.user_id || item.employeeId || '',
+						periodStart: item.pay_period_start || item.periodStart || '',
+						periodEnd: item.pay_period_end || item.periodEnd || '',
+						regularHours: item.regular_hours || item.regularHours || 0,
+						overtimeHours: item.overtime_hours || item.overtimeHours || 0,
 						status: (item.status as 'draft' | 'submitted') || 'draft',
 						notes: item.notes || '',
 					} : undefined

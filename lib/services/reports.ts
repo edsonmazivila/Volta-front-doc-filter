@@ -50,6 +50,21 @@ export interface TaxTrendData {
   suta?: number[]
 }
 
+export interface EmployeePaystubsReport {
+  paystubs: Array<{
+    id: string
+    pay_period_start: string
+    pay_period_end: string
+    pay_date: string
+    gross_pay: number
+    net_pay: number
+    total_deductions: number
+    status: string
+  }>
+  count: number
+  employee_id: string
+}
+
 // ============================================================================
 // READ Operations (Cached)
 // ============================================================================
@@ -325,6 +340,38 @@ export async function printChart(chartId: string): Promise<void> {
     console.error('Error printing chart:', error)
   }
 }
+
+/**
+ * Get employee paystubs report
+ */
+export const getEmployeePaystubsReport = cache(async (employeeId: string): Promise<EmployeePaystubsReport | null> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const url = `${API_BASE_URL}/api/reports/paystubs/${employeeId}`
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['reports', 'employee-paystubs'], revalidate: 180 },
+    })
+
+    if (!res.ok) {
+      console.error(`[getEmployeePaystubsReport] HTTP ${res.status}`)
+      return null
+    }
+
+    const data = await res.json()
+    return {
+      paystubs: data.paystubs || [],
+      count: data.count || 0,
+      employee_id: employeeId,
+    }
+  } catch (error) {
+    console.error('[getEmployeePaystubsReport] error', error)
+    return null
+  }
+})
 
 /**
  * Generate report and get download URL (Server Action)

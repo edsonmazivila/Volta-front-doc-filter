@@ -3,7 +3,7 @@ export const AUTH_ENDPOINTS = {
   LOGIN: "/api/auth/login",
   LOGOUT: "/api/auth/logout",
   PROFILE: "/api/auth/profile",
-  SIGNUP: "/api/auth/register",
+  REGISTER_ACCOUNT: "/api/auth/register-account",
   FORGOT_PASSWORD: "/api/auth/forgot-password",
   RESET_PASSWORD: "/api/auth/reset-password",
 } as const;

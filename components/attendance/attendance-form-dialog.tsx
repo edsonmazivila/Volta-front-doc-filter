@@ -83,9 +83,11 @@ export function AttendanceFormDialog({
 
     setIsSubmitting(true)
     try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
       const formData = new FormData()
       formData.append('date', date)
       formData.append('status', status)
+      formData.append('timezone', timezone)
       if (clockIn) formData.append('clock_in', clockIn)
       if (clockOut) formData.append('clock_out', clockOut)
       if (justification) formData.append('justification', justification)

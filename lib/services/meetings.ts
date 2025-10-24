@@ -9,16 +9,7 @@ import type { Meeting, ActionResult } from "@/lib/types/meetings";
 // Type definitions for API responses
 interface ApiUserResponse {
   id: string | number;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-}
-
-interface ApiEmployeeResponse {
-  id: string | number;
   full_name?: string;
-  first_name?: string;
-  last_name?: string;
   email?: string;
 }
 
@@ -34,6 +25,7 @@ interface ApiMeetingResponse {
   participants?: string[];
   participants_ids?: string[];
   participant_full_names?: string[];
+  participant_statuses?: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -57,51 +49,27 @@ async function enrichMeetingsWithEmployeeData(meetings: ApiMeetingResponse[]): P
   try {
     const cookieHeader = await getAuthCookieHeader();
     
-    // Fetch both users and employees to cover all possible ID mappings
-    const [usersRes, employeesRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/api/users`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(cookieHeader && { Cookie: cookieHeader }),
-        },
-        next: { tags: ["users"], revalidate: 300 },
-      }),
-      fetch(`${API_BASE_URL}/api/employees`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(cookieHeader && { Cookie: cookieHeader }),
-        },
-        next: { tags: ["employees"], revalidate: 300 },
-      })
-    ]);
+    // Fetch users for fallback name mapping
+    const usersRes = await fetch(`${API_BASE_URL}/api/users`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ["users"], revalidate: 300 },
+    });
 
-    // Create a combined map of all user/employee IDs to names
+    // Create a map of user IDs to names for fallback
     const userMap = new Map<string, UserMapEntry>();
     
-    // Add users to the map
     if (usersRes.ok) {
       const usersData = await usersRes.json();
       const users = Array.isArray(usersData) ? usersData : (usersData.users || usersData.data || []);
       users.forEach((user: ApiUserResponse) => {
         const userId = String(user.id);
-        const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        const userName = user.full_name || '';
         userMap.set(userId, {
           name: userName,
           email: user.email || '',
-        });
-      });
-    }
-    
-    // Add employees to the map (may overlap with users)
-    if (employeesRes.ok) {
-      const employeesData = await employeesRes.json();
-      const employees = Array.isArray(employeesData) ? employeesData : (employeesData.employees || employeesData.data || []);
-      employees.forEach((emp: ApiEmployeeResponse) => {
-        const empId = String(emp.id);
-        const empName = emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim();
-        userMap.set(empId, {
-          name: empName,
-          email: emp.email || '',
         });
       });
     }
@@ -129,8 +97,8 @@ async function enrichMeetingsWithEmployeeData(meetings: ApiMeetingResponse[]): P
           console.warn('Failed to fetch full meeting details for:', meeting.id, error);
         }
         
-        // Participants: accept ids from either `participants` or `participants_ids` and prefer names from API
-        let enrichedParticipants: Array<{ user_id: string; name: string; status: 'pending' }> = [];
+        // Participants: use participant_full_names and participant_statuses from API response
+        let enrichedParticipants: Array<{ user_id: string; name: string; status: 'pending' | 'accepted' | 'declined' }> = [];
         const participantIdsFromApi = Array.isArray(fullMeeting.participants)
           ? fullMeeting.participants
           : Array.isArray(fullMeeting.participants_ids)
@@ -138,13 +106,15 @@ async function enrichMeetingsWithEmployeeData(meetings: ApiMeetingResponse[]): P
             : [];
         if (participantIdsFromApi.length > 0) {
           const names = Array.isArray(fullMeeting.participant_full_names) ? fullMeeting.participant_full_names : [];
+          const statuses = Array.isArray(fullMeeting.participant_statuses) ? fullMeeting.participant_statuses : [];
           enrichedParticipants = participantIdsFromApi.map((userId: string, idx: number) => {
             const apiName = names[idx];
+            const apiStatus = statuses[idx] || 'pending';
             const mapped = userMap.get(String(userId));
             return {
               user_id: userId,
               name: apiName || mapped?.name || 'Unknown',
-              status: 'pending' as const,
+              status: (apiStatus === 'accepted' || apiStatus === 'declined' ? apiStatus : 'pending') as 'pending' | 'accepted' | 'declined',
             };
           });
         }
@@ -270,6 +240,30 @@ export const getAvailableParticipants = cache(
   async (): Promise<Array<{ id: string; name: string; email?: string }>> => {
     try {
       const cookieHeader = await getAuthCookieHeader();
+      
+      // Try the dedicated participants endpoint first
+      const participantsRes = await fetch(`${API_BASE_URL}/api/meetings/participants`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
+        next: { tags: ["meeting-participants"], revalidate: 300 },
+      });
+
+      if (participantsRes.ok) {
+        const participantsData = await participantsRes.json();
+        const participants = Array.isArray(participantsData) ? participantsData : (participantsData.participants || participantsData.data || []);
+        
+        // Map participants to the expected format
+        return participants.map((participant: Record<string, unknown>) => ({
+          id: String(participant.id || ''),
+          name: participant.full_name || participant.name || participant.email || String(participant.id),
+          email: participant.email || '',
+        }));
+      }
+
+      // Fallback to users endpoint if participants endpoint fails
+      console.log("Participants endpoint failed, trying users endpoint...");
       const res = await fetch(`${API_BASE_URL}/api/users`, {
         headers: {
           "Content-Type": "application/json",
@@ -279,30 +273,8 @@ export const getAvailableParticipants = cache(
       });
 
       if (!res.ok) {
-        // If users endpoint fails (403 for employees), try employees endpoint
-        console.log("Users endpoint failed, trying employees endpoint...");
-        const empRes = await fetch(`${API_BASE_URL}/api/employees`, {
-          headers: {
-            "Content-Type": "application/json",
-            ...(cookieHeader && { Cookie: cookieHeader }),
-          },
-          next: { tags: ["employees"], revalidate: 300 },
-        });
-
-        if (!empRes.ok) {
-          console.warn("Both users and employees endpoints failed, returning empty participants list");
-          return [];
-        }
-
-        const empData = await empRes.json();
-        const employees = Array.isArray(empData) ? empData : (empData.employees || empData.data || []);
-        
-        // Map employees to participant format
-        return employees.map((emp: ApiEmployeeResponse) => ({
-          id: String(emp.id || ''),
-          name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || emp.email || emp.id,
-          email: emp.email || '',
-        }));
+        console.warn("Both participants and users endpoints failed, returning empty participants list");
+        return [];
       }
 
       const data = await res.json();
@@ -311,11 +283,11 @@ export const getAvailableParticipants = cache(
       // Map users to participant format
       return users.map((user: ApiUserResponse) => ({
         id: String(user.id || ''),
-        name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        name: user.full_name || '',
         email: user.email || '',
       }));
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching participants:", error);
       return [];
     }
   }

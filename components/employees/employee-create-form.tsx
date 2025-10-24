@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -14,26 +15,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToastHelpers } from "@/components/ui/toast";
-import { createEmployeeAction } from "@/lib/services/employees";
+import { createUserAction } from "@/lib/services/users";
 import { ChevronLeft } from "lucide-react";
 
 const schema = z.object({
   // Account & User
   full_name: z.string().min(1, "Full name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Invalid email address").optional().or(z.literal('')),
+  password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal('')),
   role: z.string().min(1, "Role is required"),
+  can_login: z.boolean().optional(),
+  is_active: z.boolean().optional(),
 
   // Employment & Organization
-  department: z.string().optional(),
+  department_id: z.string().optional(),
   employee_number: z.string().optional(),
   job_title: z.string().optional(),
   employment_type: z.string().min(1, "Employment type is required"),
+  employment_status: z.string().optional(),
   hire_date: z.string().min(1, "Hire date is required"),
+  termination_date: z.string().optional(),
+  manager_id: z.string().optional(),
 
   // Contact & Address
-  primary_phone: z.string().optional(),
-  secondary_phone: z.string().optional(),
+  phone_primary: z.string().optional(),
+  phone_secondary: z.string().optional(),
   date_of_birth: z.string().optional(),
   address_line1: z.string().optional(),
   address_line2: z.string().optional(),
@@ -47,11 +53,21 @@ const schema = z.object({
   emergency_contact_phone: z.string().optional(),
   emergency_contact_relationship: z.string().optional(),
 
+  // Tax & Bank
+  tax_filing_status: z.string().optional(),
+  tax_allowances: z.number().optional(),
+  additional_tax_withholding: z.number().optional(),
+  tax_exempt: z.boolean().optional(),
+  bank_name: z.string().optional(),
+  bank_account_type: z.string().optional(),
+
   // Compensation
   pay_type: z.string().optional(),
   pay_frequency: z.string().optional(),
-  overtime_rate: z.string().optional(),
-  standard_hours: z.string().optional(),
+  annual_salary: z.number().optional(),
+  hourly_rate: z.number().optional(),
+  overtime_rate: z.number().optional(),
+  standard_hours: z.number().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -65,6 +81,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
   const router = useRouter();
   const toast = useToastHelpers();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [canLogin, setCanLogin] = useState<boolean>(true);
 
   const {
     register,
@@ -78,13 +95,18 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
       email: "",
       password: "",
       role: "",
-      department: "",
+      can_login: true,
+      is_active: true,
+      department_id: "",
       employee_number: "",
       job_title: "",
       employment_type: "",
+      employment_status: "active",
       hire_date: "",
-      primary_phone: "",
-      secondary_phone: "",
+      termination_date: "",
+      manager_id: "",
+      phone_primary: "",
+      phone_secondary: "",
       date_of_birth: "",
       address_line1: "",
       address_line2: "",
@@ -95,24 +117,55 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
       emergency_contact_name: "",
       emergency_contact_phone: "",
       emergency_contact_relationship: "",
+      tax_filing_status: "",
+      tax_allowances: 0,
+      additional_tax_withholding: 0,
+      tax_exempt: false,
+      bank_name: "",
+      bank_account_type: "",
       pay_type: "",
       pay_frequency: "",
-      overtime_rate: "",
-      standard_hours: "",
+      annual_salary: 0,
+      hourly_rate: 0,
     },
   });
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
+      // Dynamic validation based on can_login
+      if (canLogin) {
+        // If can_login is true, email and password are required
+        if (!values.email || values.email === '') {
+          toast.error('Email is required when user can login');
+          setIsSubmitting(false);
+          return;
+        }
+        if (!values.password || values.password === '') {
+          toast.error('Password is required when user can login');
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        // If can_login is false, remove email and password
+        delete values.email;
+        delete values.password;
+      }
+
       const formData = new FormData();
-      formData.append('full_name', values.full_name);
+      
+      // Add unified flags for employee creation
+      formData.append('is_employee', 'true'); // Always true for employee creation
+      formData.append('can_login', String(canLogin));
+      
+      // Add all form values (excluding is_employee from form data as it's handled above)
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'full_name') return;
-        if (value) formData.append(key, String(value));
+        if (key !== 'is_employee' && value !== undefined && value !== null && value !== '') {
+          formData.append(key, String(value));
+        }
       });
 
-      const result = await createEmployeeAction(null, formData);
+      const result = await createUserAction(null, formData);
       if ("errors" in result && result.errors) {
         const errorMsg =
           result.errors._form?.[0] ||
@@ -166,32 +219,36 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Email *</label>
-              <Input
-                type="email"
-                {...register("email")}
-                placeholder="employee@company.com"
-              />
-              {errors.email && (
-                <span className="text-xs text-destructive">
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Password *</label>
-              <Input
-                type="password"
-                {...register("password")}
-                placeholder="Min 8 characters"
-              />
-              {errors.password && (
-                <span className="text-xs text-destructive">
-                  {errors.password.message}
-                </span>
-              )}
-            </div>
+            {canLogin && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium">Email *</label>
+                  <Input
+                    type="email"
+                    {...register("email")}
+                    placeholder="employee@company.com"
+                  />
+                  {errors.email && (
+                    <span className="text-xs text-destructive">
+                      {errors.email.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium">Password *</label>
+                  <Input
+                    type="password"
+                    {...register("password")}
+                    placeholder="Min 8 characters"
+                  />
+                  {errors.password && (
+                    <span className="text-xs text-destructive">
+                      {errors.password.message}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-sm font-medium">Role *</label>
               <Controller
@@ -222,6 +279,35 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 </span>
               )}
             </div>
+
+            {/* Can Login Checkbox */}
+            <div className="flex flex-col gap-3 md:col-span-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="can_login"
+                  checked={canLogin}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    setCanLogin(checked);
+                    // Update form value
+                    const event = { target: { name: 'can_login', value: checked } };
+                    register('can_login').onChange(event);
+                  }}
+                />
+                <label htmlFor="can_login" className="text-sm font-medium">
+                  Can login to system
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_active"
+                  {...register("is_active")}
+                />
+                <label htmlFor="is_active" className="text-sm font-medium">
+                  User is active
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -237,8 +323,8 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Company *</label>
-              <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-foreground">
+              <label className="text-sm font-medium ">Company *</label>
+              <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-muted-foreground">
                 {companyName}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -248,7 +334,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Department</label>
               <Controller
-                name="department"
+                name="department_id"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
@@ -313,6 +399,17 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 </span>
               )}
             </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Termination Date</label>
+              <Input type="date" {...register("termination_date")} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Manager ID</label>
+              <Input
+                {...register("manager_id")}
+                placeholder="Manager's user ID"
+              />
+            </div>
           </div>
         </div>
 
@@ -329,7 +426,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               <label className="text-sm font-medium">Primary Phone</label>
               <Input
                 type="tel"
-                {...register("primary_phone")}
+                {...register("phone_primary")}
                 placeholder="+1 (555) 000-0000"
               />
             </div>
@@ -337,7 +434,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               <label className="text-sm font-medium">Secondary Phone</label>
               <Input
                 type="tel"
-                {...register("secondary_phone")}
+                {...register("phone_secondary")}
                 placeholder="+1 (555) 000-0000"
               />
             </div>
@@ -415,6 +512,82 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
           </div>
         </div>
 
+        {/* Tax & Bank Section */}
+        <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">Tax & Bank Information</h3>
+            <p className="text-sm text-muted-foreground">
+              Tax filing and banking details.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Tax Filing Status</label>
+              <Controller
+                name="tax_filing_status"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select filing status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">Single</SelectItem>
+                      <SelectItem value="married">Married</SelectItem>
+                      <SelectItem value="married_separate">Married Filing Separately</SelectItem>
+                      <SelectItem value="head_of_household">Head of Household</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+           
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Tax Exempt</label>
+              <Controller
+                name="tax_exempt"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value ? "true" : "false"} onValueChange={(v) => field.onChange(v === "true")}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select tax status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="false">Not Exempt</SelectItem>
+                      <SelectItem value="true">Tax Exempt</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Bank Name</label>
+              <Input
+                {...register("bank_name")}
+                placeholder="e.g., Chase Bank"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Bank Account Type</label>
+              <Controller
+                name="bank_account_type"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="checking">Checking</SelectItem>
+                      <SelectItem value="savings">Savings</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Compensation Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
@@ -461,6 +634,24 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                     </SelectContent>
                   </Select>
                 )}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Annual Salary</label>
+              <Input
+                type="number"
+                step="1"
+                {...register("annual_salary")}
+                placeholder="e.g., 48000"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Hourly Rate</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("hourly_rate")}
+                placeholder="e.g., 25.00"
               />
             </div>
             <div className="flex flex-col gap-1">

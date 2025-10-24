@@ -4,20 +4,28 @@ import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
 import { z } from 'zod'
 import { revalidateEntityMutation, CacheTags, fetchWithGracefulFallback } from '@/lib/cache-utils'
-import { toIsoUtc } from '@/lib/utils'
 
 export type TimesheetStatus = 'draft' | 'submitted' | 'approved' | 'rejected'
 
 export interface TimesheetListItem {
 	id: string
+	user_id?: string
 	employeeId?: string
 	employeeName: string
+	pay_period_start: string
+	pay_period_end: string
 	periodStart: string
 	periodEnd: string
 	status: TimesheetStatus
+	regular_hours?: number
+	overtime_hours?: number
+	sick_hours?: number
+	vacation_hours?: number
+	holiday_hours?: number
 	regularHours?: number
 	overtimeHours?: number
 	totalHours: number
+	total_hours: number
 	submittedAt?: string
 	notes?: string
 }
@@ -51,11 +59,12 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 				id?: string | number;
 				ts_id?: string | number;
 				uuid?: string;
+				user_id?: string;
 				employee_id?: string;
 				employeeId?: string;
-				employee?: { id?: string; user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
-				user?: { id?: string; user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
-				employee_info?: { id?: string; user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string; name?: string; full_name?: string };
+				employee?: { id?: string; user?: { full_name?: string; email?: string }; full_name?: string; email?: string; name?: string };
+				user?: { id?: string; user?: { full_name?: string; email?: string }; full_name?: string; email?: string; name?: string };
+				employee_info?: { id?: string; user?: { full_name?: string; email?: string }; full_name?: string; email?: string; name?: string };
 				employeeName?: string;
 				employee_name?: string;
 				employee_email?: string;
@@ -74,12 +83,15 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 				submitted_at?: string;
 				submitted?: string;
 				status?: string;
-				regularHours?: number;
 				regular_hours?: number;
-				overtimeHours?: number;
+				regularHours?: number;
 				overtime_hours?: number;
-				totalHours?: number;
+				overtimeHours?: number;
+				sick_hours?: number;
+				vacation_hours?: number;
+				holiday_hours?: number;
 				total_hours?: number;
+				totalHours?: number;
 				hours?: number;
 				notes?: string;
 				note?: string;
@@ -88,31 +100,38 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 			return (raw as RawTimesheet[]).map((t) => {
 				const emp = t.employee || t.user || t.employee_info || undefined
 				const empUser = emp?.user || undefined
-				const first = empUser?.first_name ?? emp?.first_name ?? undefined
-				const last = empUser?.last_name ?? emp?.last_name ?? undefined
-				const joined = [first, last].filter(Boolean).join(' ')
+				const fullName = empUser?.full_name ?? emp?.full_name ?? undefined
 				const nameField = emp?.name ?? emp?.full_name ?? undefined
 				const email = empUser?.email ?? emp?.email ?? t.employee_email ?? t.email ?? undefined
 				const employeeNameSource = (
-					t.employeeName ?? t.employee_name ?? nameField ?? (joined || email || '—')
+					t.employeeName ?? t.employee_name ?? nameField ?? (fullName || email || '—')
 				)
 				const employeeName: string = String(employeeNameSource)
 
-				const periodStart = String(t.pay_period_start ?? t.periodStart ?? t.period_start ?? t.start_date ?? t.start ?? '')
-				const periodEnd = String(t.pay_period_end ?? t.periodEnd ?? t.period_end ?? t.end_date ?? t.end ?? '')
+				const payPeriodStart = String(t.pay_period_start ?? t.periodStart ?? t.period_start ?? t.start_date ?? t.start ?? '')
+				const payPeriodEnd = String(t.pay_period_end ?? t.periodEnd ?? t.period_end ?? t.end_date ?? t.end ?? '')
 				const submittedAtRaw = t.submittedAt ?? t.submitted_at ?? t.submitted ?? undefined
 				const submittedAt = submittedAtRaw ? String(submittedAtRaw) : undefined
 
 				return {
 					id: String(t.id ?? t.ts_id ?? t.uuid ?? ''),
+					user_id: t.user_id ? String(t.user_id) : undefined,
 					employeeId: t.employee_id ?? t.employeeId ?? emp?.id ?? undefined,
 					employeeName,
-					periodStart,
-					periodEnd,
+					pay_period_start: payPeriodStart,
+					pay_period_end: payPeriodEnd,
+					periodStart: payPeriodStart,
+					periodEnd: payPeriodEnd,
 					status: ((t.status ?? 'draft') as TimesheetStatus),
-					regularHours: Number(t.regularHours ?? t.regular_hours ?? 0) || 0,
-					overtimeHours: Number(t.overtimeHours ?? t.overtime_hours ?? 0) || 0,
-					totalHours: Number(t.totalHours ?? t.total_hours ?? t.hours ?? 0) || 0,
+					regular_hours: Number(t.regular_hours ?? t.regularHours ?? 0) || 0,
+					overtime_hours: Number(t.overtime_hours ?? t.overtimeHours ?? 0) || 0,
+					sick_hours: Number(t.sick_hours ?? 0) || 0,
+					vacation_hours: Number(t.vacation_hours ?? 0) || 0,
+					holiday_hours: Number(t.holiday_hours ?? 0) || 0,
+					regularHours: Number(t.regular_hours ?? t.regularHours ?? 0) || 0,
+					overtimeHours: Number(t.overtime_hours ?? t.overtimeHours ?? 0) || 0,
+					total_hours: Number(t.total_hours ?? t.totalHours ?? t.hours ?? 0) || 0,
+					totalHours: Number(t.total_hours ?? t.totalHours ?? t.hours ?? 0) || 0,
 					submittedAt,
 					notes: ((t.notes ?? t.note ?? undefined) as string | undefined),
 				}
@@ -125,13 +144,16 @@ export const getTimesheets = cache(async (): Promise<TimesheetListItem[]> => {
 
 // Validation schemas
 const upsertSchema = z.object({
-	employee_id: z.string().min(1, 'Employee is required'),
-	period_start: z.string().min(1, 'Period start is required'),
-	period_end: z.string().min(1, 'Period end is required'),
+	user_id: z.string().min(1, 'User is required'),
+	pay_period_start: z.string().min(1, 'Pay period start is required'),
+	pay_period_end: z.string().min(1, 'Pay period end is required'),
+	total_hours: z.number().min(0, 'Total hours must be >= 0'),
 	regular_hours: z.number().min(0, 'Regular hours must be >= 0').default(0),
 	overtime_hours: z.number().min(0, 'Overtime hours must be >= 0').default(0),
-	total_hours: z.number().min(0, 'Total hours must be >= 0'),
-	status: z.enum(['draft', 'submitted']).default('draft'),
+	sick_hours: z.number().min(0, 'Sick hours must be >= 0').default(0),
+	vacation_hours: z.number().min(0, 'Vacation hours must be >= 0').default(0),
+	holiday_hours: z.number().min(0, 'Holiday hours must be >= 0').default(0),
+	status: z.enum(['draft', 'submitted', 'approved', 'rejected']).default('draft'),
 	notes: z.string().optional(),
 })
 
@@ -142,14 +164,17 @@ export interface ActionResult {
 }
 
 // MUTATIONS (server actions)
-export async function createTimesheetAction(input: { employee_id: string; period_start: string; period_end: string; regular_hours?: number; overtime_hours?: number; total_hours: number; status?: 'draft' | 'submitted'; notes?: string | null }): Promise<ActionResult> {
+export async function createTimesheetAction(input: { user_id: string; pay_period_start: string; pay_period_end: string; total_hours: number; regular_hours?: number; overtime_hours?: number; sick_hours?: number; vacation_hours?: number; holiday_hours?: number; status?: 'draft' | 'submitted' | 'approved' | 'rejected'; notes?: string | null }): Promise<ActionResult> {
     const parsed = upsertSchema.safeParse({
-        employee_id: String(input.employee_id || ''),
-        period_start: toIsoUtc(input.period_start),
-        period_end: toIsoUtc(input.period_end),
+        user_id: String(input.user_id || ''),
+        pay_period_start: input.pay_period_start,
+        pay_period_end: input.pay_period_end,
+        total_hours: Number(input.total_hours),
         regular_hours: Number(input.regular_hours ?? 0),
         overtime_hours: Number(input.overtime_hours ?? 0),
-        total_hours: Number(input.total_hours),
+        sick_hours: Number(input.sick_hours ?? 0),
+        vacation_hours: Number(input.vacation_hours ?? 0),
+        holiday_hours: Number(input.holiday_hours ?? 0),
         status: input.status || 'draft',
         notes: input.notes || undefined,
     })
@@ -171,14 +196,17 @@ export async function createTimesheetAction(input: { employee_id: string; period
 	return { success: true, data }
 }
 
-export async function updateTimesheetAction(id: string, input: { employee_id: string; period_start: string; period_end: string; regular_hours?: number; overtime_hours?: number; total_hours: number; status?: 'draft' | 'submitted'; notes?: string | null }): Promise<ActionResult> {
+export async function updateTimesheetAction(id: string, input: { user_id: string; pay_period_start: string; pay_period_end: string; total_hours: number; regular_hours?: number; overtime_hours?: number; sick_hours?: number; vacation_hours?: number; holiday_hours?: number; status?: 'draft' | 'submitted' | 'approved' | 'rejected'; notes?: string | null }): Promise<ActionResult> {
     const parsed = upsertSchema.safeParse({
-        employee_id: String(input.employee_id || ''),
-        period_start: toIsoUtc(input.period_start),
-        period_end: toIsoUtc(input.period_end),
+        user_id: String(input.user_id || ''),
+        pay_period_start: input.pay_period_start,
+        pay_period_end: input.pay_period_end,
+        total_hours: Number(input.total_hours),
         regular_hours: Number(input.regular_hours ?? 0),
         overtime_hours: Number(input.overtime_hours ?? 0),
-        total_hours: Number(input.total_hours),
+        sick_hours: Number(input.sick_hours ?? 0),
+        vacation_hours: Number(input.vacation_hours ?? 0),
+        holiday_hours: Number(input.holiday_hours ?? 0),
         status: input.status || 'draft',
         notes: input.notes || undefined,
     })
@@ -257,5 +285,43 @@ export async function rejectTimesheetAction(id: string, reason?: string): Promis
 	}
 	// Revalidate timesheets and all dependent caches
 	revalidateEntityMutation('TIMESHEETS')
+}
+
+// Additional endpoints
+export async function getTimesheetStatuses(): Promise<string[]> {
+	const cookieHeader = await getAuthCookieHeader()
+	const res = await fetch(`${API_BASE_URL}/api/timesheets/statuses`, {
+		headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
+	})
+	if (!res.ok) {
+		throw new Error(`Failed to fetch timesheet statuses: ${res.status}`)
+	}
+	const json = await res.json()
+	return json.statuses || ['draft', 'submitted', 'approved', 'rejected']
+}
+
+export async function getTimesheetStats(): Promise<{
+	approved: number
+	draft: number
+	pending: number
+	rejected: number
+	total: number
+}> {
+	const cookieHeader = await getAuthCookieHeader()
+	const res = await fetch(`${API_BASE_URL}/api/timesheets/stats`, {
+		headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
+	})
+	if (!res.ok) {
+		throw new Error(`Failed to fetch timesheet stats: ${res.status}`)
+	}
+	const json = await res.json()
+	const data = json.data || json
+	return {
+		approved: Number(data.approved || 0),
+		draft: Number(data.draft || 0),
+		pending: Number(data.pending || 0),
+		rejected: Number(data.rejected || 0),
+		total: Number(data.total || 0),
+	}
 }
 

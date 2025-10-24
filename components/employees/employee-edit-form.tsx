@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -14,26 +15,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToastHelpers } from "@/components/ui/toast";
-import { updateEmployeeAction, type Employee } from "@/lib/services/employees";
+import { updateUserAction, type User } from "@/lib/services/users";
 import { ChevronLeft } from "lucide-react";
 
 const schema = z.object({
   // Account & User
   full_name: z.string().min(1, "Full name is required"),
-  email: z.string().email("Invalid email address"),
-  role: z.string().optional(),
+  email: z.string().email("Invalid email address").optional().or(z.literal('')),
+  password: z.string().optional(),
+  role: z.string().min(1, "Role is required"),
+  can_login: z.boolean().optional(),
+  is_active: z.boolean().optional(),
 
   // Employment & Organization
-  department: z.string().optional(),
+  department_id: z.string().optional(),
   employee_number: z.string().optional(),
   job_title: z.string().optional(),
-  employment_type: z.string().optional(),
+  employment_type: z.string().min(1, "Employment type is required"),
   employment_status: z.string().optional(),
-  hire_date: z.string().optional(),
+  hire_date: z.string().min(1, "Hire date is required"),
+  termination_date: z.string().optional(),
+  manager_id: z.string().optional(),
 
   // Contact & Address
   phone_primary: z.string().optional(),
-  secondary_phone: z.string().optional(),
+  phone_secondary: z.string().optional(),
   date_of_birth: z.string().optional(),
   address_line1: z.string().optional(),
   address_line2: z.string().optional(),
@@ -47,17 +53,27 @@ const schema = z.object({
   emergency_contact_phone: z.string().optional(),
   emergency_contact_relationship: z.string().optional(),
 
+  // Tax & Bank
+  tax_filing_status: z.string().optional(),
+  tax_allowances: z.number().optional(),
+  additional_tax_withholding: z.number().optional(),
+  tax_exempt: z.boolean().optional(),
+  bank_name: z.string().optional(),
+  bank_account_type: z.string().optional(),
+
   // Compensation
   pay_type: z.string().optional(),
   pay_frequency: z.string().optional(),
-  overtime_rate: z.string().optional(),
-  standard_hours: z.string().optional(),
+  annual_salary: z.number().optional(),
+  hourly_rate: z.number().optional(),
+  overtime_rate: z.number().optional(),
+  standard_hours: z.number().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
 
 interface EmployeeEditFormProps {
-  employee: Employee;
+  employee: User;
   companyName: string;
   departments?: { id: string; name: string }[];
 }
@@ -66,6 +82,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
   const router = useRouter();
   const toast = useToastHelpers();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [canLogin, setCanLogin] = useState<boolean>(employee.can_login || true);
 
   const {
     register,
@@ -77,42 +94,77 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
     defaultValues: {
       full_name: employee.full_name || "",
       email: employee.email || "",
-      role: "",
-      department: employee.department || "",
+      password: "",
+      role: employee.role || "",
+      can_login: employee.can_login || true,
+      is_active: employee.is_active || true,
+      department_id: employee.department_id || "",
       employee_number: employee.employee_number || "",
       job_title: employee.job_title || "",
       employment_type: employee.employment_type || "",
       employment_status: employee.employment_status || "active",
       hire_date: employee.hire_date ? employee.hire_date.split('T')[0] : "",
+      termination_date: employee.termination_date ? employee.termination_date.split('T')[0] : "",
+      manager_id: employee.manager_id || "",
       phone_primary: employee.phone_primary || "",
-      secondary_phone: "",
-      date_of_birth: "",
-      address_line1: "",
-      address_line2: "",
-      city: "",
-      state: "",
-      postal_code: "",
-      country: "",
-      emergency_contact_name: "",
-      emergency_contact_phone: "",
-      emergency_contact_relationship: "",
-      pay_type: "",
-      pay_frequency: "",
-      overtime_rate: "",
-      standard_hours: "",
+      phone_secondary: employee.phone_secondary || "",
+      date_of_birth: employee.date_of_birth ? employee.date_of_birth.split('T')[0] : "",
+      address_line1: employee.address_line1 || "",
+      address_line2: employee.address_line2 || "",
+      city: employee.city || "",
+      state: employee.state || "",
+      postal_code: employee.postal_code || "",
+      country: employee.country || "",
+      emergency_contact_name: employee.emergency_contact_name || "",
+      emergency_contact_phone: employee.emergency_contact_phone || "",
+      emergency_contact_relationship: employee.emergency_contact_relationship || "",
+      tax_filing_status: employee.tax_filing_status || "",
+      tax_allowances: employee.tax_allowances || 0,
+      additional_tax_withholding: employee.additional_tax_withholding || 0,
+      tax_exempt: employee.tax_exempt || false,
+      bank_name: employee.bank_name || "",
+      bank_account_type: employee.bank_account_type || "",
+      pay_type: employee.compensation?.pay_type || "",
+      pay_frequency: employee.compensation?.pay_frequency || "",
+      annual_salary: employee.compensation?.annual_salary || 0,
+      hourly_rate: employee.compensation?.hourly_rate || 0,
+      overtime_rate: employee.compensation?.overtime_rate || 0,
+      standard_hours: employee.compensation?.standard_hours || 0,
     },
   });
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
+      // Dynamic validation based on can_login
+      if (canLogin) {
+        // If can_login is true, email and password are required
+        if (!values.email || values.email === '') {
+          toast.error('Email is required when user can login');
+          setIsSubmitting(false);
+          return;
+        }
+        if (!values.password || values.password === '') {
+          toast.error('Password is required when user can login');
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        // If can_login is false, remove email and password
+        delete values.email;
+        delete values.password;
+      }
+
       const formData = new FormData();
       
+      // Add all form values (excluding is_employee as requested)
       Object.entries(values).forEach(([key, value]) => {
-        if (value) formData.append(key, String(value));
+        if (key !== 'is_employee' && value !== undefined && value !== null && value !== '') {
+          formData.append(key, String(value));
+        }
       });
 
-      const result = await updateEmployeeAction(employee.id, null, formData);
+      const result = await updateUserAction(employee.id, null, formData);
       if ("errors" in result && result.errors) {
         const errorMsg =
           result.errors._form?.[0] ||
@@ -166,18 +218,90 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Email *</label>
-              <Input
-                type="email"
-                {...register("email")}
-                placeholder="employee@company.com"
+            {canLogin && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium">Email (required only if can login)</label>
+                  <Input
+                    type="email"
+                    {...register("email")}
+                    placeholder="employee@company.com"
+                  />
+                  {errors.email && (
+                    <span className="text-xs text-destructive">
+                      {errors.email.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium">Password (required only if can login)</label>
+                  <Input
+                    type="password"
+                    {...register("password")}
+                    placeholder="Enter new password"
+                  />
+                  {errors.password && (
+                    <span className="text-xs text-destructive">
+                      {errors.password.message}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Role *</label>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="operational_manager">Operational Manager</SelectItem>
+                      <SelectItem value="hr_manager">HR Manager</SelectItem>
+                      <SelectItem value="payroll_manager">Payroll Manager</SelectItem>
+                      <SelectItem value="system_admin">System Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               />
-              {errors.email && (
+              {errors.role && (
                 <span className="text-xs text-destructive">
-                  {errors.email.message}
+                  {errors.role.message}
                 </span>
               )}
+            </div>
+
+            {/* Can Login Checkbox */}
+            <div className="flex flex-col gap-3 md:col-span-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="can_login"
+                  checked={canLogin}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    setCanLogin(checked);
+                    // Update form value
+                    const event = { target: { name: 'can_login', value: checked } };
+                    register('can_login').onChange(event);
+                  }}
+                />
+                <label htmlFor="can_login" className="text-sm font-medium">
+                  Can login to system
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_active"
+                  {...register("is_active")}
+                />
+                <label htmlFor="is_active" className="text-sm font-medium">
+                  User is active
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -195,7 +319,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-sm font-medium">Company *</label>
-              <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-foreground">
+              <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-muted-foreground">
                 {companyName}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -205,7 +329,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Department</label>
               <Controller
-                name="department"
+                name="department_id"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
@@ -280,6 +404,17 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               <label className="text-sm font-medium">Hire Date</label>
               <Input type="date" {...register("hire_date")} />
             </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Termination Date</label>
+              <Input type="date" {...register("termination_date")} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Manager</label>
+              <Input
+                {...register("manager_id")}
+                placeholder="Manager ID"
+              />
+            </div>
           </div>
         </div>
 
@@ -304,7 +439,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               <label className="text-sm font-medium">Secondary Phone</label>
               <Input
                 type="tel"
-                {...register("secondary_phone")}
+                {...register("phone_secondary")}
                 placeholder="+1 (555) 000-0000"
               />
             </div>
@@ -377,6 +512,99 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               <Input
                 {...register("emergency_contact_relationship")}
                 placeholder="e.g., Spouse, Parent, Sibling"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Tax & Bank Information Section */}
+        <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">Tax & Bank Information</h3>
+            <p className="text-sm text-muted-foreground">
+              Tax filing and banking details.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Tax Filing Status</label>
+              <Controller
+                name="tax_filing_status"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select filing status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">Single</SelectItem>
+                      <SelectItem value="married">Married</SelectItem>
+                      <SelectItem value="married_separate">Married Filing Separately</SelectItem>
+                      <SelectItem value="head_of_household">Head of Household</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Tax Allowances</label>
+              <Input
+                type="number"
+                step="1"
+                {...register("tax_allowances")}
+                placeholder="e.g., 1"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Additional Tax Withholding</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("additional_tax_withholding")}
+                placeholder="e.g., 0.00"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Tax Exempt</label>
+              <Controller
+                name="tax_exempt"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value ? "true" : "false"} onValueChange={(v) => field.onChange(v === "true")}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select tax status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="false">Not Exempt</SelectItem>
+                      <SelectItem value="true">Tax Exempt</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Bank Name</label>
+              <Input
+                {...register("bank_name")}
+                placeholder="e.g., Chase Bank"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Bank Account Type</label>
+              <Controller
+                name="bank_account_type"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="checking">Checking</SelectItem>
+                      <SelectItem value="savings">Savings</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               />
             </div>
           </div>

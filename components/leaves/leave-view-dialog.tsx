@@ -64,9 +64,7 @@ export function LeaveViewDialog({
   };
 
   const getEmployeeName = () => {
-    if (leave.employee_full_name) return leave.employee_full_name;
-    if (leave.employee_first_name && leave.employee_last_name) return `${leave.employee_first_name} ${leave.employee_last_name}`;
-    return "Employee";
+    return leave.employee_full_name || "Employee";
   };
 
   return (

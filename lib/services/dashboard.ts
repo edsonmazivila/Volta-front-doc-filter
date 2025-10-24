@@ -5,7 +5,7 @@ import { API_BASE_URL } from '@/lib/config'
 import { fetchWithGracefulFallback, CacheTags } from '@/lib/cache-utils'
 
 const DASHBOARD_ENDPOINTS = {
-	EMPLOYEES_STATS: '/api/employees/stats',
+	USERS_STATS: '/api/users/stats',
 	TIMESHEETS_STATS: '/api/timesheets/stats',
 	PAYROLL_STATS: '/api/payroll/stats',
 	DASHBOARD_PAYROLL: '/api/dashboard/payroll',
@@ -34,11 +34,11 @@ export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
 			}
 
 			// Fetch stats from backend API using native fetch (server-side)
-			const [employeesRes, timesheetsRes] = await Promise.all([
-				fetch(`${API_BASE_URL}${DASHBOARD_ENDPOINTS.EMPLOYEES_STATS}`, {
+			const [usersRes, timesheetsRes] = await Promise.all([
+				fetch(`${API_BASE_URL}${DASHBOARD_ENDPOINTS.USERS_STATS}`, {
 					method: 'GET',
 					headers,
-					next: { tags: [CacheTags.EMPLOYEE_STATS], revalidate: 60 },
+					next: { tags: [CacheTags.USERS], revalidate: 60 },
 				}),
 				fetch(`${API_BASE_URL}${DASHBOARD_ENDPOINTS.TIMESHEETS_STATS}`, {
 					method: 'GET',
@@ -50,9 +50,9 @@ export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
 			let totalEmployees = 0
 			let pendingTimesheets = 0
 
-			if (employeesRes.ok) {
-				const employeesData = await employeesRes.json().catch(() => ({}))
-				totalEmployees = employeesData?.total ?? employeesData?.data?.total ?? 0
+			if (usersRes.ok) {
+				const usersData = await usersRes.json().catch(() => ({}))
+				totalEmployees = usersData?.employeeUsers ?? usersData?.data?.employeeUsers ?? 0
 			}
 
 			if (timesheetsRes.ok) {

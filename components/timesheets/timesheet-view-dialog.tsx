@@ -77,7 +77,7 @@ export function TimesheetViewDialog({
                 {timesheet.employeeName}
               </h2>
               <p className="text-muted-foreground">
-                {formatPayPeriod(timesheet.periodStart, timesheet.periodEnd)}
+                {formatPayPeriod(timesheet.pay_period_start || timesheet.periodStart, timesheet.pay_period_end || timesheet.periodEnd)}
               </p>
             </div>
             <Badge
@@ -103,8 +103,8 @@ export function TimesheetViewDialog({
                   <p className="text-sm font-medium">Pay Period</p>
                   <p className="text-sm text-muted-foreground">
                     {formatPayPeriod(
-                      timesheet.periodStart,
-                      timesheet.periodEnd
+                      timesheet.pay_period_start || timesheet.periodStart,
+                      timesheet.pay_period_end || timesheet.periodEnd
                     )}
                   </p>
                 </div>
@@ -112,14 +112,14 @@ export function TimesheetViewDialog({
                 <div>
                   <p className="text-sm font-medium">Start Date</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(timesheet.periodStart)}
+                    {formatDate(timesheet.pay_period_start || timesheet.periodStart)}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm font-medium">End Date</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(timesheet.periodEnd)}
+                    {formatDate(timesheet.pay_period_end || timesheet.periodEnd)}
                   </p>
                 </div>
 
@@ -143,21 +143,21 @@ export function TimesheetViewDialog({
                 <div>
                   <p className="text-sm font-medium">Regular Hours</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatHours(timesheet.regularHours)} hours
+                    {formatHours(timesheet.regular_hours || timesheet.regularHours || 0)} hours
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm font-medium">Overtime Hours</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatHours(timesheet.overtimeHours)} hours
+                    {formatHours(timesheet.overtime_hours || timesheet.overtimeHours || 0)} hours
                   </p>
                 </div>
 
                 <div className="border-t pt-3">
                   <p className="text-sm font-medium">Total Hours</p>
                   <p className="text-lg font-semibold text-foreground">
-                    {formatHours(timesheet.totalHours)} hours
+                    {formatHours(timesheet.total_hours || timesheet.totalHours || 0)} hours
                   </p>
                 </div>
               </div>

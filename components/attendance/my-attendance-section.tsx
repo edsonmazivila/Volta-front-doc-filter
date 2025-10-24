@@ -72,10 +72,11 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 		setClockingIn(true)
 		try {
 			const now = new Date()
+			const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 			const formData = new FormData()
 			formData.append('date', now.toISOString().split('T')[0])
-			formData.append('status', 'present')
 			formData.append('clock_in', now.toTimeString().slice(0, 5))
+			formData.append('timezone', timezone)
 			
 			const result = await createMyAttendanceAction(null, formData)
 			if ('errors' in result) {
@@ -92,14 +93,16 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 	}
 
 	const handleClockOut = async () => {
-		if (!todayRecord?.id) return
+		if (!todayRecord?.date) return
 		
 		setClockingOut(true)
 		try {
 			const now = new Date()
+			const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 			const formData = new FormData()
+			formData.append('date', todayRecord.date.split('T')[0])
 			formData.append('clock_out', now.toTimeString().slice(0, 5))
-			formData.append('attendance_id', todayRecord.id)
+			formData.append('timezone', timezone)
 			
 			const result = await clockOutMyAttendanceAction(null, formData)
 			if ('errors' in result) {

@@ -26,8 +26,9 @@ export const getAttendanceRecords = cache(
 
         const params = new URLSearchParams();
         if (filters?.month) params.append("month", filters.month);
+        // Updated to use userId instead of employee_id
         if (filters?.employee_id)
-          params.append("employee_id", String(filters.employee_id));
+          params.append("userId", String(filters.employee_id));
         if (filters?.status) params.append("status", filters.status);
 
         const url = `${API_BASE_URL}/api/attendance${
@@ -48,21 +49,17 @@ export const getAttendanceRecords = cache(
         // Normalize fields from various API shapes
         return raw.map((r: Record<string, unknown>) => {
           const emp = (r.employee || r.user || r.employee_info) as Record<string, unknown> | undefined
-          const empUser = emp?.user as Record<string, unknown> | undefined
-          const first = empUser?.first_name as string | undefined ?? emp?.first_name as string | undefined
-          const last = empUser?.last_name as string | undefined ?? emp?.last_name as string | undefined
-          const joined = [first, last].filter(Boolean).join(' ')
-          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
+          const nameField = emp?.full_name as string | undefined ?? emp?.name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
           return {
             id: String(r.id ?? r.attendance_id ?? ''),
-            employee_id: String(r.employee_id ?? r.user_id ?? ''),
+            employee_id: String(r.employee_id ?? r.user_id ?? r.userId ?? ''),
             date: String(r.date ?? r.day ?? ''),
             status: String(r.status ?? 'present'),
-            clock_in: r.clock_in ?? undefined,
-            clock_out: r.clock_out ?? undefined,
+            clock_in: r.clock_in ?? r.clockIn ?? undefined,
+            clock_out: r.clock_out ?? r.clockOut ?? undefined,
             hours_worked: r.hours_worked ?? r.hours ?? undefined,
             justification: r.justification ?? r.reason ?? undefined,
-            employee_name: String(nameField || joined || r.employee_name || `Employee #${r.employee_id ?? r.user_id}`),
+            employee_name: String(nameField || r.employee_name || `Employee #${r.employee_id ?? r.user_id ?? r.userId}`),
             created_at: r.created_at ?? undefined,
             updated_at: r.updated_at ?? undefined,
           }
@@ -111,7 +108,7 @@ export const getAttendanceStats = cache(async (): Promise<AttendanceStats> => {
   );
 });
 
-// Get pending justifications
+// Get pending justifications - Updated endpoint
 export const getPendingJustifications = cache(
   async (): Promise<AttendanceJustification[]> => {
     return fetchWithGracefulFallback(
@@ -134,7 +131,7 @@ export const getPendingJustifications = cache(
 
         if (!res.ok) throw new Error("Failed to fetch justifications");
         const data = await res.json();
-        return data.data || [];
+        return data.data || data || [];
       },
       [],
       { errorContext: "getPendingJustifications" }
@@ -185,21 +182,17 @@ export const getMyAttendance = cache(
         // Transform records to match AttendanceRecord interface
         const transformedRecords = myRecords.map((r: Record<string, unknown>) => {
           const emp = (r.employee || r.user || r.employee_info) as Record<string, unknown> | undefined
-          const empUser = emp?.user as Record<string, unknown> | undefined
-          const first = empUser?.first_name as string | undefined ?? emp?.first_name as string | undefined
-          const last = empUser?.last_name as string | undefined ?? emp?.last_name as string | undefined
-          const joined = [first, last].filter(Boolean).join(' ')
-          const nameField = emp?.name as string | undefined ?? emp?.full_name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
+          const nameField = emp?.full_name as string | undefined ?? emp?.name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
           return {
             id: String(r.id ?? r.attendance_id ?? ''),
-            employee_id: String(r.employee_id ?? r.user_id ?? ''),
+            employee_id: String(r.employee_id ?? r.user_id ?? r.userId ?? ''),
             date: String(r.date ?? r.day ?? ''),
             status: String(r.status ?? 'present') as 'present' | 'absent' | 'late' | 'half_day' | 'on_leave' | 'justified',
-            clock_in: r.clock_in ?? undefined,
-            clock_out: r.clock_out ?? undefined,
+            clock_in: r.clock_in ?? r.clockIn ?? undefined,
+            clock_out: r.clock_out ?? r.clockOut ?? undefined,
             hours_worked: r.hours_worked ?? r.hours ?? undefined,
             justification: r.justification ?? r.reason ?? undefined,
-            employee_name: String(nameField || joined || r.employee_name || `Employee #${r.employee_id ?? r.user_id}`),
+            employee_name: String(nameField || r.employee_name || `Employee #${r.employee_id ?? r.user_id ?? r.userId}`),
             created_at: r.created_at ?? undefined,
             updated_at: r.updated_at ?? undefined,
           }
@@ -229,6 +222,7 @@ export type ActionResult =
 
 // My Attendance (current user) Actions
 
+// Check-in action - Updated to match new API structure
 export async function createMyAttendanceAction(
   _prevState: unknown,
   formData: FormData
@@ -243,14 +237,21 @@ export async function createMyAttendanceAction(
     }
 
     const clockIn = formData.get('clock_in') as string;
+    const date = formData.get('date') as string;
+    const timezone = formData.get('timezone') as string || Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     if (!clockIn) {
       return { errors: { _form: ['Clock in time is required'] } }
     }
 
+    // Use current date if not provided
+    const attendanceDate = date || new Date().toISOString().split('T')[0];
+
     const payload = {
-      userID: user.id,
-      clockIn: clockIn
+      userId: user.id,
+      clockIn: clockIn,
+      date: attendanceDate,
+      timezone: timezone
     };
 
     const res = await fetch(`${API_BASE_URL}/api/attendance/check-in`, {
@@ -300,7 +301,7 @@ export async function updateMyAttendanceAction(
   }
 }
 
-// Clock out action using the dedicated check-out endpoint
+// Clock out action - Updated to match new API structure
 export async function clockOutMyAttendanceAction(
   _prevState: unknown,
   formData: FormData
@@ -315,20 +316,21 @@ export async function clockOutMyAttendanceAction(
     }
 
     const clockOut = formData.get('clock_out') as string;
-    const attendanceId = formData.get('attendance_id') as string;
+    const date = formData.get('date') as string;
+    const timezone = formData.get('timezone') as string || Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     if (!clockOut) {
       return { errors: { _form: ['Clock out time is required'] } }
     }
 
-    if (!attendanceId) {
-      return { errors: { _form: ['Attendance ID is required for clock out'] } }
-    }
+    // Use current date if not provided
+    const attendanceDate = date || new Date().toISOString().split('T')[0];
 
     const payload = {
-      userID: user.id,
+      userId: user.id,
       clockOut: clockOut,
-      attendanceId: attendanceId
+      date: attendanceDate,
+      timezone: timezone
     };
 
     const res = await fetch(`${API_BASE_URL}/api/attendance/check-out`, {
@@ -343,6 +345,85 @@ export async function clockOutMyAttendanceAction(
     }
 
     revalidateEntityMutation('MY_ATTENDANCE')
+    return { success: true, data: await res.json() }
+  } catch {
+    return { errors: { _form: ['Network error'] } }
+  }
+}
+
+// Mark absence for a user (Manager/HR/Admin only)
+export async function markAbsenceAction(
+  _prevState: unknown,
+  formData: FormData
+): Promise<ActionResult> {
+  const cookieHeader = await getAuthCookieHeader();
+  
+  try {
+    const userId = formData.get('userId') as string;
+    const date = formData.get('date') as string;
+    const reason = formData.get('reason') as string;
+    
+    if (!userId || !date) {
+      return { errors: { _form: ['User ID and date are required'] } }
+    }
+
+    const payload = {
+      userId: userId,
+      date: date,
+      reason: reason || undefined
+    };
+
+    const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to mark absence'] } }
+    }
+
+    revalidateEntityMutation('ATTENDANCE')
+    return { success: true, data: await res.json() }
+  } catch {
+    return { errors: { _form: ['Network error'] } }
+  }
+}
+
+// Submit justification for own attendance
+export async function submitJustificationAction(
+  _prevState: unknown,
+  formData: FormData
+): Promise<ActionResult> {
+  const cookieHeader = await getAuthCookieHeader();
+  
+  try {
+    const date = formData.get('date') as string;
+    const reason = formData.get('reason') as string;
+    
+    if (!date || !reason) {
+      return { errors: { _form: ['Date and reason are required'] } }
+    }
+
+    const payload = {
+      date: date,
+      reason: reason
+    };
+
+    const res = await fetch(`${API_BASE_URL}/api/attendance/justifications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.message || 'Failed to submit justification'] } }
+    }
+
+    revalidateEntityMutation('ATTENDANCE')
+    revalidateEntityMutation('ATTENDANCE_JUSTIFICATIONS')
     return { success: true, data: await res.json() }
   } catch {
     return { errors: { _form: ['Network error'] } }
@@ -523,12 +604,15 @@ export async function rejectJustificationAction(
   }
 }
 
-export async function exportAttendanceCSV(month: string): Promise<Blob | null> {
+export async function exportAttendanceCSV(month: string, userId?: string): Promise<Blob | null> {
   const cookieHeader = await getAuthCookieHeader();
 
   try {
+    const params = new URLSearchParams({ month });
+    if (userId) params.append('userId', userId);
+    
     const res = await fetch(
-      `${API_BASE_URL}/api/attendance/export?month=${month}`,
+      `${API_BASE_URL}/api/attendance/export?${params.toString()}`,
       {
         headers: {
           ...(cookieHeader && { Cookie: cookieHeader }),

@@ -175,8 +175,8 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
     id?: string | number;
     doc_id?: string | number;
     uuid?: string;
-    employee?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string };
-    user?: { user?: { first_name?: string; last_name?: string; email?: string }; first_name?: string; last_name?: string; email?: string };
+    employee?: { user?: { full_name?: string; email?: string }; full_name?: string; email?: string };
+    user?: { user?: { full_name?: string; email?: string }; full_name?: string; email?: string };
     employee_name?: string;
     employee_full_name?: string;
     title?: string;
@@ -194,10 +194,9 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
   return raw.map((d: RawDocument) => {
     const emp = d.employee || d.user || undefined
     const empUser = emp?.user || emp
-    const first = empUser?.first_name ?? ''
-    const last = empUser?.last_name ?? ''
+    const fullName = empUser?.full_name ?? ''
     const email = empUser?.email ?? ''
-    const name = [first, last].filter(Boolean).join(' ') || email || '—'
+    const name = fullName || email || '—'
 
     return {
       id: String(d.id ?? d.doc_id ?? d.uuid ?? ''),
@@ -234,10 +233,9 @@ export const getDocument = cache(async (id: string): Promise<Document | null> =>
 
   const emp = d.employee || d.user || undefined
   const empUser = emp?.user || emp
-  const first = empUser?.first_name ?? empUser?.firstName ?? ''
-  const last = empUser?.last_name ?? empUser?.lastName ?? ''
+  const fullName = empUser?.full_name ?? ''
   const email = empUser?.email ?? ''
-  const name = [first, last].filter(Boolean).join(' ') || email || '—'
+  const name = fullName || email || '—'
 
   return {
     id: String(d.id ?? ''),
@@ -293,10 +291,9 @@ export const getDocumentForEdit = cache(async (id: string): Promise<Document | n
 
   const emp = d.employee || d.user || undefined
   const empUser = emp?.user || emp
-  const first = empUser?.first_name ?? empUser?.firstName ?? ''
-  const last = empUser?.last_name ?? empUser?.lastName ?? ''
+  const fullName = empUser?.full_name ?? ''
   const email = empUser?.email ?? ''
-  const name = [first, last].filter(Boolean).join(' ') || email || '—'
+  const name = fullName || email || '—'
 
   return {
     id: String(d.id ?? ''),

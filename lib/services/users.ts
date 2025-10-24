@@ -5,15 +5,64 @@ import { API_BASE_URL } from '@/lib/config'
 import { z } from 'zod'
 import { revalidateEntityMutation, CacheTags, fetchWithGracefulFallback } from '@/lib/cache-utils'
 
-// Types
+// Compensation nested object
+export interface Compensation {
+	pay_type: string
+	pay_frequency: string
+	annual_salary?: number
+	hourly_rate?: number
+	standard_hours: number
+	overtime_rate: number
+	effective_date: string
+	end_date?: string | null
+}
+
+// Types - Unified User (can be employee, can have login)
 export interface User {
 	id: string
-	first_name: string
-	last_name: string
 	email: string
 	role: string
+	full_name: string
+	company_id: string
 	is_active: boolean
+	last_login?: string | null
 	created_at: string
+	updated_at: string
+	created_by?: string | null
+	updated_by?: string | null
+	// Unified flags
+	is_employee: boolean
+	can_login: boolean
+	// Employee fields (when is_employee = true)
+	department_id?: string | null
+	department?: string // Display name for department
+	employee_number?: string
+	employment_type?: string
+	employment_status?: string
+	hire_date?: string
+	termination_date?: string | null
+	job_title?: string
+	manager_id?: string | null
+	date_of_birth?: string
+	phone_primary?: string
+	phone_secondary?: string
+	emergency_contact_name?: string
+	emergency_contact_phone?: string
+	emergency_contact_relationship?: string
+	address_line1?: string
+	address_line2?: string
+	city?: string
+	state?: string
+	postal_code?: string
+	country?: string
+	tax_filing_status?: string
+	tax_allowances?: number
+	additional_tax_withholding?: number
+	tax_exempt?: boolean
+	bank_name?: string
+	bank_account_type?: string
+	// Compensation (nested object when is_employee = true)
+	compensation?: Compensation
 }
 
 export interface UserStats {
@@ -24,22 +73,93 @@ export interface UserStats {
 	employeeUsers: number
 }
 
-// Validation schemas
+// Validation schemas - unified user/employee creation
 const createUserSchema = z.object({
-	first_name: z.string().min(1, 'First name is required'),
-	last_name: z.string().min(1, 'Last name is required'),
-	email: z.string().email('Invalid email'),
+	// Core user fields
+	email: z.string().email('Invalid email').optional(), // Optional if can_login = false
+	password: z.string().min(6, 'Password must be at least 6 characters').optional(), // Optional if can_login = false
 	role: z.string().min(1, 'Role is required'),
-	password: z.string().min(6, 'Password must be at least 6 characters'),
+	full_name: z.string().min(1, 'Full name is required'),
 	is_active: z.boolean().default(true),
+	// Unified flags
+	can_login: z.boolean().default(true),
+	is_employee: z.boolean().default(true),
+	// Employee fields
+	employee_number: z.string().optional(),
+	employment_type: z.string().optional(),
+	employment_status: z.string().optional(),
+	hire_date: z.string().optional(),
+	termination_date: z.string().optional(),
+	job_title: z.string().optional(),
+	manager_id: z.string().optional(),
+	department_id: z.string().optional(),
+	date_of_birth: z.string().optional(),
+	phone_primary: z.string().optional(),
+	phone_secondary: z.string().optional(),
+	emergency_contact_name: z.string().optional(),
+	emergency_contact_phone: z.string().optional(),
+	emergency_contact_relationship: z.string().optional(),
+	address_line1: z.string().optional(),
+	address_line2: z.string().optional(),
+	city: z.string().optional(),
+	state: z.string().optional(),
+	postal_code: z.string().optional(),
+	country: z.string().optional(),
+	tax_filing_status: z.string().optional(),
+	tax_allowances: z.number().optional(),
+	additional_tax_withholding: z.number().optional(),
+	tax_exempt: z.boolean().optional(),
+	bank_name: z.string().optional(),
+	bank_account_type: z.string().optional(),
+	// Compensation
+	pay_type: z.string().optional(),
+	pay_frequency: z.string().optional(),
+	annual_salary: z.number().optional(),
+	hourly_rate: z.number().optional(),
+	standard_hours: z.number().optional(),
+	overtime_rate: z.number().optional(),
 })
 
 const updateUserSchema = z.object({
-	first_name: z.string().min(1).optional(),
-	last_name: z.string().min(1).optional(),
+	full_name: z.string().min(1).optional(),
 	email: z.string().email().optional(),
+	password: z.string().min(6).optional(),
 	role: z.string().optional(),
 	is_active: z.boolean().optional(),
+	can_login: z.boolean().optional(),
+	is_employee: z.boolean().optional(),
+	employee_number: z.string().optional(),
+	employment_type: z.string().optional(),
+	employment_status: z.string().optional(),
+	hire_date: z.string().optional(),
+	termination_date: z.string().optional(),
+	job_title: z.string().optional(),
+	manager_id: z.string().optional(),
+	department_id: z.string().optional(),
+	date_of_birth: z.string().optional(),
+	phone_primary: z.string().optional(),
+	phone_secondary: z.string().optional(),
+	emergency_contact_name: z.string().optional(),
+	emergency_contact_phone: z.string().optional(),
+	emergency_contact_relationship: z.string().optional(),
+	address_line1: z.string().optional(),
+	address_line2: z.string().optional(),
+	city: z.string().optional(),
+	state: z.string().optional(),
+	postal_code: z.string().optional(),
+	country: z.string().optional(),
+	tax_filing_status: z.string().optional(),
+	tax_allowances: z.number().optional(),
+	additional_tax_withholding: z.number().optional(),
+	tax_exempt: z.boolean().optional(),
+	bank_name: z.string().optional(),
+	bank_account_type: z.string().optional(),
+	pay_type: z.string().optional(),
+	pay_frequency: z.string().optional(),
+	annual_salary: z.number().optional(),
+	hourly_rate: z.number().optional(),
+	standard_hours: z.number().optional(),
+	overtime_rate: z.number().optional(),
 })
 
 // READ operations (cached with graceful fallback)
@@ -62,14 +182,48 @@ export const getUsers = cache(async (): Promise<User[]> => {
 			const json = await res.json()
 			const raw = Array.isArray(json) ? json : (json.data || json.users || [])
 
-			return raw.map((u: { id?: string; first_name?: string; last_name?: string; email?: string; role?: string; is_active?: boolean; created_at?: string }) => ({
+			return raw.map((u: Record<string, unknown>) => ({
 				id: String(u.id || ''),
-				first_name: String(u.first_name || ''),
-				last_name: String(u.last_name || ''),
 				email: String(u.email || ''),
 				role: String(u.role || ''),
+				full_name: String(u.full_name || ''),
+				company_id: String(u.company_id || ''),
 				is_active: Boolean(u.is_active),
+				last_login: u.last_login ? String(u.last_login) : null,
 				created_at: String(u.created_at || ''),
+				updated_at: String(u.updated_at || ''),
+				created_by: u.created_by ? String(u.created_by) : null,
+				updated_by: u.updated_by ? String(u.updated_by) : null,
+				is_employee: Boolean(u.is_employee),
+				can_login: Boolean(u.can_login),
+				department_id: u.department_id ? String(u.department_id) : null,
+				department: u.department ? String(u.department) : undefined,
+				employee_number: u.employee_number ? String(u.employee_number) : undefined,
+				employment_type: u.employment_type ? String(u.employment_type) : undefined,
+				employment_status: u.employment_status ? String(u.employment_status) : undefined,
+				hire_date: u.hire_date ? String(u.hire_date) : undefined,
+				termination_date: u.termination_date ? String(u.termination_date) : null,
+				job_title: u.job_title ? String(u.job_title) : undefined,
+				manager_id: u.manager_id ? String(u.manager_id) : null,
+				date_of_birth: u.date_of_birth ? String(u.date_of_birth) : undefined,
+				phone_primary: u.phone_primary ? String(u.phone_primary) : undefined,
+				phone_secondary: u.phone_secondary ? String(u.phone_secondary) : undefined,
+				emergency_contact_name: u.emergency_contact_name ? String(u.emergency_contact_name) : undefined,
+				emergency_contact_phone: u.emergency_contact_phone ? String(u.emergency_contact_phone) : undefined,
+				emergency_contact_relationship: u.emergency_contact_relationship ? String(u.emergency_contact_relationship) : undefined,
+				address_line1: u.address_line1 ? String(u.address_line1) : undefined,
+				address_line2: u.address_line2 ? String(u.address_line2) : undefined,
+				city: u.city ? String(u.city) : undefined,
+				state: u.state ? String(u.state) : undefined,
+				postal_code: u.postal_code ? String(u.postal_code) : undefined,
+				country: u.country ? String(u.country) : undefined,
+				tax_filing_status: u.tax_filing_status ? String(u.tax_filing_status) : undefined,
+				tax_allowances: u.tax_allowances ? Number(u.tax_allowances) : undefined,
+				additional_tax_withholding: u.additional_tax_withholding ? Number(u.additional_tax_withholding) : undefined,
+				tax_exempt: u.tax_exempt !== undefined ? Boolean(u.tax_exempt) : undefined,
+				bank_name: u.bank_name ? String(u.bank_name) : undefined,
+				bank_account_type: u.bank_account_type ? String(u.bank_account_type) : undefined,
+				compensation: u.compensation ? (u.compensation as Compensation) : undefined,
 			}))
 		},
 		[], // Fallback to empty array on error
@@ -121,14 +275,22 @@ export const getUserStats = cache(async (): Promise<UserStats> => {
 type ActionResult = { errors: Record<string, string[]> } | { success: true; data?: unknown }
 
 export async function createUserAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
-	const parsed = createUserSchema.safeParse({
-		first_name: formData.get('first_name'),
-		last_name: formData.get('last_name'),
-		email: formData.get('email'),
-		role: formData.get('role'),
-		password: formData.get('password'),
-		is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on',
+	// Extract and parse all fields
+	const rawData: Record<string, unknown> = {}
+	formData.forEach((value, key) => {
+		if (key === 'is_active' || key === 'can_login' || key === 'is_employee' || key === 'tax_exempt') {
+			rawData[key] = value === 'true' || value === 'on'
+		} else if (key === 'tax_allowances' || key === 'additional_tax_withholding' || key === 'annual_salary' || key === 'hourly_rate' || key === 'standard_hours' || key === 'overtime_rate') {
+			const numVal = value ? Number(value) : undefined
+			if (numVal !== undefined && !isNaN(numVal)) {
+				rawData[key] = numVal
+			}
+		} else {
+			rawData[key] = value || undefined
+		}
 	})
+
+	const parsed = createUserSchema.safeParse(rawData)
 
 	if (!parsed.success) {
 		return { errors: parsed.error.flatten().fieldErrors }
@@ -136,13 +298,65 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 
 	try {
 		const cookieHeader = await getAuthCookieHeader()
+		
+		// Build payload - backend expects flat structure
+		const payload: Record<string, unknown> = {
+			email: parsed.data.email,
+			password: parsed.data.password,
+			role: parsed.data.role,
+			full_name: parsed.data.full_name,
+			is_active: parsed.data.is_active,
+			can_login: parsed.data.can_login,
+			is_employee: parsed.data.is_employee,
+			employee_number: parsed.data.employee_number,
+			employment_type: parsed.data.employment_type,
+			employment_status: parsed.data.employment_status,
+			hire_date: parsed.data.hire_date,
+			termination_date: parsed.data.termination_date,
+			job_title: parsed.data.job_title,
+			manager_id: parsed.data.manager_id,
+			department_id: parsed.data.department_id,
+			date_of_birth: parsed.data.date_of_birth,
+			phone_primary: parsed.data.phone_primary,
+			phone_secondary: parsed.data.phone_secondary,
+			emergency_contact_name: parsed.data.emergency_contact_name,
+			emergency_contact_phone: parsed.data.emergency_contact_phone,
+			emergency_contact_relationship: parsed.data.emergency_contact_relationship,
+			address_line1: parsed.data.address_line1,
+			address_line2: parsed.data.address_line2,
+			city: parsed.data.city,
+			state: parsed.data.state,
+			postal_code: parsed.data.postal_code,
+			country: parsed.data.country,
+			tax_filing_status: parsed.data.tax_filing_status,
+			tax_allowances: parsed.data.tax_allowances,
+			additional_tax_withholding: parsed.data.additional_tax_withholding,
+			tax_exempt: parsed.data.tax_exempt,
+			bank_name: parsed.data.bank_name,
+			bank_account_type: parsed.data.bank_account_type,
+			// Compensation fields at root level
+			pay_type: parsed.data.pay_type,
+			pay_frequency: parsed.data.pay_frequency,
+			annual_salary: parsed.data.annual_salary,
+			hourly_rate: parsed.data.hourly_rate,
+			standard_hours: parsed.data.standard_hours,
+			overtime_rate: parsed.data.overtime_rate,
+		}
+
+		// Remove undefined values
+		Object.keys(payload).forEach(key => {
+			if (payload[key] === undefined) {
+				delete payload[key]
+			}
+		})
+
 		const res = await fetch(`${API_BASE_URL}/api/users`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				...(cookieHeader && { Cookie: cookieHeader }),
 			},
-			body: JSON.stringify(parsed.data),
+			body: JSON.stringify(payload),
 		})
 
 		if (!res.ok) {
@@ -161,13 +375,22 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 }
 
 export async function updateUserAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
-	const parsed = updateUserSchema.safeParse({
-		first_name: formData.get('first_name') || undefined,
-		last_name: formData.get('last_name') || undefined,
-		email: formData.get('email') || undefined,
-		role: formData.get('role') || undefined,
-		is_active: formData.get('is_active') ? formData.get('is_active') === 'true' || formData.get('is_active') === 'on' : undefined,
+	// Extract and parse all fields
+	const rawData: Record<string, unknown> = {}
+	formData.forEach((value, key) => {
+		if (key === 'is_active' || key === 'can_login' || key === 'is_employee' || key === 'tax_exempt') {
+			rawData[key] = value === 'true' || value === 'on'
+		} else if (key === 'tax_allowances' || key === 'additional_tax_withholding' || key === 'annual_salary' || key === 'hourly_rate' || key === 'standard_hours' || key === 'overtime_rate') {
+			const numVal = value ? Number(value) : undefined
+			if (numVal !== undefined && !isNaN(numVal)) {
+				rawData[key] = numVal
+			}
+		} else {
+			rawData[key] = value || undefined
+		}
 	})
+
+	const parsed = updateUserSchema.safeParse(rawData)
 
 	if (!parsed.success) {
 		return { errors: parsed.error.flatten().fieldErrors }
@@ -175,13 +398,22 @@ export async function updateUserAction(id: string, prevState: unknown, formData:
 
 	try {
 		const cookieHeader = await getAuthCookieHeader()
+		
+		// Build payload - remove undefined values
+		const payload: Record<string, unknown> = { ...parsed.data }
+		Object.keys(payload).forEach(key => {
+			if (payload[key] === undefined) {
+				delete payload[key]
+			}
+		})
+
 		const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
 				...(cookieHeader && { Cookie: cookieHeader }),
 			},
-			body: JSON.stringify(parsed.data),
+			body: JSON.stringify(payload),
 		})
 
 		if (!res.ok) {

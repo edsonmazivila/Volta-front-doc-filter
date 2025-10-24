@@ -7,8 +7,6 @@ import { revalidateEntityMutation } from '@/lib/cache-utils'
 
 export interface MeUser {
 	email: string
-	first_name: string
-	last_name: string
 	full_name: string
 }
 
@@ -47,9 +45,7 @@ export const getProfile = cache(async (): Promise<MeResponse | null> => {
 	return {
 		user: {
 			email: String(user.email || ''),
-			first_name: String(user.first_name || ''),
-			last_name: String(user.last_name || ''),
-			full_name: String(user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()),
+			full_name: String(user.full_name || ''),
 		},
 		employee: {
 			address_line1: employee.address_line1 ?? null,

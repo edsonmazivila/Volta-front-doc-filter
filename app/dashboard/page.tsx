@@ -9,8 +9,8 @@ import { getDashboardStats } from "@/lib/services/dashboard";
 import { requireUser } from "@/lib/auth/dal";
 import { getPayrollRuns } from "@/lib/services/payroll";
 import { getTimesheets } from "@/lib/services/timesheets";
-import { getEmployees } from "@/lib/services/employees";
-import type { Employee } from "@/lib/services/employees";
+import { getUsers } from "@/lib/services/users";
+import type { User } from "@/lib/services/users";
 import { getMyLeaveRequests } from "@/lib/services/leaves";
 import { getMyAttendance } from "@/lib/services/attendance";
 
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   let statsPromise: Promise<{ totalEmployees: number, pendingTimesheets: number, monthlyPayroll: number }>
   let payrollRunsPromise: ReturnType<typeof getPayrollRuns> | Promise<Awaited<ReturnType<typeof getPayrollRuns>>>
   let timesheetsPromise: ReturnType<typeof getTimesheets> | Promise<Awaited<ReturnType<typeof getTimesheets>>>
-  let employeesPromise: Promise<{ items: Employee[], total: number }>
+  let usersPromise: Promise<User[]>
   let leaveRequestsPromise: ReturnType<typeof getMyLeaveRequests> | Promise<Awaited<ReturnType<typeof getMyLeaveRequests>>>
   let myAttendancePromise: ReturnType<typeof getMyAttendance> | Promise<Awaited<ReturnType<typeof getMyAttendance>>>
 
@@ -35,14 +35,14 @@ export default async function DashboardPage() {
     statsPromise = Promise.resolve({ totalEmployees: 0, pendingTimesheets: 0, monthlyPayroll: 0 })
     payrollRunsPromise = Promise.resolve([])
     timesheetsPromise = getTimesheets().catch(() => [])
-    employeesPromise = Promise.resolve({ items: [], total: 0 })
+    usersPromise = Promise.resolve([])
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
     myAttendancePromise = getMyAttendance().catch(() => [])
   } else {
     statsPromise = getDashboardStats().catch(() => ({ totalEmployees: 0, pendingTimesheets: 0, monthlyPayroll: 0 }))
     payrollRunsPromise = getPayrollRuns().catch(() => [])
     timesheetsPromise = getTimesheets().catch(() => [])
-    employeesPromise = getEmployees().catch(() => ({ items: [], total: 0 }))
+    usersPromise = getUsers().catch(() => [])
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
     myAttendancePromise = Promise.resolve([])
   }
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
     statsPromise,
     payrollRunsPromise,
     timesheetsPromise,
-    employeesPromise,
+    usersPromise,
     leaveRequestsPromise,
     myAttendancePromise,
   ])
@@ -72,12 +72,12 @@ export default async function DashboardPage() {
     const dateStr = date.toISOString().split('T')[0];
 
     const dayTimesheets = timesheets.filter(t => {
-      const periodStart = new Date(t.periodStart).toISOString().split('T')[0];
-      const periodEnd = new Date(t.periodEnd).toISOString().split('T')[0];
+      const periodStart = new Date(t.pay_period_start || t.periodStart).toISOString().split('T')[0];
+      const periodEnd = new Date(t.pay_period_end || t.periodEnd).toISOString().split('T')[0];
       return dateStr >= periodStart && dateStr <= periodEnd;
     });
 
-    const totalHours = dayTimesheets.reduce((sum, t) => sum + (t.totalHours || 0), 0);
+    const totalHours = dayTimesheets.reduce((sum, t) => sum + (t.total_hours || t.totalHours || 0), 0);
     return { name: day, value: totalHours };
   });
 

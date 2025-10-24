@@ -65,7 +65,7 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
   }
 
   const json = await res.json()
-  let raw = json.data?.recent_runs || json.recent_runs || json.runs || json.history || json.payroll || json.items || []
+  let raw = json.history || json.data?.recent_runs || json.recent_runs || json.runs || json.payroll || json.items || []
   
   // Ensure raw is an array
   if (!Array.isArray(raw)) {
@@ -106,15 +106,15 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
     id: String(r.id ?? r.run_id ?? r.uuid ?? ''),
     periodStart: String(r.pay_period_start ?? r.periodStart ?? r.period_start ?? r.start ?? ''),
     periodEnd: String(r.pay_period_end ?? r.periodEnd ?? r.period_end ?? r.end ?? ''),
-    payDate: r.pay_date ? String(r.pay_date) : (r.date ? String(r.date) : undefined),
+    payDate: r.date ? String(r.date) : (r.pay_date ? String(r.pay_date) : undefined),
     status: r.status ? String(r.status) : undefined,
     totalHours: Number(r.total_hours ?? r.totalHours ?? 0) || 0,
-    grossAmount: Number(r.gross_amount ?? r.grossAmount ?? r.gross ?? r.gross_pay ?? 0) || 0,
-    netAmount: (r.net_amount !== undefined || r.netAmount !== undefined || r.net !== undefined || r.net_pay !== undefined)
-      ? Number(r.net_amount ?? r.netAmount ?? r.net ?? r.net_pay ?? 0) || 0
+    grossAmount: Number(r.gross_pay ?? r.gross_amount ?? r.grossAmount ?? r.gross ?? 0) || 0,
+    netAmount: (r.net_pay !== undefined || r.net_amount !== undefined || r.netAmount !== undefined || r.net !== undefined)
+      ? Number(r.net_pay ?? r.net_amount ?? r.netAmount ?? r.net ?? 0) || 0
       : undefined,
-    employeesCount: (r.employees_count !== undefined || r.employeesCount !== undefined || r.employees !== undefined)
-      ? Number(r.employees_count ?? r.employeesCount ?? r.employees ?? 0) || 0
+    employeesCount: (r.employees !== undefined || r.employees_count !== undefined || r.employeesCount !== undefined)
+      ? Number(r.employees ?? r.employees_count ?? r.employeesCount ?? 0) || 0
       : undefined,
   }))
 })
@@ -127,19 +127,19 @@ export const getPayrollStats = cache(async (): Promise<PayrollStats> => {
   try {
     const cookieHeader = await getAuthCookieHeader()
 
-    // Get employee count from employees stats endpoint
+    // Get employee count from users stats endpoint
     let totalEmployees = 0
     try {
-      const empRes = await fetch(`${API_BASE_URL}/api/employees/stats`, {
+      const empRes = await fetch(`${API_BASE_URL}/api/users/stats`, {
         headers: {
           'Content-Type': 'application/json',
           ...(cookieHeader && { Cookie: cookieHeader }),
         },
-        next: { tags: ['employees-stats'], revalidate: 60 },
+        next: { tags: ['users-stats'], revalidate: 60 },
       })
       if (empRes.ok) {
         const empData = await empRes.json()
-        totalEmployees = Number(empData?.total ?? empData?.data?.total ?? 0) || 0
+        totalEmployees = Number(empData?.employeeUsers ?? empData?.data?.employeeUsers ?? 0) || 0
       }
     } catch {
       // Fallback if employees stats not available

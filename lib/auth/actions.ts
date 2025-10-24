@@ -50,44 +50,61 @@ export async function loginAction(prevState: unknown, formData: FormData): Promi
 }
 
 export async function signupAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
-    const parsed = signupSchema.safeParse({
-        companyName: formData.get('companyName'),
-        name: formData.get('name'),
-        email: formData.get('email'),
-        password: formData.get('password'),
-        employmentType: formData.get('employmentType') || undefined,
-        hireDate: formData.get('hireDate') || undefined,
-        jobTitle: formData.get('jobTitle') || undefined,
-        employeeNumber: formData.get('employeeNumber') || undefined,
-        termsAccepted: formData.get('termsAccepted') === 'on'
-    })
+	const parsed = signupSchema.safeParse({
+		full_name: formData.get('full_name'),
+		email: formData.get('email'),
+		password: formData.get('password'),
+		company_name: formData.get('company_name'),
+		legal_name: formData.get('legal_name'),
+		tax_id: formData.get('tax_id'),
+		address_line1: formData.get('address_line1'),
+		city: formData.get('city'),
+		state: formData.get('state'),
+		postal_code: formData.get('postal_code'),
+		country: formData.get('country'),
+		company_phone: formData.get('company_phone'),
+		company_email: formData.get('company_email'),
+		website: formData.get('website') || undefined,
+		termsAccepted: formData.get('termsAccepted') === 'on'
+	})
+
 	if (!parsed.success) {
 		return { errors: parsed.error.flatten().fieldErrors }
 	}
 
-    const res = await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.SIGNUP}`, {
+	const res = await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.REGISTER_ACCOUNT}`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
-            company_name: parsed.data.companyName,
-            full_name: parsed.data.name,
-            email: parsed.data.email,
-            password: parsed.data.password,
-            employment_type: parsed.data.employmentType || undefined,
-            hire_date: parsed.data.hireDate || undefined,
-            job_title: parsed.data.jobTitle || undefined,
-            employee_number: parsed.data.employeeNumber || undefined,
+			admin: {
+				full_name: parsed.data.full_name,
+				email: parsed.data.email,
+				password: parsed.data.password
+			},
+			company: {
+				name: parsed.data.company_name,
+				legal_name: parsed.data.legal_name,
+				tax_id: parsed.data.tax_id,
+				address_line1: parsed.data.address_line1,
+				city: parsed.data.city,
+				state: parsed.data.state,
+				postal_code: parsed.data.postal_code,
+				country: parsed.data.country,
+				phone: parsed.data.company_phone,
+				email: parsed.data.company_email,
+				website: parsed.data.website
+			}
 		}),
 		credentials: 'include'
 	})
 
 	if (!res.ok) {
-    const err: unknown = await res.json().catch(() => ({}))
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return { errors: { _form: [(err as any)?.message || 'Signup failed'] } }
+		const err: unknown = await res.json().catch(() => ({}))
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return { errors: { _form: [(err as any)?.message || 'Account registration failed'] } }
 	}
 
-    return { success: true }
+	return { success: true }
 }
 
 export async function forgotPasswordAction(prevState: unknown, formData: FormData): Promise<ActionResult> {

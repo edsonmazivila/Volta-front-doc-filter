@@ -1,6 +1,6 @@
 "use client"
 
-import { type Employee } from '@/lib/services/employees'
+import { type User } from '@/lib/services/users'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/alert-dialog'
 
 interface DeleteEmployeeDialogProps {
-	employee: Employee
+	employee: User
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	onConfirm: () => void

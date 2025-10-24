@@ -10,7 +10,7 @@ interface DepartmentFormProps {
 	department?: Department
 	onCancel: () => void
 	onSuccess: () => void
-	managers?: Array<{ id: string; first_name: string; last_name: string }>
+	managers?: Array<{ id: string; full_name: string }>
 }
 
 export function DepartmentForm({ department, onCancel, onSuccess, managers = [] }: DepartmentFormProps) {
@@ -103,7 +103,7 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 					<option value=''>No manager assigned</option>
 					{managers.map((manager) => (
 						<option key={manager.id} value={manager.id}>
-							{manager.first_name} {manager.last_name}
+							{manager.full_name}
 						</option>
 					))}
 				</select>

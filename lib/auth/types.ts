@@ -47,18 +47,25 @@ export const loginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>
 
-// Signup form schema
+// Signup form schema - Register first account with admin + company
 export const signupSchema = z.object({
-    companyName: z.string().min(1, 'Company name is required'),
-    name: z.string().min(1, 'Name is required'),
-    email: z.string().min(1, 'Email is required'),
-    password: z.string().min(1, 'Password is required'),
-    // Optional employee profile fields
-    employmentType: z.string().optional(),
-    hireDate: z.string().optional(),
-    jobTitle: z.string().optional(),
-    employeeNumber: z.string().optional(),
-    termsAccepted: z.boolean()
+	// Admin user details
+	full_name: z.string().min(1, 'Full name is required'),
+	email: z.string().email('Invalid email address'),
+	password: z.string().min(8, 'Password must be at least 8 characters'),
+	// Company details
+	company_name: z.string().min(1, 'Company name is required'),
+	legal_name: z.string().min(1, 'Legal name is required'),
+	tax_id: z.string().min(1, 'Tax ID is required'),
+	address_line1: z.string().min(1, 'Address is required'),
+	city: z.string().min(1, 'City is required'),
+	state: z.string().min(1, 'State is required'),
+	postal_code: z.string().min(1, 'Postal code is required'),
+	country: z.string().min(1, 'Country is required'),
+	company_phone: z.string().min(1, 'Company phone is required'),
+	company_email: z.string().email('Invalid company email'),
+	website: z.string().url('Invalid website URL').optional(),
+	termsAccepted: z.boolean()
 })
 
 export type SignupFormData = z.infer<typeof signupSchema>

@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { Employee } from '@/lib/services/employees'
+import type { User } from '@/lib/services/users'
 
 const schema = z.object({
 	employee_id: z.string().min(1, 'Employee is required'),
@@ -14,7 +14,7 @@ const schema = z.object({
 	periodEnd: z.string().min(1, 'Period end is required'),
 	regularHours: z.coerce.number().min(0, 'Must be >= 0'),
 	overtimeHours: z.coerce.number().min(0, 'Must be >= 0'),
-	status: z.enum(['draft', 'submitted'], { required_error: 'Status is required' }),
+	status: z.enum(['draft', 'submitted', 'approved', 'rejected'], { required_error: 'Status is required' }),
 	notes: z.string().optional(),
 })
 
@@ -28,7 +28,7 @@ interface TimesheetFormDialogProps {
 	title?: string
 	submitLabel?: string
 	isLoading?: boolean
-	employees?: Employee[]
+	employees?: User[]
 }
 
 export function TimesheetFormDialog({ 
@@ -111,11 +111,11 @@ export function TimesheetFormDialog({
 									</SelectTrigger>
 									<SelectContent className="bg-background border-[var(--border)]">
 											{employees.length === 0 ? (
-											<SelectItem value="" disabled>No employees found</SelectItem>
+											<SelectItem value="none" disabled>No employees found</SelectItem>
 										) : (
 											employees.map((emp) => (
 												<SelectItem key={emp.id} value={emp.id}>
-														{emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim()} - {emp.email}
+														{emp.full_name || emp.email} - {emp.email}
 												</SelectItem>
 											))
 										)}
@@ -190,6 +190,8 @@ export function TimesheetFormDialog({
 									<SelectContent className="bg-background border-[var(--border)]">
 										<SelectItem value="draft">Draft</SelectItem>
 										<SelectItem value="submitted">Submitted</SelectItem>
+										<SelectItem value="approved">Approved</SelectItem>
+										<SelectItem value="rejected">Rejected</SelectItem>
 									</SelectContent>
 								</Select>
 							)}

@@ -12,12 +12,12 @@ import { Button } from "@/components/ui";
 import { Card, CardHeader } from "@/components/dashboard/card";
 import { exportAttendanceCSV } from "@/lib/services/attendance";
 import { toast } from "sonner";
-import type { Employee } from "@/lib/services/employees";
+import type { User } from "@/lib/services/users";
 
 interface AttendanceSectionProps {
   initialRecords: AttendanceRecord[];
   initialJustifications: AttendanceJustification[];
-  employees: Employee[];
+  employees: User[];
 }
 
 export function AttendanceSection({

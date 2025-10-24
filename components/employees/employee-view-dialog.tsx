@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { type Employee, type EmployeeDetails, getEmployeeDetails } from "@/lib/services/employees"
+import { useState } from "react"
+import { type User } from "@/lib/services/users"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -11,10 +11,11 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { CalendarDays, Phone, MapPin, User, Building, DollarSign, Users, Loader2 } from "lucide-react"
+import { CalendarDays, Phone, MapPin, User as UserIcon, Building, DollarSign, Users, Loader2, CreditCard } from "lucide-react"
+import { ROLE_DISPLAY_NAMES } from "@/lib/rbac/types"
 
 interface EmployeeViewDialogProps {
-	employee: Employee
+	employee: User
 	trigger?: React.ReactNode
 	open?: boolean
 	onOpenChange?: (open: boolean) => void
@@ -24,35 +25,13 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 	const [internalOpen, setInternalOpen] = useState(false)
 	const open = controlledOpen !== undefined ? controlledOpen : internalOpen
 	const setOpen = onOpenChange || setInternalOpen
-	const [employeeDetails, setEmployeeDetails] = useState<EmployeeDetails | null>(null)
-	const [isLoading, setIsLoading] = useState(false)
-	const [error, setError] = useState<string | null>(null)
+	
+	// Since we now have unified User structure, we already have all details
+	const employeeDetails = employee
+	const isLoading = false
+	const [error] = useState<string | null>(null)
 
-	// Fetch detailed employee information when dialog opens
-	useEffect(() => {
-		if (open && !employeeDetails) {
-			setIsLoading(true)
-			setError(null)
-			getEmployeeDetails(employee.id)
-				.then((details) => {
-					setEmployeeDetails(details)
-				})
-				.catch((err) => {
-					setError(err.message || 'Failed to load employee details')
-				})
-				.finally(() => {
-					setIsLoading(false)
-				})
-		}
-	}, [open, employee.id, employeeDetails])
-
-	// Reset state when dialog closes
-	useEffect(() => {
-		if (!open) {
-			setEmployeeDetails(null)
-			setError(null)
-		}
-	}, [open])
+	// Note: With unified User structure, no need to fetch additional details
 
 	// Format date for display
 	const formatDate = (dateString?: string) => {
@@ -86,7 +65,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						<User className="h-5 w-5" />
+						<UserIcon className="h-5 w-5" />
 						Employee Details
 					</DialogTitle>
 				</DialogHeader>
@@ -120,6 +99,18 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									Employee #: {employeeDetails.employee_number}
 								</p>
 							)}
+							<div className="flex items-center gap-2 mt-2">
+								<Badge
+									variant={employeeDetails.can_login ? "default" : "secondary"}
+									className={
+										employeeDetails.can_login
+											? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+											: "bg-gray-500/20 text-gray-400 border-gray-500/30"
+									}
+								>
+									{employeeDetails.can_login ? "Can Login" : "No Login Access"}
+								</Badge>
+							</div>
 						</div>
 						<Badge
 							variant={(employeeDetails.is_active ?? employee.is_active) ? "default" : "secondary"}
@@ -137,7 +128,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
-								<User className="h-4 w-4" />
+								<UserIcon className="h-4 w-4" />
 								Basic Information
 							</h3>
 							<div className="space-y-3">
@@ -153,13 +144,13 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									</div>
 								)}
 
-								{employeeDetails.secondary_phone && (
+								{employeeDetails.phone_secondary && (
 									<div className="flex items-center gap-3">
 										<Phone className="h-4 w-4 text-muted-foreground" />
 										<div>
 											<p className="text-sm font-medium">Secondary Phone</p>
 											<p className="text-sm text-muted-foreground">
-												{formatPhone(employeeDetails.secondary_phone)}
+												{formatPhone(employeeDetails.phone_secondary)}
 											</p>
 										</div>
 									</div>
@@ -175,22 +166,24 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									</div>
 								)}
 
-								{employeeDetails.department && (
+								{employeeDetails.department_id && (
 									<div className="flex items-center gap-3">
 										<Building className="h-4 w-4 text-muted-foreground" />
 										<div>
 											<p className="text-sm font-medium">Department</p>
-											<p className="text-sm text-muted-foreground">{employeeDetails.department}</p>
+											<p className="text-sm text-muted-foreground">{employeeDetails.department_id}</p>
 										</div>
 									</div>
 								)}
 
 								{employeeDetails.role && (
 									<div className="flex items-center gap-3">
-										<User className="h-4 w-4 text-muted-foreground" />
+										<UserIcon className="h-4 w-4 text-muted-foreground" />
 										<div>
 											<p className="text-sm font-medium">Role</p>
-											<p className="text-sm text-muted-foreground">{employeeDetails.role}</p>
+											<p className="text-sm text-muted-foreground">
+												{ROLE_DISPLAY_NAMES[employeeDetails.role as keyof typeof ROLE_DISPLAY_NAMES] || employeeDetails.role}
+											</p>
 										</div>
 									</div>
 								)}
@@ -300,36 +293,96 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						</div>
 					)}
 
+					{/* Tax & Bank Information */}
+					{(employeeDetails.tax_filing_status || employeeDetails.tax_allowances || employeeDetails.additional_tax_withholding || employeeDetails.tax_exempt || employeeDetails.bank_name || employeeDetails.bank_account_type) && (
+						<div className="space-y-4">
+							<h3 className="text-lg font-semibold flex items-center gap-2">
+								<CreditCard className="h-4 w-4" />
+								Tax & Bank Information
+							</h3>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+								{employeeDetails.tax_filing_status && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Tax Filing Status</p>
+										<p className="text-sm text-muted-foreground capitalize">{employeeDetails.tax_filing_status.replace('_', ' ')}</p>
+									</div>
+								)}
+								{employeeDetails.tax_allowances !== undefined && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Tax Allowances</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.tax_allowances}</p>
+									</div>
+								)}
+								{employeeDetails.additional_tax_withholding !== undefined && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Additional Tax Withholding</p>
+										<p className="text-sm text-muted-foreground">${employeeDetails.additional_tax_withholding.toFixed(2)}</p>
+									</div>
+								)}
+								{employeeDetails.tax_exempt !== undefined && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Tax Exempt</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.tax_exempt ? "Yes" : "No"}</p>
+									</div>
+								)}
+								{employeeDetails.bank_name && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Bank Name</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.bank_name}</p>
+									</div>
+								)}
+								{employeeDetails.bank_account_type && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Bank Account Type</p>
+										<p className="text-sm text-muted-foreground capitalize">{employeeDetails.bank_account_type}</p>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
+
 					{/* Pay Information */}
-					{(employeeDetails.pay_type || employeeDetails.pay_frequency || employeeDetails.overtime_rate || employeeDetails.standard_hours) && (
+					{employeeDetails.compensation && (
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<DollarSign className="h-4 w-4" />
 								Pay Information
 							</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-								{employeeDetails.pay_type && (
+								{employeeDetails.compensation.pay_type && (
 									<div className="space-y-2">
 										<p className="text-sm font-medium">Pay Type</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.pay_type}</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.pay_type}</p>
 									</div>
 								)}
-								{employeeDetails.pay_frequency && (
+								{employeeDetails.compensation.pay_frequency && (
 									<div className="space-y-2">
 										<p className="text-sm font-medium">Pay Frequency</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.pay_frequency}</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.pay_frequency}</p>
 									</div>
 								)}
-								{employeeDetails.overtime_rate && (
+								{employeeDetails.compensation.overtime_rate && (
 									<div className="space-y-2">
 										<p className="text-sm font-medium">Overtime Rate</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.overtime_rate}</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.overtime_rate}x</p>
 									</div>
 								)}
-								{employeeDetails.standard_hours && (
+								{employeeDetails.compensation.standard_hours && (
 									<div className="space-y-2">
 										<p className="text-sm font-medium">Standard Hours</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.standard_hours}</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.standard_hours} hrs/week</p>
+									</div>
+								)}
+								{employeeDetails.compensation.annual_salary && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Annual Salary</p>
+										<p className="text-sm text-muted-foreground">${employeeDetails.compensation.annual_salary.toLocaleString()}</p>
+									</div>
+								)}
+								{employeeDetails.compensation.hourly_rate && (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">Hourly Rate</p>
+										<p className="text-sm text-muted-foreground">${employeeDetails.compensation.hourly_rate.toFixed(2)}/hr</p>
 									</div>
 								)}
 							</div>

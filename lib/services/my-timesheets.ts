@@ -19,7 +19,7 @@ export const getMyTimesheets = cache(async (params?: { status?: string; year?: s
   if (params?.status) queryParams.append('status', params.status)
   if (params?.year) queryParams.append('year', params.year)
 
-  const url = `${API_BASE_URL}/api/timesheets${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+  const url = `${API_BASE_URL}/api/timesheets/my${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
 
   const res = await fetch(url, {
     headers: {
@@ -121,7 +121,12 @@ export async function createMyTimesheetAction(
       'Content-Type': 'application/json',
       ...(cookieHeader && { Cookie: cookieHeader }),
     },
-    body: JSON.stringify(parsed.data),
+    body: JSON.stringify({
+      pay_period_start: parsed.data.period_start,
+      pay_period_end: parsed.data.period_end,
+      total_hours: parsed.data.total_hours,
+      notes: parsed.data.notes,
+    }),
   })
 
   if (!res.ok) {
@@ -162,7 +167,12 @@ export async function updateMyTimesheetAction(
       'Content-Type': 'application/json',
       ...(cookieHeader && { Cookie: cookieHeader }),
     },
-    body: JSON.stringify(parsed.data),
+    body: JSON.stringify({
+      pay_period_start: parsed.data.period_start,
+      pay_period_end: parsed.data.period_end,
+      total_hours: parsed.data.total_hours,
+      notes: parsed.data.notes,
+    }),
   })
 
   if (!res.ok) {

@@ -5,7 +5,7 @@ import { Plus, Edit, Trash2, MoreHorizontal, UserCheck, UserX } from 'lucide-rea
 import { Button } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { deleteUserAction, toggleUserStatusAction, type User, type UserStats } from '@/lib/services/users'
 import { ROLE_DISPLAY_NAMES, Role } from '@/lib/rbac/types'
@@ -26,6 +26,8 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 	const [createOpen, setCreateOpen] = useState(false)
 	const [editOpen, setEditOpen] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [deactivateOpen, setDeactivateOpen] = useState(false)
+	const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null)
 
 	const canManageUsers = hasAnyRole(user, ['system_admin', 'hr_manager'])
 
@@ -63,6 +65,27 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 			showToast({
 				type: 'error',
 				message: error instanceof Error ? error.message : 'Failed to update user status',
+				title: 'Error'
+			})
+		}
+	}
+
+	const handleDeactivateConfirm = async () => {
+		if (!userToDeactivate) return
+		
+		try {
+			await toggleUserStatusAction(userToDeactivate.id, false)
+			showToast({
+				type: 'success',
+				message: 'User deactivated successfully',
+				title: 'Success'
+			})
+			setDeactivateOpen(false)
+			setUserToDeactivate(null)
+		} catch (error: unknown) {
+			showToast({
+				type: 'error',
+				message: error instanceof Error ? error.message : 'Failed to deactivate user',
 				title: 'Error'
 			})
 		}
@@ -131,7 +154,7 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 								<tr key={usr.id} className='border-b border-[var(--border)] hover:bg-muted/50'>
 									<td className='p-3 min-w-[200px]'>
 										<div className='text-sm font-medium'>
-											{usr.first_name} {usr.last_name}
+											{usr.full_name || usr.email}
 										</div>
 									</td>
 									<td className='p-3 min-w-[200px]'>
@@ -174,7 +197,16 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 														Edit
 													</DropdownMenuItem>
 													<DropdownMenuItem
-														onClick={() => handleToggleStatus(usr.id, usr.is_active)}
+														onClick={() => {
+															if (usr.is_active) {
+																// Show warning dialog for deactivation
+																setUserToDeactivate(usr)
+																setDeactivateOpen(true)
+															} else {
+																// Direct activation without warning
+																handleToggleStatus(usr.id, usr.is_active)
+															}
+														}}
 													>
 														{usr.is_active ? (
 															<>
@@ -244,22 +276,36 @@ export function UserManagement({ users, stats }: UserManagementProps) {
 			</Dialog>
 
 			{/* Delete Confirmation */}
-			<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Are you sure?</AlertDialogTitle>
-						<AlertDialogDescription>
-							This will permanently delete the user &quot;{userToDelete?.first_name} {userToDelete?.last_name}&quot;. This action cannot be undone.
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setUserToDelete(null)}>Cancel</AlertDialogCancel>
-						<AlertDialogAction onClick={handleDelete} className='bg-red-600 hover:bg-red-700'>
-							Delete
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
+			<ConfirmationDialog
+				open={deleteOpen}
+				onOpenChange={(open) => {
+					setDeleteOpen(open);
+					if (!open) setUserToDelete(null);
+				}}
+				title="Are you sure?"
+				description={`This will permanently delete the user "${userToDelete?.full_name || userToDelete?.email}". This action cannot be undone.`}
+				confirmText="Delete"
+				cancelText="Cancel"
+				onConfirm={handleDelete}
+				variant="destructive"
+			/>
+
+			{/* Deactivate Confirmation Dialog */}
+			<ConfirmationDialog
+				open={deactivateOpen}
+				onOpenChange={(open) => {
+					setDeactivateOpen(open);
+					if (!open) setUserToDeactivate(null);
+				}}
+				title="Deactivate User?"
+				description={`Are you sure you want to deactivate "${userToDeactivate?.full_name || userToDeactivate?.email}"? 
+
+This will prevent the user from logging into the system and accessing their account. The user can be reactivated later if needed.`}
+				confirmText="Deactivate"
+				cancelText="Cancel"
+				onConfirm={handleDeactivateConfirm}
+				variant="destructive"
+			/>
 		</div>
 	)
 }

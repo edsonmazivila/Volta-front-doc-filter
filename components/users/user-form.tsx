@@ -15,21 +15,91 @@ import { useToast } from '@/components/ui/toast'
 
 // Form schemas
 const createUserSchema = z.object({
-	first_name: z.string().min(1, 'First name is required').min(2, 'First name must be at least 2 characters'),
-	last_name: z.string().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
-	email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-	password: z.string().min(8, 'Password must be at least 8 characters'),
+	full_name: z.string().min(1, 'Full name is required').min(2, 'Full name must be at least 2 characters'),
+	email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
+	password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
 	role: z.enum([ROLES.EMPLOYEE, ROLES.OPERATIONAL_MANAGER, ROLES.HR_MANAGER, ROLES.PAYROLL_MANAGER, ROLES.SYSTEM_ADMIN]),
-	is_active: z.boolean().default(true)
+	is_active: z.boolean().default(true),
+	can_login: z.boolean().default(true),
+	is_employee: z.boolean().default(false),
+	// Employee fields
+	employee_number: z.string().optional(),
+	employment_type: z.string().optional(),
+	employment_status: z.string().optional(),
+	hire_date: z.string().optional(),
+	termination_date: z.string().optional(),
+	job_title: z.string().optional(),
+	manager_id: z.string().optional(),
+	department_id: z.string().optional(),
+	date_of_birth: z.string().optional(),
+	phone_primary: z.string().optional(),
+	phone_secondary: z.string().optional(),
+	emergency_contact_name: z.string().optional(),
+	emergency_contact_phone: z.string().optional(),
+	emergency_contact_relationship: z.string().optional(),
+	address_line1: z.string().optional(),
+	address_line2: z.string().optional(),
+	city: z.string().optional(),
+	state: z.string().optional(),
+	postal_code: z.string().optional(),
+	country: z.string().optional(),
+	tax_filing_status: z.string().optional(),
+	tax_allowances: z.number().optional(),
+	additional_tax_withholding: z.number().optional(),
+	tax_exempt: z.boolean().optional(),
+	bank_name: z.string().optional(),
+	bank_account_type: z.string().optional(),
+	// Compensation
+	pay_type: z.string().optional(),
+	pay_frequency: z.string().optional(),
+	annual_salary: z.number().optional(),
+	hourly_rate: z.number().optional(),
+	standard_hours: z.number().optional(),
+	overtime_rate: z.number().optional(),
 })
 
 const editUserSchema = z.object({
-	first_name: z.string().min(1, 'First name is required').min(2, 'First name must be at least 2 characters'),
-	last_name: z.string().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
-	email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+	full_name: z.string().min(1, 'Full name is required').min(2, 'Full name must be at least 2 characters'),
+	email: z.string().email('Please enter a valid email address').optional().or(z.literal('')),
 	password: z.string().optional(),
 	role: z.enum([ROLES.EMPLOYEE, ROLES.OPERATIONAL_MANAGER, ROLES.HR_MANAGER, ROLES.PAYROLL_MANAGER, ROLES.SYSTEM_ADMIN]),
-	is_active: z.boolean().default(true)
+	is_active: z.boolean().default(true),
+	can_login: z.boolean().default(true),
+	is_employee: z.boolean().default(false),
+	// Employee fields
+	employee_number: z.string().optional(),
+	employment_type: z.string().optional(),
+	employment_status: z.string().optional(),
+	hire_date: z.string().optional(),
+	termination_date: z.string().optional(),
+	job_title: z.string().optional(),
+	manager_id: z.string().optional(),
+	department_id: z.string().optional(),
+	date_of_birth: z.string().optional(),
+	phone_primary: z.string().optional(),
+	phone_secondary: z.string().optional(),
+	emergency_contact_name: z.string().optional(),
+	emergency_contact_phone: z.string().optional(),
+	emergency_contact_relationship: z.string().optional(),
+	address_line1: z.string().optional(),
+	address_line2: z.string().optional(),
+	city: z.string().optional(),
+	state: z.string().optional(),
+	postal_code: z.string().optional(),
+	country: z.string().optional(),
+	tax_filing_status: z.string().optional(),
+	tax_allowances: z.number().optional(),
+	additional_tax_withholding: z.number().optional(),
+	tax_exempt: z.boolean().optional(),
+	bank_name: z.string().optional(),
+	bank_account_type: z.string().optional(),
+	// Compensation
+	pay_type: z.string().optional(),
+	pay_frequency: z.string().optional(),
+	annual_salary: z.number().optional(),
+	hourly_rate: z.number().optional(),
+	standard_hours: z.number().optional(),
+	overtime_rate: z.number().optional(),
 })
 
 // Schema types are inferred automatically
@@ -44,6 +114,7 @@ interface UserFormProps {
 
 export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel }: UserFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [canLogin, setCanLogin] = useState<boolean>(user?.can_login ?? true)
 	const { showToast } = useToast()
 	
 	const schema = mode === 'create' ? createUserSchema : editUserSchema
@@ -58,12 +129,13 @@ export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel 
 	} = useForm({
 		resolver: zodResolver(schema),
 		defaultValues: {
-			first_name: user?.first_name || '',
-			last_name: user?.last_name || '',
+			full_name: user?.full_name || '',
 			email: user?.email || '',
 			password: '',
 			role: (user?.role as UserRole) || ROLES.EMPLOYEE,
-			is_active: user?.is_active ?? true
+			is_active: user?.is_active ?? true,
+			can_login: user?.can_login ?? true,
+			is_employee: user?.is_employee ?? false
 		}
 	})
 
@@ -71,12 +143,13 @@ export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel 
 	useEffect(() => {
 		if (user) {
 			reset({
-				first_name: user.first_name,
-				last_name: user.last_name,
+				full_name: user.full_name,
 				email: user.email,
 				password: '',
 				role: user.role as UserRole,
-				is_active: user.is_active
+				is_active: user.is_active,
+				can_login: user.can_login,
+				is_employee: user.is_employee
 			})
 		}
 	}, [user, reset])
@@ -84,6 +157,33 @@ export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel 
 	const handleFormSubmit = async (data: Record<string, unknown>) => {
 		setIsSubmitting(true)
 		try {
+			// Dynamic validation based on can_login
+			if (canLogin) {
+				// If can_login is true, email and password are required
+				if (!data.email || data.email === '') {
+					showToast({
+						type: 'error',
+						message: 'Email is required when user can login',
+						title: 'Validation Error'
+					})
+					setIsSubmitting(false)
+					return
+				}
+				if (!isEditMode && (!data.password || data.password === '')) {
+					showToast({
+						type: 'error',
+						message: 'Password is required when user can login',
+						title: 'Validation Error'
+					})
+					setIsSubmitting(false)
+					return
+				}
+			} else {
+				// If can_login is false, remove email and password
+				delete data.email
+				delete data.password
+			}
+			
 			// Remove empty password for edit mode
 			if (isEditMode && !data.password) {
 				delete data.password
@@ -146,62 +246,50 @@ export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel 
 
 	return (
 		<form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<FormField
-					label="First Name"
-					error={errors.first_name?.message as string}
-					required
-				>
-					<Input
-						type="text"
-						placeholder="John"
-						error={!!errors.first_name}
-						disabled={isSubmitting}
-						{...register('first_name')}
-					/>
-				</FormField>
-
-				<FormField
-					label="Last Name"
-					error={errors.last_name?.message as string}
-					required
-				>
-					<Input
-						type="text"
-						placeholder="Doe"
-						error={!!errors.last_name}
-						disabled={isSubmitting}
-						{...register('last_name')}
-					/>
-				</FormField>
-			</div>
-
 			<FormField
-				label="Email Address"
-				error={errors.email?.message as string}
+				label="Full Name"
+				error={errors.full_name?.message as string}
 				required
 			>
 				<Input
-					type="email"
-					placeholder="john.doe@company.com"
-					error={!!errors.email}
+					type="text"
+					placeholder="John Doe"
+					error={!!errors.full_name}
 					disabled={isSubmitting}
-					{...register('email')}
+					{...register('full_name')}
 				/>
 			</FormField>
 
-			<FormField
-				label={isEditMode ? "New Password (leave blank to keep current)" : "Password"}
-				error={errors.password?.message as string}
-				required={!isEditMode}
-			>
-				<PasswordInput
-					placeholder={isEditMode ? "Enter new password" : "••••••••"}
-					error={!!errors.password}
-					disabled={isSubmitting}
-					{...register('password')}
-				/>
-			</FormField>
+			{canLogin && (
+				<>
+					<FormField
+						label="Email Address"
+						error={errors.email?.message as string}
+						required={true}
+					>
+						<Input
+							type="email"
+							placeholder="john.doe@company.com"
+							error={!!errors.email}
+							disabled={isSubmitting}
+							{...register('email')}
+						/>
+					</FormField>
+
+					<FormField
+						label={isEditMode ? "New Password (leave blank to keep current)" : "Password"}
+						error={errors.password?.message as string}
+						required={!isEditMode}
+					>
+						<PasswordInput
+							placeholder={isEditMode ? "Enter new password" : "••••••••"}
+							error={!!errors.password}
+							disabled={isSubmitting}
+							{...register('password')}
+						/>
+					</FormField>
+				</>
+			)}
 
 			<FormField
 				label="Role"
@@ -232,14 +320,41 @@ export function UserForm({ mode = 'create', user, onSubmit, onSuccess, onCancel 
 				/>
 			</FormField>
 
-			<FormField label="" error={errors.is_active?.message as string}>
-				<Checkbox
-					label="User is active"
-					error={!!errors.is_active}
-					disabled={isSubmitting}
-					{...register('is_active')}
-				/>
-			</FormField>
+			<div className="space-y-3">
+				<FormField label="" error={errors.is_active?.message as string}>
+					<Checkbox
+						label="User is active"
+						error={!!errors.is_active}
+						disabled={isSubmitting}
+						{...register('is_active')}
+					/>
+				</FormField>
+
+				<FormField label="" error={errors.can_login?.message as string}>
+					<Checkbox
+						label="Can login to system"
+						error={!!errors.can_login}
+						disabled={isSubmitting}
+						checked={canLogin}
+						onChange={(e) => {
+							const checked = e.target.checked;
+							setCanLogin(checked);
+							// Update form value
+							const event = { target: { name: 'can_login', value: checked } };
+							register('can_login').onChange(event);
+						}}
+					/>
+				</FormField>
+
+				<FormField label="" error={errors.is_employee?.message as string}>
+					<Checkbox
+						label="Is employee (has employee record)"
+						error={!!errors.is_employee}
+						disabled={isSubmitting}
+						{...register('is_employee')}
+					/>
+				</FormField>
+			</div>
 
 			<div className="flex gap-3 justify-end pt-4 border-t border-white/10">
 				<Button

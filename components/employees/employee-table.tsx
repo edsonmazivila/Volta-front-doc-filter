@@ -1,10 +1,17 @@
 "use client";
 import { useState, useMemo } from "react";
 import {
-  type Employee,
-  type EmployeeListParams,
-  deleteEmployeeAction,
-} from "@/lib/services/employees";
+  type User,
+  deleteUserAction,
+  toggleUserStatusAction,
+} from "@/lib/services/users";
+
+
+type EmployeeListParams = {
+  status?: 'active' | 'inactive' | 'all';
+  login?: 'can_login' | 'cannot_login' | 'all';
+  sort?: 'name' | 'status' | 'department';
+};
 import { Button } from "@/components/ui";
 import { SearchInput } from "@/components/search-input";
 import { DeleteEmployeeDialog } from "./delete-employee-dialog";
@@ -18,16 +25,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX } from "lucide-react";
+import { ROLE_DISPLAY_NAMES } from "@/lib/rbac/types";
 
 interface EmployeeTableProps {
-  initialEmployees: Employee[];
+  initialEmployees: User[];
   initialTotal: number;
 }
 
@@ -37,21 +46,23 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<EmployeeListParams["status"]>("all");
+  const [login, setLogin] = useState<EmployeeListParams["login"]>("all");
   const [department, setDepartment] = useState("");
   const [sort, setSort] = useState<EmployeeListParams["sort"]>("name");
-  const [order, setOrder] = useState<EmployeeListParams["order"]>("asc");
 
-  const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(
+  const [deletingEmployee, setDeletingEmployee] = useState<User | null>(
     null
   );
-  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
+  const [viewingEmployee, setViewingEmployee] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deactivateOpen, setDeactivateOpen] = useState(false);
+  const [employeeToDeactivate, setEmployeeToDeactivate] = useState<User | null>(null);
 
   // Bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkDelete, setShowBulkDelete] = useState(false);
 
-  const handleRowClick = (employee: Employee, event: React.MouseEvent) => {
+  const handleRowClick = (employee: User, event: React.MouseEvent) => {
     // Don't open dialog if clicking on checkbox, buttons, or other interactive elements
     const target = event.target as HTMLElement;
     if (
@@ -65,10 +76,10 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
     setViewingEmployee(employee);
   };
 
-  const handleDelete = async (employee: Employee) => {
+  const handleDelete = async (employee: User) => {
     setIsSubmitting(true);
     try {
-      await deleteEmployeeAction(employee.id);
+      await deleteUserAction(employee.id);
       showToast({ type: "success", message: "Employee deleted successfully" });
       setDeletingEmployee(null);
       router.refresh();
@@ -79,12 +90,43 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
     }
   };
 
+  const handleToggleStatus = async (employeeId: string, currentStatus: boolean) => {
+    try {
+      const newStatus = !currentStatus;
+      await toggleUserStatusAction(employeeId, newStatus);
+      showToast({
+        type: "success",
+        message: newStatus ? "Employee activated successfully" : "Employee deactivated successfully",
+      });
+      router.refresh();
+    } catch {
+      showToast({ type: "error", message: "Failed to update employee status" });
+    }
+  };
+
+  const handleDeactivateConfirm = async () => {
+    if (!employeeToDeactivate) return;
+    
+    try {
+      await toggleUserStatusAction(employeeToDeactivate.id, false);
+      showToast({
+        type: "success",
+        message: "Employee deactivated successfully",
+      });
+      setDeactivateOpen(false);
+      setEmployeeToDeactivate(null);
+      router.refresh();
+    } catch {
+      showToast({ type: "error", message: "Failed to deactivate employee" });
+    }
+  };
+
   const handleBulkDelete = async () => {
     setIsSubmitting(true);
     try {
       // Use Promise.allSettled to handle partial failures gracefully
       const results = await Promise.allSettled(
-        Array.from(selectedIds).map((id) => deleteEmployeeAction(id))
+        Array.from(selectedIds).map((id) => deleteUserAction(id))
       );
 
       const succeeded = results.filter((r) => r.status === "fulfilled").length;
@@ -169,6 +211,13 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       );
     }
 
+    // Filter by login capability
+    if (login !== "all") {
+      filtered = filtered.filter((e) =>
+        login === "can_login" ? e.can_login : !e.can_login
+      );
+    }
+
     // Sort
     const sorted = [...filtered].sort((a, b) => {
       let compareValue = 0;
@@ -185,16 +234,16 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           break;
       }
 
-      return order === "asc" ? compareValue : -compareValue;
+      return compareValue;
     });
 
     return sorted;
-  }, [initialEmployees, query, department, status, sort, order]);
+  }, [initialEmployees, query, department, status, login, sort]);
 
   // Get unique departments for filter
   const departments = useMemo(() => {
     const depts = new Set(
-      initialEmployees.map((e) => e.department).filter(Boolean)
+      initialEmployees.map((e) => e.department_id).filter(Boolean)
     );
     return Array.from(depts).sort();
   }, [initialEmployees]);
@@ -266,6 +315,19 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           </SelectContent>
         </Select>
         <Select
+          value={login}
+          onValueChange={(v) => setLogin(v as EmployeeListParams["login"])}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
+            <SelectValue placeholder="Login Access" />
+          </SelectTrigger>
+          <SelectContent className="bg-background border-[var(--border)]">
+            <SelectItem value="all">All Login Access</SelectItem>
+            <SelectItem value="can_login">Can Login</SelectItem>
+            <SelectItem value="cannot_login">Cannot Login</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
           value={sort}
           onValueChange={(v) => setSort(v as EmployeeListParams["sort"])}
         >
@@ -276,18 +338,6 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
             <SelectItem value="name">Name</SelectItem>
             <SelectItem value="status">Status</SelectItem>
             <SelectItem value="department">Department</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={order}
-          onValueChange={(v) => setOrder(v as EmployeeListParams["order"])}
-        >
-          <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
-            <SelectValue placeholder="Order" />
-          </SelectTrigger>
-          <SelectContent className="bg-background border-[var(--border)]">
-            <SelectItem value="asc">Asc</SelectItem>
-            <SelectItem value="desc">Desc</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -322,6 +372,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                 </div>
               </th>
               <th className="text-left p-3 min-w-[180px]">Email</th>
+              <th className="text-left p-3 min-w-[120px]">Role</th>
               <th className="text-left p-3 min-w-[120px]">Department</th>
               <th className="text-left p-3 min-w-[100px]">Status</th>
               <th className="text-left p-3 min-w-[100px]">Actions</th>
@@ -330,7 +381,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           <tbody>
             {filteredAndSortedItems.length === 0 ? (
               <tr>
-                <td className="p-4" colSpan={6}>
+                <td className="p-4" colSpan={7}>
                   No employees found
                 </td>
               </tr>
@@ -351,6 +402,11 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                   </td>
                   <td className="p-3 min-w-[200px]">{e.full_name}</td>
                   <td className="p-3 min-w-[180px]">{e.email}</td>
+                  <td className="p-3 min-w-[120px]">
+                    <span className="text-sm font-medium">
+                      {ROLE_DISPLAY_NAMES[e.role as keyof typeof ROLE_DISPLAY_NAMES] || e.role}
+                    </span>
+                  </td>
                   <td className="p-3 min-w-[120px]">{e.department || "-"}</td>
                   <td className="p-3 min-w-[100px]">
                     <span
@@ -405,6 +461,31 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                         <DropdownMenuItem
                           onClick={(event) => {
                             event.stopPropagation();
+                            if (e.is_active) {
+                              // Show warning dialog for deactivation
+                              setEmployeeToDeactivate(e);
+                              setDeactivateOpen(true);
+                            } else {
+                              // Direct activation without warning
+                              handleToggleStatus(e.id, e.is_active);
+                            }
+                          }}
+                        >
+                          {e.is_active ? (
+                            <>
+                              <UserX className="mr-2 h-4 w-4" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <UserCheck className="mr-2 h-4 w-4" />
+                              Activate
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(event) => {
+                            event.stopPropagation();
                             setDeletingEmployee(e);
                           }}
                           className="text-red-400 focus:text-red-400"
@@ -449,8 +530,13 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
             id: "",
             full_name: `${selectedIds.size} employees`,
             email: "",
-            employment_status: "active",
+            role: "employee",
+            company_id: "",
             is_active: true,
+            created_at: "",
+            updated_at: "",
+            is_employee: true,
+            can_login: true,
           }}
           open={showBulkDelete}
           onOpenChange={setShowBulkDelete}
@@ -458,6 +544,23 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           isSubmitting={isSubmitting}
         />
       )}
+
+      {/* Deactivate Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deactivateOpen}
+        onOpenChange={(open) => {
+          setDeactivateOpen(open);
+          if (!open) setEmployeeToDeactivate(null);
+        }}
+        title="Deactivate Employee?"
+        description={`Are you sure you want to deactivate "${employeeToDeactivate?.full_name || employeeToDeactivate?.email}"? 
+
+This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed.`}
+        confirmText="Deactivate"
+        cancelText="Cancel"
+        onConfirm={handleDeactivateConfirm}
+        variant="destructive"
+      />
     </div>
   );
 }

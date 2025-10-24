@@ -38,7 +38,7 @@ import { hasAnyRole } from "@/lib/auth/utils";
 interface DepartmentManagementProps {
   departments: Department[];
   stats: DepartmentStats;
-  managers: Array<{ id: string; first_name: string; last_name: string }>;
+  managers: Array<{ id: string; full_name: string }>;
 }
 
 export function DepartmentManagement({
@@ -202,8 +202,7 @@ export function DepartmentManagement({
                       {department.manager ? (
                         <div className="text-sm">
                           <div className="font-medium">
-                            {department.manager.first_name}{" "}
-                            {department.manager.last_name}
+                            {department.manager.full_name}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {department.manager.email}

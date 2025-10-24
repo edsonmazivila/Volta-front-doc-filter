@@ -27,13 +27,13 @@ export interface LeaveRequestItem {
   status: LeaveStatus;
   created_at?: string;
   submitted_at?: string;
-  employee_first_name?: string;
-  employee_last_name?: string;
   employee_full_name?: string;
   employee_number?: string;
   approved_final_at?: string;
   approved_final_by?: string;
   approved_final_notes?: string;
+  approver_l1_full_name?: string;
+  approver_final_full_name?: string;
 }
 
 export interface LeaveBalanceItem {

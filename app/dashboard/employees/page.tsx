@@ -1,6 +1,6 @@
 import { Header } from "@/components/dashboard/header";
 import { EmployeeTable } from "@/components/employees/employee-table";
-import { getEmployees } from "@/lib/services/employees";
+import { getUsers } from "@/lib/services/users";
 import { requireRole } from "@/lib/rbac/server";
 
 export default async function EmployeesPage() {
@@ -10,7 +10,9 @@ export default async function EmployeesPage() {
     "payroll_manager",
     "system_admin",
   ]);
-  const { items: employees, total } = await getEmployees();
+  const users = await getUsers();
+  const employees = users;
+  const total = employees.length;
 
   return (
     <>

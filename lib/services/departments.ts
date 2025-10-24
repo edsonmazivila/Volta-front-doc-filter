@@ -13,8 +13,7 @@ export interface Department {
 	manager_id: string | null
 	manager: {
 		id: string
-		first_name: string
-		last_name: string
+		full_name: string
 		email: string
 	} | null
 	is_active: boolean
@@ -71,8 +70,7 @@ export const getDepartments = cache(async (): Promise<Department[]> => {
 				manager_id?: string | number;
 				manager?: {
 					id?: string | number;
-					first_name?: string;
-					last_name?: string;
+					full_name?: string;
 					email?: string;
 				};
 				is_active?: boolean;
@@ -86,8 +84,7 @@ export const getDepartments = cache(async (): Promise<Department[]> => {
 				manager_id: d.manager_id ? String(d.manager_id) : null,
 				manager: d.manager ? {
 					id: String(d.manager.id || ''),
-					first_name: String(d.manager.first_name || ''),
-					last_name: String(d.manager.last_name || ''),
+					full_name: String(d.manager.full_name || ''),
 					email: String(d.manager.email || ''),
 				} : null,
 				is_active: Boolean(d.is_active),

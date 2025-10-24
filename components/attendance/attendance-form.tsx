@@ -3,13 +3,13 @@
 import { useActionState, useState } from 'react'
 import { createAttendanceAction, updateAttendanceAction } from '@/lib/services/attendance'
 import type { AttendanceRecord } from '@/lib/types/attendance'
-import type { Employee } from '@/lib/services/employees'
+import type { User } from '@/lib/services/users'
 import { Button } from '@/components/ui'
 import { Input } from '../ui/input'
 import { toast } from 'sonner'
 
 interface AttendanceFormProps {
-  employees: Employee[]
+  employees: User[]
   editRecord?: AttendanceRecord
   onSuccess?: () => void
   onCancel?: () => void
@@ -59,7 +59,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
             <option value="" className="bg-background text-foreground">Select employee</option>
             {employees.map((emp) => (
               <option key={emp.id} value={emp.id} className="bg-background text-foreground">
-                {emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim()} - {emp.email}
+                {emp.full_name || emp.email} - {emp.email}
               </option>
             ))}
           </select>

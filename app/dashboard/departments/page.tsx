@@ -19,8 +19,7 @@ export default async function DepartmentsPage() {
     .filter((u) => ['system_admin', 'hr_manager', 'payroll_manager', 'operational_manager', ].includes(u.role))
     .map((u) => ({
       id: u.id,
-      first_name: u.first_name,
-      last_name: u.last_name,
+      full_name: u.full_name,
     }))
 
   return (

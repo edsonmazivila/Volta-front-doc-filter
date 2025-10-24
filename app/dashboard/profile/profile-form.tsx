@@ -52,7 +52,7 @@ export function ProfileForm({ initialData }: { initialData: MeResponse | null })
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Full name</p>
-						<p className="text-base font-medium">{user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || '-'}</p>
+						<p className="text-base font-medium">{user?.full_name || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Email</p>
@@ -104,7 +104,7 @@ export function ProfileForm({ initialData }: { initialData: MeResponse | null })
 				</div>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Full name</span>
-					<input name="full_name" defaultValue={user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim()} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="full_name" defaultValue={user?.full_name || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Email</span>

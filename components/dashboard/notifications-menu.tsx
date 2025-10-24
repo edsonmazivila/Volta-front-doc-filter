@@ -19,39 +19,62 @@ export function NotificationsMenu() {
       const [list, count] = await Promise.all([getNotifications(10), getUnreadCount()])
       setItems(list)
       setUnreadCount(count)
+    } catch (error) {
+      console.error('Failed to refresh notifications:', error)
+      // Keep existing state on error
     } finally {
       setLoading(false)
     }
   }
 
   async function handleMarkAsRead(id: string) {
-    const { markAsRead } = await import('@/lib/services/notifications')
-    await markAsRead(id)
-    await refreshNotifications()
+    try {
+      const { markAsReadAction } = await import('@/lib/services/notifications')
+      await markAsReadAction(id)
+      await refreshNotifications()
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error)
+    }
   }
 
   async function handleDelete(id: string) {
-    const { deleteNotification } = await import('@/lib/services/notifications')
-    await deleteNotification(id)
-    await refreshNotifications()
+    try {
+      const { deleteNotificationAction } = await import('@/lib/services/notifications')
+      await deleteNotificationAction(id)
+      await refreshNotifications()
+    } catch (error) {
+      console.error('Failed to delete notification:', error)
+    }
   }
 
   async function handleClearAll() {
-    const { clearAllNotifications } = await import('@/lib/services/notifications')
-    await clearAllNotifications()
-    await refreshNotifications()
+    try {
+      const { clearAllNotificationsAction } = await import('@/lib/services/notifications')
+      await clearAllNotificationsAction()
+      await refreshNotifications()
+    } catch (error) {
+      console.error('Failed to clear all notifications:', error)
+    }
   }
 
   async function handleMarkAllRead() {
-    const { markAllRead } = await import('@/lib/services/notifications')
-    await markAllRead()
-    await refreshNotifications()
+    try {
+      const { markAllReadAction } = await import('@/lib/services/notifications')
+      await markAllReadAction()
+      await refreshNotifications()
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error)
+    }
   }
 
   return (
     <DropdownMenu onOpenChange={(open) => { if (open) void refreshNotifications() }}>
       <DropdownMenuTrigger asChild>
-        <button aria-label='Notifications' className='relative rounded-full p-1 hover:bg-accent focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'>
+        <button 
+          aria-label='Notifications' 
+          className='relative rounded-full p-1 hover:bg-accent focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'
+          suppressHydrationWarning
+        >
           <Bell size={16} />
           {unreadCount > 0 && (
             <span className='absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center'>
