@@ -55,8 +55,8 @@ const schema = z.object({
 
   // Tax & Bank
   tax_filing_status: z.string().optional(),
-  tax_allowances: z.number().optional(),
-  additional_tax_withholding: z.number().optional(),
+  tax_allowances: z.coerce.number().optional(),
+  additional_tax_withholding: z.coerce.number().optional(),
   tax_exempt: z.boolean().optional(),
   bank_name: z.string().optional(),
   bank_account_type: z.string().optional(),
@@ -64,10 +64,10 @@ const schema = z.object({
   // Compensation
   pay_type: z.string().optional(),
   pay_frequency: z.string().optional(),
-  annual_salary: z.number().optional(),
-  hourly_rate: z.number().optional(),
-  overtime_rate: z.number().optional(),
-  standard_hours: z.number().optional(),
+  annual_salary: z.coerce.number().optional(),
+  hourly_rate: z.coerce.number().optional(),
+  overtime_rate: z.coerce.number().optional(),
+  standard_hours: z.coerce.number().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -138,14 +138,15 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
     try {
       // Dynamic validation based on can_login
       if (canLogin) {
-        // If can_login is true, email and password are required
+        // If can_login is true, email is required
         if (!values.email || values.email === '') {
           toast.error('Email is required when user can login');
           setIsSubmitting(false);
           return;
         }
-        if (!values.password || values.password === '') {
-          toast.error('Password is required when user can login');
+        // Password is optional when editing - only validate if provided
+        if (values.password && values.password.length < 6) {
+          toast.error('Password must be at least 6 characters');
           setIsSubmitting(false);
           return;
         }
@@ -157,9 +158,13 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
 
       const formData = new FormData();
       
-      // Add all form values (excluding is_employee as requested)
+      // Add all form values (excluding is_employee, is_active, manager_id, and empty password as they're handled separately)
       Object.entries(values).forEach(([key, value]) => {
-        if (key !== 'is_employee' && value !== undefined && value !== null && value !== '') {
+        if (key !== 'is_employee' && key !== 'is_active' && key !== 'manager_id' && value !== undefined && value !== null && value !== '') {
+          // Skip password if it's empty (user doesn't want to change it)
+          if (key === 'password' && (!value || value === '')) {
+            return;
+          }
           formData.append(key, String(value));
         }
       });
@@ -278,28 +283,22 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             {/* Can Login Checkbox */}
             <div className="flex flex-col gap-3 md:col-span-2">
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="can_login"
-                  checked={canLogin}
-                  onChange={(e) => {
-                    const checked = (e.target as HTMLInputElement).checked;
-                    setCanLogin(checked);
-                    // Update form value
-                    const event = { target: { name: 'can_login', value: checked } };
-                    register('can_login').onChange(event);
-                  }}
+                <Controller
+                  name="can_login"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="can_login"
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                        setCanLogin(checked as boolean);
+                      }}
+                    />
+                  )}
                 />
                 <label htmlFor="can_login" className="text-sm font-medium">
                   Can login to system
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_active"
-                  {...register("is_active")}
-                />
-                <label htmlFor="is_active" className="text-sm font-medium">
-                  User is active
                 </label>
               </div>
             </div>
@@ -338,12 +337,17 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                     </SelectTrigger>
                     <SelectContent>
                       {(departments || []).map((d) => (
-                        <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                        <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 )}
               />
+              {errors.department_id && (
+                <span className="text-xs text-destructive">
+                  {errors.department_id.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Employee Number</label>
@@ -351,6 +355,11 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                 {...register("employee_number")}
                 placeholder="e.g., EMP001"
               />
+              {errors.employee_number && (
+                <span className="text-xs text-destructive">
+                  {errors.employee_number.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Job Title</label>
@@ -358,6 +367,11 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                 {...register("job_title")}
                 placeholder="e.g., Software Engineer"
               />
+              {errors.job_title && (
+                <span className="text-xs text-destructive">
+                  {errors.job_title.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Employment Type</label>
@@ -403,17 +417,15 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Hire Date</label>
               <Input type="date" {...register("hire_date")} />
+              {errors.hire_date && (
+                <span className="text-xs text-destructive">
+                  {errors.hire_date.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Termination Date</label>
               <Input type="date" {...register("termination_date")} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Manager</label>
-              <Input
-                {...register("manager_id")}
-                placeholder="Manager ID"
-              />
             </div>
           </div>
         </div>
@@ -657,6 +669,34 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                   </Select>
                 )}
               />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Annual Salary</label>
+              <Input
+                type="number"
+                step="1"
+                {...register("annual_salary")}
+                placeholder="e.g., 48000"
+              />
+              {errors.annual_salary && (
+                <span className="text-xs text-destructive">
+                  {errors.annual_salary.message}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium">Hourly Rate</label>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("hourly_rate")}
+                placeholder="e.g., 25.00"
+              />
+              {errors.hourly_rate && (
+                <span className="text-xs text-destructive">
+                  {errors.hourly_rate.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">

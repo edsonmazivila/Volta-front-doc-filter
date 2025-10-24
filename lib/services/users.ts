@@ -4,6 +4,8 @@ import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
 import { z } from 'zod'
 import { revalidateEntityMutation, CacheTags, fetchWithGracefulFallback } from '@/lib/cache-utils'
+import { toIsoUtc } from '@/lib/utils'
+import { getDepartments } from './departments'
 
 // Compensation nested object
 export interface Compensation {
@@ -86,9 +88,9 @@ const createUserSchema = z.object({
 	is_employee: z.boolean().default(true),
 	// Employee fields
 	employee_number: z.string().optional(),
-	employment_type: z.string().optional(),
+	employment_type: z.string().min(1, 'Employment type is required'),
 	employment_status: z.string().optional(),
-	hire_date: z.string().optional(),
+	hire_date: z.string().min(1, 'Hire date is required'),
 	termination_date: z.string().optional(),
 	job_title: z.string().optional(),
 	manager_id: z.string().optional(),
@@ -182,6 +184,10 @@ export const getUsers = cache(async (): Promise<User[]> => {
 			const json = await res.json()
 			const raw = Array.isArray(json) ? json : (json.data || json.users || [])
 
+			// Get departments to map department names
+			const departments = await getDepartments()
+			const departmentMap = new Map(departments.map(dept => [dept.id, dept.name]))
+
 			return raw.map((u: Record<string, unknown>) => ({
 				id: String(u.id || ''),
 				email: String(u.email || ''),
@@ -197,7 +203,7 @@ export const getUsers = cache(async (): Promise<User[]> => {
 				is_employee: Boolean(u.is_employee),
 				can_login: Boolean(u.can_login),
 				department_id: u.department_id ? String(u.department_id) : null,
-				department: u.department ? String(u.department) : undefined,
+				department: u.department_id ? departmentMap.get(String(u.department_id)) : undefined,
 				employee_number: u.employee_number ? String(u.employee_number) : undefined,
 				employment_type: u.employment_type ? String(u.employment_type) : undefined,
 				employment_status: u.employment_status ? String(u.employment_status) : undefined,
@@ -311,12 +317,12 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 			employee_number: parsed.data.employee_number,
 			employment_type: parsed.data.employment_type,
 			employment_status: parsed.data.employment_status,
-			hire_date: parsed.data.hire_date,
-			termination_date: parsed.data.termination_date,
+			hire_date: toIsoUtc(parsed.data.hire_date),
+			termination_date: toIsoUtc(parsed.data.termination_date),
 			job_title: parsed.data.job_title,
 			manager_id: parsed.data.manager_id,
 			department_id: parsed.data.department_id,
-			date_of_birth: parsed.data.date_of_birth,
+			date_of_birth: toIsoUtc(parsed.data.date_of_birth),
 			phone_primary: parsed.data.phone_primary,
 			phone_secondary: parsed.data.phone_secondary,
 			emergency_contact_name: parsed.data.emergency_contact_name,
@@ -399,8 +405,37 @@ export async function updateUserAction(id: string, prevState: unknown, formData:
 	try {
 		const cookieHeader = await getAuthCookieHeader()
 		
-		// Build payload - remove undefined values
+		// Build payload - format dates and remove undefined values
 		const payload: Record<string, unknown> = { ...parsed.data }
+		
+		// Format date fields to ISO UTC format
+		if (payload.hire_date) {
+			payload.hire_date = toIsoUtc(payload.hire_date as string)
+		}
+		if (payload.termination_date) {
+			payload.termination_date = toIsoUtc(payload.termination_date as string)
+		}
+		if (payload.date_of_birth) {
+			payload.date_of_birth = toIsoUtc(payload.date_of_birth as string)
+		}
+		
+		// Structure compensation fields into nested object
+		const compensationFields = ['pay_type', 'pay_frequency', 'annual_salary', 'hourly_rate', 'standard_hours', 'overtime_rate']
+		const compensation: Record<string, unknown> = {}
+		let hasCompensation = false
+		
+		compensationFields.forEach(field => {
+			if (payload[field] !== undefined) {
+				compensation[field] = payload[field]
+				delete payload[field] // Remove from top level
+				hasCompensation = true
+			}
+		})
+		
+		if (hasCompensation) {
+			payload.compensation = compensation
+		}
+		
 		Object.keys(payload).forEach(key => {
 			if (payload[key] === undefined) {
 				delete payload[key]

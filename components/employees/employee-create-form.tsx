@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToastHelpers } from "@/components/ui/toast";
 import { createUserAction } from "@/lib/services/users";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 
 const schema = z.object({
   // Account & User
@@ -55,8 +55,8 @@ const schema = z.object({
 
   // Tax & Bank
   tax_filing_status: z.string().optional(),
-  tax_allowances: z.number().optional(),
-  additional_tax_withholding: z.number().optional(),
+  tax_allowances: z.coerce.number().optional(),
+  additional_tax_withholding: z.coerce.number().optional(),
   tax_exempt: z.boolean().optional(),
   bank_name: z.string().optional(),
   bank_account_type: z.string().optional(),
@@ -64,10 +64,10 @@ const schema = z.object({
   // Compensation
   pay_type: z.string().optional(),
   pay_frequency: z.string().optional(),
-  annual_salary: z.number().optional(),
-  hourly_rate: z.number().optional(),
-  overtime_rate: z.number().optional(),
-  standard_hours: z.number().optional(),
+  annual_salary: z.coerce.number().optional(),
+  hourly_rate: z.coerce.number().optional(),
+  overtime_rate: z.coerce.number().optional(),
+  standard_hours: z.coerce.number().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -82,6 +82,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
   const toast = useToastHelpers();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canLogin, setCanLogin] = useState<boolean>(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -152,15 +153,28 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
         delete values.password;
       }
 
+      // Additional validation for required fields
+      if (!values.employment_type || values.employment_type === '') {
+        toast.error('Employment type is required');
+        setIsSubmitting(false);
+        return;
+      }
+      if (!values.hire_date || values.hire_date === '') {
+        toast.error('Hire date is required');
+        setIsSubmitting(false);
+        return;
+      }
+
       const formData = new FormData();
       
       // Add unified flags for employee creation
       formData.append('is_employee', 'true'); // Always true for employee creation
       formData.append('can_login', String(canLogin));
+      formData.append('is_active', 'true'); // Always active by default
       
-      // Add all form values (excluding is_employee from form data as it's handled above)
+      // Add all form values (excluding is_employee, is_active, and manager_id from form data as they're handled separately)
       Object.entries(values).forEach(([key, value]) => {
-        if (key !== 'is_employee' && value !== undefined && value !== null && value !== '') {
+        if (key !== 'is_employee' && key !== 'is_active' && key !== 'manager_id' && value !== undefined && value !== null && value !== '') {
           formData.append(key, String(value));
         }
       });
@@ -176,7 +190,8 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
         router.push("/dashboard/employees");
         router.refresh();
       }
-    } catch {
+    } catch (error) {
+      console.error('Employee creation error:', error);
       toast.error("Failed to create employee");
     } finally {
       setIsSubmitting(false);
@@ -236,11 +251,25 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-sm font-medium">Password *</label>
-                  <Input
-                    type="password"
-                    {...register("password")}
-                    placeholder="Min 8 characters"
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      {...register("password")}
+                      placeholder="Min 8 characters"
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                   {errors.password && (
                     <span className="text-xs text-destructive">
                       {errors.password.message}
@@ -283,28 +312,22 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
             {/* Can Login Checkbox */}
             <div className="flex flex-col gap-3 md:col-span-2">
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="can_login"
-                  checked={canLogin}
-                  onChange={(e) => {
-                    const checked = (e.target as HTMLInputElement).checked;
-                    setCanLogin(checked);
-                    // Update form value
-                    const event = { target: { name: 'can_login', value: checked } };
-                    register('can_login').onChange(event);
-                  }}
+                <Controller
+                  name="can_login"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="can_login"
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                        setCanLogin(checked as boolean);
+                      }}
+                    />
+                  )}
                 />
                 <label htmlFor="can_login" className="text-sm font-medium">
                   Can login to system
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_active"
-                  {...register("is_active")}
-                />
-                <label htmlFor="is_active" className="text-sm font-medium">
-                  User is active
                 </label>
               </div>
             </div>
@@ -349,6 +372,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                   </Select>
                 )}
               />
+              {errors.department_id && (
+                <span className="text-xs text-destructive">
+                  {errors.department_id.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Employee Number</label>
@@ -356,6 +384,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 {...register("employee_number")}
                 placeholder="e.g., EMP001"
               />
+              {errors.employee_number && (
+                <span className="text-xs text-destructive">
+                  {errors.employee_number.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Job Title</label>
@@ -363,6 +396,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 {...register("job_title")}
                 placeholder="e.g., Software Engineer"
               />
+              {errors.job_title && (
+                <span className="text-xs text-destructive">
+                  {errors.job_title.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Employment Type *</label>
@@ -402,13 +440,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Termination Date</label>
               <Input type="date" {...register("termination_date")} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Manager ID</label>
-              <Input
-                {...register("manager_id")}
-                placeholder="Manager's user ID"
-              />
+              {errors.termination_date && (
+                <span className="text-xs text-destructive">
+                  {errors.termination_date.message}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -429,6 +465,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 {...register("phone_primary")}
                 placeholder="+1 (555) 000-0000"
               />
+              {errors.phone_primary && (
+                <span className="text-xs text-destructive">
+                  {errors.phone_primary.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Secondary Phone</label>
@@ -437,10 +478,20 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 {...register("phone_secondary")}
                 placeholder="+1 (555) 000-0000"
               />
+              {errors.phone_secondary && (
+                <span className="text-xs text-destructive">
+                  {errors.phone_secondary.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-sm font-medium">Date of Birth</label>
               <Input type="date" {...register("date_of_birth")} />
+              {errors.date_of_birth && (
+                <span className="text-xs text-destructive">
+                  {errors.date_of_birth.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-sm font-medium">Address Line 1</label>
@@ -459,6 +510,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">City</label>
               <Input {...register("city")} placeholder="City" />
+              {errors.city && (
+                <span className="text-xs text-destructive">
+                  {errors.city.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">State</label>
@@ -644,6 +700,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 {...register("annual_salary")}
                 placeholder="e.g., 48000"
               />
+              {errors.annual_salary && (
+                <span className="text-xs text-destructive">
+                  {errors.annual_salary.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Hourly Rate</label>
@@ -653,6 +714,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
                 {...register("hourly_rate")}
                 placeholder="e.g., 25.00"
               />
+              {errors.hourly_rate && (
+                <span className="text-xs text-destructive">
+                  {errors.hourly_rate.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">

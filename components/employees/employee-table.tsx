@@ -243,7 +243,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   // Get unique departments for filter
   const departments = useMemo(() => {
     const depts = new Set(
-      initialEmployees.map((e) => e.department_id).filter(Boolean)
+      initialEmployees.map((e) => e.department).filter(Boolean)
     );
     return Array.from(depts).sort();
   }, [initialEmployees]);

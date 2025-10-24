@@ -54,6 +54,15 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 		return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")
 	}
 
+	// Format employment type for display
+	const formatEmploymentType = (type?: string) => {
+		if (!type) return "Not provided"
+		return type
+			.split('_')
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ')
+	}
+
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -166,12 +175,12 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									</div>
 								)}
 
-								{employeeDetails.department_id && (
+								{employeeDetails.department && (
 									<div className="flex items-center gap-3">
 										<Building className="h-4 w-4 text-muted-foreground" />
 										<div>
 											<p className="text-sm font-medium">Department</p>
-											<p className="text-sm text-muted-foreground">{employeeDetails.department_id}</p>
+											<p className="text-sm text-muted-foreground">{employeeDetails.department}</p>
 										</div>
 									</div>
 								)}
@@ -199,7 +208,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 								{employeeDetails.employment_type && (
 									<div>
 										<p className="text-sm font-medium">Employment Type</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.employment_type}</p>
+										<p className="text-sm text-muted-foreground">{formatEmploymentType(employeeDetails.employment_type)}</p>
 									</div>
 								)}
 
