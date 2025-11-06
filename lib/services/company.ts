@@ -784,7 +784,7 @@ export async function updateCompanyDocumentAction(id: string, prevState: unknown
 
     if (!res.ok) {
       const responseText = await res.text().catch(() => '')
-      let error: any
+      let error: { message?: string; error?: string }
       try { error = JSON.parse(responseText) } catch { error = { message: responseText } }
       return { errors: { _form: [error.message || error.error || `Failed to update document (${res.status})`] } }
     }
