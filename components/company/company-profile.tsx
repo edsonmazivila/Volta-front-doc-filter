@@ -109,6 +109,8 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 	const [deletePayScheduleTarget, setDeletePayScheduleTarget] = useState<{ id: string, name: string } | null>(null)
 	const [deletingPolicy, setDeletingPolicy] = useState(false)
 	const [deletingPaySchedule, setDeletingPaySchedule] = useState(false)
+	const [editingPolicyId, setEditingPolicyId] = useState<string | null>(null)
+	const [editingPayScheduleId, setEditingPayScheduleId] = useState<string | null>(null)
 
 	async function handleDeletePayScheduleConfirm() {
 		if (!deletePayScheduleTarget) return
@@ -294,7 +296,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 				<TabsContent value='policies'>
 					<div className='flex items-center justify-between mt-4'>
 						<h3 className='text-sm font-medium text-foreground'>Company Leave Policies</h3>
-						<Button onClick={() => setLpOpen(true)}>Create</Button>
+					<Button onClick={() => { setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }); setLpOpen(true) }}>Create</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
 						{leavePoliciesState.length ? leavePoliciesState.map(p => (
@@ -313,7 +315,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										</div>
                                     </div>
                                     <div className='flex items-center gap-2 shrink-0'>
-                                        <Button variant='outline' onClick={()=>{ setLpOpen(true); setLpForm({ name: p.name, description: p.description || '', policy_type: p.policy_type, leave_type: p.leave_type, annual_allocation_days: p.annual_allocation_days, accrual_rate: p.accrual_rate, accrual_frequency: p.accrual_frequency, allow_carry_over: p.allow_carry_over, max_carry_over_days: p.max_carry_over_days, carry_over_expiry_months: p.carry_over_expiry_months, min_request_days: p.min_request_days, max_request_days: p.max_request_days, max_consecutive_days: p.max_consecutive_days, min_advance_notice_days: p.min_advance_notice_days, requires_manager_approval: p.requires_manager_approval, requires_hr_approval: p.requires_hr_approval, auto_approval_threshold: p.auto_approval_threshold, allow_half_days: p.allow_half_days, allow_negative_balance: p.allow_negative_balance, effective_date: p.effective_date.split('T')[0], is_active: p.is_active }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
+									<Button variant='outline' onClick={()=>{ setEditingPolicyId(p.id); setLpOpen(true); setLpForm({ name: p.name, description: p.description || '', policy_type: p.policy_type, leave_type: p.leave_type, annual_allocation_days: p.annual_allocation_days, accrual_rate: p.accrual_rate, accrual_frequency: p.accrual_frequency, allow_carry_over: p.allow_carry_over, max_carry_over_days: p.max_carry_over_days, carry_over_expiry_months: p.carry_over_expiry_months, min_request_days: p.min_request_days, max_request_days: p.max_request_days, max_consecutive_days: p.max_consecutive_days, min_advance_notice_days: p.min_advance_notice_days, requires_manager_approval: p.requires_manager_approval, requires_hr_approval: p.requires_hr_approval, auto_approval_threshold: p.auto_approval_threshold, allow_half_days: p.allow_half_days, allow_negative_balance: p.allow_negative_balance, effective_date: p.effective_date.split('T')[0], is_active: p.is_active }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
 										<Button variant='destructive' onClick={()=>{ setDeletePolicyTarget({ id: p.id, name: p.name }); setDeletePolicyOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
@@ -324,7 +326,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 				<TabsContent value='schedules'>
 					<div className='flex items-center justify-between mt-4'>
 						<h3 className='text-sm font-medium text-foreground'>Pay Schedules</h3>
-						<Button onClick={() => setPsOpen(true)}>Create</Button>
+					<Button onClick={() => { setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '' }); setPsOpen(true) }}>Create</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
                             {paySchedulesState.length ? paySchedulesState.map(s => (
@@ -334,7 +336,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										<div className='text-xs text-muted-foreground'>Frequency: {s.frequency} • Start: {formatDate(s.start_date)} • {s.is_active ? 'Active' : 'Inactive'}</div>
                                     </div>
                                     <div className='flex items-center gap-2'>
-                                        <Button variant='outline' onClick={()=>{ setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').slice(0,10) }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
+									<Button variant='outline' onClick={()=>{ setEditingPayScheduleId(s.id); setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').slice(0,10) }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
                                         <Button variant='destructive' onClick={() => { setDeletePayScheduleTarget({ id: s.id, name: s.name }); setDeletePayScheduleOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
@@ -400,7 +402,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			{/* Create Pay Schedule */}
 			<Dialog open={psOpen} onOpenChange={setPsOpen}>
 				<DialogContent className='sm:max-w-lg'>
-					<DialogHeader><DialogTitle>Create Pay Schedule</DialogTitle></DialogHeader>
+				<DialogHeader><DialogTitle>{editingPayScheduleId ? 'Edit' : 'Create'} Pay Schedule</DialogTitle></DialogHeader>
                     <div className='grid gap-3'>
                         <FormField label='Name'><Input value={psForm.name} onChange={(e)=>setPsForm({ ...psForm, name: e.target.value })} /></FormField>
                         <FormField label='Frequency'>
@@ -419,8 +421,8 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
                         <FormField label='Start Date'><Input type='date' value={psForm.start_date} onChange={(e)=>setPsForm({ ...psForm, start_date: e.target.value })} /></FormField>
                     </div>
 					<div className='flex justify-end gap-2 pt-4'>
-                        <Button variant='ghost' onClick={()=>setPsOpen(false)}>Cancel</Button>
-                        <Button onClick={async ()=>{ if (paySchedules.find(x=>x.name===psForm.name)) { const id = (paySchedules.find(x=>x.name===psForm.name) as { id: string }).id; const formData = new FormData(); formData.append('name', psForm.name); formData.append('frequency', psForm.frequency); formData.append('start_date', psForm.start_date); formData.append('is_active', 'true'); await updatePayScheduleAction(id, null, formData); window.location.reload() } else { await handleCreatePaySchedule() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button variant='ghost' onClick={()=>{ setPsOpen(false); setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '' }) }}>Cancel</Button>
+						<Button onClick={async ()=>{ if (editingPayScheduleId) { const formData = new FormData(); formData.append('name', psForm.name); formData.append('frequency', psForm.frequency); formData.append('start_date', psForm.start_date); formData.append('is_active', 'true'); await updatePayScheduleAction(editingPayScheduleId, null, formData); window.location.reload() } else { await handleCreatePaySchedule() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
@@ -428,7 +430,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			{/* Create/Edit Leave Policy */}
 			<Dialog open={lpOpen} onOpenChange={setLpOpen}>
 				<DialogContent className='sm:max-w-3xl max-h-[90vh] overflow-y-auto'>
-					<DialogHeader><DialogTitle>{leavePolicies.find(x=>x.name===lpForm.name) ? 'Edit' : 'Create'} Leave Policy</DialogTitle></DialogHeader>
+					<DialogHeader><DialogTitle>{editingPolicyId ? 'Edit' : 'Create'} Leave Policy</DialogTitle></DialogHeader>
                     <div className='grid gap-4'>
 						{/* Basic Information */}
 						<div className='space-y-3'>
@@ -585,8 +587,8 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 						</div>
                     </div>
 					<div className='flex justify-end gap-2 pt-4 border-t'>
-                        <Button variant='ghost' onClick={()=>{ setLpOpen(false); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }) }}>Cancel</Button>
-                        <Button onClick={async ()=>{ if (leavePolicies.find(x=>x.name===lpForm.name)) { const id = (leavePolicies.find(x=>x.name===lpForm.name) as { id: string }).id; const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(id, null, formData); window.location.reload() } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button variant='ghost' onClick={()=>{ setLpOpen(false); setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }) }}>Cancel</Button>
+						<Button onClick={async ()=>{ if (editingPolicyId) { const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(editingPolicyId, null, formData); window.location.reload() } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>

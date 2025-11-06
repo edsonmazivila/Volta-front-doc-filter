@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui'
 import { Input } from '@/components/ui/input'
-import { createMyAttendanceAction, updateMyAttendanceAction } from '@/lib/services/attendance'
+import { createMyAttendanceAction, updateMyAttendanceAction, submitJustificationAction } from '@/lib/services/attendance'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { Calendar, Clock, FileText } from 'lucide-react'
@@ -91,22 +91,34 @@ export function AttendanceFormDialog({
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
       const formData = new FormData()
       formData.append('date', date)
-      formData.append('status', status)
-      formData.append('timezone', timezone)
-      if (clockIn) formData.append('clock_in', clockIn)
-      if (clockOut) formData.append('clock_out', clockOut)
-      if (justification) formData.append('justification', justification)
-
-      const result = isEdit && attendance
-        ? await updateMyAttendanceAction(null, attendance.id, formData)
-        : await createMyAttendanceAction(null, formData)
+      
+      let result
+      if (!isEdit && (status === 'absent' || status === 'late')) {
+        formData.append('reason', justification)
+        result = await submitJustificationAction(null, formData)
+      } else if (isEdit && attendance) {
+        formData.append('status', status)
+        formData.append('timezone', timezone)
+        if (clockIn) formData.append('clock_in', clockIn)
+        if (clockOut) formData.append('clock_out', clockOut)
+        if (justification) formData.append('justification', justification)
+        result = await updateMyAttendanceAction(null, attendance.id, formData)
+      } else {
+        
+        formData.append('status', status)
+        formData.append('timezone', timezone)
+        if (clockIn) formData.append('clock_in', clockIn)
+        if (clockOut) formData.append('clock_out', clockOut)
+        if (justification) formData.append('justification', justification)
+        result = await createMyAttendanceAction(null, formData)
+      }
 
       if ('errors' in result) {
         toast.error(result.errors._form?.[0] || 'Failed to save attendance')
         return
       }
 
-      toast.success(isEdit ? 'Attendance updated successfully' : 'Attendance issue reported successfully')
+      toast.success(isEdit ? 'Attendance updated successfully' : (status === 'absent' || status === 'late' ? 'Justification submitted successfully' : 'Attendance issue reported successfully'))
       onOpenChange(false)
       router.refresh()
     } catch {
@@ -169,6 +181,7 @@ export function AttendanceFormDialog({
           </div>
 
           {/* Clock In */}
+          {(status === 'present' || status === 'late' || status === 'half_day') && (
           <div>
             <label htmlFor="clockIn" className="flex items-center gap-1 text-sm font-medium mb-1">
               <Clock className="h-4 w-4" />
@@ -182,8 +195,10 @@ export function AttendanceFormDialog({
               disabled={isSubmitting}
             />
           </div>
+          )}
 
           {/* Clock Out */}
+          {(status === 'present' || status === 'late' || status === 'half_day') && (
           <div>
             <label htmlFor="clockOut" className="flex items-center gap-1 text-sm font-medium mb-1">
               <Clock className="h-4 w-4" />
@@ -197,6 +212,7 @@ export function AttendanceFormDialog({
               disabled={isSubmitting}
             />
           </div>
+          )}
 
           {/* Justification - Show for absent/late status or when editing existing justification */}
           {(status === 'absent' || status === 'late' || (isEdit && attendance?.justification)) && (

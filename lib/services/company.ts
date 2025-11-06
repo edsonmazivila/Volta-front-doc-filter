@@ -520,7 +520,6 @@ export async function updatePayScheduleAction(id: string, prevState: unknown, fo
 export async function deletePayScheduleAction(id: string): Promise<void> {
   const cookieHeader = await getAuthCookieHeader()
   const url = `${API_BASE_URL}/api/pay-schedules/${id}`
-  console.log('[deletePayScheduleAction] DELETE', url)
   const res = await fetch(url, {
     method: 'DELETE',
     headers: {
@@ -542,7 +541,7 @@ export async function deletePayScheduleAction(id: string): Promise<void> {
 }
 
 export async function createLeavePolicyAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
-  console.log('=== SERVER ACTION: createLeavePolicyAction ===')
+
   
   const effectiveDateStr = formData.get('effective_date') as string
   const effectiveDate = effectiveDateStr ? new Date(effectiveDateStr).toISOString() : new Date().toISOString()
@@ -571,7 +570,7 @@ export async function createLeavePolicyAction(prevState: unknown, formData: Form
     is_active: formData.get('is_active') === 'true' || formData.get('is_active') === 'on' || !formData.get('is_active'),
   }
   
-  console.log('Data to validate:', dataToValidate)
+
 
   const parsed = leavePolicySchema.safeParse(dataToValidate)
 
@@ -580,12 +579,11 @@ export async function createLeavePolicyAction(prevState: unknown, formData: Form
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  console.log('Validation passed! Parsed data:', parsed.data)
+
 
   try {
     const cookieHeader = await getAuthCookieHeader()
-    console.log('Sending POST to:', `${API_BASE_URL}/api/leave-policies`)
-    console.log('Request body:', JSON.stringify(parsed.data, null, 2))
+
     
     const res = await fetch(`${API_BASE_URL}/api/leave-policies`, {
       method: 'POST',
@@ -596,9 +594,9 @@ export async function createLeavePolicyAction(prevState: unknown, formData: Form
       body: JSON.stringify(parsed.data),
     })
 
-    console.log('Response status:', res.status, res.statusText)
+
     const responseText = await res.text()
-    console.log('Response body:', responseText)
+   
 
     if (!res.ok) {
       let error
@@ -612,12 +610,11 @@ export async function createLeavePolicyAction(prevState: unknown, formData: Form
     }
 
     const data = JSON.parse(responseText)
-    console.log('Success response:', data)
+
     
     // Revalidate caches so lists update immediately
     revalidateEntityMutation('COMPANY', { additionalTags: ['leave-policies'] })
-    console.log('Cache revalidated')
-
+  
     return { success: true, data }
   } catch (error) {
     console.error('Exception in createLeavePolicyAction:', error)
@@ -754,10 +751,13 @@ export async function uploadCompanyDocumentAction(prevState: unknown, formData: 
  * Endpoint: PUT /api/company-documents/:id
  */
 export async function updateCompanyDocumentAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const rawExpiry = (formData.get('expiry_date') as string) || undefined
+  const isoExpiry = rawExpiry ? new Date(rawExpiry).toISOString() : undefined
+
   const parsed = updateCompanyDocumentSchema.safeParse({
     name: formData.get('name') || undefined,
     description: formData.get('description') || undefined,
-    expiry_date: formData.get('expiry_date') || undefined,
+    expiry_date: isoExpiry || undefined,
     document_type: formData.get('document_type') || undefined,
   })
 
@@ -767,21 +767,31 @@ export async function updateCompanyDocumentAction(id: string, prevState: unknown
 
   try {
     const cookieHeader = await getAuthCookieHeader()
-    const res = await fetch(`${API_BASE_URL}/api/company-documents/${id}`, {
+    const url = `${API_BASE_URL}/api/company-documents/${id}`
+    const bodyToSend: Record<string, unknown> = { ...parsed.data }
+    // Send a mirrored field in case API expects `type` instead of `document_type`
+    if (bodyToSend.document_type && !('type' in bodyToSend)) {
+      bodyToSend.type = bodyToSend.document_type
+    }
+    const res = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         ...(cookieHeader && { Cookie: cookieHeader }),
       },
-      body: JSON.stringify(parsed.data),
+      body: JSON.stringify(bodyToSend),
     })
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({}))
-      return { errors: { _form: [error.message || error.error || 'Failed to update document'] } }
+      const responseText = await res.text().catch(() => '')
+      let error: any
+      try { error = JSON.parse(responseText) } catch { error = { message: responseText } }
+      return { errors: { _form: [error.message || error.error || `Failed to update document (${res.status})`] } }
     }
 
-    const data = await res.json()
+    const text = await res.text()
+    let data: unknown
+    try { data = JSON.parse(text) } catch { data = { raw: text } }
     revalidateEntityMutation('COMPANY')
     
     return { success: true, data }

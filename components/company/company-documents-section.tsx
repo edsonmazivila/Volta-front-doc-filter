@@ -86,8 +86,8 @@ export function CompanyDocumentsSection({ documents, total }: CompanyDocumentsSe
 				setSelectedDoc(null)
 				window.location.reload()
 			} else if (result.errors) {
-				const errorMsg = result.errors._form?.[0] || 'Failed to update document'
-				toast.error(errorMsg)
+				const errorMsg = result.errors._form?.[0] || JSON.stringify(result.errors)
+				toast.error(errorMsg.length > 200 ? errorMsg.slice(0, 200) + '…' : errorMsg)
 			}
 		} catch {
 			toast.error('Failed to update document')

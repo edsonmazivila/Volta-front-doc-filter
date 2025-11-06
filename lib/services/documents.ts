@@ -405,9 +405,8 @@ export async function uploadDocumentAction(prevState: unknown, formData: FormDat
 
     const data = await res.json()
 
-    // Revalidate caches
-    // Revalidate documents and all dependent caches
-    revalidateEntityMutation('DOCUMENTS')
+    // Revalidate caches for documents and my-documents views
+    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 
     return { success: true, data }
   } catch {
@@ -448,7 +447,7 @@ export async function updateDocumentAction(id: string, prevState: unknown, formD
     }
 
     const data = await res.json()
-    revalidateEntityMutation('DOCUMENTS')
+    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 
     return { success: true, data }
   } catch {
@@ -489,7 +488,7 @@ export async function patchDocumentAction(id: string, prevState: unknown, formDa
     }
 
     const data = await res.json()
-    revalidateEntityMutation('DOCUMENTS')
+    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 
     return { success: true, data }
   } catch {
@@ -528,7 +527,7 @@ export async function updateDocumentWithFileAction(id: string, prevState: unknow
     }
 
     const data = await res.json()
-    revalidateEntityMutation('DOCUMENTS')
+    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 
     return { success: true, data }
   } catch {
@@ -555,7 +554,7 @@ export async function deleteDocumentAction(id: string): Promise<void> {
     throw new Error(error.message || 'Failed to delete document')
   }
 
-  revalidateEntityMutation('DOCUMENTS')
+  revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 }
 
 /**
@@ -596,7 +595,7 @@ export async function approveDocumentAction(id: string): Promise<void> {
     throw new Error(error.message || 'Failed to approve document')
   }
 
-  revalidateEntityMutation('DOCUMENTS')
+  revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 }
 
 /**
@@ -629,7 +628,7 @@ export async function rejectDocumentAction(id: string, prevState: unknown, formD
     }
 
     const data = await res.json()
-    revalidateEntityMutation('DOCUMENTS')
+    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 
     return { success: true, data }
   } catch {

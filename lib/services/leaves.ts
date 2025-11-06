@@ -299,8 +299,8 @@ export async function createLeaveRequestAction(
 
     const data = await res.json();
     console.debug('[leaves] createLeaveRequestAction success', data)
-    // Revalidate leaves and all dependent caches
-    revalidateEntityMutation("LEAVES");
+    // Revalidate leaves caches and pages
+    revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 
     return { success: true, data };
   } catch {
@@ -359,7 +359,7 @@ export async function updateLeaveRequestAction(
     }
 
     const data = await res.json().catch(() => ({}));
-    revalidateEntityMutation("LEAVES");
+    revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
     return { success: true, data };
   } catch {
     return { errors: { _form: ["Failed to update leave request"] } };
@@ -382,8 +382,8 @@ export async function submitLeaveRequestAction(id: string): Promise<void> {
     throw new Error(error.message || "Failed to submit leave request");
   }
 
-  // Revalidate leaves and all dependent caches
-  revalidateEntityMutation("LEAVES");
+  // Revalidate leaves caches and pages
+  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 }
 
 export async function cancelLeaveRequestAction(
@@ -405,8 +405,8 @@ export async function cancelLeaveRequestAction(
     throw new Error(error.message || "Failed to cancel leave request");
   }
 
-  // Revalidate leaves and all dependent caches
-  revalidateEntityMutation("LEAVES");
+  // Revalidate leaves caches and pages
+  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 }
 
 export async function approveL1Action(
@@ -431,8 +431,8 @@ export async function approveL1Action(
     throw new Error(error.message || "Failed to approve (L1)");
   }
 
-  // Revalidate leaves and all dependent caches
-  revalidateEntityMutation("LEAVES");
+  // Revalidate leaves caches and pages
+  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 }
 
 export async function approveFinalAction(
@@ -457,8 +457,8 @@ export async function approveFinalAction(
     throw new Error(error.message || "Failed to approve (final)");
   }
 
-  // Revalidate leaves and all dependent caches
-  revalidateEntityMutation("LEAVES");
+  // Revalidate leaves caches and pages
+  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 }
 
 export async function rejectLeaveRequestAction(

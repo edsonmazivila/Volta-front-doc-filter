@@ -156,6 +156,11 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         delete values.password;
       }
 
+     
+      if (values.email && employee.email && values.email.trim().toLowerCase() === employee.email.trim().toLowerCase()) {
+        delete values.email;
+      }
+
       const formData = new FormData();
       
       // Add all form values (excluding is_employee, is_active, manager_id, and empty password as they're handled separately)
