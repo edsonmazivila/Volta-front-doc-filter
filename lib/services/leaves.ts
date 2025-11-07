@@ -46,7 +46,10 @@ export interface TeamBalanceItem {
   employee_id: string;
   employee_name: string;
   employee_email?: string;
-  balances: LeaveBalanceItem[];
+  leave_type: string;
+  remaining_days: number;
+  pending_days?: number;
+  total_used?: number;
 }
 
 export interface ActionResult {
@@ -224,24 +227,66 @@ export const getTeamBalances = cache(async (): Promise<TeamBalanceItem[]> => {
 
     interface RawTeamBalance {
       employee_id?: string | number;
-      employeeId?: string | number;
       employee_name?: string;
-      employeeName?: string;
       employee_email?: string;
-      employeeEmail?: string;
-      balances?: LeaveBalanceItem[];
+      vacation_balance?: number;
+      sick_balance?: number;
+      personal_balance?: number;
+      total_used?: number;
+      balances?: Array<{
+        leave_type?: string;
+        remaining_days?: number;
+        pending_days?: number;
+        total_used?: number;
+      }>;
     }
 
-    // Transform to expected format
-    return (rawBalances as RawTeamBalance[]).map((item) => ({
-      employee_id: String(item.employee_id || item.employeeId || ""),
-      employee_name:
-        item.employee_name ||
-        item.employeeName ||
-        `Employee #${item.employee_id}`,
-      employee_email: item.employee_email || item.employeeEmail,
-      balances: item.balances || [],
-    }));
+    const toTeamBalanceItems = (item: RawTeamBalance): TeamBalanceItem[] => {
+      const employeeId = String(item.employee_id || "");
+      const employeeName = item.employee_name || `Employee #${employeeId}`;
+      const employeeEmail = item.employee_email;
+
+      const emit = (
+        leaveType: string,
+        remaining?: number,
+        pending?: number,
+        totalUsed?: number
+      ): TeamBalanceItem[] => {
+        if (typeof remaining !== "number") return [];
+        return [
+          {
+            employee_id: employeeId,
+            employee_name: employeeName,
+            employee_email: employeeEmail,
+            leave_type: leaveType,
+            remaining_days: remaining,
+            pending_days: pending,
+            total_used: totalUsed,
+          },
+        ];
+      };
+
+      // Prefer balances array if provided (newer API shape)
+      if (Array.isArray(item.balances) && item.balances.length > 0) {
+        return item.balances.flatMap((balance) =>
+          emit(
+            balance.leave_type || "other",
+            balance.remaining_days,
+            balance.pending_days,
+            balance.total_used
+          )
+        );
+      }
+
+      // Fallback to legacy fields for specific leave types
+      return [
+        ...emit("vacation", item.vacation_balance, undefined, item.total_used),
+        ...emit("sick", item.sick_balance, undefined, item.total_used),
+        ...emit("personal", item.personal_balance, undefined, item.total_used),
+      ];
+    };
+
+    return (rawBalances as RawTeamBalance[]).flatMap(toTeamBalanceItems);
   } catch {
     console.error("Error fetching team balances");
     return [];
@@ -480,6 +525,6 @@ export async function rejectLeaveRequestAction(
     throw new Error(error.message || "Failed to reject leave request");
   }
 
-  // Revalidate leaves and all dependent caches
-  revalidateEntityMutation("LEAVES");
+	// Revalidate leaves caches so dashboards and personal pages update
+	revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 }

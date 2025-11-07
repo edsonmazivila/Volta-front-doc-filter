@@ -47,9 +47,9 @@ export function MyLeavesSection({
   const [editItem, setEditItem] = useState<LeaveRequestItem | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewItem, setViewItem] = useState<LeaveRequestItem | null>(null);
-  const [operationInProgress, setOperationInProgress] = useState<
-    Record<string, boolean>
-  >({});
+	const [operationInProgress, setOperationInProgress] = useState<
+		Record<string, boolean>
+	>({});
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -218,21 +218,6 @@ export function MyLeavesSection({
             setFormOpen(true);
           }
         }}
-        onDelete={async (id) => {
-          if (operationInProgress[id]) return;
-          if (!confirm("Are you sure you want to delete this leave request?"))
-            return;
-          setOperationInProgress((prev) => ({ ...prev, [id]: true }));
-          try {
-            await cancelLeaveRequestAction(id, "Deleted by user");
-            toast.success("Deleted");
-            router.refresh();
-          } catch {
-            toast.error("Failed to delete");
-          } finally {
-            setOperationInProgress((prev) => ({ ...prev, [id]: false }));
-          }
-        }}
       />
 
       {/* Leave Request Form Dialog */}
@@ -304,6 +289,7 @@ export function MyLeavesSection({
           ) : null}
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }

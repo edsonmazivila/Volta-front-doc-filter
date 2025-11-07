@@ -7,7 +7,7 @@ import { DocumentsSection } from '@/components/documents/documents-section'
 
 export default async function DocumentsPage() {
   // Only managers and admins can access document management
-  await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
+  await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
   const [items, types, users] = await Promise.all([
     getDocuments(),
     getDocumentTypes(),

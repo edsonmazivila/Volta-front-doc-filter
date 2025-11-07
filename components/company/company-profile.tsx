@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { FormField, Input } from '@/components/auth/form-field'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -54,6 +55,9 @@ interface CompanyProfileProps {
 }
 
 export function CompanyProfile({ company, paySchedules, leavePolicies, companyDocuments }: CompanyProfileProps) {
+	const searchParams = useSearchParams()
+	const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'basic')
+
 	const [editOpen, setEditOpen] = useState(false)
 	const [psOpen, setPsOpen] = useState(false)
 	const [lpOpen, setLpOpen] = useState(false)
@@ -236,12 +240,12 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 	return (
 		<>
 			<div className='glass rounded-xl overflow-hidden'>
-			<Tabs defaultValue='basic' className='w-full'>
-				<div className='flex items-center justify-between'>
-					<TabsList>
-						<TabsTrigger value='basic'>Basic Information</TabsTrigger>
-						<TabsTrigger value='policies'>Leave Policies</TabsTrigger>
-						<TabsTrigger value='schedules'>Pay Schedules</TabsTrigger>
+		<Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
+			<div className='flex items-center justify-between'>
+				<TabsList>
+					<TabsTrigger value='basic'>Basic Information</TabsTrigger>
+					<TabsTrigger value='policies'>Leave Policies</TabsTrigger>
+					<TabsTrigger value='schedules'>Pay Schedules</TabsTrigger>
 					</TabsList>
 				</div>
 
@@ -422,7 +426,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
                     </div>
 					<div className='flex justify-end gap-2 pt-4'>
 						<Button variant='ghost' onClick={()=>{ setPsOpen(false); setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '' }) }}>Cancel</Button>
-						<Button onClick={async ()=>{ if (editingPayScheduleId) { const formData = new FormData(); formData.append('name', psForm.name); formData.append('frequency', psForm.frequency); formData.append('start_date', psForm.start_date); formData.append('is_active', 'true'); await updatePayScheduleAction(editingPayScheduleId, null, formData); window.location.reload() } else { await handleCreatePaySchedule() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button onClick={async ()=>{ if (editingPayScheduleId) { const formData = new FormData(); formData.append('name', psForm.name); formData.append('frequency', psForm.frequency); formData.append('start_date', psForm.start_date); formData.append('is_active', 'true'); await updatePayScheduleAction(editingPayScheduleId, null, formData); window.location.href = `?tab=${activeTab}` } else { await handleCreatePaySchedule() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
@@ -588,7 +592,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
                     </div>
 					<div className='flex justify-end gap-2 pt-4 border-t'>
 						<Button variant='ghost' onClick={()=>{ setLpOpen(false); setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }) }}>Cancel</Button>
-						<Button onClick={async ()=>{ if (editingPolicyId) { const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(editingPolicyId, null, formData); window.location.reload() } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button onClick={async ()=>{ if (editingPolicyId) { const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(editingPolicyId, null, formData); window.location.href = `?tab=${activeTab}` } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>

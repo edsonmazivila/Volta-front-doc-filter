@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -42,6 +42,24 @@ export function LeaveRequestFormDialog({
 	const [reason, setReason] = useState(editItem?.reason || '')
 	const [isHalfDay, setIsHalfDay] = useState(editItem?.is_half_day || false)
 	const [isSubmitting, setIsSubmitting] = useState(false)
+
+	useEffect(() => {
+		if (!open) return
+
+		if (isEditMode && editItem) {
+			setLeaveType(editItem.leave_type || 'vacation')
+			setStartDate(editItem.start_date ? new Date(editItem.start_date).toISOString().slice(0, 10) : '')
+			setEndDate(editItem.end_date ? new Date(editItem.end_date).toISOString().slice(0, 10) : '')
+			setReason(editItem.reason || '')
+			setIsHalfDay(Boolean(editItem.is_half_day))
+		} else if (!isEditMode) {
+			setLeaveType('vacation')
+			setStartDate('')
+			setEndDate('')
+			setReason('')
+			setIsHalfDay(false)
+		}
+	}, [open, isEditMode, editItem])
 
 	const resetForm = () => {
 		setLeaveType('vacation')

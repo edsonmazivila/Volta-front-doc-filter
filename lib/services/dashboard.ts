@@ -52,7 +52,11 @@ export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
 
 			if (usersRes.ok) {
 				const usersData = await usersRes.json().catch(() => ({}))
-				totalEmployees = usersData?.employeeUsers ?? usersData?.data?.employeeUsers ?? 0
+				// Prefer total users over only employee users
+				const totalUsersVal = usersData?.totalUsers ?? usersData?.data?.totalUsers ?? usersData?.total ?? usersData?.data?.total
+				const employeeUsersVal = usersData?.employeeUsers ?? usersData?.data?.employeeUsers
+				const chosen = totalUsersVal ?? employeeUsersVal ?? 0
+				totalEmployees = Number(chosen) || 0
 			}
 
 			if (timesheetsRes.ok) {
@@ -75,8 +79,21 @@ export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
 					const contentType = res.headers.get('content-type') || ''
 					if (contentType.includes('application/json')) {
 						const data = await res.json().catch(() => null)
-						const val = (data?.data?.monthly_total ?? data?.monthly_total ?? data?.total ?? 0) as number
-						monthlyPayroll = Number(val) || 0
+						const val: unknown = (
+							data?.data?.monthly_total ??
+							data?.data?.monthlyTotal ??
+							data?.monthly_total ??
+							data?.monthlyTotal ??
+							data?.total ??
+							data?.total_amount ??
+							0
+						)
+						if (typeof val === 'string') {
+							const num = parseFloat(val.replace(/[^0-9.-]/g, ''))
+							monthlyPayroll = isFinite(num) ? num : 0
+						} else {
+							monthlyPayroll = Number(val) || 0
+						}
 					} else {
 						const text = await res.text()
 						const num = parseFloat(text.replace(/[^0-9.-]/g, ''))

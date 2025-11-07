@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import type { LeaveRequestItem, TeamBalanceItem } from '@/lib/services/leaves'
 import { LeaveTable } from '@/components/leaves/leave-table'
-import { PendingApprovalsTable } from '@/components/leaves/pending-approvals-table'
 import { TeamBalancesTable } from '@/components/leaves/team-balances-table'
 import { LeaveRequestFormDialog } from '@/components/leaves/leave-request-form-dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -22,11 +21,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 interface LeaveManagementProps {
   requests: LeaveRequestItem[]
-  pending: LeaveRequestItem[]
   teamBalances: TeamBalanceItem[]
 }
 
-export function LeaveManagement({ requests, pending, teamBalances }: LeaveManagementProps) {
+export function LeaveManagement({ requests, teamBalances }: LeaveManagementProps) {
   const router = useRouter()
   const toast = useToastHelpers()
   const [formOpen, setFormOpen] = useState(false)
@@ -36,6 +34,9 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rejectId, setRejectId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+	const [cancelOpen, setCancelOpen] = useState(false)
+	const [cancelId, setCancelId] = useState<string | null>(null)
+	const [cancelReason, setCancelReason] = useState('')
   const [operationInProgress, setOperationInProgress] = useState<Record<string, boolean>>({})
   const [viewOpen, setViewOpen] = useState(false)
   const [viewItem, setViewItem] = useState<LeaveRequestItem | null>(null)
@@ -51,14 +52,13 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <Tabs defaultValue="my">
+      <Tabs defaultValue="requests">
         <TabsList>
-          <TabsTrigger value="my">All Requests</TabsTrigger>
-          <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
+          <TabsTrigger value="requests">All Requests</TabsTrigger>
           <TabsTrigger value="balances">Team Balances</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="my">
+        <TabsContent value="requests">
           <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
             <h2 className="text-sm font-medium">All Leave Requests</h2>
             <SearchInput value={search} onChange={setSearch} placeholder="Search requests..." />
@@ -105,26 +105,12 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
                 setOperationInProgress(prev => ({ ...prev, [id]: false }));
               }
             }}
-            onCancel={async (id) => {
-              if (operationInProgress[id]) return;
-              const reason = prompt('Cancel reason (optional):') || undefined;
-              setOperationInProgress(prev => ({ ...prev, [id]: true }));
-              try {
-                await cancelLeaveRequestAction(id, reason);
-                toast.success('Cancelled');
-                router.refresh();
-              } catch {
-                toast.error('Failed to cancel');
-              } finally {
-                setOperationInProgress(prev => ({ ...prev, [id]: false }));
-              }
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="pending">
-          <PendingApprovalsTable
-            items={pending}
+				onCancel={(id) => {
+					if (operationInProgress[id]) return;
+					setCancelId(id);
+					setCancelReason('');
+					setCancelOpen(true);
+				}}
             onApproveL1={async (id) => {
               if (operationInProgress[id]) return;
               setOperationInProgress(prev => ({ ...prev, [id]: true }));
@@ -133,7 +119,7 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
                 toast.success('Approved L1');
                 router.refresh();
               } catch {
-                toast.error('Failed');
+                toast.error('Failed to approve');
               } finally {
                 setOperationInProgress(prev => ({ ...prev, [id]: false }));
               }
@@ -146,7 +132,7 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
                 toast.success('Approved');
                 router.refresh();
               } catch {
-                toast.error('Failed');
+                toast.error('Failed to approve');
               } finally {
                 setOperationInProgress(prev => ({ ...prev, [id]: false }));
               }
@@ -193,7 +179,7 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
         </DialogContent>
       </Dialog>
 
-      <Dialog open={rejectOpen} onOpenChange={(v) => { if (!v) { setRejectId(null); setRejectReason('') } setRejectOpen(v) }}>
+		<Dialog open={rejectOpen} onOpenChange={(v) => { if (!v) { setRejectId(null); setRejectReason('') } setRejectOpen(v) }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Leave Request</DialogTitle>
@@ -227,6 +213,46 @@ export function LeaveManagement({ requests, pending, teamBalances }: LeaveManage
           </div>
         </DialogContent>
       </Dialog>
+
+		<Dialog open={cancelOpen} onOpenChange={(v) => { if (!v) { setCancelId(null); setCancelReason('') } setCancelOpen(v) }}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Cancel Leave Request</DialogTitle>
+				</DialogHeader>
+				<div className='flex flex-col gap-2'>
+					<label className='text-sm'>Cancel reason (optional)</label>
+					<textarea
+						className='w-full border rounded-md px-3 py-2 bg-background'
+						rows={3}
+						value={cancelReason}
+						onChange={(e) => setCancelReason(e.target.value)}
+					/>
+				</div>
+				<div className='flex justify-end gap-2 pt-2'>
+					<Button variant='secondary' onClick={() => setCancelOpen(false)}>Dismiss</Button>
+					<Button
+						variant='destructive'
+						disabled={operationInProgress['cancel']}
+						onClick={async () => {
+							if (!cancelId || operationInProgress['cancel']) return;
+							setOperationInProgress(prev => ({ ...prev, cancel: true }));
+							try {
+								await cancelLeaveRequestAction(cancelId, cancelReason.trim() || undefined);
+								toast.success('Leave cancelled');
+								setCancelOpen(false);
+								router.refresh();
+							} catch {
+								toast.error('Failed to cancel');
+							} finally {
+								setOperationInProgress(prev => ({ ...prev, cancel: false }));
+							}
+						}}
+					>
+						{operationInProgress['cancel'] ? 'Cancelling…' : 'Cancel Request'}
+					</Button>
+				</div>
+			</DialogContent>
+		</Dialog>
     </div>
   )
 }

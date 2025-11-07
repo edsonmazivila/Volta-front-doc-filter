@@ -9,8 +9,6 @@ import { getDashboardStats } from "@/lib/services/dashboard";
 import { requireUser } from "@/lib/auth/dal";
 import { getPayrollRuns } from "@/lib/services/payroll";
 import { getTimesheets } from "@/lib/services/timesheets";
-import { getUsers } from "@/lib/services/users";
-import type { User } from "@/lib/services/users";
 import { getMyLeaveRequests } from "@/lib/services/leaves";
 import { getMyAttendance } from "@/lib/services/attendance";
 
@@ -19,7 +17,9 @@ export default async function DashboardPage() {
 
   const isEmployee = user.role === 'employee'
   const canViewPayroll = user.role === 'payroll_manager' || user.role === 'system_admin'
-  const statsGridCols = canViewPayroll ? 'md:grid-cols-3' : 'md:grid-cols-2'
+  const showTotalEmployees = !isEmployee && user.role !== 'payroll_manager'
+  const visibleStatsCount = (!isEmployee ? 1 : 0) + (showTotalEmployees ? 1 : 0) + (canViewPayroll ? 1 : 0)
+  const statsGridCols = visibleStatsCount >= 3 ? 'md:grid-cols-3' : visibleStatsCount === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'
   const chartsGridCols = canViewPayroll ? 'xl:grid-cols-2' : 'xl:grid-cols-1'
   const managerQuickActionsCols = canViewPayroll ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2'
 
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   let statsPromise: Promise<{ totalEmployees: number, pendingTimesheets: number, monthlyPayroll: number }>
   let payrollRunsPromise: ReturnType<typeof getPayrollRuns> | Promise<Awaited<ReturnType<typeof getPayrollRuns>>>
   let timesheetsPromise: ReturnType<typeof getTimesheets> | Promise<Awaited<ReturnType<typeof getTimesheets>>>
-  let usersPromise: Promise<User[]>
+  // Removed users fetching to avoid 403 for roles without access (e.g., payroll_manager)
   let leaveRequestsPromise: ReturnType<typeof getMyLeaveRequests> | Promise<Awaited<ReturnType<typeof getMyLeaveRequests>>>
   let myAttendancePromise: ReturnType<typeof getMyAttendance> | Promise<Awaited<ReturnType<typeof getMyAttendance>>>
 
@@ -35,23 +35,22 @@ export default async function DashboardPage() {
     statsPromise = Promise.resolve({ totalEmployees: 0, pendingTimesheets: 0, monthlyPayroll: 0 })
     payrollRunsPromise = Promise.resolve([])
     timesheetsPromise = getTimesheets().catch(() => [])
-    usersPromise = Promise.resolve([])
+    // no users needed
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
     myAttendancePromise = getMyAttendance().catch(() => [])
   } else {
     statsPromise = getDashboardStats().catch(() => ({ totalEmployees: 0, pendingTimesheets: 0, monthlyPayroll: 0 }))
     payrollRunsPromise = getPayrollRuns().catch(() => [])
     timesheetsPromise = getTimesheets().catch(() => [])
-    usersPromise = getUsers().catch(() => [])
+    // no users needed for dashboard cards
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
     myAttendancePromise = Promise.resolve([])
   }
 
-  const [stats, payrollRuns, timesheets, , leaveRequests, myAttendance] = await Promise.all([
+  const [stats, payrollRuns, timesheets, leaveRequests, myAttendance] = await Promise.all([
     statsPromise,
     payrollRunsPromise,
     timesheetsPromise,
-    usersPromise,
     leaveRequestsPromise,
     myAttendancePromise,
   ])
@@ -97,7 +96,9 @@ export default async function DashboardPage() {
       <div className="overflow-y-auto">
         {!isEmployee && (
           <section className={`p-4 grid grid-cols-1 ${statsGridCols} gap-4`}>
+            {showTotalEmployees && (
             <StatsCard label="Total Employees" value={stats.totalEmployees} />
+            )}
             <StatsCard label="Active Timesheets" value={timesheets.length} />
             {canViewPayroll && (
               <StatsCard label="Monthly Payroll" value={`$${stats.monthlyPayroll.toLocaleString()}`} />

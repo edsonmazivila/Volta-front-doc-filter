@@ -17,6 +17,19 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
     )
   }
 
+  const grouped = teamBalances.reduce<Record<string, TeamBalanceItem[]>>((acc, item) => {
+    const key = item.employee_id
+    if (!acc[key]) acc[key] = []
+    acc[key].push(item)
+    return acc
+  }, {})
+
+  const getBalance = (items: TeamBalanceItem[], type: string) =>
+    items.find(b => b.leave_type === type)
+
+  const getOtherBalances = (items: TeamBalanceItem[]) =>
+    items.filter(b => !['vacation', 'sick', 'personal'].includes(b.leave_type))
+
   return (
     <div className="glass rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
@@ -31,76 +44,75 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
             </tr>
           </thead>
           <tbody>
-          {teamBalances.map((member) => {
-            const vacationBalance = member.balances.find(b => b.leave_type === 'vacation')
-            const sickBalance = member.balances.find(b => b.leave_type === 'sick')
-            const personalBalance = member.balances.find(b => b.leave_type === 'personal')
-            const otherBalances = member.balances.filter(b =>
-              !['vacation', 'sick', 'personal'].includes(b.leave_type)
-            )
+            {Object.values(grouped).map((items) => {
+              const sample = items[0]
+              const vacation = getBalance(items, 'vacation')
+              const sick = getBalance(items, 'sick')
+              const personal = getBalance(items, 'personal')
+              const other = getOtherBalances(items)
 
-            return (
-              <tr key={member.employee_id} className="border-b border-[var(--border)] hover:bg-muted/50 transition-colors">
-                <td className="p-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
-                      <User className="w-4 h-4" />
+              return (
+                <tr key={sample.employee_id} className="border-b border-[var(--border)] hover:bg-muted/50 transition-colors">
+                  <td className="p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                        <User className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">{sample.employee_name}</div>
+                        {sample.employee_email && (
+                          <div className="text-xs text-muted-foreground">{sample.employee_email}</div>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium">{member.employee_name}</div>
-                      {member.employee_email && (
-                        <div className="text-xs text-muted-foreground">{member.employee_email}</div>
-                      )}
+                  </td>
+                  <td className="p-3">
+                    <div className="text-sm font-medium">
+                      {vacation ? vacation.remaining_days.toFixed(1) : '0.0'}
                     </div>
-                  </div>
-                </td>
-                <td className="p-3">
-                  <div className="text-sm font-medium">
-                    {vacationBalance ? vacationBalance.remaining_days.toFixed(1) : '0.0'}
-                  </div>
-                  {vacationBalance?.pending_days ? (
-                    <div className="text-xs text-muted-foreground">
-                      Pending: {vacationBalance.pending_days.toFixed(1)}
+                    {vacation?.pending_days ? (
+                      <div className="text-xs text-muted-foreground">
+                        Pending: {vacation.pending_days.toFixed(1)}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td className="p-3">
+                    <div className="text-sm font-medium">
+                      {sick ? sick.remaining_days.toFixed(1) : '0.0'}
                     </div>
-                  ) : null}
-                </td>
-                <td className="p-3">
-                  <div className="text-sm font-medium">
-                    {sickBalance ? sickBalance.remaining_days.toFixed(1) : '0.0'}
-                  </div>
-                  {sickBalance?.pending_days ? (
-                    <div className="text-xs text-muted-foreground">
-                      Pending: {sickBalance.pending_days.toFixed(1)}
+                    {sick?.pending_days ? (
+                      <div className="text-xs text-muted-foreground">
+                        Pending: {sick.pending_days.toFixed(1)}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td className="p-3">
+                    <div className="text-sm font-medium">
+                      {personal ? personal.remaining_days.toFixed(1) : '0.0'}
                     </div>
-                  ) : null}
-                </td>
-                <td className="p-3">
-                  <div className="text-sm font-medium">
-                    {personalBalance ? personalBalance.remaining_days.toFixed(1) : '0.0'}
-                  </div>
-                  {personalBalance?.pending_days ? (
-                    <div className="text-xs text-muted-foreground">
-                      Pending: {personalBalance.pending_days.toFixed(1)}
-                    </div>
-                  ) : null}
-                </td>
-                <td className="p-3">
-                  {otherBalances.length > 0 ? (
-                    <div className="space-y-1">
-                      {otherBalances.map((balance) => (
-                        <div key={balance.leave_type} className="text-sm">
-                          <span className="capitalize text-muted-foreground">{balance.leave_type}:</span>{' '}
-                          <span className="font-medium">{balance.remaining_days.toFixed(1)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">—</span>
-                  )}
-                </td>
-              </tr>
-            )
-          })}
+                    {personal?.pending_days ? (
+                      <div className="text-xs text-muted-foreground">
+                        Pending: {personal.pending_days.toFixed(1)}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td className="p-3">
+                    {other.length > 0 ? (
+                      <div className="space-y-1">
+                        {other.map((balance) => (
+                          <div key={balance.leave_type} className="text-sm">
+                            <span className="capitalize text-muted-foreground">{balance.leave_type}:</span>{' '}
+                            <span className="font-medium">{balance.remaining_days.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">—</span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
