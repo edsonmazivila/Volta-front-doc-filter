@@ -19,7 +19,6 @@ import {
   BarChart3,
   UserCog,
   Building2,
-  Settings,
   Briefcase,
   FileCheck,
   CalendarCheck,
@@ -90,11 +89,6 @@ export const NAV_SECTIONS: NavSection[] = [
       },
       { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
       { href: "/dashboard/company", label: "Company", icon: Briefcase },
-      {
-        href: "/dashboard/settings",
-        label: "Company Settings",
-        icon: Settings,
-      },
     ],
   },
 ];

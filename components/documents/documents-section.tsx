@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DocumentTable } from "@/components/documents/document-table";
 import { DocumentUploadFormDialog } from "@/components/documents/document-upload-form-dialog";
 import { DocumentViewDialog } from "@/components/documents/document-view-dialog";
@@ -24,6 +25,7 @@ interface DocumentsSectionProps {
 
 export function DocumentsSection({ items, initialTypes = [], initialEmployees = [] }: DocumentsSectionProps) {
   const toast = useToastHelpers();
+  const router = useRouter();
   const [search, setSearch] = useState("");
   
   // Dialog states
@@ -92,6 +94,7 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
           try {
             await approveDocumentAction(id);
             toast.success("Approved");
+            router.refresh();
           } catch {
             toast.error("Failed to approve");
           } finally {

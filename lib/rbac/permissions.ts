@@ -34,7 +34,6 @@ export const PAGE_PERMISSIONS: Record<string, UserRole[]> = {
 	'/dashboard/reports': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 	'/dashboard/documents': ['operational_manager', 'hr_manager', 'system_admin'],
 	'/dashboard/company': ['hr_manager', 'system_admin'],
-	'/dashboard/settings': ['system_admin'],
 }
 
 // Check if user has access to a page

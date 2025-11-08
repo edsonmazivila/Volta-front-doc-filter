@@ -3,7 +3,7 @@ import { requireRole } from '@/lib/rbac/server'
 import { EmployeeEditForm } from '@/components/employees/employee-edit-form'
 import { getCompany } from '@/lib/services/company'
 import { getUsers } from '@/lib/services/users'
-import { getDepartments } from '@/lib/services/departments'
+import { getActiveDepartments } from '@/lib/services/departments'
 import { notFound } from 'next/navigation'
 
 export default async function EditEmployeePage(props: { params: Promise<{ id: string }> }) {
@@ -12,7 +12,7 @@ export default async function EditEmployeePage(props: { params: Promise<{ id: st
 	const [company, users, departments] = await Promise.all([
 		getCompany(),
 		getUsers(),
-		getDepartments(),
+		getActiveDepartments(),
 	])
 	const { id } = await props.params
 	// Show all users (no filtering by is_employee)

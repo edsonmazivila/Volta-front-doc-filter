@@ -97,6 +97,11 @@ export const getDepartments = cache(async (): Promise<Department[]> => {
 	)
 })
 
+export const getActiveDepartments = cache(async (): Promise<Department[]> => {
+	const departments = await getDepartments()
+	return departments.filter(d => d.is_active)
+})
+
 export const getDepartmentStats = cache(async (): Promise<DepartmentStats> => {
 	return fetchWithGracefulFallback(
 		async () => {

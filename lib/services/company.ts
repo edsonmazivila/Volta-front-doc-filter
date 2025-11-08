@@ -3,7 +3,6 @@ import { cache } from 'react'
 import { revalidateEntityMutation } from '@/lib/cache-utils'
 import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
-import { toIsoUtc } from '@/lib/utils'
 import { z } from 'zod'
 
 // Types
@@ -430,7 +429,7 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
 
 export async function createPayScheduleAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  const startDateFormatted = toIsoUtc(startDateStr)
+  const startDateFormatted = startDateStr.trim()
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),
@@ -474,7 +473,7 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 
 export async function updatePayScheduleAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  const startDateFormatted = toIsoUtc(startDateStr)
+  const startDateFormatted = startDateStr.trim()
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),

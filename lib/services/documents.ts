@@ -595,7 +595,10 @@ export async function approveDocumentAction(id: string): Promise<void> {
     throw new Error(error.message || 'Failed to approve document')
   }
 
-  revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
+  revalidateEntityMutation('DOCUMENTS', { 
+    additionalTags: ['my-documents', 'documents'], 
+    additionalPaths: ['/dashboard/my-documents', '/dashboard/documents'] 
+  })
 }
 
 /**
@@ -628,7 +631,10 @@ export async function rejectDocumentAction(id: string, prevState: unknown, formD
     }
 
     const data = await res.json()
-    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
+    revalidateEntityMutation('DOCUMENTS', { 
+      additionalTags: ['my-documents', 'documents'], 
+      additionalPaths: ['/dashboard/my-documents', '/dashboard/documents'] 
+    })
 
     return { success: true, data }
   } catch {
