@@ -3,11 +3,13 @@ import { useState, useMemo } from "react";
 import type {
   DocumentListItem,
   DocumentTypeItem,
+  Document,
 } from "@/lib/services/documents";
 import { DocumentCard } from "@/components/my-documents/document-card";
 import { UploadDocumentDialog } from "@/components/my-documents/upload-document-dialog";
 import { EditDocumentDialog } from "@/components/my-documents/edit-document-dialog";
-import { deleteDocumentAction } from "@/lib/services/documents";
+import { DocumentViewDialog } from "@/components/documents/document-view-dialog";
+import { deleteDocumentAction, getDocument } from "@/lib/services/documents";
 import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui";
 import { useToastHelpers } from "@/components/ui/toast";
@@ -36,6 +38,9 @@ export function MyDocumentsSection({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] =
     useState<DocumentListItem | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewDocumentId, setViewDocumentId] = useState<string | null>(null);
+  const [viewDocument, setViewDocument] = useState<Document | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -71,6 +76,18 @@ export function MyDocumentsSection({
   function handleCloseEditDialog() {
     setEditDialogOpen(false);
     setEditingDocument(null);
+  }
+
+  async function handleView(id: string) {
+    setViewDocumentId(id);
+    setViewDocument(null);
+    setViewDialogOpen(true);
+    try {
+      const data = await getDocument(id);
+      setViewDocument(data);
+    } catch {
+      // Error handling is done in the dialog
+    }
   }
 
   const uniqueTypes = Array.from(new Set(documents.map((d) => d.type)));
@@ -184,6 +201,7 @@ export function MyDocumentsSection({
             <DocumentCard
               key={doc.id}
               document={doc}
+              onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -205,6 +223,20 @@ export function MyDocumentsSection({
         onOpenChange={handleCloseEditDialog}
         document={editingDocument}
         documentTypes={documentTypes}
+      />
+
+      {/* View Dialog */}
+      <DocumentViewDialog
+        open={viewDialogOpen}
+        onOpenChange={(open) => {
+          setViewDialogOpen(open);
+          if (!open) {
+            setViewDocumentId(null);
+            setViewDocument(null);
+          }
+        }}
+        document={viewDocument}
+        documentId={viewDocumentId}
       />
     </div>
   );

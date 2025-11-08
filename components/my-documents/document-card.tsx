@@ -2,19 +2,21 @@
 import type { DocumentListItem } from "@/lib/services/documents";
 import { Button } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Edit, Trash2 } from "lucide-react";
+import { FileText, Edit, Trash2, Eye } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface DocumentCardProps {
   document: DocumentListItem;
   onEdit?: (document: DocumentListItem) => void;
   onDelete?: (id: string) => void;
+  onView?: (id: string) => void;
 }
 
 export function DocumentCard({
   document,
   onEdit,
   onDelete,
+  onView,
 }: DocumentCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,6 +68,18 @@ export function DocumentCard({
           </div>
 
           <div className="flex gap-2">
+            {onView && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onView(document.id)}
+                className="flex-1"
+                title="View document"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                View
+              </Button>
+            )}
             {onEdit && document.canEdit !== false && (
               <Button
                 variant="outline"
