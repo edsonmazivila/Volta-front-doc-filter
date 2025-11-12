@@ -9,6 +9,7 @@ import { DocumentCard } from "@/components/my-documents/document-card";
 import { UploadDocumentDialog } from "@/components/my-documents/upload-document-dialog";
 import { EditDocumentDialog } from "@/components/my-documents/edit-document-dialog";
 import { DocumentViewDialog } from "@/components/documents/document-view-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { deleteDocumentAction, getDocument } from "@/lib/services/documents";
 import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui";
@@ -41,6 +42,10 @@ export function MyDocumentsSection({
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewDocumentId, setViewDocumentId] = useState<string | null>(null);
   const [viewDocument, setViewDocument] = useState<Document | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingDocumentId, setDeletingDocumentId] = useState<string | null>(null);
+  const [deletingDocumentTitle, setDeletingDocumentTitle] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -56,15 +61,27 @@ export function MyDocumentsSection({
   }, [documents, search, typeFilter, statusFilter]);
 
 
-  async function handleDelete(id: string) {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+  function handleDeleteClick(id: string, title: string) {
+    setDeletingDocumentId(id);
+    setDeletingDocumentTitle(title);
+    setDeleteDialogOpen(true);
+  }
 
+  async function confirmDelete() {
+    if (!deletingDocumentId) return;
+
+    setIsDeleting(true);
     try {
-      await deleteDocumentAction(id);
-      toast.success("Document deleted");
+      await deleteDocumentAction(deletingDocumentId);
+      toast.success("Document deleted successfully");
+      setDeleteDialogOpen(false);
+      setDeletingDocumentId(null);
+      setDeletingDocumentTitle("");
       router.refresh();
     } catch {
       toast.error("Failed to delete document");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -203,7 +220,7 @@ export function MyDocumentsSection({
               document={doc}
               onView={handleView}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={() => handleDeleteClick(doc.id, doc.title)}
             />
           ))}
         </div>
@@ -237,6 +254,25 @@ export function MyDocumentsSection({
         }}
         document={viewDocument}
         documentId={viewDocumentId}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setDeletingDocumentId(null);
+            setDeletingDocumentTitle("");
+          }
+        }}
+        title="Delete Document?"
+        description={`Are you sure you want to delete "${deletingDocumentTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        variant="destructive"
+        isLoading={isDeleting}
       />
     </div>
   );

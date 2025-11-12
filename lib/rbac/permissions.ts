@@ -15,12 +15,12 @@ export const PAGE_PERMISSIONS: Record<string, UserRole[]> = {
 	'/dashboard': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 
 	// Management Section
-	'/dashboard/employees': ['operational_manager', 'hr_manager', 'system_admin'],
+	'/dashboard/employees': ['hr_manager', 'system_admin'],
 	'/dashboard/timesheets': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'], 
 	'/dashboard/attendance': ['operational_manager', 'hr_manager', 'system_admin'],
 	'/dashboard/leaves': ['operational_manager', 'hr_manager', 'system_admin'],
 	'/dashboard/payroll': ['payroll_manager', 'system_admin'],
-	'/dashboard/departments': ['operational_manager', 'hr_manager', 'system_admin'],
+	'/dashboard/departments': ['hr_manager', 'system_admin'],
 	'/dashboard/meetings': ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
 
 	// Self Service - Everyone (all roles can access own data)
@@ -32,7 +32,7 @@ export const PAGE_PERMISSIONS: Record<string, UserRole[]> = {
 
 	// Administration Section
 	'/dashboard/reports': ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'],
-	'/dashboard/documents': ['operational_manager', 'hr_manager', 'system_admin'],
+	'/dashboard/documents': ['hr_manager', 'system_admin'],
 	'/dashboard/company': ['hr_manager', 'system_admin'],
 }
 

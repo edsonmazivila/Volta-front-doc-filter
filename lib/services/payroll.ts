@@ -275,25 +275,25 @@ export async function deletePayrollRunAction(id: string): Promise<void> {
 
 /**
  * Get Excel export URL for a payroll run
- * Call this from client component and open in new window
+ * Uses Next.js API route proxy to handle authentication
  */
 export async function getExcelExportUrl(runId: string): Promise<string> {
-  return `${API_BASE_URL}/api/payroll/excel/${runId}`
+  return `/api/payroll/excel/${runId}`
 }
 
 /**
  * Get BCI export URL for a payroll run
- * Call this from client component and open in new window
+ * Uses Next.js API route proxy to handle authentication
  */
 export async function getBCIExportUrl(runId: string): Promise<string> {
-  return `${API_BASE_URL}/api/payroll/excel/bci/${runId}`
+  return `/api/payroll/excel/bci/${runId}`
 }
 
 /**
  * Get Tabela Salarial export URL for a payroll run
- * Call this from client component and open in new window
+ * Uses Next.js API route proxy to handle authentication
  */
 export async function getTabelaExportUrl(runId: string, mes?: string): Promise<string> {
-  const url = `${API_BASE_URL}/api/payroll/excel/tabela/${runId}`
+  const url = `/api/payroll/excel/tabela/${runId}`
   return mes ? `${url}?mes=${encodeURIComponent(mes)}` : url
 }

@@ -17,11 +17,13 @@ export default async function DashboardPage() {
 
   const isEmployee = user.role === 'employee'
   const canViewPayroll = user.role === 'payroll_manager' || user.role === 'system_admin'
-  const showTotalEmployees = !isEmployee && user.role !== 'payroll_manager'
+  const showTotalEmployees = !isEmployee && user.role !== 'payroll_manager' && user.role !== 'operational_manager'
+  const canManageEmployees = user.role === 'hr_manager' || user.role === 'system_admin'
   const visibleStatsCount = (!isEmployee ? 1 : 0) + (showTotalEmployees ? 1 : 0) + (canViewPayroll ? 1 : 0)
   const statsGridCols = visibleStatsCount >= 3 ? 'md:grid-cols-3' : visibleStatsCount === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'
   const chartsGridCols = canViewPayroll ? 'xl:grid-cols-2' : 'xl:grid-cols-1'
-  const managerQuickActionsCols = canViewPayroll ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2'
+  const managerQuickActionsCount = (canManageEmployees ? 1 : 0) + 1 + (canViewPayroll ? 1 : 0) // employees + timesheets + payroll
+  const managerQuickActionsCols = managerQuickActionsCount >= 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : managerQuickActionsCount === 2 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-1'
 
   // Lazily construct only the needed fetches based on role
   let statsPromise: Promise<{ totalEmployees: number, pendingTimesheets: number, monthlyPayroll: number }>
@@ -259,6 +261,7 @@ export default async function DashboardPage() {
               </>
             ) : (
               <>
+                {canManageEmployees && (
                 <Link href="/dashboard/employees" className="group">
                   <Card className="h-full transition-all hover:shadow-lg hover:border-blue-500/50 cursor-pointer">
                     <div className="p-4 flex items-center gap-3">
@@ -274,6 +277,7 @@ export default async function DashboardPage() {
                     </div>
                   </Card>
                 </Link>
+                )}
                 <Link href="/dashboard/timesheets" className="group">
                   <Card className="h-full transition-all hover:shadow-lg hover:border-green-500/50 cursor-pointer">
                     <div className="p-4 flex items-center gap-3">

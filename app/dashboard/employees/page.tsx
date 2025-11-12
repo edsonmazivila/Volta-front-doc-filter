@@ -5,7 +5,6 @@ import { requireRole } from "@/lib/rbac/server";
 
 export default async function EmployeesPage() {
   await requireRole([
-    "operational_manager",
     "hr_manager",
     "system_admin",
   ]);

@@ -7,7 +7,7 @@ import { getActiveDepartments } from '@/lib/services/departments'
 import { notFound } from 'next/navigation'
 
 export default async function EditEmployeePage(props: { params: Promise<{ id: string }> }) {
-	await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
+	await requireRole(['hr_manager', 'payroll_manager', 'system_admin'])
 	
 	const [company, users, departments] = await Promise.all([
 		getCompany(),

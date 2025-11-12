@@ -5,8 +5,7 @@ import { getDepartments, getDepartmentStats } from '@/lib/services/departments'
 import { getUsers } from '@/lib/services/users'
 
 export default async function DepartmentsPage() {
-  // Only managers and admins can access department management
-  await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
+  await requireRole(['hr_manager', 'system_admin'])
 
   const [departments, stats, allUsers] = await Promise.all([
     getDepartments(),

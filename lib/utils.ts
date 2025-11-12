@@ -63,6 +63,18 @@ export function formatNumberFixed(value?: number): string {
   return NUMBER_FORMATTER.format(value ?? 0)
 }
 
+// Currency formatting with $ symbol and 2 decimal places
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+export function formatCurrency(value?: number): string {
+  return CURRENCY_FORMATTER.format(value ?? 0)
+}
+
 // Date formatting utilities
 export function formatDate(dateInput: string | Date | null | undefined): string {
   if (!dateInput) return "Not provided"

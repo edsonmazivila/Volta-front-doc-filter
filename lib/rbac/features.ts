@@ -22,7 +22,7 @@ export const EMPLOYEE_FEATURES = {
 	VIEW_DEPARTMENT: ['operational_manager', 'hr_manager', 'system_admin'] as UserRole[],
 	VIEW_ALL: ['hr_manager', 'payroll_manager', 'system_admin'] as UserRole[],
 	CREATE: ['hr_manager', 'system_admin'] as UserRole[],
-	EDIT_DEPARTMENT: ['operational_manager', 'hr_manager', 'system_admin'] as UserRole[],
+	EDIT_DEPARTMENT: ['hr_manager', 'system_admin'] as UserRole[],
 	EDIT_ALL: ['hr_manager', 'system_admin'] as UserRole[],
 	DELETE: ['hr_manager', 'system_admin'] as UserRole[],
 }
@@ -50,15 +50,15 @@ export const PAYROLL_FEATURES = {
 export const DOCUMENT_FEATURES = {
 	VIEW_OWN: ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'] as UserRole[],
 	UPLOAD_OWN: ['employee', 'operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'] as UserRole[],
-	VIEW_DEPARTMENT: ['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'] as UserRole[],
+	VIEW_DEPARTMENT: ['hr_manager', 'payroll_manager', 'system_admin'] as UserRole[],
 	VIEW_ALL: ['hr_manager', 'payroll_manager', 'system_admin'] as UserRole[],
-	APPROVE: ['operational_manager', 'hr_manager', 'system_admin'] as UserRole[],
+	APPROVE: ['hr_manager', 'system_admin'] as UserRole[],
 	DELETE: ['hr_manager', 'system_admin'] as UserRole[],
 }
 
 // Department features
 export const DEPARTMENT_FEATURES = {
-	VIEW: ['operational_manager', 'hr_manager', 'system_admin'] as UserRole[],
+	VIEW: ['hr_manager', 'system_admin'] as UserRole[],
 	CREATE: ['hr_manager', 'system_admin'] as UserRole[],
 	EDIT: ['hr_manager', 'system_admin'] as UserRole[],
 	DELETE: ['hr_manager', 'system_admin'] as UserRole[],
