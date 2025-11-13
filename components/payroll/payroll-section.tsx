@@ -25,6 +25,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
   const { role } = usePermissions()
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [payFrequency, setPayFrequency] = useState('biweekly')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastRunId, setLastRunId] = useState<string | null>(null)
 
@@ -39,7 +40,47 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
     setIsSubmitting(true)
     try {
       // Calculate pay date (next Friday after end date)
+      const startDateObj = new Date(startDate)
       const endDateObj = new Date(endDate)
+      if (Number.isNaN(startDateObj.getTime()) || Number.isNaN(endDateObj.getTime())) {
+        toast.error('Invalid start or end date')
+        return
+      }
+      const msPerDay = 1000 * 60 * 60 * 24
+      const inclusiveDiff =
+        Math.floor((endDateObj.getTime() - startDateObj.getTime()) / msPerDay) + 1
+      const frequencyRequirements: Record<
+        string,
+        { requiredDays?: number; message: string }
+      > = {
+        weekly: {
+          requiredDays: 7,
+          message: 'Weekly period must cover exactly 7 days',
+        },
+        biweekly: {
+          requiredDays: 14,
+          message: 'Biweekly period must cover exactly 14 days',
+        },
+        semimonthly: {
+          message:
+            'Semi-monthly periods should align with 1st-15th or 16th-end of month ranges',
+        },
+        monthly: {
+          message:
+            'Monthly periods should start on the first and end on the last day of the month',
+        },
+      }
+
+      const requirement = frequencyRequirements[payFrequency]
+      if (requirement?.requiredDays && inclusiveDiff !== requirement.requiredDays) {
+        toast.error(requirement.message)
+        return
+      }
+      if (!requirement?.requiredDays && inclusiveDiff <= 0) {
+        toast.error('End date must be after start date')
+        return
+      }
+
       const payDate = new Date(endDateObj)
       payDate.setDate(endDateObj.getDate() + (5 + 7 - endDateObj.getDay()) % 7)
 
@@ -48,12 +89,25 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       formData.append('pay_period_start', startDate)
       formData.append('pay_period_end', endDate)
       formData.append('pay_date', payDate.toISOString().slice(0, 10))
-      formData.append('pay_frequency', 'biweekly')
+      formData.append('pay_frequency', payFrequency)
 
       const result = await processPayrollAction(null, formData)
 
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to calculate payroll')
+        // Show all validation errors to user
+        const errorMessages = []
+        
+        // Field-specific errors
+        if (result.errors.pay_period_start) errorMessages.push(...result.errors.pay_period_start)
+        if (result.errors.pay_period_end) errorMessages.push(...result.errors.pay_period_end)
+        if (result.errors.pay_date) errorMessages.push(...result.errors.pay_date)
+        if (result.errors.pay_frequency) errorMessages.push(...result.errors.pay_frequency)
+        
+        // General form errors (including backend errors)
+        if (result.errors._form) errorMessages.push(...result.errors._form)
+        
+        // Show the first error or a fallback message
+        toast.error(errorMessages[0] || 'Failed to calculate payroll')
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = result?.data as any
@@ -78,6 +132,17 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
     try {
       await runPayrollAction(id)
       toast.success('Payroll executed')
+      router.refresh()
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to run payroll')
+    }
+  }
+
+  async function handleRowRun(runId: string) {
+    try {
+      await runPayrollAction(runId)
+      toast.success('Payroll executed')
+      router.refresh()
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Failed to run payroll')
     }
@@ -156,50 +221,56 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
   return (
 		<div className='grid gap-4'>
 			{/* Header with period selection and actions */}
-			<div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
-				<h2 className='text-base font-semibold tracking-tight'>Payroll Processing</h2>
-				<div className='flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3 w-full md:w-auto'>
-					<div className='flex-1 min-w-[180px]'>
+			<div className='flex flex-col gap-3'>
+				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4 w-full'>
+					<div>
 						<label className='block text-xs text-muted-foreground mb-1'>Period start</label>
 						<input
 							type='date'
-							className='w-full border rounded-md px-3 py-2 bg-background'
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
 							value={startDate}
 							onChange={(e) => setStartDate(e.target.value)}
 						/>
 					</div>
-					<div className='flex-1 min-w-[180px]'>
+					<div>
 						<label className='block text-xs text-muted-foreground mb-1'>Period end</label>
 						<input
 							type='date'
-							className='w-full border rounded-md px-3 py-2 bg-background'
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
 							value={endDate}
 							onChange={(e) => setEndDate(e.target.value)}
 						/>
 					</div>
-					<div className='flex items-center gap-2 sm:ml-auto'>
-						{isPayrollActor && (
-							<Button onClick={handleProcess} disabled={isSubmitting}>
-								{isSubmitting ? 'Processing…' : 'Calculate'}
-							</Button>
-						)}
-						{isPayrollActor && (
-							<Button variant='secondary' onClick={handleRun}>
-								Run
-							</Button>
-						)}
-						{isPayrollActor && (
-							<Button variant='outline' onClick={() => handleExport('excel')}>
-								Export Excel
-							</Button>
-						)}
-						{isPayrollActor && (
-							<Button variant='outline' onClick={() => handleExport('bci')}>
-								Export BCI
-							</Button>
-						)}
+					<div>
+						<label className='block text-xs text-muted-foreground mb-1'>Pay frequency</label>
+						<select
+							value={payFrequency}
+							onChange={(e) => setPayFrequency(e.target.value)}
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
+						>
+							<option value='weekly'>Weekly</option>
+							<option value='biweekly'>Biweekly</option>
+							<option value='semimonthly'>Semi-monthly</option>
+							<option value='monthly'>Monthly</option>
+						</select>
 					</div>
 				</div>
+				{isPayrollActor && (
+					<div className='flex flex-wrap items-center gap-2 sm:justify-end'>
+						<Button onClick={handleProcess} disabled={isSubmitting}>
+							{isSubmitting ? 'Processing…' : 'Calculate'}
+						</Button>
+						<Button variant='secondary' onClick={handleRun}>
+							Run
+						</Button>
+						<Button variant='outline' onClick={() => handleExport('excel')}>
+							Export Excel
+						</Button>
+						<Button variant='outline' onClick={() => handleExport('bci')}>
+							Export BCI
+						</Button>
+					</div>
+				)}
 			</div>
 
 			<div className='flex items-center justify-between gap-3 flex-wrap'>
@@ -246,6 +317,11 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align='end'>
+                            {r.status?.toLowerCase() === 'calculated' && isPayrollActor && (
+                              <DropdownMenuItem onClick={() => handleRowRun(r.id)}>
+                                Run Payroll
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => handleViewPaystubs(r.id)}>
                               View Paystubs
                             </DropdownMenuItem>

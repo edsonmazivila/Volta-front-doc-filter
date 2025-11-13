@@ -205,7 +205,14 @@ export async function processPayrollAction(prevState: unknown, formData: FormDat
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}))
-      return { errors: { _form: [error.message || 'Failed to process payroll'] } }
+      // Extract detailed error message from various backend response formats
+      const errorMessage = 
+        error.message || 
+        error.error || 
+        error.detail || 
+        error.errors?.[0]?.message ||
+        'Failed to process payroll. Please check your input and try again.'
+      return { errors: { _form: [errorMessage] } }
     }
 
     const data = await res.json()
@@ -215,8 +222,9 @@ export async function processPayrollAction(prevState: unknown, formData: FormDat
     revalidateEntityMutation('PAYROLL_RUNS')
 
     return { success: true, data }
-  } catch {
-    return { errors: { _form: ['Failed to process payroll'] } }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to process payroll'
+    return { errors: { _form: [errorMessage] } }
   }
 }
 
@@ -236,7 +244,14 @@ export async function runPayrollAction(runId: string): Promise<void> {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}))
-    throw new Error(error.message || 'Failed to run payroll')
+    // Extract detailed error message from various backend response formats
+    const errorMessage = 
+      error.message || 
+      error.error || 
+      error.detail || 
+      error.errors?.[0]?.message ||
+      'Failed to run payroll. Please try again or contact support.'
+    throw new Error(errorMessage)
   }
 
   // Revalidate caches
