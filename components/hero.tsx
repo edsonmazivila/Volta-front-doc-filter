@@ -43,9 +43,12 @@ const Hero = () => {
           priority
           className="absolute bottom-0 left-1/2 -translate-x-1/2 opacity-90 w-full h-auto md:block hidden max-w-7xl"
         />
+        {/* Temporarily hiding trust logos for future reuse */}
+
         <h1 className="absolute bottom-36 text-white text-2xl font-bold text-center mb-4">
           Trusted by Companies of All Sizes
         </h1>
+        {/*
         <div className="absolute bottom-12 overflow-hidden max-w-4xl">
           <Marquee>
             <Image
@@ -73,6 +76,7 @@ const Hero = () => {
           <div className="from-[#030009] absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r"></div>
           <div className="from-[#030009] absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
         </div>
+        */}
       </div>
     </div>
   );

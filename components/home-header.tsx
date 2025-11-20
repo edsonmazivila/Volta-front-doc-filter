@@ -46,6 +46,7 @@ export function HomeHeader() {
     { href: "/features", label: "Features" },
     { href: "/careers", label: "Careers" },
   ];
+  const showNavLinks = false; // Toggle to true to show navigation links again
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -71,24 +72,26 @@ export function HomeHeader() {
           </div>
 
           {/* Desktop Center Navigation */}
-          <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-white/90 hover:text-white transition-colors duration-200 font-medium"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+          {showNavLinks && (
+            <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-white/90 hover:text-white transition-colors duration-200 font-medium"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-2">
             <Button variant="primaryGradient" className="text-md font-semibold px-6 py-3" asChild>
               <Link href="/signup">Sign Up</Link>
             </Button>
-            <Button variant="outline" className="text-md font-semibold px-6 py-3 bg-background/70 backdrop-blur-sm border-[var(--border)] text-foreground hover:bg-accent" asChild>
+            <Button variant="outline" className="text-md font-semibold px-6 py-3 bg-background/70 text-foreground hover:bg-accent" asChild>
               <Link href="/login">Sign In</Link>
             </Button>
           </div>
@@ -118,19 +121,21 @@ export function HomeHeader() {
           <div className="mobile-menu absolute top-20 left-4 right-4 glass-mobile-menu rounded-2xl p-6 animate-slide-down">
             <div className="flex flex-col space-y-6">
               {/* Navigation Links */}
-              <div className="flex flex-col space-y-4">
-                {navLinks.map((link, index) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={handleLinkClick}
-                    className="text-white/90 hover:text-white text-lg font-medium py-2 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 animate-fade-in-up"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+              {showNavLinks && (
+                <div className="flex flex-col space-y-4">
+                  {navLinks.map((link, index) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={handleLinkClick}
+                      className="text-white/90 hover:text-white text-lg font-medium py-2 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 animate-fade-in-up"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
 
               {/* Mobile CTA */}
               <div

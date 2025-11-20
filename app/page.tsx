@@ -12,7 +12,10 @@ export default function Home() {
       <div className="max-w-4xl mx-auto min-h-screen flex flex-col items-center justify-center">
         <Features />
       </div>
+      {/* Temporarily hiding footer for future reuse */}
+      {/*
       <Footer/>
+      */}
     </main>
   );
 }
