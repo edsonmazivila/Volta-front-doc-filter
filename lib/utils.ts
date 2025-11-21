@@ -181,10 +181,9 @@ export function getStatusColor(status: string): string {
 export function getLeaveStatusColor(status: string): string {
   switch (status.toUpperCase()) {
     case 'SUBMITTED': return 'bg-blue-500/20 text-blue-400'
-    case 'APPROVED_L1': return 'bg-yellow-500/20 text-yellow-400'
-    case 'APPROVED_FINAL': return 'bg-green-500/20 text-green-400'
+    case 'APPROVED': return 'bg-green-500/20 text-green-400'
     case 'REJECTED': return 'bg-red-500/20 text-red-400'
-    case 'CANCELLED': return 'bg-gray-500/20 text-gray-400'
+    case 'CANCELLED': return 'bg-orange-500/20 text-orange-400'
     case 'DRAFT':
     default: return 'bg-gray-500/20 text-gray-400'
   }

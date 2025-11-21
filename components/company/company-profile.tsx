@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { FormField, Input } from '@/components/auth/form-field'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -56,6 +56,7 @@ interface CompanyProfileProps {
 
 export function CompanyProfile({ company, paySchedules, leavePolicies, companyDocuments }: CompanyProfileProps) {
 	const searchParams = useSearchParams()
+	const router = useRouter()
 	const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'basic')
 
 	const [editOpen, setEditOpen] = useState(false)
@@ -77,7 +78,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 		country: company.country || '',
 	})
 
-	const [psForm, setPsForm] = useState({ name: '', frequency: 'monthly', start_date: '' })
+	const [psForm, setPsForm] = useState({ name: '', frequency: 'monthly', start_date: '', is_active: true })
 	const [lpForm, setLpForm] = useState({
 		name: '',
 		description: '',
@@ -188,10 +189,34 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			formData.append('name', psForm.name)
 			formData.append('frequency', psForm.frequency)
 			formData.append('start_date', psForm.start_date)
-			formData.append('is_active', 'true')
-			await createPayScheduleAction(null, formData)
-			window.location.reload()
-		} finally { setSaving(false); setPsOpen(false) }
+			formData.append('is_active', String(psForm.is_active))
+			const result = await createPayScheduleAction(null, formData)
+			if (result.success && result.data) {
+				// Extract the new pay schedule from the response
+				const responseData = result.data as Record<string, unknown>
+				const newSchedule = (responseData?.pay_schedule || responseData) as Record<string, unknown>
+				if (newSchedule?.id) {
+					// Update local state immediately
+					setPaySchedulesState(prev => [...prev, {
+						id: String(newSchedule.id),
+						name: String(newSchedule.name || psForm.name),
+						frequency: String(newSchedule.frequency || psForm.frequency),
+						start_date: String(newSchedule.start_date || psForm.start_date),
+						is_active: Boolean(newSchedule.is_active ?? psForm.is_active)
+					}])
+					toast.success('Pay schedule created successfully')
+					setPsOpen(false)
+					setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true })
+					router.refresh()
+				}
+			} else {
+				toast.error(result.errors?._form?.[0] || 'Failed to create pay schedule')
+			}
+		} catch {
+			toast.error('Failed to create pay schedule')
+		} finally { 
+			setSaving(false)
+		}
 	}
 
 	async function handleCreateLeavePolicy() {
@@ -330,7 +355,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 				<TabsContent value='schedules'>
 					<div className='flex items-center justify-between mt-4'>
 						<h3 className='text-sm font-medium text-foreground'>Pay Schedules</h3>
-					<Button onClick={() => { setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '' }); setPsOpen(true) }}>Create</Button>
+					<Button onClick={() => { setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true }); setPsOpen(true) }}>Create</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
                             {paySchedulesState.length ? paySchedulesState.map(s => (
@@ -340,7 +365,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										<div className='text-xs text-muted-foreground'>Frequency: {s.frequency} • Start: {formatDate(s.start_date)} • {s.is_active ? 'Active' : 'Inactive'}</div>
                                     </div>
                                     <div className='flex items-center gap-2'>
-									<Button variant='outline' onClick={()=>{ setEditingPayScheduleId(s.id); setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').slice(0,10) }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
+									<Button variant='outline' onClick={()=>{ setEditingPayScheduleId(s.id); setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').split('T')[0], is_active: s.is_active }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
                                         <Button variant='destructive' onClick={() => { setDeletePayScheduleTarget({ id: s.id, name: s.name }); setDeletePayScheduleOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
@@ -423,10 +448,48 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
                             </Select>
                         </FormField>
                         <FormField label='Start Date'><Input type='date' value={psForm.start_date} onChange={(e)=>setPsForm({ ...psForm, start_date: e.target.value })} /></FormField>
+                        <FormField label='Active'>
+                            <div className='flex items-center gap-2'>
+                                <input type='checkbox' checked={psForm.is_active} onChange={(e)=>setPsForm({ ...psForm, is_active: e.target.checked })} className='w-4 h-4' />
+                                <span className='text-sm'>Active</span>
+                            </div>
+                        </FormField>
                     </div>
 					<div className='flex justify-end gap-2 pt-4'>
-						<Button variant='ghost' onClick={()=>{ setPsOpen(false); setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '' }) }}>Cancel</Button>
-						<Button onClick={async ()=>{ if (editingPayScheduleId) { const formData = new FormData(); formData.append('name', psForm.name); formData.append('frequency', psForm.frequency); formData.append('start_date', psForm.start_date); formData.append('is_active', 'true'); await updatePayScheduleAction(editingPayScheduleId, null, formData); window.location.href = `?tab=${activeTab}` } else { await handleCreatePaySchedule() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button variant='ghost' onClick={()=>{ setPsOpen(false); setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true }) }}>Cancel</Button>
+						<Button onClick={async ()=>{ 
+							if (editingPayScheduleId) { 
+								setSaving(true)
+								const formData = new FormData()
+								formData.append('name', psForm.name)
+								formData.append('frequency', psForm.frequency)
+								formData.append('start_date', psForm.start_date)
+								formData.append('is_active', String(psForm.is_active))
+								const result = await updatePayScheduleAction(editingPayScheduleId, null, formData)
+								setSaving(false)
+								if (result.success) {
+									// Convert date to ISO format for state (YYYY-MM-DD -> YYYY-MM-DDTHH:mm:ssZ)
+									const isoDate = psForm.start_date && !psForm.start_date.includes('T') 
+										? `${psForm.start_date}T00:00:00Z` 
+										: psForm.start_date
+									// Update local state immediately
+									setPaySchedulesState(prev => prev.map(s => 
+										s.id === editingPayScheduleId 
+											? { ...s, name: psForm.name, frequency: psForm.frequency, start_date: isoDate, is_active: psForm.is_active }
+											: s
+									))
+									toast.success('Pay schedule updated successfully')
+									setPsOpen(false)
+									setEditingPayScheduleId(null)
+									setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true })
+									router.refresh()
+								} else {
+									toast.error(result.errors?._form?.[0] || 'Failed to update pay schedule')
+								}
+							} else { 
+								await handleCreatePaySchedule() 
+							} 
+						}} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>

@@ -5,12 +5,9 @@ import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { z } from 'zod'
 import { revalidateEntityMutation } from '@/lib/cache-utils'
 
-export interface MeUser {
+export interface MeResponse {
 	email: string
 	full_name: string
-}
-
-export interface MeEmployee {
 	address_line1?: string | null
 	address_line2?: string | null
 	city?: string | null
@@ -24,14 +21,9 @@ export interface MeEmployee {
 	emergency_contact_relationship?: string | null
 }
 
-export interface MeResponse {
-	user: MeUser
-	employee: MeEmployee
-}
-
 export const getProfile = cache(async (): Promise<MeResponse | null> => {
 	const cookieHeader = await getAuthCookieHeader()
-	const res = await fetch(`${API_BASE_URL}/api/me`, {
+	const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
 		headers: {
 			'Content-Type': 'application/json',
 			...(cookieHeader && { Cookie: cookieHeader }),
@@ -39,35 +31,28 @@ export const getProfile = cache(async (): Promise<MeResponse | null> => {
 		next: { tags: ['me'], revalidate: 60 },
 	})
 	if (!res.ok) return null
-	const data = await res.json()
-	const user = data.user || {}
-	const employee = data.employee || {}
+	const json = await res.json()
+	const user = json.data || json.user || {}
 	return {
-		user: {
-			email: String(user.email || ''),
-			full_name: String(user.full_name || ''),
-		},
-		employee: {
-			address_line1: employee.address_line1 ?? null,
-			address_line2: employee.address_line2 ?? null,
-			city: employee.city ?? null,
-			state: employee.state ?? null,
-			postal_code: employee.postal_code ?? null,
-			country: employee.country ?? null,
-			phone_primary: employee.phone_primary ?? null,
-			phone_secondary: employee.phone_secondary ?? null,
-			emergency_contact_name: employee.emergency_contact_name ?? null,
-			emergency_contact_phone: employee.emergency_contact_phone ?? null,
-			emergency_contact_relationship: employee.emergency_contact_relationship ?? null,
-		},
+		email: String(user.email || ''),
+		full_name: String(user.full_name || ''),
+		address_line1: user.address_line1 ?? null,
+		address_line2: user.address_line2 ?? null,
+		city: user.city ?? null,
+		state: user.state ?? null,
+		postal_code: user.postal_code ?? null,
+		country: user.country ?? null,
+		phone_primary: user.phone_primary ?? null,
+		phone_secondary: user.phone_secondary ?? null,
+		emergency_contact_name: user.emergency_contact_name ?? null,
+		emergency_contact_phone: user.emergency_contact_phone ?? null,
+		emergency_contact_relationship: user.emergency_contact_relationship ?? null,
 	}
 })
 
 const updateSchema = z.object({
-	// User
 	full_name: z.string().optional(),
 	email: z.string().email('Invalid email').optional(),
-	// Employee
 	address_line1: z.string().optional(),
 	address_line2: z.string().optional(),
 	city: z.string().optional(),
@@ -106,7 +91,7 @@ export async function updateProfileAction(_prev: unknown, formData: FormData): P
 
 	try {
 		const cookieHeader = await getAuthCookieHeader()
-		const res = await fetch(`${API_BASE_URL}/api/me`, {
+		const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',

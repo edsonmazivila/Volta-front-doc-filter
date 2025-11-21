@@ -9,6 +9,8 @@ export interface AttendanceRecord {
   hours_worked?: number
   justification?: string
   justification_status?: 'pending' | 'approved' | 'rejected'
+  justification_document_url?: string
+  justification_document_filename?: string
   created_at?: string
   updated_at?: string
 }
@@ -28,7 +30,9 @@ export interface AttendanceJustification {
   employee_name?: string
   date: string
   reason: string
-  status: 'pending' | 'approved' | 'rejected'
+  status: 'pending' | 'approved' | 'rejected' | 'justified'
+  document_url?: string
+  document_filename?: string
   created_at: string
   reviewed_by?: number
   reviewed_at?: string

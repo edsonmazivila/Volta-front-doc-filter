@@ -438,7 +438,9 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Termination Date</label>
+              <label className="text-sm font-medium">
+                Termination Date <span className="text-muted-foreground font-normal text-xs">(Optional)</span>
+              </label>
               <Input type="date" {...register("termination_date")} />
               {errors.termination_date && (
                 <span className="text-xs text-destructive">

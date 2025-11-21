@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui'
 import { Input } from '@/components/ui/input'
 import { createMyAttendanceAction, updateMyAttendanceAction, submitJustificationAction } from '@/lib/services/attendance'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, FileText } from 'lucide-react'
+import { Calendar, Clock, FileText, Upload, X, ExternalLink } from 'lucide-react'
 import type { AttendanceRecord } from '@/lib/types/attendance'
 import { formatTimeForInput } from '@/lib/utils'
 
@@ -36,6 +36,7 @@ export function AttendanceFormDialog({
   const router = useRouter()
   const toast = useToastHelpers()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form state
   const [date, setDate] = useState('')
@@ -43,6 +44,7 @@ export function AttendanceFormDialog({
   const [clockIn, setClockIn] = useState('')
   const [clockOut, setClockOut] = useState('')
   const [justification, setJustification] = useState('')
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
 
   // Initialize form when dialog opens or attendance changes
   useEffect(() => {
@@ -56,6 +58,8 @@ export function AttendanceFormDialog({
         setClockIn(formatTimeForInput(attendance.clock_in))
         setClockOut(formatTimeForInput(attendance.clock_out))
         setJustification(attendance.justification || '')
+       
+        setUploadedFile(null)
       } else {
         // Create mode - set defaults
         const today = new Date().toISOString().split('T')[0]
@@ -64,9 +68,29 @@ export function AttendanceFormDialog({
         setClockIn('')
         setClockOut('')
         setJustification('')
+        setUploadedFile(null)
       }
     }
   }, [open, isEdit, attendance])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size must be less than 10MB')
+        return
+      }
+      setUploadedFile(file)
+    }
+  }
+
+  const removeFile = () => {
+    setUploadedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,6 +119,9 @@ export function AttendanceFormDialog({
       let result
       if (!isEdit && (status === 'absent' || status === 'late')) {
         formData.append('reason', justification)
+        if (uploadedFile) {
+          formData.append('file', uploadedFile)
+        }
         result = await submitJustificationAction(null, formData)
       } else if (isEdit && attendance) {
         formData.append('status', status)
@@ -216,22 +243,135 @@ export function AttendanceFormDialog({
 
           {/* Justification - Show for absent/late status or when editing existing justification */}
           {(status === 'absent' || status === 'late' || (isEdit && attendance?.justification)) && (
-            <div>
-              <label htmlFor="justification" className="flex items-center gap-1 text-sm font-medium mb-1">
-                <FileText className="h-4 w-4" />
-                Justification
-                {(status === 'absent' || status === 'late') && <span className="text-red-400">*</span>}
-              </label>
-              <textarea
-                id="justification"
-                value={justification}
-                onChange={(e) => setJustification(e.target.value)}
-                rows={3}
-                className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter reason for absence/lateness or additional notes..."
-                disabled={isSubmitting}
-                required={status === 'absent' || status === 'late'}
-              />
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="justification" className="flex items-center gap-1 text-sm font-medium mb-1">
+                  <FileText className="h-4 w-4" />
+                  Justification
+                  {(status === 'absent' || status === 'late') && <span className="text-red-400">*</span>}
+                </label>
+                <textarea
+                  id="justification"
+                  value={justification}
+                  onChange={(e) => setJustification(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter reason for absence/lateness or additional notes..."
+                  disabled={isSubmitting}
+                  required={status === 'absent' || status === 'late'}
+                />
+              </div>
+
+              {/* File Upload for Justification */}
+              <div>
+                <label className="flex items-center gap-1 text-sm font-medium mb-2">
+                  <Upload className="h-4 w-4" />
+                  Supporting Document{' '}
+                  <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+                </label>
+                
+                {!uploadedFile && !attendance?.justification_document_url ? (
+                  // No document uploaded yet
+                  <div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      className="hidden"
+                      disabled={isSubmitting}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Document
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Supported: PDF, DOC, DOCX, JPG, PNG (Max 10MB)
+                    </p>
+                  </div>
+                ) : uploadedFile ? (
+                  // New file selected (to be uploaded or replacing existing)
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-3 rounded-md border border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
+                      <FileText className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate text-green-900 dark:text-green-100">{uploadedFile.name}</p>
+                        <p className="text-xs text-green-700 dark:text-green-400">
+                          New file · {(uploadedFile.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeFile}
+                        disabled={isSubmitting}
+                        className="flex-shrink-0 hover:bg-green-100 dark:hover:bg-green-900"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {attendance?.justification_document_url && (
+                      <p className="text-xs text-muted-foreground">
+                        This will replace: {attendance.justification_document_filename || 'existing document'}
+                      </p>
+                    )}
+                  </div>
+                ) : attendance?.justification_document_url ? (
+                  // Existing document (edit mode)
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-3 rounded-md border border-[var(--border)] bg-muted/30">
+                      <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {attendance.justification_document_filename || 'Uploaded document'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Current document
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(attendance.justification_document_url, '_blank')}
+                        disabled={isSubmitting}
+                        className="flex-shrink-0"
+                        title="View document"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={handleFileChange}
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        className="hidden"
+                        disabled={isSubmitting}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isSubmitting}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Replace with new document
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
 

@@ -38,7 +38,21 @@ export function UploadDocumentDialog({
     { type: 'other', display_name: 'Other' },
   ]
 
-  const types = documentTypes.length > 0 ? documentTypes : defaultTypes
+  // Ensure we have valid types and filter out duplicates
+  const validTypes = (documentTypes.length > 0 ? documentTypes : defaultTypes).filter(
+    (type): type is { type: string; display_name: string } => 
+      typeof type === 'object' && 
+      type !== null && 
+      'type' in type && 
+      'display_name' in type &&
+      typeof type.type === 'string' &&
+      typeof type.display_name === 'string'
+  )
+  
+  // Remove duplicates by type
+  const types = Array.from(
+    new Map(validTypes.map(t => [t.type, t])).values()
+  )
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

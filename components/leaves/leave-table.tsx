@@ -27,7 +27,6 @@ interface LeaveTableProps {
   onCancel?: (id: string) => void;
   onEdit?: (id: string) => void;
   onApproveL1?: (id: string) => void;
-  onApproveFinal?: (id: string) => void;
   onReject?: (id: string) => void;
 }
 
@@ -39,7 +38,6 @@ export function LeaveTable({
   onCancel,
   onEdit,
   onApproveL1,
-  onApproveFinal,
   onReject,
 }: LeaveTableProps) {
   const rows = useMemo(() => items, [items]);
@@ -182,19 +180,7 @@ export function LeaveTable({
                               className="text-green-400 focus:text-green-400"
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
-                              Approve L1
-                            </DropdownMenuItem>
-                          )}
-                          {row.status === "APPROVED_L1" && onApproveFinal && (
-                            <DropdownMenuItem
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onApproveFinal(row.id);
-                              }}
-                              className="text-green-400 focus:text-green-400"
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Approve Final
+                              Approve
                             </DropdownMenuItem>
                           )}
                           {onEdit && (
@@ -222,7 +208,7 @@ export function LeaveTable({
                               Submit
                             </DropdownMenuItem>
                           )}
-                          {["DRAFT", "SUBMITTED", "APPROVED_L1"].includes(
+                          {["DRAFT", "SUBMITTED"].includes(
                             row.status
                           ) &&
                             onCancel && (
@@ -238,7 +224,7 @@ export function LeaveTable({
                                 Cancel
                               </DropdownMenuItem>
                             )}
-                          {["SUBMITTED", "APPROVED_L1"].includes(row.status) &&
+                          {row.status === "SUBMITTED" &&
                             onReject && (
                               <DropdownMenuItem
                                 onClick={(event) => {

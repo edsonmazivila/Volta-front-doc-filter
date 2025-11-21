@@ -14,14 +14,12 @@ import { formatDate, formatDateRange } from "@/lib/utils";
 interface PendingApprovalsTableProps {
   items: LeaveRequestItem[];
   onApproveL1: (id: string) => Promise<void> | void;
-  onApproveFinal: (id: string) => Promise<void> | void;
   onReject: (id: string) => void;
 }
 
 export function PendingApprovalsTable({
   items,
   onApproveL1,
-  onApproveFinal,
   onReject,
 }: PendingApprovalsTableProps) {
   const [viewingLeave, setViewingLeave] = useState<LeaveRequestItem | null>(
@@ -127,19 +125,7 @@ export function PendingApprovalsTable({
                               className="text-green-400 focus:text-green-400"
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
-                              Approve L1
-                            </DropdownMenuItem>
-                          )}
-                          {row.status === "APPROVED_L1" && (
-                            <DropdownMenuItem
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onApproveFinal(row.id);
-                              }}
-                              className="text-green-400 focus:text-green-400"
-                            >
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Approve Final
+                              Approve
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem

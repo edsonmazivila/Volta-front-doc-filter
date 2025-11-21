@@ -9,8 +9,7 @@ import { revalidateEntityMutation } from "@/lib/cache-utils";
 export type LeaveStatus =
   | "DRAFT"
   | "SUBMITTED"
-  | "APPROVED_L1"
-  | "APPROVED_FINAL"
+  | "APPROVED"
   | "REJECTED"
   | "CANCELLED";
 
@@ -29,11 +28,10 @@ export interface LeaveRequestItem {
   submitted_at?: string;
   employee_full_name?: string;
   employee_number?: string;
-  approved_final_at?: string;
-  approved_final_by?: string;
-  approved_final_notes?: string;
-  approver_l1_full_name?: string;
-  approver_final_full_name?: string;
+  approved_at?: string;
+  approved_by?: string;
+  approved_notes?: string;
+  approver_full_name?: string;
 }
 
 export interface LeaveBalanceItem {
@@ -205,6 +203,47 @@ export const getLeaveBalances = cache(async (): Promise<LeaveBalanceItem[]> => {
     return [];
   }
 });
+
+export interface LeaveOverviewItem {
+  userId: string
+  fullName: string
+  leaveType: string
+  startDate: string
+  endDate: string
+}
+
+export interface LeavesOverview {
+  upcomingLeaves: LeaveOverviewItem[]
+  currentlyOut: LeaveOverviewItem[] | null
+}
+
+export const getLeavesOverview = cache(async (): Promise<LeavesOverview> => {
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/attendance/leaves/overview`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['leave-requests', 'leaves-overview'], revalidate: 60 },
+    })
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch leaves overview: ${res.status}`)
+    }
+
+    const data = await res.json()
+    return {
+      upcomingLeaves: data.upcomingLeaves || [],
+      currentlyOut: data.currentlyOut || [],
+    }
+  } catch {
+    return {
+      upcomingLeaves: [],
+      currentlyOut: [],
+    }
+  }
+})
 
 export const getTeamBalances = cache(async (): Promise<TeamBalanceItem[]> => {
   try {
@@ -454,57 +493,35 @@ export async function cancelLeaveRequestAction(
   revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
 }
 
-export async function approveL1Action(
+export async function approveLeaveAction(
   id: string,
   notes?: string
 ): Promise<void> {
   const cookieHeader = await getAuthCookieHeader();
   const res = await fetch(
-    `${API_BASE_URL}/api/leave-requests/${id}/approve-l1`,
+    `${API_BASE_URL}/api/leave-requests/${id}/approve`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(cookieHeader && { Cookie: cookieHeader }),
       },
-      body: JSON.stringify({ notes }),
+      body: JSON.stringify({ notes: notes || "" }),
     }
   );
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Failed to approve (L1)");
+    throw new Error(error.message || "Failed to approve leave request");
   }
 
   // Revalidate leaves caches and pages
-  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
+  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests", "pending-approvals"], additionalPaths: ["/dashboard/leaves", "/dashboard/my-leaves"] });
 }
 
-export async function approveFinalAction(
-  id: string,
-  notes?: string
-): Promise<void> {
-  const cookieHeader = await getAuthCookieHeader();
-  const res = await fetch(
-    `${API_BASE_URL}/api/leave-requests/${id}/approve-final`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(cookieHeader && { Cookie: cookieHeader }),
-      },
-      body: JSON.stringify({ notes }),
-    }
-  );
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Failed to approve (final)");
-  }
-
-  // Revalidate leaves caches and pages
-  revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
-}
+// Legacy aliases for backward compatibility
+export const approveL1Action = approveLeaveAction;
+export const approveFinalAction = approveLeaveAction;
 
 export async function rejectLeaveRequestAction(
   id: string,
@@ -526,5 +543,5 @@ export async function rejectLeaveRequestAction(
   }
 
 	// Revalidate leaves caches so dashboards and personal pages update
-	revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests"], additionalPaths: ["/dashboard/my-leaves"] });
+	revalidateEntityMutation("LEAVES", { additionalTags: ["leave-requests", "pending-approvals"], additionalPaths: ["/dashboard/leaves", "/dashboard/my-leaves"] });
 }

@@ -49,9 +49,7 @@ export function LeaveViewDialog({
     switch (status.toUpperCase()) {
       case "SUBMITTED":
         return <Clock className="h-4 w-4" />;
-      case "APPROVED_L1":
-        return <CheckCircle className="h-4 w-4" />;
-      case "APPROVED_FINAL":
+      case "APPROVED":
         return <CheckCircle className="h-4 w-4" />;
       case "REJECTED":
         return <XCircle className="h-4 w-4" />;
@@ -196,24 +194,24 @@ export function LeaveViewDialog({
             </div>
           )}
 
-          {/* Final Approval Section */}
-          {leave.status === 'APPROVED_FINAL' && (
+          {/* Approval Section */}
+          {leave.status === 'APPROVED' && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                Final Approval
+                Approval Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {leave.approved_final_at && (
+                {leave.approved_at && (
                   <div>
                     <p className="text-sm font-medium">Approved At</p>
-                    <p className="text-sm text-muted-foreground">{formatDateTime(leave.approved_final_at)}</p>
+                    <p className="text-sm text-muted-foreground">{formatDateTime(leave.approved_at)}</p>
                   </div>
                 )}
-                {leave.approved_final_notes && (
+                {leave.approved_notes && (
                   <div className="md:col-span-2">
                     <p className="text-sm font-medium">Notes</p>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{leave.approved_final_notes}</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{leave.approved_notes}</p>
                   </div>
                 )}
               </div>

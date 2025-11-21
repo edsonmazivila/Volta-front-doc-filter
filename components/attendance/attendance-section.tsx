@@ -90,7 +90,7 @@ export function AttendanceSection({
             Pending Justifications
           </div>
           <div className="text-2xl font-bold mt-1 text-yellow-600">
-            {initialJustifications.filter((j) => j.status === "pending").length}
+            {initialJustifications.filter((j) => j.status === "pending" || j.status === "justified").length}
           </div>
         </Card>
       </div>

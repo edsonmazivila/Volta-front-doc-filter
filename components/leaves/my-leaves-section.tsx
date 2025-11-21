@@ -126,11 +126,10 @@ export function MyLeavesSection({
             </SelectTrigger>
             <SelectContent className="bg-background border border-[var(--border)]">
               <SelectItem value="all">All status</SelectItem>
-              {[
+              {              [
                 "DRAFT",
                 "SUBMITTED",
-                "APPROVED_L1",
-                "APPROVED_FINAL",
+                "APPROVED",
                 "REJECTED",
                 "CANCELLED",
               ].map((s) => (

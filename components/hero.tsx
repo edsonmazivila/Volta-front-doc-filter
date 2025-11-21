@@ -3,7 +3,6 @@ import Image from "next/image";
 import { Spotlight } from "@/components/ui/spotlight";
 import { Button } from "@/components/ui";
 import Link from "next/link";
-import { Marquee } from "@/components/ui/marquee";
 
 const Hero = () => {
   return (

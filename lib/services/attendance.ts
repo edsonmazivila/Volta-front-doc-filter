@@ -59,6 +59,9 @@ export const getAttendanceRecords = cache(
             clock_out: r.clock_out ?? r.clockOut ?? undefined,
             hours_worked: r.hours_worked ?? r.hours ?? undefined,
             justification: r.justification ?? r.reason ?? undefined,
+            justification_status: r.justification_status ?? undefined,
+            justification_document_url: r.justification_document_url ?? r.document_url ?? undefined,
+            justification_document_filename: r.justification_document_filename ?? r.document_filename ?? undefined,
             employee_name: String(nameField || r.employee_name || `Employee #${r.employee_id ?? r.user_id ?? r.userId}`),
             created_at: r.created_at ?? undefined,
             updated_at: r.updated_at ?? undefined,
@@ -131,7 +134,23 @@ export const getPendingJustifications = cache(
 
         if (!res.ok) throw new Error("Failed to fetch justifications");
         const data = await res.json();
-        return data.data || data || [];
+        const rawJustifications = data.data || data || [];
+        
+        // Map API response fields to our interface
+        return rawJustifications.map((j: Record<string, unknown>) => ({
+          id: String(j.id || ''),
+          attendance_id: String(j.attendance_id || ''),
+          employee_id: String(j.user_id || j.employee_id || ''),
+          employee_name: String(j.full_name || j.employee_name || ''),
+          date: String(j.date || ''),
+          reason: String(j.reason || ''),
+          status: String(j.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'justified',
+          document_url: (j.justification_document_url ?? j.document_url) as string | undefined,
+          document_filename: (j.justification_document_filename ?? j.document_filename) as string | undefined,
+          created_at: String(j.created_at || ''),
+          reviewed_by: j.reviewed_by as number | undefined,
+          reviewed_at: j.reviewed_at as string | undefined,
+        }));
       },
       [],
       { errorContext: "getPendingJustifications" }
@@ -146,8 +165,18 @@ export const getMyAttendance = cache(
       async () => {
         const authHeader = await getAuthCookieHeader();
 
-        const params = month ? `?month=${month}` : "";
-        const url = `${API_BASE_URL}/api/attendance${params}`;
+        // Get current user first to filter on the backend
+        const user = await getUser();
+        if (!user) {
+          return [];
+        }
+
+        // Build query params with userId filter for server-side filtering
+        const params = new URLSearchParams();
+        if (month) params.append("month", month);
+        params.append("userId", user.id);
+        
+        const url = `${API_BASE_URL}/api/attendance${params.toString() ? `?${params.toString()}` : ""}`;
         
         const res = await fetch(url, {
           headers: {
@@ -163,24 +192,11 @@ export const getMyAttendance = cache(
         
         const data = await res.json();
         
-        // Try different possible data structures
-        const allRecords = data.data || data.records || data || [];
-        
-        // Get current user to filter records
-        const user = await getUser();
-        if (!user) {
-          return [];
-        }
-        
-        // Filter records for current user
-        const myRecords = allRecords.filter((record: Record<string, unknown>) => {
-          // Check different possible user ID fields
-          const userId = record.user_id || record.userId || record.employee_id || record.employeeId;
-          return userId === user.id;
-        });
+       
+        const records = data.data || data.records || data || [];
         
         // Transform records to match AttendanceRecord interface
-        const transformedRecords = myRecords.map((r: Record<string, unknown>) => {
+        const transformedRecords = records.map((r: Record<string, unknown>) => {
           const emp = (r.employee || r.user || r.employee_info) as Record<string, unknown> | undefined
           const nameField = emp?.full_name as string | undefined ?? emp?.name as string | undefined ?? r.full_name as string | undefined ?? r.employee_name as string | undefined
           return {
@@ -192,6 +208,9 @@ export const getMyAttendance = cache(
             clock_out: r.clock_out ?? r.clockOut ?? undefined,
             hours_worked: r.hours_worked ?? r.hours ?? undefined,
             justification: r.justification ?? r.reason ?? undefined,
+            justification_status: r.justification_status ?? undefined,
+            justification_document_url: r.justification_document_url ?? r.document_url ?? undefined,
+            justification_document_filename: r.justification_document_filename ?? r.document_filename ?? undefined,
             employee_name: String(nameField || r.employee_name || `Employee #${r.employee_id ?? r.user_id ?? r.userId}`),
             created_at: r.created_at ?? undefined,
             updated_at: r.updated_at ?? undefined,
@@ -406,15 +425,12 @@ export async function submitJustificationAction(
       return { errors: { _form: ['Date and reason are required'] } }
     }
 
-    const payload = {
-      date: date,
-      reason: reason
-    };
-
+    // backend expects multipart/form-data
+    // Backend will handle the case where no file is provided
     const res = await fetch(`${API_BASE_URL}/api/attendance/justifications`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(cookieHeader && { Cookie: cookieHeader }) },
-      body: JSON.stringify(payload),
+      headers: { ...(cookieHeader && { Cookie: cookieHeader }) },
+      body: formData,
     });
 
     if (!res.ok) {
@@ -555,19 +571,21 @@ export async function approveJustificationAction(
       {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           ...(cookieHeader && { Cookie: cookieHeader }),
         },
       }
     );
 
     if (!res.ok) {
-      const error = await res.json();
+      const error = await res.json().catch(() => ({}));
       return {
         errors: { _form: [error.message || "Failed to approve justification"] },
       };
     }
 
     revalidateEntityMutation("ATTENDANCE");
+    revalidateEntityMutation("ATTENDANCE_JUSTIFICATIONS");
     return { success: true };
   } catch {
     return { errors: { _form: ["Network error"] } };
@@ -575,7 +593,8 @@ export async function approveJustificationAction(
 }
 
 export async function rejectJustificationAction(
-  justificationId: string
+  justificationId: string,
+  note?: string
 ): Promise<ActionResult> {
   const cookieHeader = await getAuthCookieHeader();
 
@@ -585,8 +604,13 @@ export async function rejectJustificationAction(
       {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           ...(cookieHeader && { Cookie: cookieHeader }),
         },
+        body: JSON.stringify({ 
+          reason: note || 'Rejected by manager',
+          note: note || '' 
+        }),
       }
     );
 
@@ -598,6 +622,7 @@ export async function rejectJustificationAction(
     }
 
     revalidateEntityMutation("ATTENDANCE");
+    revalidateEntityMutation("ATTENDANCE_JUSTIFICATIONS");
     return { success: true };
   } catch {
     return { errors: { _form: ["Network error"] } };

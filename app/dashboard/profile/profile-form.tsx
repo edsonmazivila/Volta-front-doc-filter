@@ -21,9 +21,6 @@ export function ProfileForm({ initialData }: { initialData: MeResponse | null })
 		setIsEditing(false)
 	}
 
-	const user = initialData?.user
-	const emp = initialData?.employee
-
 	return (
 		<div className="glass rounded-xl p-6">
 			{error && (
@@ -47,119 +44,103 @@ export function ProfileForm({ initialData }: { initialData: MeResponse | null })
 
 			{!isEditing ? (
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="md:col-span-2">
-						<h3 className="text-sm font-medium text-muted-foreground">User</h3>
-					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Full name</p>
-						<p className="text-base font-medium">{user?.full_name || '-'}</p>
+						<p className="text-base font-medium">{initialData?.full_name || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Email</p>
-						<p className="text-base font-medium break-all">{user?.email || '-'}</p>
-					</div>
-
-					<div className="md:col-span-2 mt-2">
-						<h3 className="text-sm font-medium text-muted-foreground">Employee</h3>
+						<p className="text-base font-medium break-all">{initialData?.email || '-'}</p>
 					</div>
 					<div className="md:col-span-2">
 						<p className="text-xs text-muted-foreground">Address</p>
-						<p className="text-base font-medium">{[emp?.address_line1, emp?.address_line2].filter(Boolean).join(', ') || '-'}</p>
+						<p className="text-base font-medium">{[initialData?.address_line1, initialData?.address_line2].filter(Boolean).join(', ') || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">City</p>
-						<p className="text-base font-medium">{emp?.city || '-'}</p>
+						<p className="text-base font-medium">{initialData?.city || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">State</p>
-						<p className="text-base font-medium">{emp?.state || '-'}</p>
+						<p className="text-base font-medium">{initialData?.state || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Postal code</p>
-						<p className="text-base font-medium">{emp?.postal_code || '-'}</p>
+						<p className="text-base font-medium">{initialData?.postal_code || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Country</p>
-						<p className="text-base font-medium">{emp?.country || '-'}</p>
+						<p className="text-base font-medium">{initialData?.country || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Primary phone</p>
-						<p className="text-base font-medium">{emp?.phone_primary || '-'}</p>
+						<p className="text-base font-medium">{initialData?.phone_primary || '-'}</p>
 					</div>
 					<div>
 						<p className="text-xs text-muted-foreground">Secondary phone</p>
-						<p className="text-base font-medium">{emp?.phone_secondary || '-'}</p>
+						<p className="text-base font-medium">{initialData?.phone_secondary || '-'}</p>
 					</div>
 					<div className="md:col-span-2">
 						<p className="text-xs text-muted-foreground">Emergency contact</p>
-						<p className="text-base font-medium">{emp?.emergency_contact_name || '-'}</p>
-						<p className="text-sm text-muted-foreground">{emp?.emergency_contact_relationship || ''}</p>
-						<p className="text-sm text-muted-foreground">{emp?.emergency_contact_phone || ''}</p>
+						<p className="text-base font-medium">{initialData?.emergency_contact_name || '-'}</p>
+						<p className="text-sm text-muted-foreground">{initialData?.emergency_contact_relationship || ''}</p>
+						<p className="text-sm text-muted-foreground">{initialData?.emergency_contact_phone || ''}</p>
 					</div>
 				</div>
 			) : (
 				<form id="profile-form" action={action} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div className="md:col-span-2">
-					<h2 className="text-sm font-medium text-muted-foreground">User</h2>
-				</div>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Full name</span>
-					<input name="full_name" defaultValue={user?.full_name || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="full_name" defaultValue={initialData?.full_name || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Email</span>
-					<input type="email" name="email" defaultValue={user?.email || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input type="email" name="email" defaultValue={initialData?.email || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
-
-				<div className="md:col-span-2 mt-2">
-					<h2 className="text-sm font-medium text-muted-foreground">Employee</h2>
-				</div>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Address line 1</span>
-					<input name="address_line1" defaultValue={emp?.address_line1 || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="address_line1" defaultValue={initialData?.address_line1 || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Address line 2</span>
-					<input name="address_line2" defaultValue={emp?.address_line2 || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="address_line2" defaultValue={initialData?.address_line2 || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">City</span>
-					<input name="city" defaultValue={emp?.city || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="city" defaultValue={initialData?.city || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">State</span>
-					<input name="state" defaultValue={emp?.state || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="state" defaultValue={initialData?.state || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">Postal code</span>
-					<input name="postal_code" defaultValue={emp?.postal_code || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="postal_code" defaultValue={initialData?.postal_code || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">Country</span>
-					<input name="country" defaultValue={emp?.country || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="country" defaultValue={initialData?.country || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">Primary phone</span>
-					<input name="phone_primary" defaultValue={emp?.phone_primary || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="phone_primary" defaultValue={initialData?.phone_primary || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">Secondary phone</span>
-					<input name="phone_secondary" defaultValue={emp?.phone_secondary || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="phone_secondary" defaultValue={initialData?.phone_secondary || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1 md:col-span-2">
 					<span className="text-sm">Emergency contact name</span>
-					<input name="emergency_contact_name" defaultValue={emp?.emergency_contact_name || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="emergency_contact_name" defaultValue={initialData?.emergency_contact_name || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">Emergency contact phone</span>
-					<input name="emergency_contact_phone" defaultValue={emp?.emergency_contact_phone || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="emergency_contact_phone" defaultValue={initialData?.emergency_contact_phone || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
 				<label className="flex flex-col gap-1">
 					<span className="text-sm">Emergency contact relationship</span>
-					<input name="emergency_contact_relationship" defaultValue={emp?.emergency_contact_relationship || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
+					<input name="emergency_contact_relationship" defaultValue={initialData?.emergency_contact_relationship || ''} className="w-full border rounded-md px-3 py-2 bg-background border-[var(--border)]" />
 				</label>
-
-
 			</form>
 			)}
 		</div>

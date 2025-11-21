@@ -14,7 +14,6 @@ import {
   submitLeaveRequestAction,
   cancelLeaveRequestAction,
   approveL1Action,
-  approveFinalAction,
   rejectLeaveRequestAction,
 } from '@/lib/services/leaves'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -69,7 +68,7 @@ export function LeaveManagement({ requests, teamBalances }: LeaveManagementProps
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-[var(--border)]">
                   <SelectItem value="all">All status</SelectItem>
-                  {['DRAFT','SUBMITTED','APPROVED_L1','APPROVED_FINAL','REJECTED','CANCELLED'].map(s => (
+                  {['DRAFT','SUBMITTED','APPROVED','REJECTED','CANCELLED'].map(s => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
                 </SelectContent>
@@ -116,19 +115,6 @@ export function LeaveManagement({ requests, teamBalances }: LeaveManagementProps
               setOperationInProgress(prev => ({ ...prev, [id]: true }));
               try {
                 await approveL1Action(id);
-                toast.success('Approved L1');
-                router.refresh();
-              } catch {
-                toast.error('Failed to approve');
-              } finally {
-                setOperationInProgress(prev => ({ ...prev, [id]: false }));
-              }
-            }}
-            onApproveFinal={async (id) => {
-              if (operationInProgress[id]) return;
-              setOperationInProgress(prev => ({ ...prev, [id]: true }));
-              try {
-                await approveFinalAction(id);
                 toast.success('Approved');
                 router.refresh();
               } catch {

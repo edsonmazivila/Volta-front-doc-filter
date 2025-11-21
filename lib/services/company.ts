@@ -429,7 +429,12 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
 
 export async function createPayScheduleAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  const startDateFormatted = startDateStr.trim()
+  // Convert to ISO format (YYYY-MM-DDTHH:mm:ssZ)
+  let startDateFormatted = startDateStr.trim()
+  if (startDateFormatted && !startDateFormatted.includes('T')) {
+    // If it's just a date (YYYY-MM-DD), convert to ISO format
+    startDateFormatted = `${startDateFormatted}T00:00:00Z`
+  }
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),
@@ -473,7 +478,12 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 
 export async function updatePayScheduleAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  const startDateFormatted = startDateStr.trim()
+  // Convert YYYY-MM-DD to ISO format (YYYY-MM-DDTHH:mm:ssZ)
+  let startDateFormatted = startDateStr.trim()
+  if (startDateFormatted && !startDateFormatted.includes('T')) {
+    // If it's just a date (YYYY-MM-DD), convert to ISO format
+    startDateFormatted = `${startDateFormatted}T00:00:00Z`
+  }
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),

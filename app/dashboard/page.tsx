@@ -9,7 +9,7 @@ import { getDashboardStats } from "@/lib/services/dashboard";
 import { requireUser } from "@/lib/auth/dal";
 import { getPayrollRuns } from "@/lib/services/payroll";
 import { getTimesheets } from "@/lib/services/timesheets";
-import { getMyLeaveRequests } from "@/lib/services/leaves";
+import { getMyLeaveRequests, getLeavesOverview } from "@/lib/services/leaves";
 import { getMyAttendance } from "@/lib/services/attendance";
 
 export default async function DashboardPage() {
@@ -25,6 +25,8 @@ export default async function DashboardPage() {
   const managerQuickActionsCount = (canManageEmployees ? 1 : 0) + 1 + (canViewPayroll ? 1 : 0) // employees + timesheets + payroll
   const managerQuickActionsCols = managerQuickActionsCount >= 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : managerQuickActionsCount === 2 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-1'
 
+  const canViewLeavesOverview = user.role === 'hr_manager' || user.role === 'system_admin'
+
   // Lazily construct only the needed fetches based on role
   let statsPromise: Promise<{ totalEmployees: number, pendingTimesheets: number, monthlyPayroll: number }>
   let payrollRunsPromise: ReturnType<typeof getPayrollRuns> | Promise<Awaited<ReturnType<typeof getPayrollRuns>>>
@@ -32,6 +34,7 @@ export default async function DashboardPage() {
   // Removed users fetching to avoid 403 for roles without access (e.g., payroll_manager)
   let leaveRequestsPromise: ReturnType<typeof getMyLeaveRequests> | Promise<Awaited<ReturnType<typeof getMyLeaveRequests>>>
   let myAttendancePromise: ReturnType<typeof getMyAttendance> | Promise<Awaited<ReturnType<typeof getMyAttendance>>>
+  let leavesOverviewPromise: ReturnType<typeof getLeavesOverview> | Promise<Awaited<ReturnType<typeof getLeavesOverview>>>
 
   if (isEmployee) {
     statsPromise = Promise.resolve({ totalEmployees: 0, pendingTimesheets: 0, monthlyPayroll: 0 })
@@ -40,6 +43,7 @@ export default async function DashboardPage() {
     // no users needed
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
     myAttendancePromise = getMyAttendance().catch(() => [])
+    leavesOverviewPromise = Promise.resolve({ upcomingLeaves: [], currentlyOut: [] })
   } else {
     statsPromise = getDashboardStats().catch(() => ({ totalEmployees: 0, pendingTimesheets: 0, monthlyPayroll: 0 }))
     payrollRunsPromise = getPayrollRuns().catch(() => [])
@@ -47,14 +51,16 @@ export default async function DashboardPage() {
     // no users needed for dashboard cards
     leaveRequestsPromise = getMyLeaveRequests().catch(() => [])
     myAttendancePromise = Promise.resolve([])
+    leavesOverviewPromise = canViewLeavesOverview ? getLeavesOverview().catch(() => ({ upcomingLeaves: [], currentlyOut: [] })) : Promise.resolve({ upcomingLeaves: [], currentlyOut: [] })
   }
 
-  const [stats, payrollRuns, timesheets, leaveRequests, myAttendance] = await Promise.all([
+  const [stats, payrollRuns, timesheets, leaveRequests, myAttendance, leavesOverview] = await Promise.all([
     statsPromise,
     payrollRunsPromise,
     timesheetsPromise,
     leaveRequestsPromise,
     myAttendancePromise,
+    leavesOverviewPromise,
   ])
 
   // Pending items requiring action
@@ -89,7 +95,7 @@ export default async function DashboardPage() {
   const pendingMyLeaves = leaveRequests.filter(l => l.status === 'SUBMITTED').length
   const upcomingMyLeaves = leaveRequests.filter(l => {
     const start = new Date(l.start_date)
-    return (l.status === 'APPROVED_L1' || l.status === 'APPROVED_FINAL') && start >= new Date()
+    return l.status === 'APPROVED' && start >= new Date()
   }).length
 
   return (
@@ -412,7 +418,7 @@ export default async function DashboardPage() {
                       const startDate = new Date(l.start_date)
                       const today = new Date()
                       const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-                      return startDate >= today && startDate <= nextWeek && (l.status === 'APPROVED_L1' || l.status === 'APPROVED_FINAL')
+                      return startDate >= today && startDate <= nextWeek && l.status === 'APPROVED'
                     }).length}
                   </span>
                 </div>
@@ -453,6 +459,68 @@ export default async function DashboardPage() {
                   </div>
                   <span className="text-lg font-semibold">{payrollRuns.length}</span>
                 </div>
+                )}
+              </div>
+            </Card>
+          </section>
+        )}
+        
+        {/* Leaves Overview - Only for HR & Admin */}
+        {canViewLeavesOverview && (
+          <section className="px-4 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-[1]">
+            {/* Currently Out */}
+            <Card className="min-h-[200px]">
+              <CardHeader title="Currently Out" />
+              <div className="space-y-2">
+                {leavesOverview.currentlyOut && leavesOverview.currentlyOut.length > 0 ? (
+                  leavesOverview.currentlyOut.map((leave, idx) => (
+                    <div key={`${leave.userId}-${idx}`} className="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{leave.fullName}</p>
+                        <p className="text-xs text-muted-foreground">{leave.leaveType}</p>
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground">
+                        <p>{new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                        <p>to {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
+                    No one currently out
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Upcoming Leaves */}
+            <Card className="min-h-[200px]">
+              <CardHeader title="Upcoming Leaves" />
+              <div className="space-y-2">
+                {leavesOverview.upcomingLeaves.length > 0 ? (
+                  <>
+                    {leavesOverview.upcomingLeaves.slice(0, 5).map((leave, idx) => (
+                      <div key={`${leave.userId}-${idx}`} className="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{leave.fullName}</p>
+                          <p className="text-xs text-muted-foreground">{leave.leaveType}</p>
+                        </div>
+                        <div className="text-right text-xs text-muted-foreground">
+                          <p>{new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                          <p>to {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                        </div>
+                      </div>
+                    ))}
+                    {leavesOverview.upcomingLeaves.length > 5 && (
+                      <Link href="/dashboard/leaves" className="block text-center py-2 text-xs text-blue-400 hover:underline">
+                        View all {leavesOverview.upcomingLeaves.length} upcoming leaves
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
+                    No upcoming leaves
+                  </div>
                 )}
               </div>
             </Card>

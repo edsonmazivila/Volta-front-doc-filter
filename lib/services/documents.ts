@@ -175,10 +175,7 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
     id?: string | number;
     doc_id?: string | number;
     uuid?: string;
-    employee?: { user?: { full_name?: string; email?: string }; full_name?: string; email?: string };
-    user?: { user?: { full_name?: string; email?: string }; full_name?: string; email?: string };
-    employee_name?: string;
-    employee_full_name?: string;
+    full_name?: string;
     title?: string;
     original_filename?: string;
     document_type?: string;
@@ -192,15 +189,9 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
     updated_at?: string;
   }
   return raw.map((d: RawDocument) => {
-    const emp = d.employee || d.user || undefined
-    const empUser = emp?.user || emp
-    const fullName = empUser?.full_name ?? ''
-    const email = empUser?.email ?? ''
-    const name = fullName || email || '—'
-
     return {
       id: String(d.id ?? d.doc_id ?? d.uuid ?? ''),
-      employeeName: String(d.employee_full_name ?? d.employee_name ?? name),
+      employeeName: String(d.full_name || '—'),
       title: String(d.title ?? d.original_filename ?? 'Untitled'),
       type: String(d.document_type ?? d.type ?? 'unknown'),
       status: (d.document_status ?? d.status ?? 'uploaded') as DocumentStatus,
@@ -231,16 +222,10 @@ export const getDocument = cache(async (id: string): Promise<Document | null> =>
   const json = await res.json()
   const d = json.document || json.data || json
 
-  const emp = d.employee || d.user || undefined
-  const empUser = emp?.user || emp
-  const fullName = empUser?.full_name ?? ''
-  const email = empUser?.email ?? ''
-  const name = fullName || email || '—'
-
   return {
     id: String(d.id ?? ''),
     employee_id: String(d.employee_id ?? ''),
-    employee_name: String(d.employee_full_name ?? d.employee_name ?? d.employeeName ?? name),
+    employee_name: String(d.full_name || '—'),
     title: String(d.title ?? ''),
     document_type: String(d.document_type ?? ''),
     document_status: (d.document_status ?? 'uploaded') as DocumentStatus,
@@ -289,16 +274,10 @@ export const getDocumentForEdit = cache(async (id: string): Promise<Document | n
   const json = await res.json()
   const d = json.document || json.data || json
 
-  const emp = d.employee || d.user || undefined
-  const empUser = emp?.user || emp
-  const fullName = empUser?.full_name ?? ''
-  const email = empUser?.email ?? ''
-  const name = fullName || email || '—'
-
   return {
     id: String(d.id ?? ''),
     employee_id: String(d.employee_id ?? ''),
-    employee_name: String(d.employee_name ?? name),
+    employee_name: String(d.full_name || '—'),
     title: String(d.title ?? ''),
     document_type: String(d.document_type ?? ''),
     document_status: (d.document_status ?? 'uploaded') as DocumentStatus,
@@ -333,9 +312,48 @@ export const getDocumentTypes = cache(async (): Promise<DocumentTypeItem[]> => {
     if (!res.ok) return []
 
     const json = await res.json()
-    if (Array.isArray(json.document_types)) return json.document_types
-    if (Array.isArray(json.types)) return json.types.map((t: string) => ({ type: t, display_name: t }))
-    return []
+    
+    // Handle different response formats
+    let rawTypes: unknown[] = []
+    if (Array.isArray(json.document_types)) {
+      rawTypes = json.document_types
+    } else if (Array.isArray(json.types)) {
+      rawTypes = json.types
+    } else if (Array.isArray(json)) {
+      rawTypes = json
+    }
+    
+    // Normalize to DocumentTypeItem format
+    return rawTypes.map((item: unknown) => {
+      // Handle string format
+      if (typeof item === 'string') {
+        return { type: item, display_name: item }
+      }
+      
+      // Handle object format
+      if (typeof item === 'object' && item !== null) {
+        const obj = item as Record<string, unknown>
+        
+        // Check for {label, value} format
+        if ('label' in obj && 'value' in obj) {
+          return {
+            type: String(obj.value || ''),
+            display_name: String(obj.label || obj.value || '')
+          }
+        }
+        
+        // Check for {type, display_name} format
+        if ('type' in obj) {
+          return {
+            type: String(obj.type || ''),
+            display_name: String(obj.display_name || obj.type || '')
+          }
+        }
+      }
+      
+      // Fallback
+      return { type: String(item), display_name: String(item) }
+    })
   } catch {
     return []
   }
