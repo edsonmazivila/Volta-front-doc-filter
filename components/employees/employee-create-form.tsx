@@ -78,11 +78,12 @@ interface EmployeeCreateFormProps {
 }
 
 export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateFormProps) {
-  const router = useRouter();
-  const toast = useToastHelpers();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [canLogin, setCanLogin] = useState<boolean>(true);
-  const [showPassword, setShowPassword] = useState(false);
+	const router = useRouter();
+	const toast = useToastHelpers();
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [canLogin, setCanLogin] = useState<boolean>(true);
+	const [showPassword, setShowPassword] = useState(false);
+	const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const {
     register,
@@ -131,88 +132,142 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
     },
   });
 
-  async function onSubmit(values: FormValues) {
-    setIsSubmitting(true);
-    try {
-      // Dynamic validation based on can_login
-      if (canLogin) {
-        // If can_login is true, email and password are required
-        if (!values.email || values.email === '') {
-          toast.error('Email is required when user can login');
-          setIsSubmitting(false);
-          return;
-        }
-        if (!values.password || values.password === '') {
-          toast.error('Password is required when user can login');
-          setIsSubmitting(false);
-          return;
-        }
-      } else {
-        // If can_login is false, remove email and password
-        delete values.email;
-        delete values.password;
-      }
+	async function onSubmit(values: FormValues) {
+		setIsSubmitting(true);
+		setValidationErrors([]);
+		
+		try {
+			// Dynamic validation based on can_login
+			if (canLogin) {
+				if (!values.email?.trim()) {
+					const error = 'Please enter an email address. Email is required when user can login.';
+					setValidationErrors([error]);
+					toast.error(error);
+					setIsSubmitting(false);
+					return;
+				}
+				if (!values.password?.trim()) {
+					const error = 'Please enter a password. Password is required when user can login.';
+					setValidationErrors([error]);
+					toast.error(error);
+					setIsSubmitting(false);
+					return;
+				}
+			} else {
+				delete values.email;
+				delete values.password;
+			}
 
-      // Additional validation for required fields
-      if (!values.employment_type || values.employment_type === '') {
-        toast.error('Employment type is required');
-        setIsSubmitting(false);
-        return;
-      }
-      if (!values.hire_date || values.hire_date === '') {
-        toast.error('Hire date is required');
-        setIsSubmitting(false);
-        return;
-      }
+			const formData = new FormData();
+			
+			// Add unified flags for employee creation
+			formData.append('is_employee', 'true');
+			formData.append('can_login', String(canLogin));
+			formData.append('is_active', 'true');
+			
+			// Add all form values, filtering out empty strings and special keys
+			Object.entries(values).forEach(([key, value]) => {
+				const shouldInclude = 
+					key !== 'is_employee' && 
+					key !== 'is_active' && 
+					value !== undefined && 
+					value !== null && 
+					value !== '';
+				
+				if (shouldInclude) {
+					formData.append(key, String(value));
+				}
+			});
 
-      const formData = new FormData();
-      
-      // Add unified flags for employee creation
-      formData.append('is_employee', 'true'); // Always true for employee creation
-      formData.append('can_login', String(canLogin));
-      formData.append('is_active', 'true'); // Always active by default
-      
-      // Add all form values (excluding is_employee, is_active, and manager_id from form data as they're handled separately)
-      Object.entries(values).forEach(([key, value]) => {
-        if (key !== 'is_employee' && key !== 'is_active' && key !== 'manager_id' && value !== undefined && value !== null && value !== '') {
-          formData.append(key, String(value));
-        }
-      });
+			const result = await createUserAction(null, formData);
+			
+			if ("errors" in result && result.errors) {
+				// Show validation errors to the user
+				if (result.errors._form) {
+					const errorMsg = result.errors._form[0];
+					setValidationErrors([errorMsg]);
+					toast.error(errorMsg);
+				} else {
+					// Format field-specific errors with better messages
+					const errorEntries = Object.entries(result.errors);
+					const errorMessages = errorEntries
+						.map(([field, messages]) => {
+							if (Array.isArray(messages) && messages.length > 0) {
+								const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+								return `${fieldName}: ${messages[0]}`;
+							}
+							return null;
+						})
+						.filter((msg): msg is string => msg !== null);
+					
+					if (errorMessages.length > 0) {
+						console.error('[FORM] Validation errors:', errorMessages);
+						setValidationErrors(errorMessages);
+						// Show the first error to user
+						toast.error(errorMessages[0]);
+						// If multiple errors, show a hint
+						if (errorMessages.length > 1) {
+							setTimeout(() => {
+								toast.error(`${errorMessages.length - 1} more validation error(s). See below for details.`);
+							}, 300);
+						}
+					} else {
+						const error = 'Please check all required fields and try again.';
+						setValidationErrors([error]);
+						toast.error(error);
+					}
+				}
+			} else {
+				setValidationErrors([]);
+				toast.success("Employee created successfully!");
+				router.push("/dashboard/employees");
+				router.refresh();
+			}
+		} catch (error) {
+			console.error('[FORM] Error creating employee:', error);
+			const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+			setValidationErrors([errorMsg]);
+			toast.error(errorMsg);
+		} finally {
+			setIsSubmitting(false);
+		}
+	}
 
-      const result = await createUserAction(null, formData);
-      if ("errors" in result && result.errors) {
-        const errorMsg =
-          result.errors._form?.[0] ||
-          Object.values(result.errors).flat().join(", ");
-        toast.error(errorMsg);
-      } else {
-        toast.success("Employee created successfully");
-        router.push("/dashboard/employees");
-        router.refresh();
-      }
-    } catch (error) {
-      console.error('Employee creation error:', error);
-      toast.error("Failed to create employee");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+	return (
+		<div className="space-y-6">
+			<div className="flex items-center gap-3">
+				<Button
+					type="button"
+					variant="secondary"
+					size="sm"
+					onClick={() => router.back()}
+				>
+					<ChevronLeft className="w-4 h-4" />
+					Back
+				</Button>
+			</div>
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={() => router.back()}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Back
-        </Button>
-      </div>
+			{validationErrors.length > 0 && (
+				<div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+					<div className="flex items-start gap-3">
+						<div className="flex-shrink-0 w-5 h-5 rounded-full bg-destructive/20 flex items-center justify-center mt-0.5">
+							<span className="text-destructive text-sm font-bold">!</span>
+						</div>
+						<div className="flex-1">
+							<h4 className="text-sm font-semibold text-destructive mb-2">
+								Please fix the following {validationErrors.length === 1 ? 'error' : 'errors'}:
+							</h4>
+							<ul className="list-disc list-inside space-y-1">
+								{validationErrors.map((error, index) => (
+									<li key={index} className="text-sm text-destructive/90">{error}</li>
+								))}
+							</ul>
+						</div>
+					</div>
+				</div>
+			)}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Account & User Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>

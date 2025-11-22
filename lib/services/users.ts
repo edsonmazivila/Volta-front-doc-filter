@@ -4,7 +4,7 @@ import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 import { API_BASE_URL } from '@/lib/config'
 import { z } from 'zod'
 import { revalidateEntityMutation, CacheTags, fetchWithGracefulFallback } from '@/lib/cache-utils'
-import { toIsoUtc } from '@/lib/utils'
+import { toIsoUtc, optionalIsoUtc } from '@/lib/utils'
 import { getDepartments } from './departments'
 
 // Compensation nested object
@@ -299,7 +299,16 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 	const parsed = createUserSchema.safeParse(rawData)
 
 	if (!parsed.success) {
-		return { errors: parsed.error.flatten().fieldErrors }
+		console.error('[CREATE USER] Validation failed:', parsed.error.flatten().fieldErrors)
+		const errors = parsed.error.flatten().fieldErrors
+		// Convert validation errors to user-friendly messages
+		const formattedErrors: Record<string, string[]> = {}
+		Object.entries(errors).forEach(([key, messages]) => {
+			if (messages) {
+				formattedErrors[key] = messages
+			}
+		})
+		return { errors: formattedErrors }
 	}
 
 	try {
@@ -318,11 +327,11 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 			employment_type: parsed.data.employment_type,
 			employment_status: parsed.data.employment_status,
 			hire_date: toIsoUtc(parsed.data.hire_date),
-			termination_date: toIsoUtc(parsed.data.termination_date),
+			termination_date: optionalIsoUtc(parsed.data.termination_date),
 			job_title: parsed.data.job_title,
 			manager_id: parsed.data.manager_id,
 			department_id: parsed.data.department_id,
-			date_of_birth: toIsoUtc(parsed.data.date_of_birth),
+			date_of_birth: optionalIsoUtc(parsed.data.date_of_birth),
 			phone_primary: parsed.data.phone_primary,
 			phone_secondary: parsed.data.phone_secondary,
 			emergency_contact_name: parsed.data.emergency_contact_name,
@@ -367,16 +376,21 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 
 		if (!res.ok) {
 			const error = await res.json().catch(() => ({}))
-			return { errors: { _form: [error.message || 'Failed to create user'] } }
+			console.error('[CREATE USER] API error:', { status: res.status, error })
+			const errorMessage = error.message || error.error || `Failed to create user. Server returned error: ${res.status}`
+			return { errors: { _form: [errorMessage] } }
 		}
 
 		const data = await res.json()
+		
 		// Revalidate users and all dependent caches (departments, employees, etc.)
 		revalidateEntityMutation('USERS')
 
 		return { success: true, data }
-	} catch {
-		return { errors: { _form: ['Failed to create user'] } }
+	} catch (error) {
+		console.error('[CREATE USER] Unexpected error:', error)
+		const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+		return { errors: { _form: [errorMessage] } }
 	}
 }
 
@@ -399,7 +413,15 @@ export async function updateUserAction(id: string, prevState: unknown, formData:
 	const parsed = updateUserSchema.safeParse(rawData)
 
 	if (!parsed.success) {
-		return { errors: parsed.error.flatten().fieldErrors }
+		console.error('[UPDATE USER] Validation failed:', parsed.error.flatten().fieldErrors)
+		const errors = parsed.error.flatten().fieldErrors
+		const formattedErrors: Record<string, string[]> = {}
+		Object.entries(errors).forEach(([key, messages]) => {
+			if (messages) {
+				formattedErrors[key] = messages
+			}
+		})
+		return { errors: formattedErrors }
 	}
 
 	try {
@@ -413,10 +435,10 @@ export async function updateUserAction(id: string, prevState: unknown, formData:
 			payload.hire_date = toIsoUtc(payload.hire_date as string)
 		}
 		if (payload.termination_date) {
-			payload.termination_date = toIsoUtc(payload.termination_date as string)
+			payload.termination_date = optionalIsoUtc(payload.termination_date as string)
 		}
 		if (payload.date_of_birth) {
-			payload.date_of_birth = toIsoUtc(payload.date_of_birth as string)
+			payload.date_of_birth = optionalIsoUtc(payload.date_of_birth as string)
 		}
 		
 		// Structure compensation fields into nested object
@@ -453,16 +475,21 @@ export async function updateUserAction(id: string, prevState: unknown, formData:
 
 		if (!res.ok) {
 			const error = await res.json().catch(() => ({}))
-			return { errors: { _form: [error.message || 'Failed to update user'] } }
+			console.error('[UPDATE USER] API error:', { status: res.status, error })
+			const errorMessage = error.message || error.error || `Failed to update user. Server returned error: ${res.status}`
+			return { errors: { _form: [errorMessage] } }
 		}
 
 		const data = await res.json()
+		
 		// Revalidate users and all dependent caches (departments, employees, etc.)
 		revalidateEntityMutation('USERS')
 
 		return { success: true, data }
-	} catch {
-		return { errors: { _form: ['Failed to update user'] } }
+	} catch (error) {
+		console.error('[UPDATE USER] Unexpected error:', error)
+		const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+		return { errors: { _form: [errorMessage] } }
 	}
 }
 
