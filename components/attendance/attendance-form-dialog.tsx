@@ -241,8 +241,8 @@ export function AttendanceFormDialog({
           </div>
           )}
 
-          {/* Justification - Show for absent/late status or when editing existing justification */}
-          {(status === 'absent' || status === 'late' || (isEdit && attendance?.justification)) && (
+          {/* Justification - Show for absent/late/justified status or when editing existing justification/document */}
+          {(status === 'absent' || status === 'late' || status === 'justified' || (isEdit && (attendance?.justification || attendance?.justification_document_url))) && (
             <div className="space-y-3">
               <div>
                 <label htmlFor="justification" className="flex items-center gap-1 text-sm font-medium mb-1">

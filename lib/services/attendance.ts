@@ -158,6 +158,56 @@ export const getPendingJustifications = cache(
   }
 );
 
+// Get my justifications (includes document data)
+export const getMyJustifications = cache(
+  async (month?: string): Promise<AttendanceJustification[]> => {
+    return fetchWithGracefulFallback(
+      async () => {
+        const authHeader = await getAuthCookieHeader();
+
+        const params = new URLSearchParams();
+        if (month) params.append('month', month);
+
+        const res = await fetch(
+          `${API_BASE_URL}/api/attendance/justifications${params.toString() ? `?${params.toString()}` : ''}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authHeader && { Cookie: authHeader }),
+            },
+            next: {
+              tags: [CacheTags.ATTENDANCE_JUSTIFICATIONS],
+              revalidate: 30,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error('Failed to fetch my justifications');
+        const data = await res.json();
+        const rawJustifications = data.justifications || data.data || data || [];
+        
+        // Map API response fields to our interface
+        return rawJustifications.map((j: Record<string, unknown>) => ({
+          id: String(j.id || ''),
+          attendance_id: String(j.attendance_id || ''),
+          employee_id: String(j.user_id || j.employee_id || ''),
+          employee_name: String(j.full_name || j.employee_name || ''),
+          date: String(j.date || ''),
+          reason: String(j.reason || ''),
+          status: String(j.status || 'pending') as 'pending' | 'approved' | 'rejected' | 'justified',
+          document_url: (j.justification_document_url ?? j.document_url) as string | undefined,
+          document_filename: (j.justification_document_filename ?? j.document_filename) as string | undefined,
+          created_at: String(j.created_at || ''),
+          reviewed_by: j.reviewed_by as number | undefined,
+          reviewed_at: j.reviewed_at as string | undefined,
+        }));
+      },
+      [],
+      { errorContext: 'getMyJustifications' }
+    );
+  }
+);
+
 // Get my attendance records
 export const getMyAttendance = cache(
   async (month?: string): Promise<AttendanceRecord[]> => {
@@ -438,7 +488,9 @@ export async function submitJustificationAction(
       return { errors: { _form: [error.message || 'Failed to submit justification'] } }
     }
 
-    revalidateEntityMutation('ATTENDANCE')
+    revalidateEntityMutation('ATTENDANCE', {
+      additionalPaths: ['/dashboard/attendance', '/dashboard/my-attendance']
+    })
     revalidateEntityMutation('ATTENDANCE_JUSTIFICATIONS')
     return { success: true, data: await res.json() }
   } catch {
@@ -584,7 +636,9 @@ export async function approveJustificationAction(
       };
     }
 
-    revalidateEntityMutation("ATTENDANCE");
+    revalidateEntityMutation("ATTENDANCE", {
+      additionalPaths: ['/dashboard/attendance', '/dashboard/my-attendance']
+    });
     revalidateEntityMutation("ATTENDANCE_JUSTIFICATIONS");
     return { success: true };
   } catch {
@@ -621,7 +675,9 @@ export async function rejectJustificationAction(
       };
     }
 
-    revalidateEntityMutation("ATTENDANCE");
+    revalidateEntityMutation("ATTENDANCE", {
+      additionalPaths: ['/dashboard/attendance', '/dashboard/my-attendance']
+    });
     revalidateEntityMutation("ATTENDANCE_JUSTIFICATIONS");
     return { success: true };
   } catch {

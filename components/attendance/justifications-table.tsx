@@ -7,6 +7,7 @@ import { Button } from '@/components/ui'
 import { toast } from 'sonner'
 import { JustificationRejectDialog } from './justification-reject-dialog'
 import { useRouter } from 'next/navigation'
+import { FileText, ExternalLink } from 'lucide-react'
 
 interface JustificationsTableProps {
   justifications: AttendanceJustification[]
@@ -81,6 +82,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
             <th className="px-4 py-3">Employee</th>
             <th className="px-4 py-3">Date</th>
             <th className="px-4 py-3">Reason</th>
+            <th className="px-4 py-3">Document</th>
             <th className="px-4 py-3">Status</th>
             <th className="px-4 py-3">Submitted</th>
             <th className="px-4 py-3 text-right">Actions</th>
@@ -101,6 +103,22 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
               </td>
               <td className="px-4 py-3 text-sm">
                 <span className="max-w-xs block">{justification.reason}</span>
+              </td>
+              <td className="px-4 py-3 text-sm">
+                {justification.document_url ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(justification.document_url, '_blank')}
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    title={justification.document_filename || 'View document'}
+                  >
+                    <FileText className="h-4 w-4" />
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                ) : (
+                  <span className="text-muted-foreground text-xs">No document</span>
+                )}
               </td>
               <td className="px-4 py-3">
                 <span
