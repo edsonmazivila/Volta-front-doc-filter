@@ -429,12 +429,9 @@ export async function updateCompanyAction(prevState: unknown, formData: FormData
 
 export async function createPayScheduleAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  // Convert to ISO format (YYYY-MM-DDTHH:mm:ssZ)
-  let startDateFormatted = startDateStr.trim()
-  if (startDateFormatted && !startDateFormatted.includes('T')) {
-    // If it's just a date (YYYY-MM-DD), convert to ISO format
-    startDateFormatted = `${startDateFormatted}T00:00:00Z`
-  }
+  // Backend expects YYYY-MM-DD format, keep it as-is
+  const startDateFormatted = startDateStr.trim()
+  
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),
@@ -449,6 +446,7 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
   try {
     const cookieHeader = await getAuthCookieHeader()
     const url = `${API_BASE_URL}/api/pay-schedules`
+    
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -478,12 +476,9 @@ export async function createPayScheduleAction(prevState: unknown, formData: Form
 
 export async function updatePayScheduleAction(id: string, prevState: unknown, formData: FormData): Promise<ActionResult> {
   const startDateStr = (formData.get('start_date') as string) || ''
-  // Convert YYYY-MM-DD to ISO format (YYYY-MM-DDTHH:mm:ssZ)
-  let startDateFormatted = startDateStr.trim()
-  if (startDateFormatted && !startDateFormatted.includes('T')) {
-    // If it's just a date (YYYY-MM-DD), convert to ISO format
-    startDateFormatted = `${startDateFormatted}T00:00:00Z`
-  }
+  // Backend expects YYYY-MM-DD format, keep it as-is
+  const startDateFormatted = startDateStr.trim()
+  
   const parsed = payScheduleSchema.safeParse({
     name: String(formData.get('name') || ''),
     frequency: String(formData.get('frequency') || ''),

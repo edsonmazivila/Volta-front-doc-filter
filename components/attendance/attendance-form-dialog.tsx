@@ -119,9 +119,9 @@ export function AttendanceFormDialog({
       let result
       if (!isEdit && (status === 'absent' || status === 'late')) {
         formData.append('reason', justification)
-        if (uploadedFile) {
-          formData.append('file', uploadedFile)
-        }
+				if (uploadedFile) {
+					formData.append('document', uploadedFile)
+				}
         result = await submitJustificationAction(null, formData)
       } else if (isEdit && attendance) {
         formData.append('status', status)

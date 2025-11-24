@@ -306,6 +306,8 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 		const cookieHeader = await getAuthCookieHeader()
 		
 		// Build payload - backend expects flat structure
+		const formatDate = (value?: string) => (value ? toIsoUtc(value) : undefined)
+
 		const payload: Record<string, unknown> = {
 			email: parsed.data.email,
 			password: parsed.data.password,
@@ -317,12 +319,12 @@ export async function createUserAction(prevState: unknown, formData: FormData): 
 			employee_number: parsed.data.employee_number,
 			employment_type: parsed.data.employment_type,
 			employment_status: parsed.data.employment_status,
-			hire_date: toIsoUtc(parsed.data.hire_date),
-			termination_date: toIsoUtc(parsed.data.termination_date),
+			hire_date: formatDate(parsed.data.hire_date),
+			termination_date: formatDate(parsed.data.termination_date),
 			job_title: parsed.data.job_title,
 			manager_id: parsed.data.manager_id,
 			department_id: parsed.data.department_id,
-			date_of_birth: toIsoUtc(parsed.data.date_of_birth),
+			date_of_birth: formatDate(parsed.data.date_of_birth),
 			phone_primary: parsed.data.phone_primary,
 			phone_secondary: parsed.data.phone_secondary,
 			emergency_contact_name: parsed.data.emergency_contact_name,
