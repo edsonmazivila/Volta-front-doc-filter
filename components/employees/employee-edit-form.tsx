@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToastHelpers } from "@/components/ui/toast";
 import { updateUserAction, type User } from "@/lib/services/users";
+import { toDateOnly } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 
 const schema = z.object({
@@ -83,6 +84,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
   const toast = useToastHelpers();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canLogin, setCanLogin] = useState<boolean>(employee.can_login || true);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const {
     register,
@@ -103,12 +105,12 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
       job_title: employee.job_title || "",
       employment_type: employee.employment_type || "",
       employment_status: employee.employment_status || "active",
-      hire_date: employee.hire_date ? employee.hire_date.split('T')[0] : "",
-      termination_date: employee.termination_date ? employee.termination_date.split('T')[0] : "",
+      hire_date: toDateOnly(employee.hire_date),
+      termination_date: toDateOnly(employee.termination_date),
       manager_id: employee.manager_id || "",
       phone_primary: employee.phone_primary || "",
       phone_secondary: employee.phone_secondary || "",
-      date_of_birth: employee.date_of_birth ? employee.date_of_birth.split('T')[0] : "",
+      date_of_birth: toDateOnly(employee.date_of_birth),
       address_line1: employee.address_line1 || "",
       address_line2: employee.address_line2 || "",
       city: employee.city || "",
@@ -135,58 +137,103 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
+    setValidationErrors([]);
+    
     try {
       // Dynamic validation based on can_login
       if (canLogin) {
-        // If can_login is true, email is required
-        if (!values.email || values.email === '') {
-          toast.error('Email is required when user can login');
+        if (!values.email?.trim()) {
+          const error = 'Please enter an email address. Email is required when user can login.';
+          setValidationErrors([error]);
+          toast.error(error);
           setIsSubmitting(false);
           return;
         }
         // Password is optional when editing - only validate if provided
         if (values.password && values.password.length < 6) {
-          toast.error('Password must be at least 6 characters');
+          const error = 'Password must be at least 6 characters if you want to change it.';
+          setValidationErrors([error]);
+          toast.error(error);
           setIsSubmitting(false);
           return;
         }
       } else {
-        // If can_login is false, remove email and password
         delete values.email;
         delete values.password;
       }
 
-     
+      // Remove email if unchanged (avoid unnecessary backend updates)
       if (values.email && employee.email && values.email.trim().toLowerCase() === employee.email.trim().toLowerCase()) {
         delete values.email;
       }
 
       const formData = new FormData();
       
-      // Add all form values (excluding is_employee, is_active, manager_id, and empty password as they're handled separately)
+      // Add all form values, filtering out empty strings and special keys
       Object.entries(values).forEach(([key, value]) => {
-        if (key !== 'is_employee' && key !== 'is_active' && key !== 'manager_id' && value !== undefined && value !== null && value !== '') {
-          // Skip password if it's empty (user doesn't want to change it)
-          if (key === 'password' && (!value || value === '')) {
-            return;
-          }
+        const shouldSkip = 
+          key === 'is_employee' || 
+          key === 'is_active' || 
+          key === 'manager_id' ||
+          (key === 'password' && !value) ||
+          value === undefined || 
+          value === null || 
+          value === '';
+        
+        if (!shouldSkip) {
           formData.append(key, String(value));
         }
       });
 
       const result = await updateUserAction(employee.id, null, formData);
+      
       if ("errors" in result && result.errors) {
-        const errorMsg =
-          result.errors._form?.[0] ||
-          Object.values(result.errors).flat().join(", ");
-        toast.error(errorMsg);
+        // Show validation errors to the user
+        if (result.errors._form) {
+          const errorMsg = result.errors._form[0];
+          setValidationErrors([errorMsg]);
+          toast.error(errorMsg);
+        } else {
+          // Format field-specific errors with better messages
+          const errorEntries = Object.entries(result.errors);
+          const errorMessages = errorEntries
+            .map(([field, messages]) => {
+              if (Array.isArray(messages) && messages.length > 0) {
+                const fieldName = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                return `${fieldName}: ${messages[0]}`;
+              }
+              return null;
+            })
+            .filter((msg): msg is string => msg !== null);
+          
+          if (errorMessages.length > 0) {
+            console.error('[EDIT FORM] Validation errors:', errorMessages);
+            setValidationErrors(errorMessages);
+            // Show the first error to user
+            toast.error(errorMessages[0]);
+            // If multiple errors, show a hint
+            if (errorMessages.length > 1) {
+              setTimeout(() => {
+                toast.error(`${errorMessages.length - 1} more validation error(s). See below for details.`);
+              }, 300);
+            }
+          } else {
+            const error = 'Please check all required fields and try again.';
+            setValidationErrors([error]);
+            toast.error(error);
+          }
+        }
       } else {
-        toast.success("Employee updated successfully");
+        setValidationErrors([]);
+        toast.success("Employee updated successfully!");
         router.push("/dashboard/employees");
         router.refresh();
       }
-    } catch {
-      toast.error("Failed to update employee");
+    } catch (error) {
+      console.error('[EDIT FORM] Error updating employee:', error);
+      const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+      setValidationErrors([errorMsg]);
+      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -205,6 +252,26 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
           Back
         </Button>
       </div>
+
+      {validationErrors.length > 0 && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-destructive/20 flex items-center justify-center mt-0.5">
+              <span className="text-destructive text-sm font-bold">!</span>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-destructive mb-2">
+                Please fix the following {validationErrors.length === 1 ? 'error' : 'errors'}:
+              </h4>
+              <ul className="list-disc list-inside space-y-1">
+                {validationErrors.map((error, index) => (
+                  <li key={index} className="text-sm text-destructive/90">{error}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Account & User Section */}
