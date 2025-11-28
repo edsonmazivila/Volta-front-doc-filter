@@ -1,30 +1,102 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { COOKIE_NAMES, API_BASE_URL } from '@/lib/config'
+import { locales, defaultLocale, LOCALE_COOKIE_NAME, type Locale } from '@/lib/i18n/locales'
 
 // Public routes that don't require authentication
-const publicRoutes = [
+const publicRoutes = new Set([
 	'/',
 	'/login',
 	'/signup',
 	'/forgot-password',
 	'/reset-password'
-]
+])
 
 // Auth routes that should redirect to dashboard if already authenticated
-const authRoutes = [
+const authRoutes = new Set([
 	'/login',
 	'/signup',
 	'/forgot-password',
 	'/reset-password'
-]
+])
+
+/**
+ * Detect the user's preferred locale from request headers and cookies
+ */
+function getPreferredLocale(request: NextRequest): Locale {
+	// 1. Check cookie first (user's explicit preference)
+	const cookieLocale = request.cookies.get(LOCALE_COOKIE_NAME)?.value
+	if (cookieLocale && locales.includes(cookieLocale as Locale)) {
+		return cookieLocale as Locale
+	}
+
+	// 2. Parse Accept-Language header
+	const acceptLanguage = request.headers.get('Accept-Language')
+	if (acceptLanguage) {
+		// Parse language preferences (e.g., "pt-PT,pt;q=0.9,en;q=0.8")
+		const languages = acceptLanguage
+			.split(',')
+			.map(lang => {
+				const [code, qValue] = lang.trim().split(';q=')
+				return {
+					code: code.trim(),
+					quality: qValue ? Number.parseFloat(qValue) : 1
+				}
+			})
+			.sort((a, b) => b.quality - a.quality)
+
+		// Find first matching locale
+		for (const { code } of languages) {
+			// Exact match
+			if (locales.includes(code as Locale)) {
+				return code as Locale
+			}
+			// Language-only match (e.g., "pt" matches "pt-PT")
+			const languageOnly = code.split('-')[0]
+			const matchingLocale = locales.find(
+				locale => locale.startsWith(languageOnly)
+			)
+			if (matchingLocale) {
+				return matchingLocale
+			}
+		}
+	}
+
+	// 3. Fallback to default
+	return defaultLocale
+}
+
+/**
+ * Create a response with locale header
+ */
+function createResponseWithLocale(
+	response: NextResponse,
+	locale: Locale
+): NextResponse {
+	// Set locale in response headers for use in layout
+	response.headers.set('x-locale', locale)
+
+	// Set locale cookie if not already set (persists user preference)
+	if (!response.cookies.get(LOCALE_COOKIE_NAME)) {
+		response.cookies.set(LOCALE_COOKIE_NAME, locale, {
+			path: '/',
+			maxAge: 60 * 60 * 24 * 365, // 1 year
+			sameSite: 'lax',
+		})
+	}
+
+	return response
+}
 
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl
 
+	// Detect preferred locale
+	const locale = getPreferredLocale(request)
+
 	// Check if the route is public
-	const isPublicRoute = publicRoutes.includes(pathname)
-	const isAuthRoute = authRoutes.includes(pathname)
+	const isPublicRoute = publicRoutes.has(pathname)
+	const isAuthRoute = authRoutes.has(pathname)
 
 	// Get session token from cookies (centralized name)
 	const sessionToken = request.cookies.get(COOKIE_NAMES.SESSION_TOKEN)?.value
@@ -37,8 +109,8 @@ export async function middleware(request: NextRequest) {
 			loginUrl.searchParams.set('redirect', pathname)
 			return NextResponse.redirect(loginUrl)
 		}
-		// Allow access to public routes
-		return NextResponse.next()
+		// Allow access to public routes with locale
+		return createResponseWithLocale(NextResponse.next(), locale)
 	}
 
 	// Session token exists - validate it with backend for protected routes
@@ -85,7 +157,8 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.redirect(new URL('/dashboard', request.url))
 	}
 
-	return NextResponse.next()
+	// Normal response with locale header
+	return createResponseWithLocale(NextResponse.next(), locale)
 }
 
 export const config = {

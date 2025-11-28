@@ -25,6 +25,8 @@ import {
 } from "@/lib/services/leaves";
 import { Calendar } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 
 interface MyLeavesSectionProps {
   requests: LeaveRequestItem[];
@@ -37,6 +39,7 @@ export function MyLeavesSection({
   balances,
   isLoading = false,
 }: MyLeavesSectionProps) {
+  const { i18n } = useLingui();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -98,12 +101,12 @@ export function MyLeavesSection({
                       {(b.remaining_days ?? 0).toFixed(1)}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      days left
+                      {i18n._(msg`days left`)}
                     </span>
                   </div>
                   {b.pending_days ? (
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Pending:{" "}
+                      {i18n._(msg`Pending`)}:{" "}
                       <span className="font-medium">{b.pending_days}</span>
                     </div>
                   ) : null}
@@ -113,19 +116,19 @@ export function MyLeavesSection({
       </div>
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-sm font-medium">My Leave Requests</h2>
+        <h2 className="text-sm font-medium">{i18n._(msg`My Leave Requests`)}</h2>
         <SearchInput
           value={search}
           onChange={setSearch}
-          placeholder="Search requests..."
+          placeholder={i18n._(msg`Search requests...`)}
         />
         <div className="flex flex-col sm:flex-row gap-4 w-full">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-[180px] bg-background border border-[var(--border)]">
-              <SelectValue placeholder="All status" />
+              <SelectValue placeholder={i18n._(msg`All status`)} />
             </SelectTrigger>
             <SelectContent className="bg-background border border-[var(--border)]">
-              <SelectItem value="all">All status</SelectItem>
+              <SelectItem value="all">{i18n._(msg`All status`)}</SelectItem>
               {              [
                 "DRAFT",
                 "SUBMITTED",
@@ -141,10 +144,10 @@ export function MyLeavesSection({
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-full sm:w-[180px] bg-background border border-[var(--border)]">
-              <SelectValue placeholder="All types" />
+              <SelectValue placeholder={i18n._(msg`All types`)} />
             </SelectTrigger>
             <SelectContent className="bg-background border border-[var(--border)]">
-              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="all">{i18n._(msg`All types`)}</SelectItem>
               {[
                 "vacation",
                 "sick",
@@ -168,7 +171,7 @@ export function MyLeavesSection({
             }}
             className="ml-auto"
           >
-            New request
+            {i18n._(msg`New request`)}
           </Button>
         </div>
       </div>
@@ -186,10 +189,10 @@ export function MyLeavesSection({
           setOperationInProgress((prev) => ({ ...prev, [id]: true }));
           try {
             await submitLeaveRequestAction(id);
-            toast.success("Submitted");
+            toast.success(i18n._(msg`Submitted`));
             router.refresh();
           } catch {
-            toast.error("Failed to submit");
+            toast.error(i18n._(msg`Failed to submit`));
           } finally {
             setOperationInProgress((prev) => ({ ...prev, [id]: false }));
           }
@@ -197,14 +200,14 @@ export function MyLeavesSection({
         onCancel={async (id) => {
           if (operationInProgress[id]) return;
           const reason =
-            window.prompt("Cancel reason (optional):") || undefined;
+            window.prompt(i18n._(msg`Cancel reason (optional):`)) || undefined;
           setOperationInProgress((prev) => ({ ...prev, [id]: true }));
           try {
             await cancelLeaveRequestAction(id, reason);
-            toast.success("Cancelled");
+            toast.success(i18n._(msg`Cancelled`));
             router.refresh();
           } catch {
-            toast.error("Failed to cancel");
+            toast.error(i18n._(msg`Failed to cancel`));
           } finally {
             setOperationInProgress((prev) => ({ ...prev, [id]: false }));
           }
@@ -237,36 +240,36 @@ export function MyLeavesSection({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Leave Request Details</DialogTitle>
+            <DialogTitle>{i18n._(msg`Leave Request Details`)}</DialogTitle>
           </DialogHeader>
           {viewItem ? (
             <div className="grid gap-2 text-sm">
               <div>
-                <span className="text-muted-foreground">Status:</span>{" "}
+                <span className="text-muted-foreground">{i18n._(msg`Status`)}:</span>{" "}
                 <span className="capitalize">
                   {viewItem.status.toLowerCase()}
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground">Type:</span>{" "}
+                <span className="text-muted-foreground">{i18n._(msg`Type`)}:</span>{" "}
                 <span className="capitalize">{viewItem.leave_type}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">Dates:</span>{" "}
+                <span className="text-muted-foreground">{i18n._(msg`Dates`)}:</span>{" "}
                 {viewItem.start_date?.slice(0, 10)} -{" "}
                 {viewItem.end_date?.slice(0, 10)}
               </div>
               <div>
-                <span className="text-muted-foreground">Days:</span>{" "}
+                <span className="text-muted-foreground">{i18n._(msg`Days`)}:</span>{" "}
                 {viewItem.total_days}
-                {viewItem.is_half_day ? " (Half Day)" : ""}
+                {viewItem.is_half_day ? ` ${i18n._(msg`(Half Day)`)}` : ""}
               </div>
               <div>
-                <span className="text-muted-foreground">Reason:</span>{" "}
+                <span className="text-muted-foreground">{i18n._(msg`Reason`)}:</span>{" "}
                 {viewItem.reason || "-"}
               </div>
               <div>
-                <span className="text-muted-foreground">Created:</span>{" "}
+                <span className="text-muted-foreground">{i18n._(msg`Created`)}:</span>{" "}
                 {viewItem.created_at?.slice(0, 10) || "-"}
               </div>
               {viewItem.status === "DRAFT" ? (
@@ -280,7 +283,7 @@ export function MyLeavesSection({
                       setViewOpen(false);
                     }}
                   >
-                    Edit draft
+                    {i18n._(msg`Edit draft`)}
                   </Button>
                 </div>
               ) : null}

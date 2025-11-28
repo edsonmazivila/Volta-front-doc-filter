@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, XCircle, Clock } from "lucide-react"
 import { formatPayPeriod, formatHours, getStatusColor } from '@/lib/utils'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface TimesheetTableProps {
 	items?: TimesheetListItem[]
@@ -24,6 +26,7 @@ interface TimesheetTableProps {
 }
 
 export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, onEdit, onSubmit, onApprove, onReject, onDelete }: TimesheetTableProps) {
+	const { i18n } = useLingui()
 	const rows = useMemo(() => items, [items])
 	const [viewingTimesheet, setViewingTimesheet] = useState<TimesheetListItem | null>(null)
 
@@ -58,10 +61,10 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 		return (
 			<div className="glass rounded-xl overflow-hidden">
 				<div className="p-6 text-center text-sm text-muted-foreground">
-					No timesheets found
+					{i18n._(msg`No timesheets found`)}
 					{onNewTimesheet ? (
 						<div className="mt-3">
-							<Button onClick={onNewTimesheet}>New Timesheet</Button>
+							<Button onClick={onNewTimesheet}>{i18n._(msg`New Timesheet`)}</Button>
 						</div>
 					) : null}
 				</div>
@@ -78,28 +81,28 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 							<tr>
 								<th className="text-left p-3">
 									<div className="flex items-center gap-2">
-										Employee
-										<span className="text-xs text-muted-foreground">(click to view details)</span>
+										{i18n._(msg`Employee`)}
+										<span className="text-xs text-muted-foreground">({i18n._(msg`click to view details`)})</span>
 									</div>
 								</th>
-								<th className="text-left p-3">Pay Period</th>
-								<th className="text-left p-3">Total Hours</th>
-								<th className="text-left p-3">Notes</th>
-								<th className="text-left p-3">Status</th>
-								<th className="text-left p-3">Actions</th>
+								<th className="text-left p-3">{i18n._(msg`Pay Period`)}</th>
+								<th className="text-left p-3">{i18n._(msg`Total Hours`)}</th>
+								<th className="text-left p-3">{i18n._(msg`Notes`)}</th>
+								<th className="text-left p-3">{i18n._(msg`Status`)}</th>
+								<th className="text-left p-3">{i18n._(msg`Actions`)}</th>
 							</tr>
 						</thead>
 						<tbody>
 							{rows.length === 0 ? (
 								<tr>
 									<td className="p-4" colSpan={6}>
-										No timesheets found
+										{i18n._(msg`No timesheets found`)}
 									</td>
 								</tr>
 							) : (
 								rows.map(row => (
-									<tr 
-										key={row.id} 
+									<tr
+										key={row.id}
 										className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer transition-colors"
 										onClick={(event) => handleRowClick(row, event)}
 									>
@@ -136,7 +139,7 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 														}}
 													>
 														<Eye className="mr-2 h-4 w-4" />
-														View Details
+														{i18n._(msg`View Details`)}
 													</DropdownMenuItem>
 													<DropdownMenuItem
 														onClick={(event) => {
@@ -145,7 +148,7 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 														}}
 													>
 														<Edit className="mr-2 h-4 w-4" />
-														Edit
+														{i18n._(msg`Edit`)}
 													</DropdownMenuItem>
 													{row.status === 'draft' && onSubmit && (
 														<DropdownMenuItem
@@ -155,7 +158,7 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 															}}
 														>
 															<Clock className="mr-2 h-4 w-4" />
-															Submit
+															{i18n._(msg`Submit`)}
 														</DropdownMenuItem>
 													)}
 													{row.status === 'submitted' && onApprove && (
@@ -166,7 +169,7 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 															}}
 														>
 															<CheckCircle className="mr-2 h-4 w-4" />
-															Approve
+															{i18n._(msg`Approve`)}
 														</DropdownMenuItem>
 													)}
 													{row.status === 'submitted' && onReject && (
@@ -177,7 +180,7 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 															}}
 														>
 															<XCircle className="mr-2 h-4 w-4" />
-															Reject
+															{i18n._(msg`Reject`)}
 														</DropdownMenuItem>
 													)}
 													<DropdownMenuItem
@@ -188,7 +191,7 @@ export function TimesheetTable({ items = [], isLoading = false, onNewTimesheet, 
 														className="text-red-400 focus:text-red-400"
 													>
 														<Trash2 className="mr-2 h-4 w-4" />
-														Delete
+														{i18n._(msg`Delete`)}
 													</DropdownMenuItem>
 												</DropdownMenuContent>
 											</DropdownMenu>

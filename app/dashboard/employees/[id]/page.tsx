@@ -5,10 +5,11 @@ import { getCompany } from '@/lib/services/company'
 import { getUsers } from '@/lib/services/users'
 import { getActiveDepartments } from '@/lib/services/departments'
 import { notFound } from 'next/navigation'
+import { t } from '@lingui/core/macro'
 
 export default async function EditEmployeePage(props: { params: Promise<{ id: string }> }) {
 	await requireRole(['hr_manager', 'payroll_manager', 'system_admin'])
-	
+
 	const [company, users, departments] = await Promise.all([
 		getCompany(),
 		getUsers(),
@@ -24,7 +25,7 @@ export default async function EditEmployeePage(props: { params: Promise<{ id: st
 
 	return (
 		<>
-			<Header title='Edit Employee' />
+			<Header title={t`Edit Employee`} />
 			<section className='p-4 md:p-6'>
 				<EmployeeEditForm employee={employee} companyName={company?.name || 'Company'} departments={departments} />
 			</section>

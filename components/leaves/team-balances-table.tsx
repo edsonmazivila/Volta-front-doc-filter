@@ -1,17 +1,21 @@
 'use client'
 import type { TeamBalanceItem } from '@/lib/services/leaves'
 import { User } from 'lucide-react'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface TeamBalancesTableProps {
   teamBalances: TeamBalanceItem[]
 }
 
 export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
+  const { i18n } = useLingui()
+
   if (teamBalances.length === 0) {
     return (
       <div className="glass rounded-xl overflow-hidden">
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No team balances available</p>
+          <p className="text-muted-foreground">{i18n._(msg`No team balances available`)}</p>
         </div>
       </div>
     )
@@ -36,11 +40,11 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
         <table className="w-full text-sm">
           <thead className="border-b border-[var(--border)] text-neutral-400">
             <tr>
-              <th className="text-left p-3">Employee</th>
-              <th className="text-left p-3">Vacation</th>
-              <th className="text-left p-3">Sick</th>
-              <th className="text-left p-3">Personal</th>
-              <th className="text-left p-3">Other</th>
+              <th className="text-left p-3">{i18n._(msg`Employee`)}</th>
+              <th className="text-left p-3">{i18n._(msg`Vacation`)}</th>
+              <th className="text-left p-3">{i18n._(msg`Sick`)}</th>
+              <th className="text-left p-3">{i18n._(msg`Personal`)}</th>
+              <th className="text-left p-3">{i18n._(msg`Other`)}</th>
             </tr>
           </thead>
           <tbody>
@@ -72,7 +76,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                     {vacation?.pending_days ? (
                       <div className="text-xs text-muted-foreground">
-                        Pending: {vacation.pending_days.toFixed(1)}
+                        {i18n._(msg`Pending`)}: {vacation.pending_days.toFixed(1)}
                       </div>
                     ) : null}
                   </td>
@@ -82,7 +86,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                     {sick?.pending_days ? (
                       <div className="text-xs text-muted-foreground">
-                        Pending: {sick.pending_days.toFixed(1)}
+                        {i18n._(msg`Pending`)}: {sick.pending_days.toFixed(1)}
                       </div>
                     ) : null}
                   </td>
@@ -92,7 +96,7 @@ export function TeamBalancesTable({ teamBalances }: TeamBalancesTableProps) {
                     </div>
                     {personal?.pending_days ? (
                       <div className="text-xs text-muted-foreground">
-                        Pending: {personal.pending_days.toFixed(1)}
+                        {i18n._(msg`Pending`)}: {personal.pending_days.toFixed(1)}
                       </div>
                     ) : null}
                   </td>

@@ -3,11 +3,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react"; // You'll need to install lucide-react
+import { Menu, X } from "lucide-react";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 
 export function HomeHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const { i18n } = useLingui();
 
   // Handle hydration
   useEffect(() => {
@@ -41,10 +45,10 @@ export function HomeHeader() {
   }, [isMenuOpen]);
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/features", label: "Features" },
-    { href: "/careers", label: "Careers" },
+    { href: "/", label: i18n._(msg`Home`) },
+    { href: "/pricing", label: i18n._(msg`Pricing`) },
+    { href: "/features", label: i18n._(msg`Features`) },
+    { href: "/careers", label: i18n._(msg`Careers`) },
   ];
   const showNavLinks = false; // Toggle to true to show navigation links again
 
@@ -89,10 +93,10 @@ export function HomeHeader() {
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-2">
             <Button variant="primaryGradient" className="text-md font-semibold px-6 py-3" asChild>
-              <Link href="/signup">Sign Up</Link>
+              <Link href="/signup"><Trans>Sign Up</Trans></Link>
             </Button>
             <Button variant="outline" className="text-md font-semibold px-6 py-3 bg-background/70 text-foreground hover:bg-accent" asChild>
-              <Link href="/login">Sign In</Link>
+              <Link href="/login"><Trans>Sign In</Trans></Link>
             </Button>
           </div>
 
@@ -149,7 +153,7 @@ export function HomeHeader() {
                     asChild
                   >
                     <Link href="/login" onClick={handleLinkClick}>
-                      Sign In
+                      <Trans>Sign In</Trans>
                     </Link>
                   </Button>
                   <Button
@@ -158,7 +162,7 @@ export function HomeHeader() {
                     asChild
                   >
                     <Link href="/signup" onClick={handleLinkClick}>
-                      Sign Up
+                      <Trans>Sign Up</Trans>
                     </Link>
                   </Button>
                 </div>

@@ -3,6 +3,7 @@ import { verifySession } from '@/lib/auth/dal'
 import { requireRole } from '@/lib/rbac/server'
 import { getMyPaystubs } from '@/lib/services/paystubs'
 import { PaystubsSection } from '@/components/paystubs/paystubs-section'
+import { t } from '@lingui/core/macro'
 
 export const metadata = {
   title: 'My Paystubs - NexuPayroll',
@@ -17,7 +18,7 @@ export default async function PaystubsPage() {
 
   return (
     <>
-      <Header title="My Paystubs" />
+      <Header title={t`My Paystubs`} />
       <section className="p-4 overflow-y-auto">
         <PaystubsSection
           paystubs={paystubs}

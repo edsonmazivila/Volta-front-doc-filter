@@ -7,18 +7,21 @@ import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { User } from '@/lib/services/users'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
-const schema = z.object({
-	employee_id: z.string().min(1, 'Employee is required'),
-	periodStart: z.string().min(1, 'Period start is required'),
-	periodEnd: z.string().min(1, 'Period end is required'),
-	regularHours: z.coerce.number().min(0, 'Must be >= 0'),
-	overtimeHours: z.coerce.number().min(0, 'Must be >= 0'),
-	status: z.enum(['draft', 'submitted', 'approved', 'rejected'], { required_error: 'Status is required' }),
+// Define a base schema for type inference
+const baseTimesheetSchema = z.object({
+	employee_id: z.string().min(1),
+	periodStart: z.string().min(1),
+	periodEnd: z.string().min(1),
+	regularHours: z.coerce.number().min(0),
+	overtimeHours: z.coerce.number().min(0),
+	status: z.enum(['draft', 'submitted', 'approved', 'rejected']),
 	notes: z.string().optional(),
 })
 
-export type TimesheetFormValues = z.infer<typeof schema>
+export type TimesheetFormValues = z.infer<typeof baseTimesheetSchema>
 
 interface TimesheetFormDialogProps {
 	open: boolean
@@ -31,16 +34,28 @@ interface TimesheetFormDialogProps {
 	employees?: User[]
 }
 
-export function TimesheetFormDialog({ 
-	open, 
-	onOpenChange, 
-	defaultValues, 
-	onSubmit, 
-	title = 'New Timesheet', 
-	submitLabel = 'Save', 
+export function TimesheetFormDialog({
+	open,
+	onOpenChange,
+	defaultValues,
+	onSubmit,
+	title = 'New Timesheet',
+	submitLabel = 'Save',
 	isLoading = false,
 	employees = []
 }: TimesheetFormDialogProps) {
+	const { i18n } = useLingui()
+
+	const schema = z.object({
+		employee_id: z.string().min(1, i18n._(msg`Employee is required`)),
+		periodStart: z.string().min(1, i18n._(msg`Period start is required`)),
+		periodEnd: z.string().min(1, i18n._(msg`Period end is required`)),
+		regularHours: z.coerce.number().min(0, i18n._(msg`Must be >= 0`)),
+		overtimeHours: z.coerce.number().min(0, i18n._(msg`Must be >= 0`)),
+		status: z.enum(['draft', 'submitted', 'approved', 'rejected'], { required_error: i18n._(msg`Status is required`) }),
+		notes: z.string().optional(),
+	})
+
 	const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control, watch } = useForm<TimesheetFormValues>({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -92,7 +107,7 @@ export function TimesheetFormDialog({
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
-					<DialogDescription>Fill in the timesheet details for the selected employee.</DialogDescription>
+					<DialogDescription>{i18n._(msg`Fill in the timesheet details for the selected employee.`)}</DialogDescription>
 				</DialogHeader>
 				<form onSubmit={handleSubmit(async (values) => {
 					await onSubmit(values)
@@ -100,18 +115,18 @@ export function TimesheetFormDialog({
 				})} className='space-y-4'>
 					{/* Employee Selection */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Employee *</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Employee`)} *</label>
 						<Controller
 							name="employee_id"
 							control={control}
 							render={({ field }) => (
 								<Select value={field.value} onValueChange={field.onChange} disabled={isLoading || !!defaultValues?.employee_id}>
 									<SelectTrigger className="w-full bg-background border-[var(--border)]">
-										<SelectValue placeholder="Select employee" />
+										<SelectValue placeholder={i18n._(msg`Select employee`)} />
 									</SelectTrigger>
 									<SelectContent className="bg-background border-[var(--border)]">
 											{employees.length === 0 ? (
-											<SelectItem value="none" disabled>No employees found</SelectItem>
+											<SelectItem value="none" disabled>{i18n._(msg`No employees found`)}</SelectItem>
 										) : (
 											employees.map((emp) => (
 												<SelectItem key={emp.id} value={emp.id}>
@@ -129,12 +144,12 @@ export function TimesheetFormDialog({
 					{/* Period Dates */}
 					<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Pay Period Start *</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Pay Period Start`)} *</label>
 							<input type='date' className='w-full border rounded-md px-3 py-2 bg-background' disabled={isLoading} {...register('periodStart')} />
 							{errors.periodStart ? <span className='text-xs text-destructive'>{errors.periodStart.message}</span> : null}
 						</div>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Pay Period End *</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Pay Period End`)} *</label>
 							<input type='date' className='w-full border rounded-md px-3 py-2 bg-background' disabled={isLoading} {...register('periodEnd')} />
 							{errors.periodEnd ? <span className='text-xs text-destructive'>{errors.periodEnd.message}</span> : null}
 						</div>
@@ -143,26 +158,26 @@ export function TimesheetFormDialog({
 					{/* Hours */}
 					<div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Regular Hours *</label>
-							<input 
-								type='number' 
-								step='0.5' 
+							<label className='text-sm font-medium'>{i18n._(msg`Regular Hours`)} *</label>
+							<input
+								type='number'
+								step='0.5'
 								min='0'
-								className='w-full border rounded-md px-3 py-2 bg-background' 
-								disabled={isLoading} 
-								{...register('regularHours', { valueAsNumber: true })} 
+								className='w-full border rounded-md px-3 py-2 bg-background'
+								disabled={isLoading}
+								{...register('regularHours', { valueAsNumber: true })}
 							/>
 							{errors.regularHours ? <span className='text-xs text-destructive'>{errors.regularHours.message}</span> : null}
 						</div>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Overtime Hours *</label>
-							<input 
-								type='number' 
-								step='0.5' 
+							<label className='text-sm font-medium'>{i18n._(msg`Overtime Hours`)} *</label>
+							<input
+								type='number'
+								step='0.5'
 								min='0'
-								className='w-full border rounded-md px-3 py-2 bg-background' 
-								disabled={isLoading} 
-								{...register('overtimeHours', { valueAsNumber: true })} 
+								className='w-full border rounded-md px-3 py-2 bg-background'
+								disabled={isLoading}
+								{...register('overtimeHours', { valueAsNumber: true })}
 							/>
 							{errors.overtimeHours ? <span className='text-xs text-destructive'>{errors.overtimeHours.message}</span> : null}
 						</div>
@@ -170,28 +185,28 @@ export function TimesheetFormDialog({
 
 					{/* Total Hours Display */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium text-muted-foreground'>Total Hours</label>
+						<label className='text-sm font-medium text-muted-foreground'>{i18n._(msg`Total Hours`)}</label>
 						<div className='w-full border rounded-md px-3 py-2 bg-muted/20 text-lg font-semibold'>
-							{totalHours.toFixed(2)} hours
+							{totalHours.toFixed(2)} {i18n._(msg`hours`)}
 						</div>
 					</div>
 
 					{/* Status */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Status *</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Status`)} *</label>
 						<Controller
 							name="status"
 							control={control}
 							render={({ field }) => (
 								<Select value={field.value} onValueChange={field.onChange} disabled={isLoading}>
 									<SelectTrigger className="w-full bg-background border-[var(--border)]">
-										<SelectValue placeholder="Select status" />
+										<SelectValue placeholder={i18n._(msg`Select status`)} />
 									</SelectTrigger>
 									<SelectContent className="bg-background border-[var(--border)]">
-										<SelectItem value="draft">Draft</SelectItem>
-										<SelectItem value="submitted">Submitted</SelectItem>
-										<SelectItem value="approved">Approved</SelectItem>
-										<SelectItem value="rejected">Rejected</SelectItem>
+										<SelectItem value="draft">{i18n._(msg`Draft`)}</SelectItem>
+										<SelectItem value="submitted">{i18n._(msg`Submitted`)}</SelectItem>
+										<SelectItem value="approved">{i18n._(msg`Approved`)}</SelectItem>
+										<SelectItem value="rejected">{i18n._(msg`Rejected`)}</SelectItem>
 									</SelectContent>
 								</Select>
 							)}
@@ -201,13 +216,13 @@ export function TimesheetFormDialog({
 
 					{/* Notes */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Notes</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Notes`)}</label>
 						<textarea className='w-full border rounded-md px-3 py-2 bg-background' rows={3} disabled={isLoading} {...register('notes')} />
 					</div>
 
 					<div className='flex justify-end gap-2 pt-2'>
-						<Button type='button' variant='secondary' onClick={() => onOpenChange(false)} disabled={isSubmitting || isLoading}>Cancel</Button>
-						<Button type='submit' disabled={isSubmitting || isLoading}>{(isSubmitting || isLoading) ? 'Saving…' : submitLabel}</Button>
+						<Button type='button' variant='secondary' onClick={() => onOpenChange(false)} disabled={isSubmitting || isLoading}>{i18n._(msg`Cancel`)}</Button>
+						<Button type='submit' disabled={isSubmitting || isLoading}>{(isSubmitting || isLoading) ? i18n._(msg`Saving…`) : submitLabel}</Button>
 					</div>
 				</form>
 			</DialogContent>

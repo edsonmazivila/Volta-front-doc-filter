@@ -3,6 +3,7 @@ import { verifySession } from '@/lib/auth/dal'
 import { requireRole } from '@/lib/rbac/server'
 import { getMyDocuments, getDocumentTypes } from '@/lib/services/documents'
 import { MyDocumentsSection } from '@/components/my-documents/my-documents-section'
+import { t } from '@lingui/core/macro'
 
 export const metadata = {
   title: 'My Documents - NexuPayroll',
@@ -20,7 +21,7 @@ export default async function MyDocumentsPage() {
 
   return (
     <>
-      <Header title="My Documents" />
+      <Header title={t`My Documents`} />
       <section className="p-4 overflow-y-auto">
         <MyDocumentsSection
           documents={documents}

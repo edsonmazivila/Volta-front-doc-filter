@@ -10,6 +10,8 @@ import {
 import { MoreHorizontal, Eye, CheckCircle, XCircle } from "lucide-react";
 import { LeaveViewDialog } from "./leave-view-dialog";
 import { formatDate, formatDateRange } from "@/lib/utils";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 
 interface PendingApprovalsTableProps {
   items: LeaveRequestItem[];
@@ -22,6 +24,7 @@ export function PendingApprovalsTable({
   onApproveL1,
   onReject,
 }: PendingApprovalsTableProps) {
+  const { i18n } = useLingui();
   const [viewingLeave, setViewingLeave] = useState<LeaveRequestItem | null>(
     null
   );
@@ -48,25 +51,25 @@ export function PendingApprovalsTable({
               <tr>
                 <th className="text-left p-3">
                   <div className="flex items-center gap-2">
-                    Employee
+                    {i18n._(msg`Employee`)}
                     <span className="text-xs text-muted-foreground">
-                      (click to view details)
+                      {i18n._(msg`(click to view details)`)}
                     </span>
                   </div>
                 </th>
-                <th className="text-left p-3">Type</th>
-                <th className="text-left p-3">Dates</th>
-                <th className="text-left p-3">Days</th>
-                <th className="text-left p-3">Reason</th>
-                <th className="text-left p-3">Submitted</th>
-                <th className="text-left p-3">Actions</th>
+                <th className="text-left p-3">{i18n._(msg`Type`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Dates`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Days`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Reason`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Submitted`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Actions`)}</th>
               </tr>
             </thead>
             <tbody>
               {items.length === 0 ? (
                 <tr>
                   <td className="p-4" colSpan={7}>
-                    No pending approvals found
+                    {i18n._(msg`No pending approvals found`)}
                   </td>
                 </tr>
               ) : (
@@ -83,7 +86,7 @@ export function PendingApprovalsTable({
                     </td>
                     <td className="p-3">
                       {row.total_days}
-                      {row.is_half_day ? " (Half Day)" : ""}
+                      {row.is_half_day ? ` ${i18n._(msg`(Half Day)`)}` : ""}
                     </td>
                     <td
                       className="p-3 max-w-[240px] truncate"
@@ -114,7 +117,7 @@ export function PendingApprovalsTable({
                             }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
-                            View Details
+                            {i18n._(msg`View Details`)}
                           </DropdownMenuItem>
                           {row.status === "SUBMITTED" && (
                             <DropdownMenuItem
@@ -125,7 +128,7 @@ export function PendingApprovalsTable({
                               className="text-green-400 focus:text-green-400"
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
-                              Approve
+                              {i18n._(msg`Approve`)}
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
@@ -136,7 +139,7 @@ export function PendingApprovalsTable({
                             className="text-red-400 focus:text-red-400"
                           >
                             <XCircle className="mr-2 h-4 w-4" />
-                            Reject
+                            {i18n._(msg`Reject`)}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

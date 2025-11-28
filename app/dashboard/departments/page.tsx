@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/rbac/server'
 import { DepartmentManagement } from '@/components/departments/department-management'
 import { getDepartments, getDepartmentStats } from '@/lib/services/departments'
 import { getUsers } from '@/lib/services/users'
+import { t } from '@lingui/core/macro'
 
 export default async function DepartmentsPage() {
   await requireRole(['hr_manager', 'system_admin'])
@@ -23,11 +24,11 @@ export default async function DepartmentsPage() {
 
   return (
     <>
-      <Header title='Departments' />
+      <Header title={t`Departments`} />
       <section className='p-4 overflow-y-auto'>
         <div>
           <h1 className="text-xl font-bold mb-2">
-            Manage departments and organizational structure
+            {t`Manage departments and organizational structure`}
           </h1>
         </div>
         <DepartmentManagement

@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/rbac/server'
 import { getTimesheets } from '@/lib/services/timesheets'
 import { getUsers, type User } from '@/lib/services/users'
 import { TimesheetsSection } from '@/components/timesheets/timesheets-section'
+import { t } from '@lingui/core/macro'
 
 export default async function TimesheetsPage() {
   // Only managers and admins can access timesheet management
@@ -34,13 +35,13 @@ export default async function TimesheetsPage() {
           } as User]
         })
       ).values())
-  
+
   return (
     <>
-      <Header title='Timesheets' />
+      <Header title={t`Timesheets`} />
       <section className='p-4 grid gap-4 overflow-y-auto'>
         <Card>
-          <CardHeader title='This Period' />
+          <CardHeader title={t`This Period`} />
           <TimesheetsSection items={items} employees={employees} />
         </Card>
       </section>

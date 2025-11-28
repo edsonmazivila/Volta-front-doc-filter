@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { AuthForm, PasswordField, ConfirmPasswordField } from '@/components/auth/auth-form'
 import { resetPasswordSchema } from '@/lib/auth/types'
 import { resetPasswordAction } from '@/lib/auth/actions'
+import { useLingui } from '@lingui/react'
+import { Trans } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 interface ResetPasswordFormProps {
 	token: string
@@ -15,8 +18,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState(false)
 	const router = useRouter()
+	const { i18n } = useLingui()
 
-	    const handleResetPassword = async () => {}
+	const handleResetPassword = async () => {}
 
 	if (success) {
 		return (
@@ -27,9 +31,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
 						</svg>
 					</div>
-					<h1 className="text-xl font-bold text-white mb-2">Password Reset!</h1>
+					<h1 className="text-xl font-bold text-white mb-2"><Trans>Password Reset!</Trans></h1>
 					<p className="text-neutral-400 text-sm">
-						Your password has been reset successfully. Redirecting to login...
+						<Trans>Your password has been reset successfully. Redirecting to login...</Trans>
 					</p>
 				</div>
 			</div>
@@ -43,31 +47,31 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 					<p className="text-sm text-red-400">{error}</p>
 				</div>
 			)}
-			
-            <AuthForm
-				title="Set new password"
-				subtitle="Enter your new password below"
-                onSubmit={handleResetPassword}
-                action={async (formData) => {
-                    if (!formData.get('token')) formData.set('token', token)
+
+			<AuthForm
+				title={i18n._(msg`Set new password`)}
+				subtitle={i18n._(msg`Enter your new password below`)}
+				onSubmit={handleResetPassword}
+				action={async (formData) => {
+					if (!formData.get('token')) formData.set('token', token)
 					const result = await resetPasswordAction(undefined, formData)
 					if ('errors' in result) {
 						const formErrors = (result.errors as Record<string, string[] | undefined>)._form
-						if (formErrors && formErrors.length) {
+						if (formErrors?.length) {
 							setError(formErrors[0])
 							return
 						}
 					}
-                    setSuccess(true)
-                    setTimeout(() => {
-                        router.push('/login?message=Password reset successfully! Please sign in with your new password.')
-                    }, 2000)
-                }}
+					setSuccess(true)
+					setTimeout(() => {
+						router.push('/login?message=Password reset successfully! Please sign in with your new password.')
+					}, 2000)
+				}}
 				schema={resetPasswordSchema}
 				defaultValues={{ token }}
-				submitText="Reset password"
+				submitText={i18n._(msg`Reset password`)}
 			>
-				<PasswordField placeholder="Enter your new password" />
+				<PasswordField placeholder={i18n._(msg`Enter your new password`)} />
 				<ConfirmPasswordField />
 			</AuthForm>
 		</>

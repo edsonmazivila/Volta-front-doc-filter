@@ -4,19 +4,21 @@ import { useState } from 'react'
 import { AttendanceRecord } from '@/lib/types/attendance'
 import { deleteAttendanceAction } from '@/lib/services/attendance'
 import { Button } from '@/components/ui'
-import { 
+import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { 
-	MoreHorizontal, 
-	Edit, 
-	Trash2 
+import {
+	MoreHorizontal,
+	Edit,
+	Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDate, formatTime } from '@/lib/utils'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface AttendanceTableProps {
   records: AttendanceRecord[]
@@ -32,31 +34,32 @@ const STATUS_COLORS: Record<'present'|'absent'|'late'|'half_day'|'on_leave'|'jus
   justified: 'bg-gray-500/20 text-gray-400',
 }
 
-const STATUS_LABELS: Record<'present'|'absent'|'late'|'half_day'|'on_leave'|'justified', string> = {
-  present: 'Present',
-  absent: 'Absent',
-  late: 'Late',
-  half_day: 'Half Day',
-  on_leave: 'On Leave',
-  justified: 'Justified',
-}
-
 export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
+  const { i18n } = useLingui()
   const [deleting, setDeleting] = useState<Record<string, boolean>>({})
 
+  const STATUS_LABELS: Record<'present'|'absent'|'late'|'half_day'|'on_leave'|'justified', string> = {
+    present: i18n._(msg`Present`),
+    absent: i18n._(msg`Absent`),
+    late: i18n._(msg`Late`),
+    half_day: i18n._(msg`Half Day`),
+    on_leave: i18n._(msg`On Leave`),
+    justified: i18n._(msg`Justified`),
+  }
+
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this attendance record?')) return
+    if (!confirm(i18n._(msg`Are you sure you want to delete this attendance record?`))) return
 
     setDeleting((prev) => ({ ...prev, [id]: true }))
     try {
       const result = await deleteAttendanceAction(id)
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to delete')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to delete`))
       } else {
-        toast.success('Attendance record deleted')
+        toast.success(i18n._(msg`Attendance record deleted`))
       }
     } catch {
-      toast.error('An error occurred')
+      toast.error(i18n._(msg`An error occurred`))
     } finally {
       setDeleting((prev) => ({ ...prev, [id]: false }))
     }
@@ -79,9 +82,9 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium">No attendance records</h3>
+          <h3 className="mt-2 text-sm font-medium">{i18n._(msg`No attendance records`)}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Get started by creating a new attendance record
+            {i18n._(msg`Get started by creating a new attendance record`)}
           </p>
         </div>
       </div>
@@ -94,14 +97,14 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
         <table className="w-full text-sm min-w-[900px]">
           <thead className="border-b border-[var(--border)] text-neutral-400 sticky top-0 bg-background z-10 shadow-sm">
             <tr>
-              <th className="text-left p-3 min-w-[150px]">Employee</th>
-              <th className="text-left p-3 min-w-[100px]">Date</th>
-              <th className="text-left p-3 min-w-[100px]">Status</th>
-              <th className="text-left p-3 min-w-[100px]">Clock In</th>
-              <th className="text-left p-3 min-w-[100px]">Clock Out</th>
-              <th className="text-left p-3 min-w-[80px]">Hours</th>
-              <th className="text-left p-3 min-w-[150px]">Justification</th>
-              <th className="text-left p-3 min-w-[100px]">Actions</th>
+              <th className="text-left p-3 min-w-[150px]">{i18n._(msg`Employee`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Date`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Status`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Clock In`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Clock Out`)}</th>
+              <th className="text-left p-3 min-w-[80px]">{i18n._(msg`Hours`)}</th>
+              <th className="text-left p-3 min-w-[150px]">{i18n._(msg`Justification`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Actions`)}</th>
             </tr>
           </thead>
           <tbody>
@@ -159,7 +162,7 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
                           onClick={() => onEdit(record)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
-                          Edit
+                          {i18n._(msg`Edit`)}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
@@ -168,7 +171,7 @@ export function AttendanceTable({ records, onEdit }: AttendanceTableProps) {
                         className="text-red-400 focus:text-red-400"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        {deleting[record.id] ? 'Deleting...' : 'Delete'}
+                        {deleting[record.id] ? i18n._(msg`Deleting...`) : i18n._(msg`Delete`)}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

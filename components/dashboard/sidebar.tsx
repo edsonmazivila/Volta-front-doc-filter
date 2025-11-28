@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -31,6 +32,8 @@ import { Button } from "@/components/ui";
 import { useSession } from "@/components/auth/session-context";
 import { usePermissions } from "@/lib/rbac/hooks";
 import Image from "next/image";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 type NavItem = {
   href: string;
@@ -43,6 +46,64 @@ type NavSection = {
   items: NavItem[];
 };
 
+/**
+ * Hook to get translated navigation sections
+ */
+function useNavSections(): NavSection[] {
+  const { i18n } = useLingui();
+
+  return useMemo(() => [
+    {
+      title: i18n._(msg`Overview`),
+      items: [{ href: "/dashboard", label: i18n._(msg`Dashboard`), icon: LayoutDashboard }],
+    },
+    {
+      title: i18n._(msg`Management`),
+      items: [
+        {
+          href: "/dashboard/employees",
+          label: i18n._(msg`Employees Management`),
+          icon: Users,
+        },
+        { href: "/dashboard/timesheets", label: i18n._(msg`Team Timesheets`), icon: Clock },
+        {
+          href: "/dashboard/attendance",
+          label: i18n._(msg`Team Attendance`),
+          icon: ClipboardCheck,
+        },
+        { href: "/dashboard/leaves", label: i18n._(msg`Team time off`), icon: Calendar },
+        { href: "/dashboard/payroll", label: i18n._(msg`Payroll`), icon: DollarSign },
+        { href: "/dashboard/meetings", label: i18n._(msg`Meetings`), icon: Video },
+        { href: "/dashboard/documents", label: i18n._(msg`Team Documents`), icon: FileText },
+      ],
+    },
+    {
+      title: i18n._(msg`Self Service`),
+      items: [
+        { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+        { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
+        { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
+        { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
+        { href: "/dashboard/my-documents", label: i18n._(msg`Documents`), icon: FolderOpen },
+        { href: "/dashboard/my-profile", label: i18n._(msg`Profile`), icon: UserCog },
+      ],
+    },
+    {
+      title: i18n._(msg`Administration`),
+      items: [
+        {
+          href: "/dashboard/departments",
+          label: i18n._(msg`Department Management`),
+          icon: Building2,
+        },
+        { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
+        { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
+      ],
+    },
+  ], [i18n]);
+}
+
+// Keep for backwards compatibility with any external imports
 export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Overview",
@@ -51,17 +112,9 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Management",
     items: [
-      {
-        href: "/dashboard/employees",
-        label: "Employees Management",
-        icon: Users,
-      },
+      { href: "/dashboard/employees", label: "Employees Management", icon: Users },
       { href: "/dashboard/timesheets", label: "Team Timesheets", icon: Clock },
-      {
-        href: "/dashboard/attendance",
-        label: "Team Attendance",
-        icon: ClipboardCheck,
-      },
+      { href: "/dashboard/attendance", label: "Team Attendance", icon: ClipboardCheck },
       { href: "/dashboard/leaves", label: "Team time off", icon: Calendar },
       { href: "/dashboard/payroll", label: "Payroll", icon: DollarSign },
       { href: "/dashboard/meetings", label: "Meetings", icon: Video },
@@ -82,11 +135,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Administration",
     items: [
-      {
-        href: "/dashboard/departments",
-        label: "Department Management",
-        icon: Building2,
-      },
+      { href: "/dashboard/departments", label: "Department Management", icon: Building2 },
       { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
       { href: "/dashboard/company", label: "Company", icon: Briefcase },
     ],
@@ -122,11 +171,14 @@ export function Sidebar() {
   const { user } = useSession();
   const pathname = usePathname();
   const { canAccessPage } = usePermissions();
+  const navSections = useNavSections();
+  const { i18n } = useLingui();
 
   // Compute filtered sections directly each render to reflect current role immediately
   const hideSelfService = user?.role === "system_admin";
-  const filteredSections = NAV_SECTIONS.filter(
-    (section) => !(hideSelfService && section.title === "Self Service")
+  const selfServiceTitle = i18n._(msg`Self Service`);
+  const filteredSections = navSections.filter(
+    (section) => !(hideSelfService && section.title === selfServiceTitle)
   )
     .map((section) => ({
       ...section,
@@ -182,15 +234,16 @@ export function Sidebar() {
 
 export function SidebarTrigger({ className = "" }: { className?: string }) {
   const { openDrawer } = useSidebar();
+  const { i18n } = useLingui();
   return (
     <Button
-      aria-label="Open menu"
+      aria-label={i18n._(msg`Open menu`)}
       className={`md:hidden ${className}`}
       variant="outline"
       size="sm"
       onClick={openDrawer}
     >
-      Menu
+      {i18n._(msg`Menu`)}
     </Button>
   );
 }
@@ -200,11 +253,14 @@ function SidebarDrawer() {
   const { user } = useSession();
   const pathname = usePathname();
   const { canAccessPage } = usePermissions();
+  const navSections = useNavSections();
+  const { i18n } = useLingui();
 
   // Compute filtered sections directly each render
   const hideSelfService = user?.role === "system_admin";
-  const filteredSections = NAV_SECTIONS.filter(
-    (section) => !(hideSelfService && section.title === "Self Service")
+  const selfServiceTitle = i18n._(msg`Self Service`);
+  const filteredSections = navSections.filter(
+    (section) => !(hideSelfService && section.title === selfServiceTitle)
   )
     .map((section) => ({
       ...section,

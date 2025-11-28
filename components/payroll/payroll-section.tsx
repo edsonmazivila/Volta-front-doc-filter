@@ -14,12 +14,15 @@ import {
   getTabelaExportUrl,
   type PayrollRunItem
 } from '@/lib/services/payroll'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface PayrollSectionProps {
   runs: PayrollRunItem[]
 }
 
 export function PayrollSection({ runs }: PayrollSectionProps) {
+  const { i18n } = useLingui()
   const toast = useToastHelpers()
   const router = useRouter()
   const { role } = usePermissions()
@@ -33,7 +36,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 
   async function handleProcess() {
     if (!startDate || !endDate) {
-      toast.error('Select start and end dates')
+      toast.error(i18n._(msg`Select start and end dates`))
       return
     }
 
@@ -43,7 +46,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       const startDateObj = new Date(startDate)
       const endDateObj = new Date(endDate)
       if (Number.isNaN(startDateObj.getTime()) || Number.isNaN(endDateObj.getTime())) {
-        toast.error('Invalid start or end date')
+        toast.error(i18n._(msg`Invalid start or end date`))
         return
       }
       const msPerDay = 1000 * 60 * 60 * 24
@@ -55,19 +58,17 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       > = {
         weekly: {
           requiredDays: 7,
-          message: 'Weekly period must cover exactly 7 days',
+          message: i18n._(msg`Weekly period must cover exactly 7 days`),
         },
         biweekly: {
           requiredDays: 14,
-          message: 'Biweekly period must cover exactly 14 days',
+          message: i18n._(msg`Biweekly period must cover exactly 14 days`),
         },
         semimonthly: {
-          message:
-            'Semi-monthly periods should align with 1st-15th or 16th-end of month ranges',
+          message: i18n._(msg`Semi-monthly periods should align with 1st-15th or 16th-end of month ranges`),
         },
         monthly: {
-          message:
-            'Monthly periods should start on the first and end on the last day of the month',
+          message: i18n._(msg`Monthly periods should start on the first and end on the last day of the month`),
         },
       }
 
@@ -77,7 +78,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
         return
       }
       if (!requirement?.requiredDays && inclusiveDiff <= 0) {
-        toast.error('End date must be after start date')
+        toast.error(i18n._(msg`End date must be after start date`))
         return
       }
 
@@ -96,27 +97,27 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       if ('errors' in result) {
         // Show all validation errors to user
         const errorMessages = []
-        
+
         // Field-specific errors
         if (result.errors.pay_period_start) errorMessages.push(...result.errors.pay_period_start)
         if (result.errors.pay_period_end) errorMessages.push(...result.errors.pay_period_end)
         if (result.errors.pay_date) errorMessages.push(...result.errors.pay_date)
         if (result.errors.pay_frequency) errorMessages.push(...result.errors.pay_frequency)
-        
+
         // General form errors (including backend errors)
         if (result.errors._form) errorMessages.push(...result.errors._form)
-        
+
         // Show the first error or a fallback message
-        toast.error(errorMessages[0] || 'Failed to calculate payroll')
+        toast.error(errorMessages[0] || i18n._(msg`Failed to calculate payroll`))
       } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data = result?.data as any
         const id = (data?.payroll_run?.id ?? data?.id ?? data?.run_id ?? null) as string | null
         if (id) setLastRunId(id)
-        toast.success('Payroll calculated')
+        toast.success(i18n._(msg`Payroll calculated`))
       }
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to calculate payroll')
+      toast.error(error instanceof Error ? error.message : i18n._(msg`Failed to calculate payroll`))
     } finally {
       setIsSubmitting(false)
     }
@@ -125,33 +126,33 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
   async function handleRun() {
     const id = lastRunId || runs[0]?.id
     if (!id) {
-      toast.error('No calculated payroll to run')
+      toast.error(i18n._(msg`No calculated payroll to run`))
       return
     }
 
     try {
       await runPayrollAction(id)
-      toast.success('Payroll executed')
+      toast.success(i18n._(msg`Payroll executed`))
       router.refresh()
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to run payroll')
+      toast.error(error instanceof Error ? error.message : i18n._(msg`Failed to run payroll`))
     }
   }
 
   async function handleRowRun(runId: string) {
     try {
       await runPayrollAction(runId)
-      toast.success('Payroll executed')
+      toast.success(i18n._(msg`Payroll executed`))
       router.refresh()
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to run payroll')
+      toast.error(error instanceof Error ? error.message : i18n._(msg`Failed to run payroll`))
     }
   }
 
   async function handleExport(type: 'excel' | 'bci' | 'tabela') {
     const id = lastRunId || runs[0]?.id
     if (!id) {
-      toast.error('No payroll run selected')
+      toast.error(i18n._(msg`No payroll run selected`))
       return
     }
 
@@ -168,9 +169,9 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       if (typeof window !== 'undefined') {
         window.open(url, '_blank')
       }
-      toast.success('Export started')
+      toast.success(i18n._(msg`Export started`))
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Export failed')
+      toast.error(error instanceof Error ? error.message : i18n._(msg`Export failed`))
     }
   }
 
@@ -188,9 +189,9 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       if (typeof window !== 'undefined') {
         window.open(url, '_blank')
       }
-      toast.success('Export started')
+      toast.success(i18n._(msg`Export started`))
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Export failed')
+      toast.error(error instanceof Error ? error.message : i18n._(msg`Export failed`))
     }
   }
 
@@ -224,7 +225,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 			<div className='flex flex-col gap-3'>
 				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4 w-full'>
 					<div>
-						<label className='block text-xs text-muted-foreground mb-1'>Period start</label>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Period start`)}</label>
 						<input
 							type='date'
 							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
@@ -233,7 +234,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 						/>
 					</div>
 					<div>
-						<label className='block text-xs text-muted-foreground mb-1'>Period end</label>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Period end`)}</label>
 						<input
 							type='date'
 							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
@@ -242,39 +243,39 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 						/>
 					</div>
 					<div>
-						<label className='block text-xs text-muted-foreground mb-1'>Pay frequency</label>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay frequency`)}</label>
 						<select
 							value={payFrequency}
 							onChange={(e) => setPayFrequency(e.target.value)}
 							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
 						>
-							<option value='weekly'>Weekly</option>
-							<option value='biweekly'>Biweekly</option>
-							<option value='semimonthly'>Semi-monthly</option>
-							<option value='monthly'>Monthly</option>
+							<option value='weekly'>{i18n._(msg`Weekly`)}</option>
+							<option value='biweekly'>{i18n._(msg`Biweekly`)}</option>
+							<option value='semimonthly'>{i18n._(msg`Semi-monthly`)}</option>
+							<option value='monthly'>{i18n._(msg`Monthly`)}</option>
 						</select>
 					</div>
 				</div>
 				{isPayrollActor && (
 					<div className='flex flex-wrap items-center gap-2 sm:justify-end'>
 						<Button onClick={handleProcess} disabled={isSubmitting}>
-							{isSubmitting ? 'Processing…' : 'Calculate'}
+							{isSubmitting ? i18n._(msg`Processing…`) : i18n._(msg`Calculate`)}
 						</Button>
 						<Button variant='secondary' onClick={handleRun}>
-							Run
+							{i18n._(msg`Run`)}
 						</Button>
 						<Button variant='outline' onClick={() => handleExport('excel')}>
-							Export Excel
+							{i18n._(msg`Export Excel`)}
 						</Button>
 						<Button variant='outline' onClick={() => handleExport('bci')}>
-							Export BCI
+							{i18n._(msg`Export BCI`)}
 						</Button>
 					</div>
 				)}
 			</div>
 
 			<div className='flex items-center justify-between gap-3 flex-wrap'>
-				<h2 className='text-sm font-medium'>Recent Runs</h2>
+				<h2 className='text-sm font-medium'>{i18n._(msg`Recent Runs`)}</h2>
 			</div>
 
       <div className='grid gap-2'>
@@ -284,12 +285,12 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
               <table className='w-full text-sm'>
                 <thead className='border-b border-[var(--border)] text-neutral-400'>
                   <tr>
-                    <th className='text-left p-3'>Pay Date</th>
-                    <th className='text-left p-3'>Employees</th>
-                    <th className='text-left p-3'>Gross Pay</th>
-                    <th className='text-left p-3'>Net Pay</th>
-                    <th className='text-left p-3'>Status</th>
-                    <th className='text-left p-3'>Actions</th>
+                    <th className='text-left p-3'>{i18n._(msg`Pay Date`)}</th>
+                    <th className='text-left p-3'>{i18n._(msg`Employees`)}</th>
+                    <th className='text-left p-3'>{i18n._(msg`Gross Pay`)}</th>
+                    <th className='text-left p-3'>{i18n._(msg`Net Pay`)}</th>
+                    <th className='text-left p-3'>{i18n._(msg`Status`)}</th>
+                    <th className='text-left p-3'>{i18n._(msg`Actions`)}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -319,20 +320,20 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
                           <DropdownMenuContent align='end'>
                             {r.status?.toLowerCase() === 'calculated' && isPayrollActor && (
                               <DropdownMenuItem onClick={() => handleRowRun(r.id)}>
-                                Run Payroll
+                                {i18n._(msg`Run Payroll`)}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem onClick={() => handleViewPaystubs(r.id)}>
-                              View Paystubs
+                              {i18n._(msg`View Paystubs`)}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRowExport(r.id, 'excel')}>
-                              Export Summary
+                              {i18n._(msg`Export Summary`)}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRowExport(r.id, 'bci')}>
-                              Export BCI
+                              {i18n._(msg`Export BCI`)}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleRowExport(r.id, 'tabela')}>
-                              Export Tabela
+                              {i18n._(msg`Export Tabela`)}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -348,10 +349,10 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
             <div className='p-8 text-center'>
               <div className='flex flex-col items-center gap-2'>
                 <svg className='w-12 h-12 text-muted-foreground/50' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 2z' />
                 </svg>
-                <p className='text-sm text-muted-foreground'>No payroll runs yet</p>
-                <p className='text-xs text-muted-foreground/70'>Calculate payroll to get started</p>
+                <p className='text-sm text-muted-foreground'>{i18n._(msg`No payroll runs yet`)}</p>
+                <p className='text-xs text-muted-foreground/70'>{i18n._(msg`Calculate payroll to get started`)}</p>
               </div>
             </div>
           </div>

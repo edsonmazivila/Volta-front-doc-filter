@@ -5,6 +5,7 @@ import { getPayrollRuns, getPayrollStats } from '@/lib/services/payroll'
 import { PayrollSection } from '@/components/payroll/payroll-section'
 import { formatCurrency } from '@/lib/utils'
 import { DollarSign, TrendingUp, Receipt } from 'lucide-react'
+import { t } from '@lingui/core/macro'
 
 export default async function PayrollPage() {
   await requireRole(['payroll_manager', 'system_admin'])
@@ -12,7 +13,7 @@ export default async function PayrollPage() {
 
   return (
     <>
-      <Header title='Payroll' />
+      <Header title={t`Payroll`} />
       <section className='p-4 grid gap-4 overflow-y-auto'>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           {/* Gross Payroll Card */}
@@ -24,7 +25,7 @@ export default async function PayrollPage() {
                   <DollarSign className='h-6 w-6 text-green-500' />
                 </div>
               </div>
-              <p className='text-sm text-muted-foreground mb-1'>Gross Payroll</p>
+              <p className='text-sm text-muted-foreground mb-1'>{t`Gross Payroll`}</p>
               <p className='text-3xl font-bold text-foreground'>{formatCurrency(stats.gross ?? 0)}</p>
             </div>
           </Card>
@@ -38,7 +39,7 @@ export default async function PayrollPage() {
                   <TrendingUp className='h-6 w-6 text-blue-500' />
                 </div>
               </div>
-              <p className='text-sm text-muted-foreground mb-1'>Net Payroll</p>
+              <p className='text-sm text-muted-foreground mb-1'>{t`Net Payroll`}</p>
               <p className='text-3xl font-bold text-foreground'>{formatCurrency(stats.net ?? 0)}</p>
             </div>
           </Card>
@@ -52,13 +53,13 @@ export default async function PayrollPage() {
                   <Receipt className='h-6 w-6 text-orange-500' />
                 </div>
               </div>
-              <p className='text-sm text-muted-foreground mb-1'>Tax Withholding</p>
+              <p className='text-sm text-muted-foreground mb-1'>{t`Tax Withholding`}</p>
               <p className='text-3xl font-bold text-foreground'>{formatCurrency(stats.taxes ?? 0)}</p>
             </div>
           </Card>
         </div>
         <Card>
-          <CardHeader title='Payroll Processing' />
+          <CardHeader title={t`Payroll Processing`} />
           <PayrollSection runs={runs} />
         </Card>
       </section>

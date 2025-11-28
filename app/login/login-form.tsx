@@ -10,10 +10,14 @@ import {
 import { loginAction } from "@/lib/auth/actions";
 import { loginSchema } from "@/lib/auth/types";
 import Link from "next/link";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
+import { msg } from "@lingui/core/macro";
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const { i18n } = useLingui();
 
   // Get success message from search params
   const successMessage = searchParams.get("message");
@@ -33,8 +37,8 @@ export function LoginForm() {
       )}
 
       <AuthForm
-        title="Welcome back"
-        subtitle="Sign in to your account to continue"
+        title={i18n._(msg`Welcome back`)}
+        subtitle={i18n._(msg`Sign in to your account to continue`)}
         onSubmit={async () => {
           /* handled by action */
         }}
@@ -45,7 +49,7 @@ export function LoginForm() {
             const formErrors = (
               result.errors as Record<string, string[] | undefined>
             )._form;
-            if (formErrors && formErrors.length) {
+            if (formErrors?.length) {
               setError(formErrors[0]);
               return;
             }
@@ -54,7 +58,7 @@ export function LoginForm() {
           window.location.href = '/dashboard';
         }}
         schema={loginSchema}
-        submitText="Sign in"
+        submitText={i18n._(msg`Sign in`)}
       >
         <EmailField />
         <PasswordField />
@@ -63,7 +67,7 @@ export function LoginForm() {
             href="/forgot-password"
             className="text-primary hover:opacity-80 underline"
           >
-            Forgot your password?
+            <Trans>Forgot your password?</Trans>
           </Link>
         </div>
       </AuthForm>

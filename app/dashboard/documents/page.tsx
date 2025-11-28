@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/rbac/server'
 import { getDocuments, getDocumentTypes } from '@/lib/services/documents'
 import { getUsers } from '@/lib/services/users'
 import { DocumentsSection } from '@/components/documents/documents-section'
+import { t } from '@lingui/core/macro'
 
 export default async function DocumentsPage() {
   await requireRole(['hr_manager', 'system_admin'])
@@ -21,10 +22,10 @@ export default async function DocumentsPage() {
 
   return (
     <>
-      <Header title='Documents' />
+      <Header title={t`Documents`} />
       <section className='p-4 grid gap-4 overflow-y-auto'>
         <Card>
-          <CardHeader title='Library' />
+          <CardHeader title={t`Library`} />
           <DocumentsSection items={items} initialTypes={types} initialEmployees={employees} />
         </Card>
       </section>

@@ -1,0 +1,345 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Use concurrency to cancel in-progress runs when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  IMAGE_NAME: nexudigital/payroll-front
+
+jobs:
+  version:
+    name: Determine Version
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.semver.outputs.new_version }}
+      version_changed: ${{ steps.semver.outputs.version_changed }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: latest_tag
+        shell: bash
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
+          if [ "$latest_tag" = "v0.1.0" ] && ! git rev-parse "v0.1.0" >/dev/null 2>&1; then
+            echo "latest_tag=HEAD" >> $GITHUB_OUTPUT
+            echo "initial_version=true" >> $GITHUB_OUTPUT
+          else
+            echo "latest_tag=${latest_tag}" >> $GITHUB_OUTPUT
+            echo "initial_version=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        shell: bash
+        run: |
+          if [ "${{ steps.latest_tag.outputs.initial_version }}" = "true" ]; then
+            echo "changelog<<EOF" >> $GITHUB_OUTPUT
+            echo "Initial release v0.1.0" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            cl=$(git log ${{ steps.latest_tag.outputs.latest_tag }}..HEAD --pretty=format:"- %s%n%b")
+            echo "changelog<<EOF" >> $GITHUB_OUTPUT
+            echo "$cl" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine version bump
+        id: semver
+        shell: bash
+        run: |
+          if [ "${{ steps.latest_tag.outputs.initial_version }}" = "true" ]; then
+            echo "new_version=v0.1.0" >> $GITHUB_OUTPUT
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          latest=${{ steps.latest_tag.outputs.latest_tag }}
+          latest=${latest#v}
+          IFS='.' read -r major minor patch <<< "$latest"
+          commits=$(git log ${{ steps.latest_tag.outputs.latest_tag }}..HEAD --pretty=format:"%s")
+          changed=false
+          while IFS= read -r c; do
+            if [[ "$c" == *"BREAKING CHANGE:"* ]]; then
+              major=$((major+1)); minor=0; patch=0; changed=true; break
+            elif [[ "$c" == feat:* || "$c" == feature:* ]]; then
+              minor=$((minor+1)); patch=0; changed=true
+            elif [[ "$c" == fix:* || "$c" =~ ^[Ff]ix ]]; then
+              patch=$((patch+1)); changed=true
+            fi
+          done <<< "$commits"
+          echo "new_version=v${major}.${minor}.${patch}" >> $GITHUB_OUTPUT
+          echo "version_changed=$changed" >> $GITHUB_OUTPUT
+
+  test:
+    name: Test & Quality Assurance
+    runs-on: ubuntu-latest
+    needs: [version]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      # - name: Run tests
+      #   run: npm test -- --coverage --watchAll=false
+
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     file: ./coverage/lcov.info
+      #     flags: unittests
+      #     name: codecov-umbrella
+      #     fail_ci_if_error: false
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: .next/
+          retention-days: 1
+
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    needs: [test, version]
+
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tags: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        if: ${{ env.DOCKER_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata (labels only)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ needs.version.outputs.new_version }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && needs.version.outputs.version_changed == 'true' }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ needs.version.outputs.new_version }}
+            ${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            DD_VERSION=${{ needs.version.outputs.new_version }}
+
+  release:
+    name: Create Release
+    needs: [version, build]
+    if: needs.version.outputs.version_changed == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create CHANGELOG.md if it doesn't exist
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)," >> CHANGELOG.md
+            echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)." >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "## [Unreleased]" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Get current date
+          release_date=$(date +%Y-%m-%d)
+
+          # Create new version section from Unreleased
+          sed -i "s/## \[Unreleased\]/## [Unreleased]\n\n### Added\n- None\n\n### Changed\n- None\n\n### Deprecated\n- None\n\n### Removed\n- None\n\n### Fixed\n- None\n\n### Security\n- None\n\n## [${{ needs.version.outputs.new_version }}] - ${release_date}/" CHANGELOG.md
+
+          # Update links at the bottom of the file
+          if ! grep -q "\[Unreleased\]:" CHANGELOG.md; then
+            echo -e "\n[Unreleased]: https://github.com/${{ github.repository }}/compare/${{ needs.version.outputs.new_version }}...HEAD" >> CHANGELOG.md
+            echo "[${{ needs.version.outputs.new_version }}]: https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.new_version }}" >> CHANGELOG.md
+          else
+            # Update existing links
+            sed -i "/\[Unreleased\]/c\[Unreleased\]: https://github.com/${{ github.repository }}/compare/${{ needs.version.outputs.new_version }}...HEAD" CHANGELOG.md
+            sed -i "/^\[${{ needs.version.outputs.new_version }}/d" CHANGELOG.md
+            sed -i "/\[Unreleased\]/a\[${{ needs.version.outputs.new_version }}]: https://github.com/${{ github.repository }}/releases/tag/${{ needs.version.outputs.new_version }}" CHANGELOG.md
+          fi
+
+          # Configure git with token-based authentication
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://github-actions[bot]:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          git add CHANGELOG.md
+          git commit -m "docs: update changelog for ${{ needs.version.outputs.new_version }}"
+          git push
+
+      - name: Create Release Notes
+        id: release_notes
+        run: |
+          # Extract the current version's changes from CHANGELOG.md
+          awk '/^## \[${{ needs.version.outputs.new_version }}\]/{p=1;print;next} /^## \[/{p=0} p{print}' CHANGELOG.md > release_notes.md
+
+          # Append installation and documentation information
+          cat << EOF >> release_notes.md
+
+          ## Docker Image
+          \`\`\`bash
+          docker pull nexudigital/payroll-front:${{ needs.version.outputs.new_version }}
+          \`\`\`
+
+          ## Deployment
+          See deployment documentation for deployment instructions.
+          EOF
+
+      - name: Create Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://github-actions[bot]:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          git tag -a ${{ needs.version.outputs.new_version }} -m "Release ${{ needs.version.outputs.new_version }}"
+          git push origin ${{ needs.version.outputs.new_version }}
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.version.outputs.new_version }}
+          release_name: Release ${{ needs.version.outputs.new_version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+
+  deploy:
+    name: Deploy via Argo CD
+    needs: [release, version]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch deploy workflow with tag
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main',
+              inputs: {
+                tag: '${{ needs.version.outputs.new_version }}'
+              }
+            });
+
+  security:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    needs: test
+
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high || true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          severity: "CRITICAL,HIGH"
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
