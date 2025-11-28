@@ -203,6 +203,7 @@ msgid "Process payments"
 msgstr "Processar pagamentos"
 
 #: app/dashboard/page.tsx:330
+#: components/reports/reports-section.tsx:78
 msgid "Payroll Totals"
 msgstr "Totais de Processamento Salarial"
 
@@ -318,6 +319,7 @@ msgid "Payroll Processing"
 msgstr "Processamento Salarial"
 
 #: app/dashboard/profile/page.tsx:11
+#: components/dashboard/header.tsx:55
 #: components/dashboard/sidebar.tsx:88
 msgid "Profile"
 msgstr "Perfil"
@@ -439,6 +441,7 @@ msgid "Email"
 msgstr "Email"
 
 #: app/signup/signup-form.tsx:107
+#: components/auth/auth-form.tsx:136
 #: components/employees/employee-create-form.tsx:313
 msgid "Password"
 msgstr "Palavra-passe"
@@ -552,6 +555,7 @@ msgid "Create account"
 msgstr "Criar conta"
 
 #: components/attendance/attendance-form-dialog.tsx:36
+#: components/attendance/attendance-form.tsx:105
 #: components/attendance/attendance-section.tsx:80
 #: components/attendance/attendance-table.tsx:42
 #: components/attendance/my-attendance-section.tsx:52
@@ -560,6 +564,7 @@ msgid "Present"
 msgstr "Presente"
 
 #: components/attendance/attendance-form-dialog.tsx:37
+#: components/attendance/attendance-form.tsx:106
 #: components/attendance/attendance-section.tsx:86
 #: components/attendance/attendance-table.tsx:43
 #: components/attendance/my-attendance-section.tsx:53
@@ -568,18 +573,21 @@ msgid "Absent"
 msgstr "Ausente"
 
 #: components/attendance/attendance-form-dialog.tsx:38
+#: components/attendance/attendance-form.tsx:107
 #: components/attendance/attendance-table.tsx:44
 #: components/attendance/my-attendance-section.tsx:54
 msgid "Late"
 msgstr "Atrasado"
 
 #: components/attendance/attendance-form-dialog.tsx:39
+#: components/attendance/attendance-form.tsx:108
 #: components/attendance/attendance-table.tsx:45
 #: components/attendance/my-attendance-section.tsx:55
 msgid "Half Day"
 msgstr "Meio Dia"
 
 #: components/attendance/attendance-form-dialog.tsx:40
+#: components/attendance/attendance-form.tsx:109
 #: components/attendance/attendance-table.tsx:46
 #: components/attendance/my-attendance-section.tsx:56
 #: components/employees/employee-edit-form.tsx:488
@@ -635,15 +643,20 @@ msgid "Report Attendance Issue"
 msgstr "Reportar Problema de Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:186
+#: components/attendance/attendance-form.tsx:78
 #: components/attendance/attendance-table.tsx:101
+#: components/attendance/justifications-table.tsx:86
 #: components/attendance/my-attendance-section.tsx:271
 #: components/documents/document-table.tsx:83
 #: components/meetings/meeting-form-dialog.tsx:155
+#: components/reports/reports-section.tsx:176
 msgid "Date"
 msgstr "Data"
 
 #: components/attendance/attendance-form-dialog.tsx:201
+#: components/attendance/attendance-form.tsx:95
 #: components/attendance/attendance-table.tsx:102
+#: components/attendance/justifications-table.tsx:89
 #: components/attendance/my-attendance-section.tsx:272
 #: components/departments/department-management.tsx:182
 #: components/documents/document-table.tsx:82
@@ -660,6 +673,7 @@ msgid "Status"
 msgstr "Estado"
 
 #: components/attendance/attendance-form-dialog.tsx:223
+#: components/attendance/attendance-form.tsx:121
 #: components/attendance/attendance-table.tsx:103
 #: components/attendance/my-attendance-section.tsx:239
 #: components/attendance/my-attendance-section.tsx:273
@@ -667,6 +681,7 @@ msgid "Clock In"
 msgstr "Entrada"
 
 #: components/attendance/attendance-form-dialog.tsx:240
+#: components/attendance/attendance-form.tsx:132
 #: components/attendance/attendance-table.tsx:104
 #: components/attendance/my-attendance-section.tsx:221
 #: components/attendance/my-attendance-section.tsx:274
@@ -674,6 +689,7 @@ msgid "Clock Out"
 msgstr "Saída"
 
 #: components/attendance/attendance-form-dialog.tsx:258
+#: components/attendance/attendance-form.tsx:148
 #: components/attendance/attendance-table.tsx:106
 msgid "Justification"
 msgstr "Justificação"
@@ -729,6 +745,7 @@ msgid "Current document"
 msgstr "Documento atual"
 
 #: components/attendance/attendance-form-dialog.tsx:354
+#: components/attendance/justifications-table.tsx:117
 #: components/my-documents/document-card.tsx:80
 msgid "View document"
 msgstr "Ver documento"
@@ -757,6 +774,8 @@ msgid "Update Attendance"
 msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
+#: components/attendance/attendance-form.tsx:178
+#: components/attendance/justification-reject-dialog.tsx:123
 #: components/company/company-documents-section.tsx:375
 #: components/company/company-documents-section.tsx:458
 #: components/company/company-documents-section.tsx:538
@@ -785,8 +804,67 @@ msgstr "Atualizar Assiduidade"
 #: components/my-documents/upload-document-dialog.tsx:193
 #: components/my-timesheets/timesheet-form-dialog.tsx:142
 #: components/timesheets/timesheet-form-dialog.tsx:224
+#: components/timesheets/timesheets-section.tsx:145
 msgid "Cancel"
 msgstr "Cancelar"
+
+#: components/attendance/attendance-form.tsx:42
+msgid "Attendance updated"
+msgstr "Assiduidade atualizada"
+
+#: components/attendance/attendance-form.tsx:42
+msgid "Attendance recorded"
+msgstr "Assiduidade registada"
+
+#: components/attendance/attendance-form.tsx:52
+#: components/attendance/attendance-table.tsx:100
+#: components/attendance/justification-reject-dialog.tsx:76
+#: components/attendance/justifications-table.tsx:85
+#: components/attendance/justifications-table.tsx:98
+#: components/documents/document-table.tsx:76
+#: components/documents/document-upload-form-dialog.tsx:99
+#: components/employees/employee-create-form.tsx:352
+#: components/employees/employee-edit-form.tsx:344
+#: components/leaves/leave-table.tsx:99
+#: components/leaves/leave-view-dialog.tsx:68
+#: components/leaves/pending-approvals-table.tsx:54
+#: components/leaves/team-balances-table.tsx:43
+#: components/timesheets/timesheet-form-dialog.tsx:118
+#: components/timesheets/timesheet-table.tsx:84
+msgid "Employee"
+msgstr "Colaborador"
+
+#: components/attendance/attendance-form.tsx:62
+#: components/documents/document-upload-form-dialog.tsx:105
+#: components/timesheets/timesheet-form-dialog.tsx:125
+msgid "Select employee"
+msgstr "Selecionar colaborador"
+
+#: components/attendance/attendance-form.tsx:156
+msgid "Provide a reason..."
+msgstr "Forneça um motivo..."
+
+#: components/attendance/attendance-form.tsx:174
+#: components/my-timesheets/timesheet-form-dialog.tsx:145
+#: components/timesheets/timesheets-section.tsx:132
+msgid "Update"
+msgstr "Atualizar"
+
+#: components/attendance/attendance-form.tsx:174
+#: components/departments/department-form.tsx:147
+#: components/documents/document-edit-dialog.tsx:140
+#: components/employees/employee-edit-form.tsx:819
+#: components/leaves/leave-request-form-dialog.tsx:220
+#: components/meetings/meeting-form-dialog.tsx:245
+#: components/my-timesheets/timesheet-form-dialog.tsx:145
+msgid "Saving..."
+msgstr "A guardar..."
+
+#: components/attendance/attendance-form.tsx:174
+#: components/attendance/attendance-section.tsx:114
+#: components/attendance/attendance-section.tsx:120
+msgid "Record Attendance"
+msgstr "Registar Assiduidade"
 
 #: components/attendance/attendance-section.tsx:60
 msgid "CSV exported successfully"
@@ -823,11 +901,6 @@ msgstr "A exportar..."
 msgid "Export CSV"
 msgstr "Exportar CSV"
 
-#: components/attendance/attendance-section.tsx:114
-#: components/attendance/attendance-section.tsx:120
-msgid "Record Attendance"
-msgstr "Registar Assiduidade"
-
 #: components/attendance/attendance-table.tsx:51
 msgid "Are you sure you want to delete this attendance record?"
 msgstr "Tem a certeza que deseja eliminar este registo de assiduidade?"
@@ -842,6 +915,8 @@ msgid "Attendance record deleted"
 msgstr "Registo de assiduidade eliminado"
 
 #: components/attendance/attendance-table.tsx:62
+#: components/attendance/justifications-table.tsx:43
+#: components/attendance/justifications-table.tsx:65
 #: components/my-timesheets/timesheet-form-dialog.tsx:70
 msgid "An error occurred"
 msgstr "Ocorreu um erro"
@@ -854,20 +929,6 @@ msgstr "Sem registos de assiduidade"
 msgid "Get started by creating a new attendance record"
 msgstr "Comece por criar um novo registo de assiduidade"
 
-#: components/attendance/attendance-table.tsx:100
-#: components/documents/document-table.tsx:76
-#: components/documents/document-upload-form-dialog.tsx:99
-#: components/employees/employee-create-form.tsx:352
-#: components/employees/employee-edit-form.tsx:344
-#: components/leaves/leave-table.tsx:99
-#: components/leaves/leave-view-dialog.tsx:68
-#: components/leaves/pending-approvals-table.tsx:54
-#: components/leaves/team-balances-table.tsx:43
-#: components/timesheets/timesheet-form-dialog.tsx:118
-#: components/timesheets/timesheet-table.tsx:84
-msgid "Employee"
-msgstr "Colaborador"
-
 #: components/attendance/attendance-table.tsx:105
 #: components/attendance/my-attendance-section.tsx:275
 #: components/paystubs/paystub-card.tsx:72
@@ -875,6 +936,7 @@ msgid "Hours"
 msgstr "Horas"
 
 #: components/attendance/attendance-table.tsx:107
+#: components/attendance/justifications-table.tsx:91
 #: components/company/company-documents-section.tsx:202
 #: components/departments/department-management.tsx:184
 #: components/documents/document-table.tsx:84
@@ -882,6 +944,8 @@ msgstr "Horas"
 #: components/leaves/leave-table.tsx:113
 #: components/leaves/pending-approvals-table.tsx:65
 #: components/payroll/payroll-section.tsx:293
+#: components/reports/reports-section.tsx:178
+#: components/reports/reports-section.tsx:190
 #: components/timesheets/timesheet-table.tsx:92
 msgid "Actions"
 msgstr "Ações"
@@ -905,6 +969,7 @@ msgstr "Editar"
 #: components/company/company-documents-section.tsx:540
 #: components/company/company-profile.tsx:679
 #: components/company/company-profile.tsx:697
+#: components/dashboard/notifications-menu.tsx:111
 #: components/departments/department-management.tsx:261
 #: components/departments/department-management.tsx:323
 #: components/documents/document-table.tsx:173
@@ -919,6 +984,110 @@ msgstr "Eliminar"
 #: components/employees/delete-employee-dialog.tsx:61
 msgid "Deleting..."
 msgstr "A eliminar..."
+
+#: components/attendance/justification-reject-dialog.tsx:62
+#: components/attendance/justification-reject-dialog.tsx:130
+msgid "Reject Justification"
+msgstr "Rejeitar Justificação"
+
+#: components/attendance/justification-reject-dialog.tsx:65
+msgid "Please provide a reason for rejecting this justification"
+msgstr "Por favor, forneça um motivo para rejeitar esta justificação"
+
+#: components/attendance/justification-reject-dialog.tsx:89
+#: components/attendance/justifications-table.tsx:87
+#: components/documents/document-reject-dialog.tsx:68
+#: components/leaves/leave-management.tsx:177
+#: components/leaves/leave-request-form-dialog.tsx:197
+#: components/leaves/leave-table.tsx:111
+#: components/leaves/leave-view-dialog.tsx:190
+#: components/leaves/my-leaves-section.tsx:268
+#: components/leaves/pending-approvals-table.tsx:63
+msgid "Reason"
+msgstr "Motivo"
+
+#: components/attendance/justification-reject-dialog.tsx:97
+msgid "Rejection Note"
+msgstr "Nota de Rejeição"
+
+#: components/attendance/justification-reject-dialog.tsx:103
+msgid "E.g., Not a valid medical justification, insufficient evidence..."
+msgstr "Ex.: Justificação médica inválida, evidência insuficiente..."
+
+#: components/attendance/justification-reject-dialog.tsx:110
+msgid "This note will be visible to the employee"
+msgstr "Esta nota será visível para o colaborador"
+
+#: components/attendance/justification-reject-dialog.tsx:130
+#: components/documents/document-reject-dialog.tsx:90
+#: components/leaves/leave-management.tsx:200
+msgid "Rejecting..."
+msgstr "A rejeitar..."
+
+#: components/attendance/justifications-table.tsx:37
+#: components/documents/documents-section.tsx:102
+#: components/leaves/leave-management.tsx:124
+msgid "Failed to approve"
+msgstr "Falha ao aprovar"
+
+#: components/attendance/justifications-table.tsx:39
+msgid "Justification approved"
+msgstr "Justificação aprovada"
+
+#: components/attendance/justifications-table.tsx:59
+#: components/documents/document-reject-dialog.tsx:48
+#: components/documents/document-reject-dialog.tsx:55
+#: components/leaves/leave-management.tsx:194
+msgid "Failed to reject"
+msgstr "Falha ao rejeitar"
+
+#: components/attendance/justifications-table.tsx:62
+msgid "Justification rejected"
+msgstr "Justificação rejeitada"
+
+#: components/attendance/justifications-table.tsx:75
+msgid "No pending justifications"
+msgstr "Sem justificações pendentes"
+
+#: components/attendance/justifications-table.tsx:88
+#: components/documents/document-table.tsx:80
+msgid "Document"
+msgstr "Documento"
+
+#: components/attendance/justifications-table.tsx:90
+#: components/leaves/leave-management.tsx:102
+#: components/leaves/leave-view-dialog.tsx:175
+#: components/leaves/my-leaves-section.tsx:192
+#: components/leaves/pending-approvals-table.tsx:64
+#: components/my-timesheets/my-timesheets-section.tsx:88
+#: components/my-timesheets/my-timesheets-section.tsx:111
+#: components/my-timesheets/timesheet-card.tsx:103
+#: components/timesheets/timesheet-form-dialog.tsx:207
+msgid "Submitted"
+msgstr "Submetido"
+
+#: components/attendance/justifications-table.tsx:123
+msgid "No document"
+msgstr "Sem documento"
+
+#: components/attendance/justifications-table.tsx:151
+#: components/documents/document-table.tsx:151
+#: components/leaves/leave-table.tsx:186
+#: components/leaves/pending-approvals-table.tsx:131
+#: components/timesheets/timesheet-table.tsx:172
+msgid "Approve"
+msgstr "Aprovar"
+
+#: components/attendance/justifications-table.tsx:160
+#: components/documents/document-reject-dialog.tsx:90
+#: components/documents/document-table.tsx:162
+#: components/leaves/leave-management.tsx:200
+#: components/leaves/leave-table.tsx:240
+#: components/leaves/pending-approvals-table.tsx:142
+#: components/timesheets/timesheet-table.tsx:183
+#: components/timesheets/timesheets-section.tsx:160
+msgid "Reject"
+msgstr "Rejeitar"
 
 #: components/attendance/my-attendance-section.tsx:86
 #: components/attendance/my-attendance-section.tsx:92
@@ -1002,6 +1171,85 @@ msgstr "Notas"
 msgid "No attendance records found"
 msgstr "Nenhum registo de assiduidade encontrado"
 
+#: components/auth/auth-form.tsx:80
+msgid "Please wait..."
+msgstr "Por favor, aguarde..."
+
+#: components/auth/auth-form.tsx:102
+msgid "Email address"
+msgstr "Endereço de email"
+
+#: components/auth/auth-form.tsx:159
+msgid "Confirm password"
+msgstr "Confirmar palavra-passe"
+
+#: components/auth/auth-form.tsx:181
+#: components/employees/employee-create-form.tsx:612
+#: components/employees/employee-edit-form.tsx:590
+msgid "Full name"
+msgstr "Nome completo"
+
+#: components/auth/auth-form.tsx:204
+msgid "Company name"
+msgstr "Nome da empresa"
+
+#: components/auth/auth-form.tsx:230
+msgid "I agree to the"
+msgstr "Concordo com os"
+
+#: components/auth/auth-form.tsx:235
+msgid "Terms of Service"
+msgstr "Termos de Serviço"
+
+#: components/auth/auth-form.tsx:237
+msgid "and"
+msgstr "e"
+
+#: components/auth/auth-form.tsx:242
+#: components/footer.tsx:37
+msgid "Privacy Policy"
+msgstr "Política de Privacidade"
+
+#: components/auth/password-input.tsx:30
+msgid "Hide password"
+msgstr "Ocultar palavra-passe"
+
+#: components/auth/password-input.tsx:30
+msgid "Show password"
+msgstr "Mostrar palavra-passe"
+
+#: components/auth/password-input.tsx:60
+msgid "Weak"
+msgstr "Fraca"
+
+#: components/auth/password-input.tsx:60
+msgid "Medium"
+msgstr "Média"
+
+#: components/auth/password-input.tsx:60
+msgid "Strong"
+msgstr "Forte"
+
+#: components/auth/password-input.tsx:103
+msgid "At least 8 characters"
+msgstr "Pelo menos 8 caracteres"
+
+#: components/auth/password-input.tsx:104
+msgid "One lowercase letter"
+msgstr "Uma letra minúscula"
+
+#: components/auth/password-input.tsx:105
+msgid "One uppercase letter"
+msgstr "Uma letra maiúscula"
+
+#: components/auth/password-input.tsx:106
+msgid "One number"
+msgstr "Um número"
+
+#: components/auth/password-input.tsx:107
+msgid "One special character"
+msgstr "Um caractere especial"
+
 #: components/company/company-documents-section.tsx:62
 #: components/my-documents/upload-document-dialog.tsx:94
 msgid "Document uploaded successfully"
@@ -1073,6 +1321,7 @@ msgstr "Nome"
 #: components/leaves/leave-table.tsx:108
 #: components/leaves/my-leaves-section.tsx:254
 #: components/leaves/pending-approvals-table.tsx:60
+#: components/reports/reports-section.tsx:177
 msgid "Type"
 msgstr "Tipo"
 
@@ -1107,6 +1356,8 @@ msgstr "Ver Detalhes"
 #: components/company/company-documents-section.tsx:264
 #: components/company/company-documents-section.tsx:487
 #: components/documents/document-view-dialog.tsx:117
+#: components/reports/reports-section.tsx:33
+#: components/reports/reports-section.tsx:198
 msgid "Download"
 msgstr "Transferir"
 
@@ -1398,6 +1649,7 @@ msgstr "Nenhuma política de férias encontrada."
 #: components/employees/employee-table.tsx:315
 #: components/employees/employee-table.tsx:421
 #: components/employees/employee-view-dialog.tsx:135
+#: components/reports/reports-section.tsx:115
 msgid "Active"
 msgstr "Ativo"
 
@@ -1437,17 +1689,18 @@ msgstr "Estado / Província"
 #: components/company/company-profile.tsx:429
 #: components/company/company-profile.tsx:495
 #: components/company/company-profile.tsx:661
-#: components/timesheets/timesheet-form-dialog.tsx:225
-msgid "Saving…"
-msgstr "A guardar…"
+#: components/documents/document-edit-dialog.tsx:140
+#: components/leaves/leave-request-form-dialog.tsx:220
+#: components/timesheets/timesheets-section.tsx:132
+msgid "Save"
+msgstr "Guardar"
 
 #: components/company/company-profile.tsx:429
 #: components/company/company-profile.tsx:495
 #: components/company/company-profile.tsx:661
-#: components/documents/document-edit-dialog.tsx:140
-#: components/leaves/leave-request-form-dialog.tsx:220
-msgid "Save"
-msgstr "Guardar"
+#: components/timesheets/timesheet-form-dialog.tsx:225
+msgid "Saving…"
+msgstr "A guardar…"
 
 #: components/company/company-profile.tsx:437
 msgid "Edit Pay Schedule"
@@ -1486,6 +1739,7 @@ msgstr "Quinzenal"
 #: components/employees/employee-create-form.tsx:751
 #: components/employees/employee-edit-form.tsx:746
 #: components/payroll/payroll-section.tsx:255
+#: components/reports/reports-section.tsx:67
 msgid "Monthly"
 msgstr "Mensal"
 
@@ -1652,7 +1906,54 @@ msgstr "Esta ação não pode ser desfeita. Isto irá eliminar permanentemente {
 msgid "Delete pay schedule?"
 msgstr "Eliminar calendário de pagamento?"
 
+#: components/dashboard/header.tsx:35
+msgid "User menu"
+msgstr "Menu do utilizador"
+
+#: components/dashboard/header.tsx:50
+msgid "Theme"
+msgstr "Tema"
+
+#: components/dashboard/logout-button.tsx:20
+#: components/dashboard/logout-button.tsx:21
+msgid "Logout"
+msgstr "Terminar sessão"
+
+#: components/dashboard/notifications-menu.tsx:77
+#: components/dashboard/notifications-menu.tsx:90
+msgid "Notifications"
+msgstr "Notificações"
+
+#: components/dashboard/notifications-menu.tsx:93
+msgid "Loading..."
+msgstr "A carregar..."
+
+#: components/dashboard/notifications-menu.tsx:95
+msgid "No notifications"
+msgstr "Sem notificações"
+
+#: components/dashboard/notifications-menu.tsx:101
+msgid "Notification"
+msgstr "Notificação"
+
+#: components/dashboard/notifications-menu.tsx:107
+msgid "Mark as read"
+msgstr "Marcar como lida"
+
+#: components/dashboard/notifications-menu.tsx:122
+msgid "Refresh"
+msgstr "Atualizar"
+
+#: components/dashboard/notifications-menu.tsx:124
+msgid "Mark all read"
+msgstr "Marcar todas como lidas"
+
+#: components/dashboard/notifications-menu.tsx:125
+msgid "Clear all"
+msgstr "Limpar todas"
+
 #: components/dashboard/sidebar.tsx:57
+#: components/reports/reports-section.tsx:64
 msgid "Overview"
 msgstr "Visão Geral"
 
@@ -1713,6 +2014,7 @@ msgstr "Relatórios"
 #: components/dashboard/sidebar.tsx:100
 #: components/employees/employee-create-form.tsx:409
 #: components/employees/employee-edit-form.tsx:397
+#: components/footer.tsx:34
 msgid "Company"
 msgstr "Empresa"
 
@@ -1756,15 +2058,6 @@ msgstr "Gestor do Departamento"
 #: components/departments/department-form.tsx:110
 msgid "No manager assigned"
 msgstr "Nenhum gestor atribuído"
-
-#: components/departments/department-form.tsx:147
-#: components/documents/document-edit-dialog.tsx:140
-#: components/employees/employee-edit-form.tsx:819
-#: components/leaves/leave-request-form-dialog.tsx:220
-#: components/meetings/meeting-form-dialog.tsx:245
-#: components/my-timesheets/timesheet-form-dialog.tsx:145
-msgid "Saving..."
-msgstr "A guardar..."
 
 #: components/departments/department-form.tsx:149
 msgid "Update Department"
@@ -1863,12 +2156,6 @@ msgstr "Confidencial"
 msgid "Reason is required"
 msgstr "O motivo é obrigatório"
 
-#: components/documents/document-reject-dialog.tsx:48
-#: components/documents/document-reject-dialog.tsx:55
-#: components/leaves/leave-management.tsx:194
-msgid "Failed to reject"
-msgstr "Falha ao rejeitar"
-
 #: components/documents/document-reject-dialog.tsx:50
 #: components/leaves/leave-management.tsx:190
 #: components/my-documents/my-documents-section.tsx:182
@@ -1881,33 +2168,9 @@ msgstr "Rejeitado"
 msgid "Reject Document"
 msgstr "Rejeitar Documento"
 
-#: components/documents/document-reject-dialog.tsx:68
-#: components/leaves/leave-management.tsx:177
-#: components/leaves/leave-request-form-dialog.tsx:197
-#: components/leaves/leave-table.tsx:111
-#: components/leaves/leave-view-dialog.tsx:190
-#: components/leaves/my-leaves-section.tsx:268
-#: components/leaves/pending-approvals-table.tsx:63
-msgid "Reason"
-msgstr "Motivo"
-
 #: components/documents/document-reject-dialog.tsx:74
 msgid "Enter reason for rejection..."
 msgstr "Introduza o motivo da rejeição..."
-
-#: components/documents/document-reject-dialog.tsx:90
-#: components/documents/document-table.tsx:162
-#: components/leaves/leave-management.tsx:200
-#: components/leaves/leave-table.tsx:240
-#: components/leaves/pending-approvals-table.tsx:142
-#: components/timesheets/timesheet-table.tsx:183
-msgid "Reject"
-msgstr "Rejeitar"
-
-#: components/documents/document-reject-dialog.tsx:90
-#: components/leaves/leave-management.tsx:200
-msgid "Rejecting..."
-msgstr "A rejeitar..."
 
 #: components/documents/document-table.tsx:77
 #: components/employees/employee-table.tsx:372
@@ -1916,21 +2179,10 @@ msgstr "A rejeitar..."
 msgid "(click to view details)"
 msgstr "(clique para ver detalhes)"
 
-#: components/documents/document-table.tsx:80
-msgid "Document"
-msgstr "Documento"
-
 #: components/documents/document-table.tsx:91
 #: components/my-documents/my-documents-section.tsx:204
 msgid "No documents found"
 msgstr "Nenhum documento encontrado"
-
-#: components/documents/document-table.tsx:151
-#: components/leaves/leave-table.tsx:186
-#: components/leaves/pending-approvals-table.tsx:131
-#: components/timesheets/timesheet-table.tsx:172
-msgid "Approve"
-msgstr "Aprovar"
 
 #: components/documents/document-upload-form-dialog.tsx:60
 msgid "Employee, type, and file are required"
@@ -1940,11 +2192,6 @@ msgstr "Colaborador, tipo e ficheiro são obrigatórios"
 #: components/documents/document-upload-form-dialog.tsx:84
 msgid "Upload failed"
 msgstr "Falha no carregamento"
-
-#: components/documents/document-upload-form-dialog.tsx:105
-#: components/timesheets/timesheet-form-dialog.tsx:125
-msgid "Select employee"
-msgstr "Selecionar colaborador"
 
 #: components/documents/document-upload-form-dialog.tsx:116
 msgid "Document type"
@@ -2052,11 +2299,6 @@ msgstr "Pesquisar documentos..."
 #: components/timesheets/timesheet-form-dialog.tsx:208
 msgid "Approved"
 msgstr "Aprovado"
-
-#: components/documents/documents-section.tsx:102
-#: components/leaves/leave-management.tsx:124
-msgid "Failed to approve"
-msgstr "Falha ao aprovar"
 
 #: components/documents/documents-section.tsx:118
 msgid "Deleted"
@@ -2325,11 +2567,6 @@ msgstr "Contacto de Emergência"
 #: components/employees/employee-edit-form.tsx:582
 msgid "Who should we contact in an emergency?"
 msgstr "Quem devemos contactar em caso de emergência?"
-
-#: components/employees/employee-create-form.tsx:612
-#: components/employees/employee-edit-form.tsx:590
-msgid "Full name"
-msgstr "Nome completo"
 
 #: components/employees/employee-create-form.tsx:624
 #: components/employees/employee-edit-form.tsx:602
@@ -2862,6 +3099,60 @@ msgstr "Assiduidade e Horários"
 msgid "Track attendance, manage overtime, and streamline approvals with an intuitive experience."
 msgstr "Registe assiduidade, gira horas extra e simplifique aprovações com uma experiência intuitiva."
 
+#: components/footer.tsx:26
+msgid "Product"
+msgstr "Produto"
+
+#: components/footer.tsx:28
+#: components/home-header.tsx:50
+msgid "Features"
+msgstr "Funcionalidades"
+
+#: components/footer.tsx:29
+#: components/home-header.tsx:49
+msgid "Pricing"
+msgstr "Preços"
+
+#: components/footer.tsx:30
+msgid "Testimonials"
+msgstr "Testemunhos"
+
+#: components/footer.tsx:36
+msgid "About Us"
+msgstr "Sobre Nós"
+
+#: components/footer.tsx:38
+msgid "Terms of Services"
+msgstr "Termos de Serviço"
+
+#: components/footer.tsx:42
+msgid "Resources"
+msgstr "Recursos"
+
+#: components/footer.tsx:44
+msgid "Blog"
+msgstr "Blog"
+
+#: components/footer.tsx:45
+msgid "Help"
+msgstr "Ajuda"
+
+#: components/footer.tsx:49
+msgid "Social Links"
+msgstr "Redes Sociais"
+
+#: components/footer.tsx:51
+msgid "Facebook"
+msgstr "Facebook"
+
+#: components/footer.tsx:52
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+#: components/footer.tsx:72
+msgid "All rights reserved."
+msgstr "Todos os direitos reservados."
+
 #: components/hero.tsx:19
 msgid "All‑in‑one HR & Payroll Platform"
 msgstr "Plataforma Integrada de RH e Processamento Salarial"
@@ -2881,14 +3172,6 @@ msgstr "Confiado por Empresas de Todos os Tamanhos"
 #: components/home-header.tsx:48
 msgid "Home"
 msgstr "Início"
-
-#: components/home-header.tsx:49
-msgid "Pricing"
-msgstr "Preços"
-
-#: components/home-header.tsx:50
-msgid "Features"
-msgstr "Funcionalidades"
 
 #: components/home-header.tsx:51
 msgid "Careers"
@@ -2940,17 +3223,6 @@ msgstr "Todos os tipos"
 #: components/leaves/my-leaves-section.tsx:174
 msgid "New request"
 msgstr "Novo pedido"
-
-#: components/leaves/leave-management.tsx:102
-#: components/leaves/leave-view-dialog.tsx:175
-#: components/leaves/my-leaves-section.tsx:192
-#: components/leaves/pending-approvals-table.tsx:64
-#: components/my-timesheets/my-timesheets-section.tsx:88
-#: components/my-timesheets/my-timesheets-section.tsx:111
-#: components/my-timesheets/timesheet-card.tsx:103
-#: components/timesheets/timesheet-form-dialog.tsx:207
-msgid "Submitted"
-msgstr "Submetido"
 
 #: components/leaves/leave-management.tsx:105
 #: components/leaves/my-leaves-section.tsx:195
@@ -3445,6 +3717,7 @@ msgid "Unknown date"
 msgstr "Data desconhecida"
 
 #: components/my-documents/document-card.tsx:83
+#: components/reports/reports-section.tsx:197
 msgid "View"
 msgstr "Ver"
 
@@ -3543,6 +3816,8 @@ msgstr "Gerir as suas submissões de folhas de horas"
 #: components/my-timesheets/my-timesheets-section.tsx:64
 #: components/my-timesheets/timesheet-form-dialog.tsx:86
 #: components/timesheets/timesheet-table.tsx:67
+#: components/timesheets/timesheets-section.tsx:96
+#: components/timesheets/timesheets-section.tsx:131
 msgid "New Timesheet"
 msgstr "Nova Folha de Horas"
 
@@ -3557,6 +3832,7 @@ msgid "Draft"
 msgstr "Rascunho"
 
 #: components/my-timesheets/my-timesheets-section.tsx:99
+#: components/reports/reports-section.tsx:108
 msgid "Total"
 msgstr "Total"
 
@@ -3575,6 +3851,7 @@ msgid "Timesheet submitted successfully"
 msgstr "Folha de horas submetida com sucesso"
 
 #: components/my-timesheets/timesheet-card.tsx:44
+#: components/timesheets/timesheets-section.tsx:72
 msgid "Failed to submit timesheet"
 msgstr "Falha ao submeter folha de horas"
 
@@ -3587,6 +3864,7 @@ msgid "Timesheet deleted successfully"
 msgstr "Folha de horas eliminada com sucesso"
 
 #: components/my-timesheets/timesheet-card.tsx:60
+#: components/timesheets/timesheets-section.tsx:111
 msgid "Failed to delete timesheet"
 msgstr "Falha ao eliminar folha de horas"
 
@@ -3607,6 +3885,7 @@ msgid "Timesheet created successfully"
 msgstr "Folha de horas criada com sucesso"
 
 #: components/my-timesheets/timesheet-form-dialog.tsx:86
+#: components/timesheets/timesheets-section.tsx:131
 msgid "Edit Timesheet"
 msgstr "Editar Folha de Horas"
 
@@ -3621,10 +3900,6 @@ msgstr "Fim do Período"
 #: components/my-timesheets/timesheet-form-dialog.tsx:136
 msgid "Optional notes about this timesheet..."
 msgstr "Notas opcionais sobre esta folha de horas..."
-
-#: components/my-timesheets/timesheet-form-dialog.tsx:145
-msgid "Update"
-msgstr "Atualizar"
 
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"
@@ -3893,6 +4168,66 @@ msgstr "Nenhum recibo de vencimento encontrado"
 msgid "Your paystubs will appear here once they are generated"
 msgstr "Os seus recibos de vencimento aparecerão aqui assim que forem gerados"
 
+#: components/reports/reports-section.tsx:40
+msgid "PNG Image"
+msgstr "Imagem PNG"
+
+#: components/reports/reports-section.tsx:44
+msgid "PDF Document"
+msgstr "Documento PDF"
+
+#: components/reports/reports-section.tsx:49
+msgid "CSV Data"
+msgstr "Dados CSV"
+
+#: components/reports/reports-section.tsx:68
+msgid "Quarterly"
+msgstr "Trimestral"
+
+#: components/reports/reports-section.tsx:69
+msgid "Yearly"
+msgstr "Anual"
+
+#: components/reports/reports-section.tsx:71
+msgid "Export"
+msgstr "Exportar"
+
+#: components/reports/reports-section.tsx:85
+msgid "Tax Liability"
+msgstr "Responsabilidade Fiscal"
+
+#: components/reports/reports-section.tsx:104
+msgid "Employee Metrics"
+msgstr "Métricas de Colaboradores"
+
+#: components/reports/reports-section.tsx:123
+msgid "Avg Tenure"
+msgstr "Antiguidade Média"
+
+#: components/reports/reports-section.tsx:126
+msgid "years"
+msgstr "anos"
+
+#: components/reports/reports-section.tsx:130
+msgid "Turnover"
+msgstr "Rotatividade"
+
+#: components/reports/reports-section.tsx:139
+msgid "Employment Types"
+msgstr "Tipos de Contrato"
+
+#: components/reports/reports-section.tsx:153
+msgid "Department Distribution"
+msgstr "Distribuição por Departamento"
+
+#: components/reports/reports-section.tsx:169
+msgid "Recent Reports"
+msgstr "Relatórios Recentes"
+
+#: components/reports/reports-section.tsx:175
+msgid "Report Name"
+msgstr "Nome do Relatório"
+
 #: components/timesheets/timesheet-form-dialog.tsx:50
 msgid "Employee is required"
 msgstr "Colaborador é obrigatório"
@@ -3945,3 +4280,55 @@ msgstr "Submetido Em"
 #: components/timesheets/timesheet-view-dialog.tsx:143
 msgid "Hours Information"
 msgstr "Informação de Horas"
+
+#: components/timesheets/timesheets-section.tsx:54
+msgid "Timesheet updated"
+msgstr "Folha de horas atualizada"
+
+#: components/timesheets/timesheets-section.tsx:58
+msgid "Timesheet created"
+msgstr "Folha de horas criada"
+
+#: components/timesheets/timesheets-section.tsx:62
+msgid "Failed to save timesheet"
+msgstr "Falha ao guardar folha de horas"
+
+#: components/timesheets/timesheets-section.tsx:69
+msgid "Timesheet submitted"
+msgstr "Folha de horas submetida"
+
+#: components/timesheets/timesheets-section.tsx:79
+msgid "Timesheet approved"
+msgstr "Folha de horas aprovada"
+
+#: components/timesheets/timesheets-section.tsx:82
+msgid "Failed to approve timesheet"
+msgstr "Falha ao aprovar folha de horas"
+
+#: components/timesheets/timesheets-section.tsx:95
+msgid "Review Timesheets"
+msgstr "Rever Folhas de Horas"
+
+#: components/timesheets/timesheets-section.tsx:108
+msgid "Delete this timesheet?"
+msgstr "Eliminar esta folha de horas?"
+
+#: components/timesheets/timesheets-section.tsx:110
+msgid "Timesheet deleted"
+msgstr "Folha de horas eliminada"
+
+#: components/timesheets/timesheets-section.tsx:138
+msgid "Reject Timesheet"
+msgstr "Rejeitar Folha de Horas"
+
+#: components/timesheets/timesheets-section.tsx:141
+msgid "Reason (optional)"
+msgstr "Motivo (opcional)"
+
+#: components/timesheets/timesheets-section.tsx:152
+msgid "Timesheet rejected"
+msgstr "Folha de horas rejeitada"
+
+#: components/timesheets/timesheets-section.tsx:156
+msgid "Failed to reject timesheet"
+msgstr "Falha ao rejeitar folha de horas"

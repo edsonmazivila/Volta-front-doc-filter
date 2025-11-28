@@ -16,6 +16,8 @@ import { Button } from '@/components/ui'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface TimesheetsSectionProps {
 	items: TimesheetListItem[]
@@ -24,6 +26,7 @@ interface TimesheetsSectionProps {
 
 export function TimesheetsSection({ items, employees = [] }: TimesheetsSectionProps) {
 	const router = useRouter()
+	const { i18n } = useLingui()
 	const [open, setOpen] = useState(false)
 	const [isPending, startTransition] = useTransition()
   const toast = useToastHelpers()
@@ -48,35 +51,35 @@ export function TimesheetsSection({ items, employees = [] }: TimesheetsSectionPr
       if (editId) {
         const res = await updateTimesheetAction(editId, payload)
         if ('errors' in res && res.errors?._form?.length) throw new Error(res.errors._form[0])
-				toast.success('Timesheet updated')
+				toast.success(i18n._(msg`Timesheet updated`))
 			} else {
         const res = await createTimesheetAction(payload)
         if ('errors' in res && res.errors?._form?.length) throw new Error(res.errors._form[0])
-				toast.success('Timesheet created')
+				toast.success(i18n._(msg`Timesheet created`))
 			}
 			startTransition(() => router.refresh())
 		} catch {
-			toast.error('Failed to save timesheet')
+			toast.error(i18n._(msg`Failed to save timesheet`))
 		}
 	}
 
 async function handleSubmitTimesheet(id: string) {
   try {
     await submitTimesheetAction(id)
-		toast.success('Timesheet submitted')
+		toast.success(i18n._(msg`Timesheet submitted`))
 		startTransition(() => router.refresh())
 	} catch {
-		toast.error('Failed to submit timesheet')
+		toast.error(i18n._(msg`Failed to submit timesheet`))
 	}
 }
 
 async function handleApprove(id: string) {
   try {
     await approveTimesheetAction(id)
-		toast.success('Timesheet approved')
+		toast.success(i18n._(msg`Timesheet approved`))
 		startTransition(() => router.refresh())
 	} catch {
-		toast.error('Failed to approve timesheet')
+		toast.error(i18n._(msg`Failed to approve timesheet`))
 	}
 }
 
@@ -89,8 +92,8 @@ async function handleReject(id: string) {
 return (
 		<div className='grid gap-4'>
 			<div className='flex items-center justify-between'>
-				<h2 className='text-sm font-medium'>Review Timesheets</h2>
-				<Button onClick={() => { setEditId(null); setOpen(true) }}>New Timesheet</Button>
+				<h2 className='text-sm font-medium'>{i18n._(msg`Review Timesheets`)}</h2>
+				<Button onClick={() => { setEditId(null); setOpen(true) }}>{i18n._(msg`New Timesheet`)}</Button>
 			</div>
 			<TimesheetTable
 				items={items}
@@ -102,10 +105,10 @@ return (
 				onReject={handleReject}
 				onDelete={(id) => {
 					// Simple confirm; can be replaced by a styled dialog later
-					if (!confirm('Delete this timesheet?')) return
+					if (!confirm(i18n._(msg`Delete this timesheet?`))) return
           deleteTimesheetAction(id)
-						.then(() => { toast.success('Timesheet deleted'); startTransition(() => router.refresh()) })
-						.catch(() => toast.error('Failed to delete timesheet'))
+						.then(() => { toast.success(i18n._(msg`Timesheet deleted`)); startTransition(() => router.refresh()) })
+						.catch(() => toast.error(i18n._(msg`Failed to delete timesheet`)))
 				}}
 			/>
 			<TimesheetFormDialog
@@ -125,36 +128,36 @@ return (
 					} : undefined
 				})() : undefined}
 				onSubmit={handleSave}
-				title={editId ? 'Edit Timesheet' : 'New Timesheet'}
-				submitLabel={editId ? 'Update' : 'Save'}
+				title={editId ? i18n._(msg`Edit Timesheet`) : i18n._(msg`New Timesheet`)}
+				submitLabel={editId ? i18n._(msg`Update`) : i18n._(msg`Save`)}
 			/>
 			{/* Reject reason dialog */}
 			<Dialog open={rejectOpen} onOpenChange={(v: boolean) => { if (!v) { setRejectId(null); setRejectReason('') }; setRejectOpen(v) }}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Reject Timesheet</DialogTitle>
+						<DialogTitle>{i18n._(msg`Reject Timesheet`)}</DialogTitle>
 					</DialogHeader>
 					<div className='flex flex-col gap-2'>
-						<label className='text-sm'>Reason (optional)</label>
+						<label className='text-sm'>{i18n._(msg`Reason (optional)`)}</label>
 						<textarea className='textarea' rows={4} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
 					</div>
 					<div className='flex justify-end gap-2 pt-2'>
-						<Button variant='secondary' onClick={() => setRejectOpen(false)}>Cancel</Button>
+						<Button variant='secondary' onClick={() => setRejectOpen(false)}>{i18n._(msg`Cancel`)}</Button>
 						<Button
 							variant='destructive'
 							onClick={async () => {
 								if (!rejectId) return
                 try {
                     await rejectTimesheetAction(rejectId, rejectReason || undefined)
-									toast.success('Timesheet rejected')
+									toast.success(i18n._(msg`Timesheet rejected`))
 									setRejectOpen(false)
 									startTransition(() => router.refresh())
 					} catch {
-						toast.error('Failed to reject timesheet')
+						toast.error(i18n._(msg`Failed to reject timesheet`))
 								}
 							}}
 						>
-							Reject
+							{i18n._(msg`Reject`)}
 						</Button>
 					</div>
 				</DialogContent>

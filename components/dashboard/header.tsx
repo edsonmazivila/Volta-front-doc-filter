@@ -15,9 +15,12 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { SidebarTrigger } from '@/components/dashboard/sidebar'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 export function Header({ title }: { title: string }) {
   const { user, isAuthenticated } = useSession()
+  const { i18n } = useLingui()
   return (
     <header className='sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='h-12 px-4 flex items-center justify-between'>
@@ -28,8 +31,8 @@ export function Header({ title }: { title: string }) {
         <div className='flex items-center gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-				<button 
-                  aria-label='User menu' 
+				<button
+                  aria-label={i18n._(msg`User menu`)}
                   className='rounded-full h-10 w-10 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'
                   suppressHydrationWarning
                 >
@@ -44,12 +47,12 @@ export function Header({ title }: { title: string }) {
                 </div>
               )}
               <DropdownMenuLabel className='flex items-center justify-between'>
-                <span>Theme</span>
+                <span>{i18n._(msg`Theme`)}</span>
                 <ThemeToggle />
               </DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href='/dashboard/profile' className='flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground'>
-                  <UserCog size={14} /> Profile
+                  <UserCog size={14} /> {i18n._(msg`Profile`)}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

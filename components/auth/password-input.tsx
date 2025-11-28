@@ -4,12 +4,15 @@ import React, { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { Input } from './form-field'
 import { cn } from '@/lib/utils'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 	error?: boolean
 }
 
 export function PasswordInput({ error, className, ...props }: PasswordInputProps) {
+	const { i18n } = useLingui()
 	const [showPassword, setShowPassword] = useState(false)
 
 	return (
@@ -24,7 +27,7 @@ export function PasswordInput({ error, className, ...props }: PasswordInputProps
 				type="button"
 				onClick={() => setShowPassword(!showPassword)}
 				className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:opacity-80 transition-colors"
-				aria-label={showPassword ? 'Hide password' : 'Show password'}
+				aria-label={showPassword ? i18n._(msg`Hide password`) : i18n._(msg`Show password`)}
 			>
 				{showPassword ? (
 					<EyeOff className="h-4 w-4" />
@@ -38,6 +41,7 @@ export function PasswordInput({ error, className, ...props }: PasswordInputProps
 
 // Password strength indicator
 export function PasswordStrength({ password }: { password: string }) {
+	const { i18n } = useLingui()
 	const getStrength = (pwd: string) => {
 		let score = 0
 		const checks = {
@@ -53,7 +57,7 @@ export function PasswordStrength({ password }: { password: string }) {
 		return {
 			score,
 			checks,
-			label: score < 2 ? 'Weak' : score < 4 ? 'Medium' : 'Strong',
+			label: score < 2 ? i18n._(msg`Weak`) : score < 4 ? i18n._(msg`Medium`) : i18n._(msg`Strong`),
 			color: score < 2 ? 'red' : score < 4 ? 'yellow' : 'green'
 		}
 	}
@@ -85,7 +89,7 @@ export function PasswordStrength({ password }: { password: string }) {
 					{strength.label}
 				</span>
 			</div>
-			
+
 			<div className="space-y-1">
 				{Object.entries(strength.checks).map(([key, passed]) => (
 					<div key={key} className="flex items-center gap-2 text-xs">
@@ -96,11 +100,11 @@ export function PasswordStrength({ password }: { password: string }) {
 						<span className={cn(
 							passed ? 'text-green-700 dark:text-green-400' : 'text-muted-foreground'
 						)}>
-							{key === 'length' && 'At least 8 characters'}
-							{key === 'lowercase' && 'One lowercase letter'}
-							{key === 'uppercase' && 'One uppercase letter'}
-							{key === 'number' && 'One number'}
-							{key === 'special' && 'One special character'}
+							{key === 'length' && i18n._(msg`At least 8 characters`)}
+							{key === 'lowercase' && i18n._(msg`One lowercase letter`)}
+							{key === 'uppercase' && i18n._(msg`One uppercase letter`)}
+							{key === 'number' && i18n._(msg`One number`)}
+							{key === 'special' && i18n._(msg`One special character`)}
 						</span>
 					</div>
 				))}

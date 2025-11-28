@@ -7,52 +7,55 @@ import {
   LinkedinIcon,
 } from "lucide-react";
 import Image from "next/image";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface FooterLink {
-  title: string;
+  titleKey: ReturnType<typeof msg>;
   href: string;
   icon?: React.ComponentType<{ className?: string }>;
 }
 
 interface FooterSection {
-  label: string;
+  labelKey: ReturnType<typeof msg>;
   links: FooterLink[];
 }
 
 const footerLinks: FooterSection[] = [
   {
-    label: "Product",
+    labelKey: msg`Product`,
     links: [
-      { title: "Features", href: "#features" },
-      { title: "Pricing", href: "#pricing" },
-      { title: "Testimonials", href: "#testimonials" },
+      { titleKey: msg`Features`, href: "#features" },
+      { titleKey: msg`Pricing`, href: "#pricing" },
+      { titleKey: msg`Testimonials`, href: "#testimonials" },
     ],
   },
   {
-    label: "Company",
+    labelKey: msg`Company`,
     links: [
-      { title: "About Us", href: "/about" },
-      { title: "Privacy Policy", href: "/privacy" },
-      { title: "Terms of Services", href: "/terms" },
+      { titleKey: msg`About Us`, href: "/about" },
+      { titleKey: msg`Privacy Policy`, href: "/privacy" },
+      { titleKey: msg`Terms of Services`, href: "/terms" },
     ],
   },
   {
-    label: "Resources",
+    labelKey: msg`Resources`,
     links: [
-      { title: "Blog", href: "/blog" },
-      { title: "Help", href: "/help" },
+      { titleKey: msg`Blog`, href: "/blog" },
+      { titleKey: msg`Help`, href: "/help" },
     ],
   },
   {
-    label: "Social Links",
+    labelKey: msg`Social Links`,
     links: [
-      { title: "Facebook", href: "#", icon: FacebookIcon },
-      { title: "LinkedIn", href: "#", icon: LinkedinIcon },
+      { titleKey: msg`Facebook`, href: "#", icon: FacebookIcon },
+      { titleKey: msg`LinkedIn`, href: "#", icon: LinkedinIcon },
     ],
   },
 ];
 
 export function Footer() {
+  const { i18n } = useLingui();
   return (
     <footer className="md:rounded-t-6xl relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center rounded-t-4xl border-t bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:py-16">
       <div className="bg-foreground/20 absolute top-0 right-1/2 left-1/2 h-px w-1/3 -translate-x-1/2 -translate-y-1/2 rounded-full blur" />
@@ -66,24 +69,24 @@ export function Footer() {
             height={100}
           />
           <p className="text-muted-foreground mt-8 text-sm md:mt-0">
-            © {new Date().getFullYear()} Nexu. All rights reserved.
+            © {new Date().getFullYear()} Nexu. {i18n._(msg`All rights reserved.`)}
           </p>
         </AnimatedContainer>
 
         <div className="mt-10 grid grid-cols-2 gap-8 md:grid-cols-4 xl:col-span-2 xl:mt-0">
           {footerLinks.map((section, index) => (
-            <AnimatedContainer key={section.label} delay={0.1 + index * 0.1}>
+            <AnimatedContainer key={i18n._(section.labelKey)} delay={0.1 + index * 0.1}>
               <div className="mb-10 md:mb-0">
-                <h3 className="text-xs">{section.label}</h3>
+                <h3 className="text-xs">{i18n._(section.labelKey)}</h3>
                 <ul className="text-muted-foreground mt-4 space-y-2 text-sm">
                   {section.links.map((link) => (
-                    <li key={link.title}>
+                    <li key={i18n._(link.titleKey)}>
                       <a
                         href={link.href}
                         className="hover:text-foreground inline-flex items-center transition-all duration-300"
                       >
                         {link.icon && <link.icon className="me-1 size-4" />}
-                        {link.title}
+                        {i18n._(link.titleKey)}
                       </a>
                     </li>
                   ))}
