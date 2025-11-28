@@ -697,6 +697,7 @@ msgid "Update Attendance"
 msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
+#: components/leaves/leave-management.tsx:181
 #: components/timesheets/timesheet-form-dialog.tsx:212
 msgid "Cancel"
 msgstr "Cancelar"
@@ -827,6 +828,7 @@ msgid "Today's Attendance"
 msgstr "Assiduidade de Hoje"
 
 #: components/attendance/my-attendance-section.tsx:180
+#: components/leaves/leave-management.tsx:160
 msgid "Status:"
 msgstr "Estado:"
 
@@ -1043,6 +1045,140 @@ msgstr "Registar"
 #: components/home-header.tsx:156
 msgid "Sign In"
 msgstr "Entrar"
+
+#: components/leaves/leave-management.tsx:59
+msgid "All Requests"
+msgstr "Todos os Pedidos"
+
+#: components/leaves/leave-management.tsx:60
+msgid "Team Balances"
+msgstr "Saldos da Equipa"
+
+#: components/leaves/leave-management.tsx:65
+msgid "All Leave Requests"
+msgstr "Todos os Pedidos de Ausência"
+
+#: components/leaves/leave-management.tsx:66
+msgid "Search requests..."
+msgstr "Pesquisar pedidos..."
+
+#: components/leaves/leave-management.tsx:70
+#: components/leaves/leave-management.tsx:73
+msgid "All status"
+msgstr "Todos os estados"
+
+#: components/leaves/leave-management.tsx:81
+#: components/leaves/leave-management.tsx:84
+msgid "All types"
+msgstr "Todos os tipos"
+
+#: components/leaves/leave-management.tsx:90
+msgid "New request"
+msgstr "Novo pedido"
+
+#: components/leaves/leave-management.tsx:102
+#: components/timesheets/timesheet-form-dialog.tsx:195
+msgid "Submitted"
+msgstr "Submetido"
+
+#: components/leaves/leave-management.tsx:105
+msgid "Failed to submit"
+msgstr "Falha ao submeter"
+
+#: components/leaves/leave-management.tsx:121
+#: components/timesheets/timesheet-form-dialog.tsx:196
+msgid "Approved"
+msgstr "Aprovado"
+
+#: components/leaves/leave-management.tsx:124
+msgid "Failed to approve"
+msgstr "Falha ao aprovar"
+
+#: components/leaves/leave-management.tsx:140
+msgid "Team Leave Balances"
+msgstr "Saldos de Ausências da Equipa"
+
+#: components/leaves/leave-management.tsx:156
+msgid "Leave Request Details"
+msgstr "Detalhes do Pedido de Ausência"
+
+#: components/leaves/leave-management.tsx:161
+msgid "Type:"
+msgstr "Tipo:"
+
+#: components/leaves/leave-management.tsx:162
+msgid "Dates:"
+msgstr "Datas:"
+
+#: components/leaves/leave-management.tsx:163
+msgid "Days:"
+msgstr "Dias:"
+
+#: components/leaves/leave-management.tsx:163
+msgid " (Half Day)"
+msgstr " (Meio Dia)"
+
+#: components/leaves/leave-management.tsx:164
+msgid "Reason:"
+msgstr "Motivo:"
+
+#: components/leaves/leave-management.tsx:165
+msgid "Created:"
+msgstr "Criado:"
+
+#: components/leaves/leave-management.tsx:174
+msgid "Reject Leave Request"
+msgstr "Rejeitar Pedido de Ausência"
+
+#: components/leaves/leave-management.tsx:177
+msgid "Reason"
+msgstr "Motivo"
+
+#: components/leaves/leave-management.tsx:190
+#: components/timesheets/timesheet-form-dialog.tsx:197
+msgid "Rejected"
+msgstr "Rejeitado"
+
+#: components/leaves/leave-management.tsx:194
+msgid "Failed to reject"
+msgstr "Falha ao rejeitar"
+
+#: components/leaves/leave-management.tsx:200
+#: components/timesheets/timesheet-table.tsx:183
+msgid "Reject"
+msgstr "Rejeitar"
+
+#: components/leaves/leave-management.tsx:200
+msgid "Rejecting..."
+msgstr "A rejeitar..."
+
+#: components/leaves/leave-management.tsx:209
+msgid "Cancel Leave Request"
+msgstr "Cancelar Pedido de Ausência"
+
+#: components/leaves/leave-management.tsx:212
+msgid "Cancel reason (optional)"
+msgstr "Motivo de cancelamento (opcional)"
+
+#: components/leaves/leave-management.tsx:221
+msgid "Dismiss"
+msgstr "Dispensar"
+
+#: components/leaves/leave-management.tsx:230
+msgid "Leave cancelled"
+msgstr "Ausência cancelada"
+
+#: components/leaves/leave-management.tsx:234
+msgid "Failed to cancel"
+msgstr "Falha ao cancelar"
+
+#: components/leaves/leave-management.tsx:240
+msgid "Cancelling…"
+msgstr "A cancelar…"
+
+#: components/leaves/leave-management.tsx:240
+msgid "Cancel Request"
+msgstr "Cancelar Pedido"
 
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"
@@ -1265,18 +1401,6 @@ msgstr "Selecionar estado"
 msgid "Draft"
 msgstr "Rascunho"
 
-#: components/timesheets/timesheet-form-dialog.tsx:195
-msgid "Submitted"
-msgstr "Submetido"
-
-#: components/timesheets/timesheet-form-dialog.tsx:196
-msgid "Approved"
-msgstr "Aprovado"
-
-#: components/timesheets/timesheet-form-dialog.tsx:197
-msgid "Rejected"
-msgstr "Rejeitado"
-
 #: components/timesheets/timesheet-form-dialog.tsx:213
 msgid "Saving…"
 msgstr "A guardar…"
@@ -1310,10 +1434,6 @@ msgstr "Submeter"
 #: components/timesheets/timesheet-table.tsx:172
 msgid "Approve"
 msgstr "Aprovar"
-
-#: components/timesheets/timesheet-table.tsx:183
-msgid "Reject"
-msgstr "Rejeitar"
 
 #: components/timesheets/timesheet-view-dialog.tsx:71
 msgid "Timesheet Details"
