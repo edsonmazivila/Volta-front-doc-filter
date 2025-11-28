@@ -805,6 +805,7 @@ msgstr "Update Attendance"
 #: components/my-timesheets/timesheet-form-dialog.tsx:142
 #: components/timesheets/timesheet-form-dialog.tsx:224
 #: components/timesheets/timesheets-section.tsx:145
+#: components/ui/confirmation-dialog.tsx:39
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -4332,3 +4333,11 @@ msgstr "Timesheet rejected"
 #: components/timesheets/timesheets-section.tsx:156
 msgid "Failed to reject timesheet"
 msgstr "Failed to reject timesheet"
+
+#: components/ui/confirmation-dialog.tsx:38
+msgid "Confirm"
+msgstr "Confirm"
+
+#: components/ui/confirmation-dialog.tsx:40
+msgid "Processing..."
+msgstr "Processing..."

@@ -805,6 +805,7 @@ msgstr "Atualizar Assiduidade"
 #: components/my-timesheets/timesheet-form-dialog.tsx:142
 #: components/timesheets/timesheet-form-dialog.tsx:224
 #: components/timesheets/timesheets-section.tsx:145
+#: components/ui/confirmation-dialog.tsx:39
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -4332,3 +4333,11 @@ msgstr "Folha de horas rejeitada"
 #: components/timesheets/timesheets-section.tsx:156
 msgid "Failed to reject timesheet"
 msgstr "Falha ao rejeitar folha de horas"
+
+#: components/ui/confirmation-dialog.tsx:38
+msgid "Confirm"
+msgstr "Confirmar"
+
+#: components/ui/confirmation-dialog.tsx:40
+msgid "Processing..."
+msgstr "A processar..."

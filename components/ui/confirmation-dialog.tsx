@@ -8,6 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -26,12 +28,17 @@ export function ConfirmationDialog({
   onOpenChange,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   onConfirm,
   variant = "default",
   isLoading = false,
 }: ConfirmationDialogProps) {
+  const { i18n } = useLingui();
+  const defaultConfirmText = i18n._(msg`Confirm`);
+  const defaultCancelText = i18n._(msg`Cancel`);
+  const processingText = i18n._(msg`Processing...`);
+
   const getButtonStyles = () => {
     if (variant === "destructive") {
       return "bg-red-500 hover:bg-red-600";
@@ -48,14 +55,14 @@ export function ConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => onOpenChange(false)}>
-            {cancelText}
+            {cancelText ?? defaultCancelText}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className={getButtonStyles()}
             disabled={isLoading}
           >
-            {isLoading ? "Processing..." : confirmText}
+            {isLoading ? processingText : (confirmText ?? defaultConfirmText)}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
