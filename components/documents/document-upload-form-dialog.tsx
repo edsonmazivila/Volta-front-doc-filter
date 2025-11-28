@@ -6,6 +6,8 @@ import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToastHelpers } from '@/components/ui/toast'
 import { uploadDocumentAction } from '@/lib/services/documents'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface DocumentUploadFormDialogProps {
 	open: boolean
@@ -22,6 +24,7 @@ export function DocumentUploadFormDialog({
 }: DocumentUploadFormDialogProps) {
 	const router = useRouter()
 	const toast = useToastHelpers()
+	const { i18n } = useLingui()
 	const fileInputRef = useRef<HTMLInputElement | null>(null)
 
 	const [file, setFile] = useState<File | null>(null)
@@ -54,7 +57,7 @@ export function DocumentUploadFormDialog({
 
 	const handleUpload = async () => {
 		if (!file || !employeeId || !docType) {
-			toast.error('Employee, type, and file are required')
+			toast.error(i18n._(msg`Employee, type, and file are required`))
 			return
 		}
 
@@ -71,14 +74,14 @@ export function DocumentUploadFormDialog({
 		try {
 			const result = await uploadDocumentAction(null, form)
 			if ('errors' in result) {
-				toast.error(result.errors._form?.[0] || 'Upload failed')
+				toast.error(result.errors._form?.[0] || i18n._(msg`Upload failed`))
 			} else {
-				toast.success('Uploaded')
+				toast.success(i18n._(msg`Uploaded`))
 				handleClose()
 				router.refresh()
 			}
 		} catch{
-			toast.error('Upload failed')
+			toast.error(i18n._(msg`Upload failed`))
 		} finally {
 			setUploading(false)
 		}
@@ -88,18 +91,18 @@ export function DocumentUploadFormDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Upload Document</DialogTitle>
+					<DialogTitle>{i18n._(msg`Upload Document`)}</DialogTitle>
 				</DialogHeader>
 				<div className='grid gap-3'>
 					{/* Employee Selection */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Employee</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Employee`)}</label>
 						<select
 							className='w-full border rounded-md px-3 py-2 bg-background'
 							value={employeeId}
 							onChange={(e) => setEmployeeId(e.target.value)}
 						>
-							<option value=''>Select employee</option>
+							<option value=''>{i18n._(msg`Select employee`)}</option>
 							{employees.map((e) => (
 								<option key={e.id} value={e.id}>
 									{e.label}
@@ -110,13 +113,13 @@ export function DocumentUploadFormDialog({
 
 					{/* Document Type */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Document type</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Document type`)}</label>
 						<select
 							className='w-full border rounded-md px-3 py-2 bg-background'
 							value={docType}
 							onChange={(e) => setDocType(e.target.value)}
 						>
-							<option value=''>Select type</option>
+							<option value=''>{i18n._(msg`Select type`)}</option>
 							{documentTypes.map((t) => (
 								<option key={t.type} value={t.type}>
 									{t.display_name}
@@ -128,16 +131,16 @@ export function DocumentUploadFormDialog({
 					{/* Title and Expiry Date */}
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Title</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Title`)}</label>
 							<input
 								className='w-full border rounded-md px-3 py-2 bg-background'
 								value={title}
 								onChange={(e) => setTitle(e.target.value)}
-								placeholder='Optional'
+								placeholder={i18n._(msg`Optional`)}
 							/>
 						</div>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Expiry Date</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Expiry Date`)}</label>
 							<input
 								type='date'
 								className='w-full border rounded-md px-3 py-2 bg-background'
@@ -149,19 +152,19 @@ export function DocumentUploadFormDialog({
 
 					{/* Description */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Description</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Description`)}</label>
 						<textarea
 							className='w-full border rounded-md px-3 py-2 bg-background'
 							rows={3}
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
-							placeholder='Optional'
+							placeholder={i18n._(msg`Optional`)}
 						/>
 					</div>
 
 					{/* File Upload */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>File</label>
+						<label className='text-sm font-medium'>{i18n._(msg`File`)}</label>
 						<div
 							className='w-full rounded-md border border-dashed border-[var(--border)] bg-muted/20 p-4 text-center cursor-pointer hover:bg-muted/30 transition-colors'
 							onDragOver={(e) => {
@@ -181,9 +184,9 @@ export function DocumentUploadFormDialog({
 									) : (
 										<>
 											<span className='font-medium text-foreground'>
-												Click to upload
+												{i18n._(msg`Click to upload`)}
 											</span>
-											<span> or drag and drop</span>
+											<span> {i18n._(msg`or drag and drop`)}</span>
 											<br />
 											<span className='text-xs'>PDF, DOCX, PNG, JPG</span>
 										</>
@@ -198,7 +201,7 @@ export function DocumentUploadFormDialog({
 										openFilePicker()
 									}}
 								>
-									Choose file
+									{i18n._(msg`Choose file`)}
 								</Button>
 							</div>
 							<input
@@ -222,17 +225,17 @@ export function DocumentUploadFormDialog({
 							className='h-4 w-4'
 						/>
 						<label htmlFor='doc-confidential' className='text-sm'>
-							Confidential
+							{i18n._(msg`Confidential`)}
 						</label>
 					</div>
 
 					{/* Actions */}
 					<div className='flex justify-end gap-2 pt-2'>
 						<Button variant='secondary' onClick={handleClose} disabled={uploading}>
-							Cancel
+							{i18n._(msg`Cancel`)}
 						</Button>
 						<Button onClick={handleUpload} disabled={uploading}>
-							{uploading ? 'Uploading...' : 'Upload'}
+							{uploading ? i18n._(msg`Uploading...`) : i18n._(msg`Upload`)}
 						</Button>
 					</div>
 				</div>

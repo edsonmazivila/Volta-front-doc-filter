@@ -6,6 +6,8 @@ import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToastHelpers } from '@/components/ui/toast'
 import { rejectDocumentAction } from '@/lib/services/documents'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface DocumentRejectDialogProps {
 	open: boolean
@@ -20,6 +22,7 @@ export function DocumentRejectDialog({
 }: DocumentRejectDialogProps) {
 	const router = useRouter()
 	const toast = useToastHelpers()
+	const { i18n } = useLingui()
 
 	const [reason, setReason] = useState('')
 	const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,7 +34,7 @@ export function DocumentRejectDialog({
 
 	const handleReject = async () => {
 		if (!documentId || !reason.trim()) {
-			toast.error('Reason is required')
+			toast.error(i18n._(msg`Reason is required`))
 			return
 		}
 
@@ -42,14 +45,14 @@ export function DocumentRejectDialog({
 
 			const result = await rejectDocumentAction(documentId, null, form)
 			if ('errors' in result) {
-				toast.error(result.errors._form?.[0] || 'Failed to reject')
+				toast.error(result.errors._form?.[0] || i18n._(msg`Failed to reject`))
 			} else {
-				toast.success('Rejected')
+				toast.success(i18n._(msg`Rejected`))
 				handleClose()
 				router.refresh()
 			}
 		} catch {
-			toast.error('Failed to reject')
+			toast.error(i18n._(msg`Failed to reject`))
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -59,16 +62,16 @@ export function DocumentRejectDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Reject Document</DialogTitle>
+					<DialogTitle>{i18n._(msg`Reject Document`)}</DialogTitle>
 				</DialogHeader>
 				<div className='flex flex-col gap-2'>
-					<label className='text-sm font-medium'>Reason</label>
+					<label className='text-sm font-medium'>{i18n._(msg`Reason`)}</label>
 					<textarea
 						className='w-full border rounded-md px-3 py-2 bg-background'
 						rows={3}
 						value={reason}
 						onChange={(e) => setReason(e.target.value)}
-						placeholder='Enter reason for rejection...'
+						placeholder={i18n._(msg`Enter reason for rejection...`)}
 					/>
 				</div>
 				<div className='flex justify-end gap-2 pt-2'>
@@ -77,14 +80,14 @@ export function DocumentRejectDialog({
 						onClick={handleClose}
 						disabled={isSubmitting}
 					>
-						Cancel
+						{i18n._(msg`Cancel`)}
 					</Button>
 					<Button
 						variant='destructive'
 						onClick={handleReject}
 						disabled={isSubmitting || !reason.trim()}
 					>
-						{isSubmitting ? 'Rejecting...' : 'Reject'}
+						{isSubmitting ? i18n._(msg`Rejecting...`) : i18n._(msg`Reject`)}
 					</Button>
 				</div>
 			</DialogContent>

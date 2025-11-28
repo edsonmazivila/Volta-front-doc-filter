@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/toast'
 import { createDepartmentAction, updateDepartmentAction, type Department } from '@/lib/services/departments'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface DepartmentFormProps {
 	department?: Department
@@ -15,6 +17,7 @@ interface DepartmentFormProps {
 
 export function DepartmentForm({ department, onCancel, onSuccess, managers = [] }: DepartmentFormProps) {
 	const { showToast } = useToast()
+	const { i18n } = useLingui()
 	const isEditing = !!department
 
 	const [createState, createAction, createPending] = useActionState(
@@ -35,12 +38,14 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 	const onSuccessRef = React.useRef(onSuccess)
 	const showToastRef = React.useRef(showToast)
 	const isEditingRef = React.useRef(isEditing)
+	const i18nRef = React.useRef(i18n)
 
 	React.useEffect(() => {
 		onSuccessRef.current = onSuccess
 		showToastRef.current = showToast
 		isEditingRef.current = isEditing
-	}, [onSuccess, showToast, isEditing])
+		i18nRef.current = i18n
+	}, [onSuccess, showToast, isEditing, i18n])
 
 	// Only react to success flag change to prevent infinite re-renders
 	const isSuccess = !!(state && 'success' in state && state.success)
@@ -48,8 +53,10 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 		if (!isSuccess) return
 		showToastRef.current({
 			type: 'success',
-			message: isEditingRef.current ? 'Department updated successfully' : 'Department created successfully',
-			title: 'Success',
+			message: isEditingRef.current
+				? i18nRef.current._(msg`Department updated successfully`)
+				: i18nRef.current._(msg`Department created successfully`),
+			title: i18nRef.current._(msg`Success`),
 		})
 		onSuccessRef.current()
 	}, [isSuccess])
@@ -58,14 +65,14 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 		<form action={action} className='space-y-4'>
 			<div>
 				<label htmlFor='name' className='block text-sm font-medium text-foreground mb-1'>
-					Department Name <span className='text-red-500'>*</span>
+					{i18n._(msg`Department Name`)} <span className='text-red-500'>*</span>
 				</label>
 				<Input
 					id='name'
 					name='name'
 					type='text'
 					defaultValue={department?.name}
-					placeholder='e.g. Engineering, Sales, HR'
+					placeholder={i18n._(msg`e.g. Engineering, Sales, HR`)}
 					required
 				/>
 				{state && 'errors' in state && state.errors?.name && (
@@ -75,13 +82,13 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 
 			<div>
 				<label htmlFor='description' className='block text-sm font-medium text-foreground mb-1'>
-					Description
+					{i18n._(msg`Description`)}
 				</label>
 				<textarea
 					id='description'
 					name='description'
 					defaultValue={department?.description}
-					placeholder='Brief description of the department'
+					placeholder={i18n._(msg`Brief description of the department`)}
 					rows={3}
 					className='w-full px-3 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring'
 				/>
@@ -92,7 +99,7 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 
 			<div>
 				<label htmlFor='manager_id' className='block text-sm font-medium text-foreground mb-1'>
-					Department Manager
+					{i18n._(msg`Department Manager`)}
 				</label>
 				<select
 					id='manager_id'
@@ -100,7 +107,7 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 					defaultValue={department?.manager_id || ''}
 					className='w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring'
 				>
-					<option value=''>No manager assigned</option>
+					<option value=''>{i18n._(msg`No manager assigned`)}</option>
 					{managers.map((manager) => (
 						<option key={manager.id} value={manager.id}>
 							{manager.full_name}
@@ -121,7 +128,7 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 					className='w-4 h-4 text-primary border-input rounded focus:ring-ring'
 				/>
 				<label htmlFor='is_active' className='text-sm font-medium text-foreground'>
-					Active
+					{i18n._(msg`Active`)}
 				</label>
 			</div>
 
@@ -133,10 +140,14 @@ export function DepartmentForm({ department, onCancel, onSuccess, managers = [] 
 
 			<div className='flex justify-end gap-3 pt-4'>
 				<Button type='button' variant='outline' onClick={onCancel} disabled={pending}>
-					Cancel
+					{i18n._(msg`Cancel`)}
 				</Button>
 				<Button type='submit' disabled={pending}>
-					{pending ? 'Saving...' : isEditing ? 'Update Department' : 'Create Department'}
+					{pending
+						? i18n._(msg`Saving...`)
+						: isEditing
+							? i18n._(msg`Update Department`)
+							: i18n._(msg`Create Department`)}
 				</Button>
 			</div>
 		</form>

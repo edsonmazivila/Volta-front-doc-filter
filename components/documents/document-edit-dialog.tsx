@@ -6,6 +6,8 @@ import { Button } from '@/components/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToastHelpers } from '@/components/ui/toast'
 import { patchDocumentAction } from '@/lib/services/documents'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface DocumentEditDialogProps {
 	open: boolean
@@ -27,6 +29,7 @@ export function DocumentEditDialog({
 }: DocumentEditDialogProps) {
 	const router = useRouter()
 	const toast = useToastHelpers()
+	const { i18n } = useLingui()
 
 	const [title, setTitle] = useState('')
 	const [description, setDescription] = useState('')
@@ -57,14 +60,14 @@ export function DocumentEditDialog({
 
 			const result = await patchDocumentAction(documentId, null, form)
 			if ('errors' in result) {
-				toast.error(result.errors._form?.[0] || 'Failed to update')
+				toast.error(result.errors._form?.[0] || i18n._(msg`Failed to update`))
 			} else {
-				toast.success('Updated')
+				toast.success(i18n._(msg`Updated`))
 				onOpenChange(false)
 				router.refresh()
 			}
 		} catch {
-			toast.error('Failed to update')
+			toast.error(i18n._(msg`Failed to update`))
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -74,13 +77,13 @@ export function DocumentEditDialog({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Edit Document</DialogTitle>
+					<DialogTitle>{i18n._(msg`Edit Document`)}</DialogTitle>
 				</DialogHeader>
 				{initialData ? (
 					<div className='grid gap-3'>
 						{/* Title */}
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Title</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Title`)}</label>
 							<input
 								className='w-full border rounded-md px-3 py-2 bg-background'
 								value={title}
@@ -90,7 +93,7 @@ export function DocumentEditDialog({
 
 						{/* Description */}
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Description</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Description`)}</label>
 							<textarea
 								className='w-full border rounded-md px-3 py-2 bg-background'
 								rows={3}
@@ -101,7 +104,7 @@ export function DocumentEditDialog({
 
 						{/* Expiry Date */}
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Expiry Date</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Expiry Date`)}</label>
 							<input
 								type='date'
 								className='w-full border rounded-md px-3 py-2 bg-background'
@@ -120,7 +123,7 @@ export function DocumentEditDialog({
 								className='h-4 w-4'
 							/>
 							<label htmlFor='edit-doc-conf' className='text-sm'>
-								Confidential
+								{i18n._(msg`Confidential`)}
 							</label>
 						</div>
 
@@ -131,15 +134,15 @@ export function DocumentEditDialog({
 								onClick={() => onOpenChange(false)}
 								disabled={isSubmitting}
 							>
-								Cancel
+								{i18n._(msg`Cancel`)}
 							</Button>
 							<Button onClick={handleSave} disabled={isSubmitting}>
-								{isSubmitting ? 'Saving...' : 'Save'}
+								{isSubmitting ? i18n._(msg`Saving...`) : i18n._(msg`Save`)}
 							</Button>
 						</div>
 					</div>
 				) : (
-					<div className='text-sm text-muted-foreground'>Loading…</div>
+					<div className='text-sm text-muted-foreground'>{i18n._(msg`Loading…`)}</div>
 				)}
 			</DialogContent>
 		</Dialog>

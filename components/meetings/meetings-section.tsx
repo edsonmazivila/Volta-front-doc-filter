@@ -6,6 +6,8 @@ import { MeetingFormDialog } from '@/components/meetings/meeting-form-dialog'
 import { Button } from '@/components/ui'
 import { SearchInput } from '@/components/search-input'
 import { Plus } from 'lucide-react'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface MeetingsSectionProps {
   meetings: Meeting[]
@@ -14,6 +16,7 @@ interface MeetingsSectionProps {
 }
 
 export function MeetingsSection({ meetings, availableParticipants = [], currentUserId }: MeetingsSectionProps) {
+  const { i18n } = useLingui()
   const [open, setOpen] = useState(false)
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null)
   const [search, setSearch] = useState('')
@@ -50,16 +53,16 @@ export function MeetingsSection({ meetings, availableParticipants = [], currentU
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
         <div>
-          <h2 className="text-sm font-medium">My Agenda</h2>
+          <h2 className="text-sm font-medium">{i18n._(msg`My Agenda`)}</h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Manage, accept or decline meeting invitations
+            {i18n._(msg`Manage, accept or decline meeting invitations`)}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <SearchInput value={search} onChange={setSearch} placeholder="Search meetings..." />
+          <SearchInput value={search} onChange={setSearch} placeholder={i18n._(msg`Search meetings...`)} />
           <Button onClick={handleNew} size="sm" className="shrink-0">
             <Plus className="h-4 w-4 mr-1" />
-            New Meeting
+            {i18n._(msg`New Meeting`)}
           </Button>
         </div>
       </div>
@@ -67,12 +70,12 @@ export function MeetingsSection({ meetings, availableParticipants = [], currentU
       {filtered.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-[var(--border)] rounded-lg">
           <div className="text-muted-foreground">
-            {search ? 'No meetings match your search' : 'No meetings scheduled'}
+            {search ? i18n._(msg`No meetings match your search`) : i18n._(msg`No meetings scheduled`)}
           </div>
           {!search && (
             <Button variant="outline" size="sm" onClick={handleNew} className="mt-3">
               <Plus className="h-4 w-4 mr-1" />
-              Schedule a Meeting
+              {i18n._(msg`Schedule a Meeting`)}
             </Button>
           )}
         </div>
