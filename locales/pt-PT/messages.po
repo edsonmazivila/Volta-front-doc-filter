@@ -126,6 +126,9 @@ msgstr "Ver a Minha Assiduidade"
 #: app/dashboard/page.tsx:160
 #: app/dashboard/page.tsx:438
 #: components/leaves/my-leaves-section.tsx:109
+#: components/leaves/team-balances-table.tsx:79
+#: components/leaves/team-balances-table.tsx:89
+#: components/leaves/team-balances-table.tsx:99
 msgid "Pending"
 msgstr "Pendente"
 
@@ -776,6 +779,7 @@ msgstr "Comece por criar um novo registo de assiduidade"
 #: components/leaves/leave-table.tsx:99
 #: components/leaves/leave-view-dialog.tsx:67
 #: components/leaves/pending-approvals-table.tsx:54
+#: components/leaves/team-balances-table.tsx:43
 #: components/timesheets/timesheet-form-dialog.tsx:106
 #: components/timesheets/timesheet-table.tsx:84
 msgid "Employee"
@@ -1484,6 +1488,26 @@ msgstr "Editar rascunho"
 #: components/leaves/pending-approvals-table.tsx:72
 msgid "No pending approvals found"
 msgstr "Nenhuma aprovação pendente encontrada"
+
+#: components/leaves/team-balances-table.tsx:18
+msgid "No team balances available"
+msgstr "Nenhum saldo de equipa disponível"
+
+#: components/leaves/team-balances-table.tsx:44
+msgid "Vacation"
+msgstr "Férias"
+
+#: components/leaves/team-balances-table.tsx:45
+msgid "Sick"
+msgstr "Doença"
+
+#: components/leaves/team-balances-table.tsx:46
+msgid "Personal"
+msgstr "Pessoal"
+
+#: components/leaves/team-balances-table.tsx:47
+msgid "Other"
+msgstr "Outro"
 
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"
