@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Eye, Edit, Check, X, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface DocumentTableProps {
 	items?: DocumentListItem[]
@@ -22,6 +24,7 @@ interface DocumentTableProps {
 }
 
 export function DocumentTable({ items = [], isLoading = false, onApprove, onReject, onDelete, onView, onEdit }: DocumentTableProps) {
+	const { i18n } = useLingui()
 	const rows = useMemo(() => items, [items])
 	const [pendingId, setPendingId] = useState<string | null>(null)
 
@@ -70,22 +73,22 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 						<tr>
 							<th className="text-left p-3">
 								<div className="flex items-center gap-2">
-									Employee
-									<span className="text-xs text-muted-foreground">(click to view details)</span>
+									{i18n._(msg`Employee`)}
+									<span className="text-xs text-muted-foreground">{i18n._(msg`(click to view details)`)}</span>
 								</div>
 							</th>
-							<th className="text-left p-3">Document</th>
-							<th className="text-left p-3">Type</th>
-							<th className="text-left p-3">Status</th>
-							<th className="text-left p-3">Date</th>
-							<th className="text-left p-3">Actions</th>
+							<th className="text-left p-3">{i18n._(msg`Document`)}</th>
+							<th className="text-left p-3">{i18n._(msg`Type`)}</th>
+							<th className="text-left p-3">{i18n._(msg`Status`)}</th>
+							<th className="text-left p-3">{i18n._(msg`Date`)}</th>
+							<th className="text-left p-3">{i18n._(msg`Actions`)}</th>
 						</tr>
 					</thead>
 					<tbody>
 						{rows.length === 0 ? (
 							<tr>
 								<td className="p-4" colSpan={6}>
-									No documents found
+									{i18n._(msg`No documents found`)}
 								</td>
 							</tr>
 						) : (
@@ -124,7 +127,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 													}}
 												>
 													<Eye className="mr-2 h-4 w-4" />
-													View Details
+													{i18n._(msg`View Details`)}
 												</DropdownMenuItem>
 												<DropdownMenuItem
 													onClick={(event) => {
@@ -133,7 +136,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 													}}
 												>
 													<Edit className="mr-2 h-4 w-4" />
-													Edit
+													{i18n._(msg`Edit`)}
 												</DropdownMenuItem>
 												<DropdownMenuItem
 													onClick={(event) => {
@@ -145,7 +148,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 													disabled={pendingId === row.id}
 												>
 													<Check className="mr-2 h-4 w-4" />
-													Approve
+													{i18n._(msg`Approve`)}
 												</DropdownMenuItem>
 												<DropdownMenuItem
 													onClick={(event) => {
@@ -156,7 +159,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 													className="text-yellow-400 focus:text-yellow-400"
 												>
 													<X className="mr-2 h-4 w-4" />
-													Reject
+													{i18n._(msg`Reject`)}
 												</DropdownMenuItem>
 												<DropdownMenuItem
 													onClick={(event) => {
@@ -167,7 +170,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 													className="text-red-400 focus:text-red-400"
 												>
 													<Trash2 className="mr-2 h-4 w-4" />
-													Delete
+													{i18n._(msg`Delete`)}
 												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>

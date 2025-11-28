@@ -42,7 +42,7 @@ All translations follow this consistent pattern:
 
 ## Current Status
 
-### ✅ Completed Components (16 components)
+### ✅ Completed Components (17 components)
 
 #### Attendance Components (4/4 complete)
 - ✅ `components/attendance/attendance-form-dialog.tsx` - Form dialog with 100+ strings
@@ -67,8 +67,9 @@ All translations follow this consistent pattern:
 - ✅ `components/leaves/pending-approvals-table.tsx` - Pending approvals table with actions (1 string)
 - ✅ `components/leaves/team-balances-table.tsx` - Team balances table with leave types (5 strings)
 
-#### Document Components (1/6 complete)
+#### Document Components (2/6 complete)
 - ✅ `components/documents/documents-section.tsx` - Main documents section with search and actions (5 strings)
+- ✅ `components/documents/document-table.tsx` - Document table with headers and actions (2 strings)
 
 ### ⏳ In Progress
 
@@ -77,8 +78,8 @@ All translations follow this consistent pattern:
 
 ### ❌ Remaining Components (~70+ components)
 
-#### Document Components (5 remaining)
-- ❌ `components/documents/document-table.tsx` - **NEXT TO TRANSLATE**
+#### Document Components (4 remaining)
+- ❌ `components/documents/document-view-dialog.tsx` - **NEXT TO TRANSLATE**
 - ❌ `components/documents/document-view-dialog.tsx`
 - ❌ `components/documents/document-edit-dialog.tsx`
 - ❌ `components/documents/document-reject-dialog.tsx`
@@ -95,8 +96,8 @@ All translations follow this consistent pattern:
 ## Translation Statistics
 
 **Latest Status** (as of last commit):
-- **Total messages**: 401
-- **Translated**: 401 (100%)
+- **Total messages**: 403
+- **Translated**: 403 (100%)
 - **Missing**: 0 ✅
 
 **Note**: This will increase as more components are translated.
