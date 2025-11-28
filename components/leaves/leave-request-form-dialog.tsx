@@ -114,8 +114,8 @@ export function LeaveRequestFormDialog({
 
 			if ('errors' in result) {
 				const errs = result.errors as Record<string, string[]>
-				const msg = errs._form?.[0] || Object.values(errs)[0]?.[0] || i18n._(msg`Failed to save request`)
-				toast.error(msg)
+				const errorMsg = errs._form?.[0] || Object.values(errs)[0]?.[0] || i18n._(msg`Failed to save request`)
+				toast.error(errorMsg)
 				return
 			}
 

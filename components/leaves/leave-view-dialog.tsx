@@ -43,6 +43,7 @@ export function LeaveViewDialog({
   open: controlledOpen,
   onOpenChange,
 }: LeaveViewDialogProps) {
+  const { i18n } = useLingui();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
