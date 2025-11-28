@@ -14,6 +14,7 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
+  REGISTRY: docker.io
   IMAGE_NAME: nexudigital/payroll-front
 
 jobs:
@@ -135,7 +136,7 @@ jobs:
 
   build:
     name: Build & Package
-    runs-on: ubuntu-latest
+    runs-on: infra-linux
     needs: [test, version]
 
     outputs:
@@ -149,12 +150,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to Container Registry
         uses: docker/login-action@v3
-        if: ${{ env.DOCKER_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -163,10 +160,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ needs.version.outputs.new_version }}
-
+          
       - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v5
@@ -175,13 +172,15 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' && needs.version.outputs.version_changed == 'true' }}
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ needs.version.outputs.new_version }}
-            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.new_version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            DD_VERSION=${{ needs.version.outputs.new_version }}
+            VERSION=${{ github.sha }}
+            BUILD_TIME=${{ github.event.head_commit.timestamp }}
+            GIT_COMMIT=${{ github.sha }}
 
   release:
     name: Create Release
