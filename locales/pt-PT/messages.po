@@ -125,6 +125,7 @@ msgstr "Ver a Minha Assiduidade"
 
 #: app/dashboard/page.tsx:160
 #: app/dashboard/page.tsx:438
+#: components/leaves/my-leaves-section.tsx:109
 msgid "Pending"
 msgstr "Pendente"
 
@@ -608,6 +609,7 @@ msgstr "Data"
 #: components/attendance/attendance-table.tsx:102
 #: components/attendance/my-attendance-section.tsx:272
 #: components/leaves/leave-table.tsx:102
+#: components/leaves/my-leaves-section.tsx:248
 #: components/payroll/payroll-section.tsx:292
 #: components/timesheets/timesheet-form-dialog.tsx:184
 #: components/timesheets/timesheet-table.tsx:91
@@ -1069,31 +1071,39 @@ msgid "All Leave Requests"
 msgstr "Todos os Pedidos de Ausência"
 
 #: components/leaves/leave-management.tsx:66
+#: components/leaves/my-leaves-section.tsx:123
 msgid "Search requests..."
 msgstr "Pesquisar pedidos..."
 
 #: components/leaves/leave-management.tsx:70
 #: components/leaves/leave-management.tsx:73
+#: components/leaves/my-leaves-section.tsx:128
+#: components/leaves/my-leaves-section.tsx:131
 msgid "All status"
 msgstr "Todos os estados"
 
 #: components/leaves/leave-management.tsx:81
 #: components/leaves/leave-management.tsx:84
+#: components/leaves/my-leaves-section.tsx:147
+#: components/leaves/my-leaves-section.tsx:150
 msgid "All types"
 msgstr "Todos os tipos"
 
 #: components/leaves/leave-management.tsx:90
 #: components/leaves/leave-table.tsx:84
+#: components/leaves/my-leaves-section.tsx:174
 msgid "New request"
 msgstr "Novo pedido"
 
 #: components/leaves/leave-management.tsx:102
 #: components/leaves/leave-view-dialog.tsx:174
+#: components/leaves/my-leaves-section.tsx:192
 #: components/timesheets/timesheet-form-dialog.tsx:195
 msgid "Submitted"
 msgstr "Submetido"
 
 #: components/leaves/leave-management.tsx:105
+#: components/leaves/my-leaves-section.tsx:195
 msgid "Failed to submit"
 msgstr "Falha ao submeter"
 
@@ -1112,6 +1122,7 @@ msgstr "Saldos de Ausências da Equipa"
 
 #: components/leaves/leave-management.tsx:156
 #: components/leaves/leave-view-dialog.tsx:77
+#: components/leaves/my-leaves-section.tsx:243
 msgid "Leave Request Details"
 msgstr "Detalhes do Pedido de Ausência"
 
@@ -1148,6 +1159,7 @@ msgstr "Rejeitar Pedido de Ausência"
 #: components/leaves/leave-request-form-dialog.tsx:197
 #: components/leaves/leave-table.tsx:111
 #: components/leaves/leave-view-dialog.tsx:189
+#: components/leaves/my-leaves-section.tsx:268
 msgid "Reason"
 msgstr "Motivo"
 
@@ -1187,6 +1199,7 @@ msgid "Leave cancelled"
 msgstr "Ausência cancelada"
 
 #: components/leaves/leave-management.tsx:234
+#: components/leaves/my-leaves-section.tsx:210
 msgid "Failed to cancel"
 msgstr "Falha ao cancelar"
 
@@ -1229,6 +1242,7 @@ msgstr "Novo Pedido de Férias"
 
 #: components/leaves/leave-request-form-dialog.tsx:144
 #: components/leaves/leave-table.tsx:108
+#: components/leaves/my-leaves-section.tsx:254
 msgid "Type"
 msgstr "Tipo"
 
@@ -1274,15 +1288,18 @@ msgid "(click to view details)"
 msgstr "(clique para ver detalhes)"
 
 #: components/leaves/leave-table.tsx:109
+#: components/leaves/my-leaves-section.tsx:258
 msgid "Dates"
 msgstr "Datas"
 
 #: components/leaves/leave-table.tsx:110
+#: components/leaves/my-leaves-section.tsx:263
 msgid "Days"
 msgstr "Dias"
 
 #: components/leaves/leave-table.tsx:112
 #: components/leaves/leave-view-dialog.tsx:165
+#: components/leaves/my-leaves-section.tsx:272
 msgid "Created"
 msgstr "Criado"
 
@@ -1364,6 +1381,7 @@ msgstr "Duração e Estado"
 #~ msgstr "Total de Dias"
 
 #: components/leaves/leave-view-dialog.tsx:153
+#: components/leaves/my-leaves-section.tsx:265
 msgid "(Half Day)"
 msgstr "(Meio Dia)"
 
@@ -1430,6 +1448,26 @@ msgstr "Fechar"
 #: components/leaves/leave-view-dialog.tsx:226
 #~ msgid "Fechar"
 #~ msgstr "Fechar"
+
+#: components/leaves/my-leaves-section.tsx:104
+msgid "days left"
+msgstr "dias restantes"
+
+#: components/leaves/my-leaves-section.tsx:119
+msgid "My Leave Requests"
+msgstr "Os Meus Pedidos de Férias"
+
+#: components/leaves/my-leaves-section.tsx:203
+msgid "Cancel reason (optional):"
+msgstr "Motivo do cancelamento (opcional):"
+
+#: components/leaves/my-leaves-section.tsx:207
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#: components/leaves/my-leaves-section.tsx:286
+msgid "Edit draft"
+msgstr "Editar rascunho"
 
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"

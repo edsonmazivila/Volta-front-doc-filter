@@ -42,7 +42,7 @@ All translations follow this consistent pattern:
 
 ## Current Status
 
-### ✅ Completed Components (12 components)
+### ✅ Completed Components (13 components)
 
 #### Attendance Components (4/4 complete)
 - ✅ `components/attendance/attendance-form-dialog.tsx` - Form dialog with 100+ strings
@@ -58,11 +58,12 @@ All translations follow this consistent pattern:
 - ✅ `components/timesheets/timesheet-table.tsx` - Table headers and actions
 - ✅ `components/timesheets/timesheet-view-dialog.tsx` - View dialog with period/hours info
 
-#### Leave Components (4/7 complete)
+#### Leave Components (5/7 complete)
 - ✅ `components/leaves/leave-management.tsx` - Main management page with tabs, filters, dialogs
 - ✅ `components/leaves/leave-table.tsx` - Table with headers and dropdown actions
 - ✅ `components/leaves/leave-view-dialog.tsx` - Leave request details dialog with 19 strings
 - ✅ `components/leaves/leave-request-form-dialog.tsx` - Leave request form with 14 strings
+- ✅ `components/leaves/my-leaves-section.tsx` - My leaves section with balances and filters (5 strings)
 
 ### ⏳ In Progress
 
@@ -71,9 +72,8 @@ All translations follow this consistent pattern:
 
 ### ❌ Remaining Components (~75+ components)
 
-#### Leave Components (3 remaining)
-- ❌ `components/leaves/my-leaves-section.tsx` - **NEXT TO TRANSLATE**
-- ❌ `components/leaves/pending-approvals-table.tsx`
+#### Leave Components (2 remaining)
+- ❌ `components/leaves/pending-approvals-table.tsx` - **NEXT TO TRANSLATE**
 - ❌ `components/leaves/team-balances-table.tsx`
 
 #### Other Component Categories (~70+ components)
@@ -88,8 +88,8 @@ All translations follow this consistent pattern:
 ## Translation Statistics
 
 **Latest Status** (as of last commit):
-- **Total messages**: 385
-- **Translated**: 385 (100%)
+- **Total messages**: 390
+- **Translated**: 390 (100%)
 - **Missing**: 0 ✅
 
 **Note**: This will increase as more components are translated.
