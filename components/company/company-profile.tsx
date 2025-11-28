@@ -18,7 +18,7 @@ import { Edit, Trash2, Upload } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
-import { 
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -31,6 +31,8 @@ import {
 import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
 import type { CompanyDocumentsResponse } from '@/lib/services/company'
 import { toast } from 'sonner'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface CompanyProfileProps {
 	company: {
@@ -57,6 +59,7 @@ interface CompanyProfileProps {
 export function CompanyProfile({ company, paySchedules, leavePolicies, companyDocuments }: CompanyProfileProps) {
 	const searchParams = useSearchParams()
 	const router = useRouter()
+	const { i18n } = useLingui()
 	const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'basic')
 
 	const [editOpen, setEditOpen] = useState(false)
@@ -123,11 +126,11 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 		try {
 			await deletePayScheduleAction(deletePayScheduleTarget.id)
 			setPaySchedulesState(prev => prev.filter(x => x.id !== deletePayScheduleTarget.id))
-			toast.success('Pay schedule deleted')
+			toast.success(i18n._(msg`Pay schedule deleted`))
 			setDeletePayScheduleOpen(false)
 			setDeletePayScheduleTarget(null)
 		} catch (err) {
-			const message = err instanceof Error ? err.message : 'Failed to delete pay schedule'
+			const message = err instanceof Error ? err.message : i18n._(msg`Failed to delete pay schedule`)
 			toast.error(message)
 		} finally {
 			setDeletingPaySchedule(false)
@@ -140,11 +143,11 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 		try {
 			await deleteLeavePolicyAction(deletePolicyTarget.id)
 			setLeavePoliciesState(prev => prev.filter(x => x.id !== deletePolicyTarget.id))
-			toast.success('Leave policy deleted')
+			toast.success(i18n._(msg`Leave policy deleted`))
 			setDeletePolicyOpen(false)
 			setDeletePolicyTarget(null)
 		} catch (err) {
-			const message = err instanceof Error ? err.message : 'Failed to delete leave policy'
+			const message = err instanceof Error ? err.message : i18n._(msg`Failed to delete leave policy`)
 			toast.error(message)
 		} finally {
 			setDeletingPolicy(false)
@@ -204,17 +207,17 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 						start_date: String(newSchedule.start_date || psForm.start_date),
 						is_active: Boolean(newSchedule.is_active ?? psForm.is_active)
 					}])
-					toast.success('Pay schedule created successfully')
+					toast.success(i18n._(msg`Pay schedule created successfully`))
 					setPsOpen(false)
 					setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true })
 					router.refresh()
 				}
 			} else {
-				toast.error(result.errors?._form?.[0] || 'Failed to create pay schedule')
+				toast.error(result.errors?._form?.[0] || i18n._(msg`Failed to create pay schedule`))
 			}
 		} catch {
-			toast.error('Failed to create pay schedule')
-		} finally { 
+			toast.error(i18n._(msg`Failed to create pay schedule`))
+		} finally {
 			setSaving(false)
 		}
 	}
@@ -242,21 +245,21 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			
 			if (result.success) {
 				console.log('Success! Reloading page...')
-				toast.success('Leave policy created successfully')
+				toast.success(i18n._(msg`Leave policy created successfully`))
 				window.location.reload()
 			} else if (result.errors) {
 				console.error('Validation errors:', result.errors)
-				const errorMsg = result.errors._form?.[0] || Object.entries(result.errors).map(([k, v]) => `${k}: ${v?.join(', ')}`).join('; ') || 'Failed to create leave policy'
+				const errorMsg = result.errors._form?.[0] || Object.entries(result.errors).map(([k, v]) => `${k}: ${v?.join(', ')}`).join('; ') || i18n._(msg`Failed to create leave policy`)
 				toast.error(errorMsg)
 				setSaving(false)
 			} else {
 				console.error('Unknown response format:', result)
-				toast.error('Unexpected response from server')
+				toast.error(i18n._(msg`Unexpected response from server`))
 				setSaving(false)
 			}
 		} catch (err) {
 			console.error('Exception during create:', err)
-			toast.error('Failed to create leave policy: ' + (err instanceof Error ? err.message : 'Unknown error'))
+			toast.error(i18n._(msg`Failed to create leave policy`) + ': ' + (err instanceof Error ? err.message : i18n._(msg`Unknown error`)))
 			setSaving(false)
 		}
 		console.log('=== CREATE LEAVE POLICY END ===')
@@ -268,27 +271,27 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 		<Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
 			<div className='flex items-center justify-between'>
 				<TabsList>
-					<TabsTrigger value='basic'>Basic Information</TabsTrigger>
-					<TabsTrigger value='policies'>Leave Policies</TabsTrigger>
-					<TabsTrigger value='schedules'>Pay Schedules</TabsTrigger>
+					<TabsTrigger value='basic'>{i18n._(msg`Basic Information`)}</TabsTrigger>
+					<TabsTrigger value='policies'>{i18n._(msg`Leave Policies`)}</TabsTrigger>
+					<TabsTrigger value='schedules'>{i18n._(msg`Pay Schedules`)}</TabsTrigger>
 					</TabsList>
 				</div>
 
 				<TabsContent value='basic'>
 					<div className='flex items-center justify-between mt-4'>
-					<h3 className='text-sm font-medium text-foreground'>Company Information</h3>
-						<Button onClick={() => setEditOpen(true)}>Edit</Button>
+					<h3 className='text-sm font-medium text-foreground'>{i18n._(msg`Company Information`)}</h3>
+						<Button onClick={() => setEditOpen(true)}>{i18n._(msg`Edit`)}</Button>
 					</div>
 					<div className='mt-3 grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6'>
 						<div className='flex flex-col items-start gap-3'>
 							{company.logo ? (
-								<Image src={company.logo} alt='Company Logo' className='h-24 w-24 rounded-lg object-cover border border-white/10' width={96} height={96} />
+								<Image src={company.logo} alt={i18n._(msg`Company Logo`)} className='h-24 w-24 rounded-lg object-cover border border-white/10' width={96} height={96} />
 							) : (
-								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground'>Logo</div>
+								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground'>{i18n._(msg`Logo`)}</div>
 							)}
 							<label className='text-xs text-muted-foreground inline-flex items-center gap-2 cursor-pointer'>
 								<Upload className='h-3.5 w-3.5' />
-								<span>Upload logo</span>
+								<span>{i18n._(msg`Upload logo`)}</span>
 								<input type='file' accept='image/*' className='hidden' onChange={async (e)=>{
 									const file = e.target.files?.[0]
 									if (!file) return
@@ -300,21 +303,21 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 							</label>
 						</div>
 						<div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-foreground'>
-							<div><div className='text-xs text-muted-foreground'>Company Name</div><div>{company.name || '—'}</div></div>
-							<div><div className='text-xs text-muted-foreground'>Legal Name</div><div>{company.legal_name || '—'}</div></div>
-							<div><div className='text-xs text-muted-foreground'>Tax ID</div><div>{company.tax_id || '—'}</div></div>
-							<div><div className='text-xs text-muted-foreground'>Email</div><div>{company.email || '—'}</div></div>
-							<div><div className='text-xs text-muted-foreground'>Phone</div><div>{company.phone || '—'}</div></div>
-							<div><div className='text-xs text-muted-foreground'>Website</div><div>{company.website || '—'}</div></div>
-							<div className='md:col-span-2'><div className='text-xs text-muted-foreground'>Address</div><div>{[company.address_line1, company.address_line2, company.city, company.state, company.postal_code, company.country].filter(Boolean).join(', ') || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Company Name`)}</div><div>{company.name || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Legal Name`)}</div><div>{company.legal_name || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Tax ID`)}</div><div>{company.tax_id || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Email`)}</div><div>{company.email || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Phone`)}</div><div>{company.phone || '—'}</div></div>
+							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Website`)}</div><div>{company.website || '—'}</div></div>
+							<div className='md:col-span-2'><div className='text-xs text-muted-foreground'>{i18n._(msg`Address`)}</div><div>{[company.address_line1, company.address_line2, company.city, company.state, company.postal_code, company.country].filter(Boolean).join(', ') || '—'}</div></div>
 						</div>
 					</div>
 
 					{/* Company Documents - only visible on Basic tab */}
 					{companyDocuments && (
 						<div className='mt-6 border-t border-white/10 pt-6'>
-							<h3 className='text-sm font-medium text-foreground mb-2'>Company Documents</h3>
-							<CompanyDocumentsSection 
+							<h3 className='text-sm font-medium text-foreground mb-2'>{i18n._(msg`Company Documents`)}</h3>
+							<CompanyDocumentsSection
 								documents={companyDocuments.documents}
 								total={companyDocuments.total}
 							/>
@@ -324,8 +327,8 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 
 				<TabsContent value='policies'>
 					<div className='flex items-center justify-between mt-4'>
-						<h3 className='text-sm font-medium text-foreground'>Company Leave Policies</h3>
-					<Button onClick={() => { setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }); setLpOpen(true) }}>Create</Button>
+						<h3 className='text-sm font-medium text-foreground'>{i18n._(msg`Company Leave Policies`)}</h3>
+					<Button onClick={() => { setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }); setLpOpen(true) }}>{i18n._(msg`Create`)}</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
 						{leavePoliciesState.length ? leavePoliciesState.map(p => (
@@ -333,14 +336,14 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
                                     <div className='flex-1 min-w-0'>
 										<div className='text-foreground font-medium'>{p.name}</div>
 										<div className='text-xs text-muted-foreground capitalize mt-0.5'>
-											Type: {p.leave_type} • Allocation: {p.annual_allocation_days} days/year
+											{i18n._(msg`Type`)}: {p.leave_type} • {i18n._(msg`Allocation`)}: {p.annual_allocation_days} {i18n._(msg`days/year`)}
 											{p.description && <span className='block mt-1'>{p.description}</span>}
 										</div>
 										<div className='text-xs text-muted-foreground mt-1 flex flex-wrap gap-2'>
-											{p.requires_manager_approval && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500'>Manager Approval</span>}
-											{p.requires_hr_approval && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500'>HR Approval</span>}
-											{p.allow_half_days && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-green-500/10 text-green-500'>Half Days</span>}
-											{!p.is_active && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-red-500/10 text-red-500'>Inactive</span>}
+											{p.requires_manager_approval && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500'>{i18n._(msg`Manager Approval`)}</span>}
+											{p.requires_hr_approval && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-500'>{i18n._(msg`HR Approval`)}</span>}
+											{p.allow_half_days && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-green-500/10 text-green-500'>{i18n._(msg`Half Days`)}</span>}
+											{!p.is_active && <span className='inline-flex items-center px-1.5 py-0.5 rounded bg-red-500/10 text-red-500'>{i18n._(msg`Inactive`)}</span>}
 										</div>
                                     </div>
                                     <div className='flex items-center gap-2 shrink-0'>
@@ -348,28 +351,28 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										<Button variant='destructive' onClick={()=>{ setDeletePolicyTarget({ id: p.id, name: p.name }); setDeletePolicyOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
-						)) : (<div className='text-muted-foreground text-sm'>No leave policies found.</div>)}
+						)) : (<div className='text-muted-foreground text-sm'>{i18n._(msg`No leave policies found.`)}</div>)}
                         </div>
 				</TabsContent>
 
 				<TabsContent value='schedules'>
 					<div className='flex items-center justify-between mt-4'>
-						<h3 className='text-sm font-medium text-foreground'>Pay Schedules</h3>
-					<Button onClick={() => { setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true }); setPsOpen(true) }}>Create</Button>
+						<h3 className='text-sm font-medium text-foreground'>{i18n._(msg`Pay Schedules`)}</h3>
+					<Button onClick={() => { setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true }); setPsOpen(true) }}>{i18n._(msg`Create`)}</Button>
 					</div>
                         <div className='mt-3 space-y-2'>
                             {paySchedulesState.length ? paySchedulesState.map(s => (
                                 <div key={s.id} className='border border-white/10 rounded-lg p-3 flex items-center justify-between'>
                                     <div>
 										<div className='text-foreground'>{s.name}</div>
-										<div className='text-xs text-muted-foreground'>Frequency: {s.frequency} • Start: {formatDate(s.start_date)} • {s.is_active ? 'Active' : 'Inactive'}</div>
+										<div className='text-xs text-muted-foreground'>{i18n._(msg`Frequency`)}: {s.frequency} • {i18n._(msg`Start`)}: {formatDate(s.start_date)} • {s.is_active ? i18n._(msg`Active`) : i18n._(msg`Inactive`)}</div>
                                     </div>
                                     <div className='flex items-center gap-2'>
 									<Button variant='outline' onClick={()=>{ setEditingPayScheduleId(s.id); setPsOpen(true); setPsForm({ name: s.name, frequency: s.frequency, start_date: (s.start_date || '').split('T')[0], is_active: s.is_active }) }} className='h-8 px-2'><Edit className='h-4 w-4' /></Button>
                                         <Button variant='destructive' onClick={() => { setDeletePayScheduleTarget({ id: s.id, name: s.name }); setDeletePayScheduleOpen(true) }} className='h-8 px-2'><Trash2 className='h-4 w-4' /></Button>
                                     </div>
                                 </div>
-							)) : (<div className='text-muted-foreground text-sm'>No pay schedules found.</div>)}
+							)) : (<div className='text-muted-foreground text-sm'>{i18n._(msg`No pay schedules found.`)}</div>)}
                         </div>
 				</TabsContent>
 			</Tabs>
@@ -377,53 +380,53 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			{/* Edit Company Dialog */}
 			<Dialog open={editOpen} onOpenChange={setEditOpen}>
 				<DialogContent className='sm:max-w-2xl'>
-					<DialogHeader><DialogTitle>Edit Company</DialogTitle></DialogHeader>
+					<DialogHeader><DialogTitle>{i18n._(msg`Edit Company`)}</DialogTitle></DialogHeader>
 					{error && (
 						<div className='bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-2 rounded-lg text-sm'>
 							{error}
 						</div>
 					)}
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-						<FormField label='Company Name' className='md:col-span-2'>
+						<FormField label={i18n._(msg`Company Name`)} className='md:col-span-2'>
 							<Input value={form.name} onChange={(e)=>setForm({ ...form, name: e.target.value })} />
 						</FormField>
-						<FormField label='Legal Name' className='md:col-span-2'>
+						<FormField label={i18n._(msg`Legal Name`)} className='md:col-span-2'>
 							<Input value={form.legal_name} onChange={(e)=>setForm({ ...form, legal_name: e.target.value })} />
 						</FormField>
-						<FormField label='Tax ID'>
+						<FormField label={i18n._(msg`Tax ID`)}>
 							<Input value={form.tax_id} onChange={(e)=>setForm({ ...form, tax_id: e.target.value })} />
 						</FormField>
-						<FormField label='Email'>
+						<FormField label={i18n._(msg`Email`)}>
 							<Input type='email' value={form.email} onChange={(e)=>setForm({ ...form, email: e.target.value })} />
 						</FormField>
-						<FormField label='Phone'>
+						<FormField label={i18n._(msg`Phone`)}>
 							<Input type='tel' value={form.phone} onChange={(e)=>setForm({ ...form, phone: e.target.value })} />
 						</FormField>
-						<FormField label='Website'>
+						<FormField label={i18n._(msg`Website`)}>
 							<Input type='url' value={form.website} onChange={(e)=>setForm({ ...form, website: e.target.value })} placeholder='https://' />
 						</FormField>
-						<FormField label='Address Line 1' className='md:col-span-2'>
+						<FormField label={i18n._(msg`Address Line 1`)} className='md:col-span-2'>
 							<Input value={form.address_line1} onChange={(e)=>setForm({ ...form, address_line1: e.target.value })} />
 						</FormField>
-						<FormField label='Address Line 2' className='md:col-span-2'>
+						<FormField label={i18n._(msg`Address Line 2`)} className='md:col-span-2'>
 							<Input value={form.address_line2} onChange={(e)=>setForm({ ...form, address_line2: e.target.value })} />
 						</FormField>
-						<FormField label='City'>
+						<FormField label={i18n._(msg`City`)}>
 							<Input value={form.city} onChange={(e)=>setForm({ ...form, city: e.target.value })} />
 						</FormField>
-						<FormField label='State / Province'>
+						<FormField label={i18n._(msg`State / Province`)}>
 							<Input value={form.state} onChange={(e)=>setForm({ ...form, state: e.target.value })} />
 						</FormField>
-						<FormField label='Postal Code'>
+						<FormField label={i18n._(msg`Postal Code`)}>
 							<Input value={form.postal_code} onChange={(e)=>setForm({ ...form, postal_code: e.target.value })} />
 						</FormField>
-						<FormField label='Country'>
+						<FormField label={i18n._(msg`Country`)}>
 							<Input value={form.country} onChange={(e)=>setForm({ ...form, country: e.target.value })} />
 						</FormField>
 					</div>
 					<div className='flex justify-end gap-2 pt-4'>
-						<Button variant='ghost' onClick={()=>setEditOpen(false)}>Cancel</Button>
-						<Button onClick={handleCompanySave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button variant='ghost' onClick={()=>setEditOpen(false)}>{i18n._(msg`Cancel`)}</Button>
+						<Button onClick={handleCompanySave} disabled={saving}>{saving ? i18n._(msg`Saving…`) : i18n._(msg`Save`)}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
@@ -431,32 +434,32 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			{/* Create Pay Schedule */}
 			<Dialog open={psOpen} onOpenChange={setPsOpen}>
 				<DialogContent className='sm:max-w-lg'>
-				<DialogHeader><DialogTitle>{editingPayScheduleId ? 'Edit' : 'Create'} Pay Schedule</DialogTitle></DialogHeader>
+				<DialogHeader><DialogTitle>{editingPayScheduleId ? i18n._(msg`Edit Pay Schedule`) : i18n._(msg`Create Pay Schedule`)}</DialogTitle></DialogHeader>
                     <div className='grid gap-3'>
-                        <FormField label='Name'><Input value={psForm.name} onChange={(e)=>setPsForm({ ...psForm, name: e.target.value })} /></FormField>
-                        <FormField label='Frequency'>
+                        <FormField label={i18n._(msg`Name`)}><Input value={psForm.name} onChange={(e)=>setPsForm({ ...psForm, name: e.target.value })} /></FormField>
+                        <FormField label={i18n._(msg`Frequency`)}>
                             <Select value={psForm.frequency} onValueChange={(v)=>setPsForm({ ...psForm, frequency: v })}>
                                 <SelectTrigger className='w-full bg-neutral-900/90 text-white border-white/20'>
-                                    <SelectValue placeholder='Select frequency' />
+                                    <SelectValue placeholder={i18n._(msg`Select frequency`)} />
                                 </SelectTrigger>
                                 <SelectContent className='bg-neutral-900 text-white border-white/10'>
-                                    <SelectItem value='weekly'>Weekly</SelectItem>
-                                    <SelectItem value='biweekly'>Biweekly</SelectItem>
-                                    <SelectItem value='semimonthly'>Semi-monthly</SelectItem>
-                                    <SelectItem value='monthly'>Monthly</SelectItem>
+                                    <SelectItem value='weekly'>{i18n._(msg`Weekly`)}</SelectItem>
+                                    <SelectItem value='biweekly'>{i18n._(msg`Biweekly`)}</SelectItem>
+                                    <SelectItem value='semimonthly'>{i18n._(msg`Semi-monthly`)}</SelectItem>
+                                    <SelectItem value='monthly'>{i18n._(msg`Monthly`)}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </FormField>
-                        <FormField label='Start Date'><Input type='date' value={psForm.start_date} onChange={(e)=>setPsForm({ ...psForm, start_date: e.target.value })} /></FormField>
-                        <FormField label='Active'>
+                        <FormField label={i18n._(msg`Start Date`)}><Input type='date' value={psForm.start_date} onChange={(e)=>setPsForm({ ...psForm, start_date: e.target.value })} /></FormField>
+                        <FormField label={i18n._(msg`Active`)}>
                             <div className='flex items-center gap-2'>
                                 <input type='checkbox' checked={psForm.is_active} onChange={(e)=>setPsForm({ ...psForm, is_active: e.target.checked })} className='w-4 h-4' />
-                                <span className='text-sm'>Active</span>
+                                <span className='text-sm'>{i18n._(msg`Active`)}</span>
                             </div>
                         </FormField>
                     </div>
 					<div className='flex justify-end gap-2 pt-4'>
-						<Button variant='ghost' onClick={()=>{ setPsOpen(false); setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true }) }}>Cancel</Button>
+						<Button variant='ghost' onClick={()=>{ setPsOpen(false); setEditingPayScheduleId(null); setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true }) }}>{i18n._(msg`Cancel`)}</Button>
 						<Button onClick={async ()=>{ 
 							if (editingPayScheduleId) { 
 								setSaving(true)
@@ -478,18 +481,18 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 											? { ...s, name: psForm.name, frequency: psForm.frequency, start_date: isoDate, is_active: psForm.is_active }
 											: s
 									))
-									toast.success('Pay schedule updated successfully')
+									toast.success(i18n._(msg`Pay schedule updated successfully`))
 									setPsOpen(false)
 									setEditingPayScheduleId(null)
 									setPsForm({ name: '', frequency: 'monthly', start_date: '', is_active: true })
 									router.refresh()
 								} else {
-									toast.error(result.errors?._form?.[0] || 'Failed to update pay schedule')
+									toast.error(result.errors?._form?.[0] || i18n._(msg`Failed to update pay schedule`))
 								}
-							} else { 
-								await handleCreatePaySchedule() 
-							} 
-						}} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+							} else {
+								await handleCreatePaySchedule()
+							}
+						}} disabled={saving}>{saving ? i18n._(msg`Saving…`) : i18n._(msg`Save`)}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
@@ -497,40 +500,40 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 			{/* Create/Edit Leave Policy */}
 			<Dialog open={lpOpen} onOpenChange={setLpOpen}>
 				<DialogContent className='sm:max-w-3xl max-h-[90vh] overflow-y-auto'>
-					<DialogHeader><DialogTitle>{editingPolicyId ? 'Edit' : 'Create'} Leave Policy</DialogTitle></DialogHeader>
+					<DialogHeader><DialogTitle>{editingPolicyId ? i18n._(msg`Edit Leave Policy`) : i18n._(msg`Create Leave Policy`)}</DialogTitle></DialogHeader>
                     <div className='grid gap-4'>
 						{/* Basic Information */}
 						<div className='space-y-3'>
-							<h4 className='text-sm font-medium'>Basic Information</h4>
+							<h4 className='text-sm font-medium'>{i18n._(msg`Basic Information`)}</h4>
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-								<FormField label='Policy Name' required>
-									<Input value={lpForm.name} onChange={(e)=>setLpForm({ ...lpForm, name: e.target.value })} placeholder='e.g., Annual Leave' />
+								<FormField label={i18n._(msg`Policy Name`)} required>
+									<Input value={lpForm.name} onChange={(e)=>setLpForm({ ...lpForm, name: e.target.value })} placeholder={i18n._(msg`e.g., Annual Leave`)} />
 								</FormField>
-								<FormField label='Leave Type' required>
+								<FormField label={i18n._(msg`Leave Type`)} required>
 									<Select value={lpForm.leave_type} onValueChange={(v)=>setLpForm({ ...lpForm, leave_type: v })}>
 										<SelectTrigger className='w-full bg-background border-input'>
-											<SelectValue placeholder='Select leave type' />
+											<SelectValue placeholder={i18n._(msg`Select leave type`)} />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value='vacation'>Vacation</SelectItem>
-											<SelectItem value='sick'>Sick Leave</SelectItem>
-											<SelectItem value='personal'>Personal Leave</SelectItem>
-											<SelectItem value='maternity'>Maternity Leave</SelectItem>
-											<SelectItem value='paternity'>Paternity Leave</SelectItem>
-											<SelectItem value='bereavement'>Bereavement Leave</SelectItem>
-											<SelectItem value='emergency'>Emergency Leave</SelectItem>
+											<SelectItem value='vacation'>{i18n._(msg`Vacation`)}</SelectItem>
+											<SelectItem value='sick'>{i18n._(msg`Sick Leave`)}</SelectItem>
+											<SelectItem value='personal'>{i18n._(msg`Personal Leave`)}</SelectItem>
+											<SelectItem value='maternity'>{i18n._(msg`Maternity Leave`)}</SelectItem>
+											<SelectItem value='paternity'>{i18n._(msg`Paternity Leave`)}</SelectItem>
+											<SelectItem value='bereavement'>{i18n._(msg`Bereavement Leave`)}</SelectItem>
+											<SelectItem value='emergency'>{i18n._(msg`Emergency Leave`)}</SelectItem>
 										</SelectContent>
 									</Select>
 								</FormField>
-								<FormField label='Effective Date' required className='md:col-span-2'>
+								<FormField label={i18n._(msg`Effective Date`)} required className='md:col-span-2'>
 									<Input type='date' value={lpForm.effective_date} onChange={(e)=>setLpForm({ ...lpForm, effective_date: e.target.value })} />
 								</FormField>
-								<FormField label='Description' className='md:col-span-2'>
+								<FormField label={i18n._(msg`Description`)} className='md:col-span-2'>
 									<textarea
 										value={lpForm.description}
 										onChange={(e)=>setLpForm({ ...lpForm, description: e.target.value })}
 										rows={2}
-										placeholder='Optional description or notes'
+										placeholder={i18n._(msg`Optional description or notes`)}
 										className='w-full px-3 py-2 text-sm border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-none'
 									/>
 								</FormField>
@@ -539,12 +542,12 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 
 						{/* Allocation & Accrual */}
 						<div className='space-y-3 pt-3 border-t'>
-							<h4 className='text-sm font-medium'>Allocation & Accrual</h4>
+							<h4 className='text-sm font-medium'>{i18n._(msg`Allocation & Accrual`)}</h4>
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-								<FormField label='Annual Allocation (days)' required>
+								<FormField label={i18n._(msg`Annual Allocation (days)`)} required>
 									<Input type='number' min='0' value={lpForm.annual_allocation_days} onChange={(e)=>setLpForm({ ...lpForm, annual_allocation_days: Number(e.target.value) })} />
 								</FormField>
-								<FormField label='Accrual Rate (per month)' required>
+								<FormField label={i18n._(msg`Accrual Rate (per month)`)} required>
 									<Input type='number' min='0' step='0.1' value={lpForm.accrual_rate} onChange={(e)=>setLpForm({ ...lpForm, accrual_rate: Number(e.target.value) })} />
 								</FormField>
 							</div>
@@ -552,7 +555,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 
 						{/* Carry Over Settings */}
 						<div className='space-y-3 pt-3 border-t'>
-							<h4 className='text-sm font-medium'>Carry Over Settings</h4>
+							<h4 className='text-sm font-medium'>{i18n._(msg`Carry Over Settings`)}</h4>
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
 								<div className='md:col-span-2 flex items-center gap-2'>
 									<input
@@ -562,14 +565,14 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										onChange={(e)=>setLpForm({ ...lpForm, allow_carry_over: e.target.checked })}
 										className='h-4 w-4 rounded border-input'
 									/>
-									<label htmlFor='allow_carry_over' className='text-sm cursor-pointer'>Allow carry over to next period</label>
+									<label htmlFor='allow_carry_over' className='text-sm cursor-pointer'>{i18n._(msg`Allow carry over to next period`)}</label>
 								</div>
 								{lpForm.allow_carry_over && (
 									<>
-										<FormField label='Max Carry Over Days'>
+										<FormField label={i18n._(msg`Max Carry Over Days`)}>
 											<Input type='number' min='0' value={lpForm.max_carry_over_days} onChange={(e)=>setLpForm({ ...lpForm, max_carry_over_days: Number(e.target.value) })} />
 										</FormField>
-										<FormField label='Carry Over Expiry (months)'>
+										<FormField label={i18n._(msg`Carry Over Expiry (months)`)}>
 											<Input type='number' min='0' value={lpForm.carry_over_expiry_months} onChange={(e)=>setLpForm({ ...lpForm, carry_over_expiry_months: Number(e.target.value) })} />
 										</FormField>
 									</>
@@ -579,18 +582,18 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 
 						{/* Request Limits */}
 						<div className='space-y-3 pt-3 border-t'>
-							<h4 className='text-sm font-medium'>Request Limits</h4>
+							<h4 className='text-sm font-medium'>{i18n._(msg`Request Limits`)}</h4>
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-								<FormField label='Min Request Days'>
+								<FormField label={i18n._(msg`Min Request Days`)}>
 									<Input type='number' min='0' value={lpForm.min_request_days} onChange={(e)=>setLpForm({ ...lpForm, min_request_days: Number(e.target.value) })} />
 								</FormField>
-								<FormField label='Max Request Days'>
+								<FormField label={i18n._(msg`Max Request Days`)}>
 									<Input type='number' min='0' value={lpForm.max_request_days} onChange={(e)=>setLpForm({ ...lpForm, max_request_days: Number(e.target.value) })} />
 								</FormField>
-								<FormField label='Max Consecutive Days'>
+								<FormField label={i18n._(msg`Max Consecutive Days`)}>
 									<Input type='number' min='0' value={lpForm.max_consecutive_days} onChange={(e)=>setLpForm({ ...lpForm, max_consecutive_days: Number(e.target.value) })} />
 								</FormField>
-								<FormField label='Min Advance Notice (days)'>
+								<FormField label={i18n._(msg`Min Advance Notice (days)`)}>
 									<Input type='number' min='0' value={lpForm.min_advance_notice_days} onChange={(e)=>setLpForm({ ...lpForm, min_advance_notice_days: Number(e.target.value) })} />
 								</FormField>
 							</div>
@@ -598,7 +601,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 
 						{/* Approval & Options */}
 						<div className='space-y-3 pt-3 border-t'>
-							<h4 className='text-sm font-medium'>Approval & Options</h4>
+							<h4 className='text-sm font-medium'>{i18n._(msg`Approval & Options`)}</h4>
 							<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
 								<div className='flex items-center gap-2'>
 									<input
@@ -608,7 +611,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										onChange={(e)=>setLpForm({ ...lpForm, requires_manager_approval: e.target.checked })}
 										className='h-4 w-4 rounded border-input'
 									/>
-									<label htmlFor='requires_manager_approval' className='text-sm cursor-pointer'>Requires Manager Approval</label>
+									<label htmlFor='requires_manager_approval' className='text-sm cursor-pointer'>{i18n._(msg`Requires Manager Approval`)}</label>
 								</div>
 								<div className='flex items-center gap-2'>
 									<input
@@ -618,7 +621,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										onChange={(e)=>setLpForm({ ...lpForm, requires_hr_approval: e.target.checked })}
 										className='h-4 w-4 rounded border-input'
 									/>
-									<label htmlFor='requires_hr_approval' className='text-sm cursor-pointer'>Requires HR Approval</label>
+									<label htmlFor='requires_hr_approval' className='text-sm cursor-pointer'>{i18n._(msg`Requires HR Approval`)}</label>
 								</div>
 								<div className='flex items-center gap-2'>
 									<input
@@ -628,7 +631,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										onChange={(e)=>setLpForm({ ...lpForm, allow_half_days: e.target.checked })}
 										className='h-4 w-4 rounded border-input'
 									/>
-									<label htmlFor='allow_half_days' className='text-sm cursor-pointer'>Allow Half Days</label>
+									<label htmlFor='allow_half_days' className='text-sm cursor-pointer'>{i18n._(msg`Allow Half Days`)}</label>
 								</div>
 								<div className='flex items-center gap-2'>
 									<input
@@ -638,7 +641,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										onChange={(e)=>setLpForm({ ...lpForm, allow_negative_balance: e.target.checked })}
 										className='h-4 w-4 rounded border-input'
 									/>
-									<label htmlFor='allow_negative_balance' className='text-sm cursor-pointer'>Allow Negative Balance</label>
+									<label htmlFor='allow_negative_balance' className='text-sm cursor-pointer'>{i18n._(msg`Allow Negative Balance`)}</label>
 								</div>
 								<div className='flex items-center gap-2'>
 									<input
@@ -648,14 +651,14 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 										onChange={(e)=>setLpForm({ ...lpForm, is_active: e.target.checked })}
 										className='h-4 w-4 rounded border-input'
 									/>
-									<label htmlFor='is_active' className='text-sm cursor-pointer font-medium'>Active Policy</label>
+									<label htmlFor='is_active' className='text-sm cursor-pointer font-medium'>{i18n._(msg`Active Policy`)}</label>
 								</div>
 							</div>
 						</div>
                     </div>
 					<div className='flex justify-end gap-2 pt-4 border-t'>
-						<Button variant='ghost' onClick={()=>{ setLpOpen(false); setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }) }}>Cancel</Button>
-						<Button onClick={async ()=>{ if (editingPolicyId) { const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(editingPolicyId, null, formData); window.location.href = `?tab=${activeTab}` } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+						<Button variant='ghost' onClick={()=>{ setLpOpen(false); setEditingPolicyId(null); setLpForm({ name: '', description: '', policy_type: 'company', leave_type: 'vacation', annual_allocation_days: 0, accrual_rate: 0, accrual_frequency: 'monthly', allow_carry_over: false, max_carry_over_days: 0, carry_over_expiry_months: 0, min_request_days: 0, max_request_days: 0, max_consecutive_days: 0, min_advance_notice_days: 0, requires_manager_approval: false, requires_hr_approval: false, auto_approval_threshold: 0, allow_half_days: false, allow_negative_balance: false, effective_date: '', is_active: true }) }}>{i18n._(msg`Cancel`)}</Button>
+						<Button onClick={async ()=>{ if (editingPolicyId) { const formData = new FormData(); Object.entries(lpForm).forEach(([key, value]) => formData.append(key, String(value))); await updateLeavePolicyAction(editingPolicyId, null, formData); window.location.href = `?tab=${activeTab}` } else { await handleCreateLeavePolicy() } }} disabled={saving}>{saving ? i18n._(msg`Saving…`) : i18n._(msg`Save`)}</Button>
 					</div>
 				</DialogContent>
 			</Dialog>
@@ -665,15 +668,15 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 		<AlertDialog open={deletePolicyOpen} onOpenChange={setDeletePolicyOpen}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Delete leave policy?</AlertDialogTitle>
+					<AlertDialogTitle>{i18n._(msg`Delete leave policy?`)}</AlertDialogTitle>
 					<AlertDialogDescription>
-						This action cannot be undone. This will permanently delete {deletePolicyTarget?.name}.
+						{i18n._(msg`This action cannot be undone. This will permanently delete ${deletePolicyTarget?.name ?? ''}.`)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={deletingPolicy}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel disabled={deletingPolicy}>{i18n._(msg`Cancel`)}</AlertDialogCancel>
 					<AlertDialogAction onClick={handleDeletePolicyConfirm} disabled={deletingPolicy} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
-						{deletingPolicy ? 'Deleting…' : 'Delete'}
+						{deletingPolicy ? i18n._(msg`Deleting…`) : i18n._(msg`Delete`)}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
@@ -683,15 +686,15 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 		<AlertDialog open={deletePayScheduleOpen} onOpenChange={setDeletePayScheduleOpen}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Delete pay schedule?</AlertDialogTitle>
+					<AlertDialogTitle>{i18n._(msg`Delete pay schedule?`)}</AlertDialogTitle>
 					<AlertDialogDescription>
-						This action cannot be undone. This will permanently delete {deletePayScheduleTarget?.name}.
+						{i18n._(msg`This action cannot be undone. This will permanently delete ${deletePayScheduleTarget?.name ?? ''}.`)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={deletingPaySchedule}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel disabled={deletingPaySchedule}>{i18n._(msg`Cancel`)}</AlertDialogCancel>
 					<AlertDialogAction onClick={handleDeletePayScheduleConfirm} disabled={deletingPaySchedule} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
-						{deletingPaySchedule ? 'Deleting…' : 'Delete'}
+						{deletingPaySchedule ? i18n._(msg`Deleting…`) : i18n._(msg`Delete`)}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input'
 import { uploadDocumentAction } from '@/lib/services/documents'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface UploadDocumentDialogProps {
   open: boolean
@@ -22,6 +24,7 @@ export function UploadDocumentDialog({
 }: UploadDocumentDialogProps) {
   const router = useRouter()
   const toast = useToastHelpers()
+  const { i18n } = useLingui()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -68,7 +71,7 @@ export function UploadDocumentDialog({
     e.preventDefault()
 
     if (!selectedFile || !documentType) {
-      toast.error('Please select a file and document type')
+      toast.error(i18n._(msg`Please select a file and document type`))
       return
     }
 
@@ -84,11 +87,11 @@ export function UploadDocumentDialog({
       const result = await uploadDocumentAction(null, formData)
 
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to upload document')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to upload document`))
         return
       }
 
-      toast.success('Document uploaded successfully')
+      toast.success(i18n._(msg`Document uploaded successfully`))
       onOpenChange(false)
       router.refresh()
 
@@ -98,7 +101,7 @@ export function UploadDocumentDialog({
       setDocumentType('')
       setDescription('')
     } catch {
-      toast.error('Failed to upload document')
+      toast.error(i18n._(msg`Failed to upload document`))
     } finally {
       setIsSubmitting(false)
     }
@@ -108,13 +111,13 @@ export function UploadDocumentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload Document</DialogTitle>
+          <DialogTitle>{i18n._(msg`Upload Document`)}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="file" className="block text-sm font-medium mb-2">
-              File <span className="text-red-400">*</span>
+              {i18n._(msg`File`)} <span className="text-red-400">*</span>
             </label>
             <Input
               id="file"
@@ -125,14 +128,14 @@ export function UploadDocumentDialog({
             />
             {selectedFile && (
               <p className="text-xs text-muted-foreground mt-1">
-                Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                {i18n._(msg`Selected`)}: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
               </p>
             )}
           </div>
 
           <div>
             <label htmlFor="document_type" className="block text-sm font-medium mb-2">
-              Document Type <span className="text-red-400">*</span>
+              {i18n._(msg`Document Type`)} <span className="text-red-400">*</span>
             </label>
             <select
               id="document_type"
@@ -141,7 +144,7 @@ export function UploadDocumentDialog({
               className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select type...</option>
+              <option value="">{i18n._(msg`Select type...`)}</option>
               {types.map((type) => (
                 <option key={type.type} value={type.type}>
                   {type.display_name}
@@ -152,20 +155,20 @@ export function UploadDocumentDialog({
 
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-2">
-              Title
+              {i18n._(msg`Title`)}
             </label>
             <Input
               id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Document title (optional)"
+              placeholder={i18n._(msg`Document title (optional)`)}
             />
           </div>
 
           <div>
             <label htmlFor="description" className="block text-sm font-medium mb-2">
-              Description
+              {i18n._(msg`Description`)}
             </label>
             <textarea
               id="description"
@@ -173,13 +176,13 @@ export function UploadDocumentDialog({
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Additional notes (optional)"
+              placeholder={i18n._(msg`Additional notes (optional)`)}
             />
           </div>
 
           <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
             <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? 'Uploading...' : 'Upload'}
+              {isSubmitting ? i18n._(msg`Uploading...`) : i18n._(msg`Upload`)}
             </Button>
             <Button
               type="button"
@@ -187,7 +190,7 @@ export function UploadDocumentDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {i18n._(msg`Cancel`)}
             </Button>
           </div>
         </form>

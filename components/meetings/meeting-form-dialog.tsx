@@ -9,6 +9,8 @@ import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { toIsoUtc } from '@/lib/utils'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface MeetingFormDialogProps {
   open: boolean
@@ -23,6 +25,7 @@ export function MeetingFormDialog({
   meeting,
   availableParticipants = [],
 }: MeetingFormDialogProps) {
+  const { i18n } = useLingui()
   const router = useRouter()
   const toast = useToastHelpers()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -73,7 +76,7 @@ export function MeetingFormDialog({
     e.preventDefault()
 
     if (!title.trim() || !date || !time) {
-      toast.error('Title, date, and time are required')
+      toast.error(i18n._(msg`Title, date, and time are required`))
       return
     }
 
@@ -84,7 +87,7 @@ export function MeetingFormDialog({
       const isoDateTime = toIsoUtc(datetimeString)
       
       if (!isoDateTime) {
-        toast.error('Invalid date or time format')
+        toast.error(i18n._(msg`Invalid date or time format`))
         return
       }
 
@@ -104,15 +107,15 @@ export function MeetingFormDialog({
         : await createMeetingAction(null, formData)
 
       if (result.errors) {
-        toast.error(result.errors._form?.[0] || 'Failed to save meeting')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to save meeting`))
         return
       }
 
-      toast.success(meeting ? 'Meeting updated' : 'Meeting created')
+      toast.success(meeting ? i18n._(msg`Meeting updated`) : i18n._(msg`Meeting created`))
       onOpenChange(false)
       router.refresh()
     } catch {
-      toast.error('Failed to save meeting')
+      toast.error(i18n._(msg`Failed to save meeting`))
     } finally {
       setIsSubmitting(false)
     }
@@ -128,28 +131,28 @@ export function MeetingFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{meeting ? 'Edit Meeting' : 'Create Meeting'}</DialogTitle>
+          <DialogTitle>{meeting ? i18n._(msg`Edit Meeting`) : i18n._(msg`Create Meeting`)}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label htmlFor="title" className="block text-sm font-medium mb-1">
-                Title <span className="text-red-400">*</span>
+                {i18n._(msg`Title`)} <span className="text-red-400">*</span>
               </label>
               <Input
                 id="title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Team standup"
+                placeholder={i18n._(msg`Team standup`)}
                 required
               />
             </div>
 
             <div>
               <label htmlFor="date" className="block text-sm font-medium mb-1">
-                Date <span className="text-red-400">*</span>
+                {i18n._(msg`Date`)} <span className="text-red-400">*</span>
               </label>
               <Input
                 id="date"
@@ -162,7 +165,7 @@ export function MeetingFormDialog({
 
             <div>
               <label htmlFor="time" className="block text-sm font-medium mb-1">
-                Time <span className="text-red-400">*</span>
+                {i18n._(msg`Time`)} <span className="text-red-400">*</span>
               </label>
               <Input
                 id="time"
@@ -175,20 +178,20 @@ export function MeetingFormDialog({
 
             <div className="md:col-span-2">
               <label htmlFor="location" className="block text-sm font-medium mb-1">
-                Location
+                {i18n._(msg`Location`)}
               </label>
               <Input
                 id="location"
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Conference Room A or Zoom link"
+                placeholder={i18n._(msg`Conference Room A or Zoom link`)}
               />
             </div>
 
             <div className="md:col-span-2">
               <label htmlFor="description" className="block text-sm font-medium mb-1">
-                Description
+                {i18n._(msg`Description`)}
               </label>
               <textarea
                 id="description"
@@ -196,17 +199,17 @@ export function MeetingFormDialog({
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Meeting agenda or details..."
+                placeholder={i18n._(msg`Meeting agenda or details...`)}
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-2">
-                Participants
+                {i18n._(msg`Participants`)}
               </label>
               <div className="border border-[var(--border)] rounded-md p-3 max-h-48 overflow-y-auto space-y-2 bg-background">
                 {availableParticipants.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No users available</p>
+                  <p className="text-sm text-muted-foreground">{i18n._(msg`No users available`)}</p>
                 ) : (
                   availableParticipants.map((user) => (
                     <label
@@ -229,7 +232,9 @@ export function MeetingFormDialog({
               </div>
               {selectedParticipants.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  {selectedParticipants.length} participant{selectedParticipants.length !== 1 ? 's' : ''} selected
+                  {selectedParticipants.length === 1
+                    ? i18n._(msg`1 participant selected`)
+                    : i18n._(msg`${selectedParticipants.length} participants selected`)}
                 </p>
               )}
             </div>
@@ -237,7 +242,7 @@ export function MeetingFormDialog({
 
           <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)]">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : meeting ? 'Save Changes' : 'Create Meeting'}
+              {isSubmitting ? i18n._(msg`Saving...`) : meeting ? i18n._(msg`Save Changes`) : i18n._(msg`Create Meeting`)}
             </Button>
             <Button
               type="button"
@@ -245,7 +250,7 @@ export function MeetingFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {i18n._(msg`Cancel`)}
             </Button>
           </div>
         </form>

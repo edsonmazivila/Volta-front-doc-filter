@@ -8,6 +8,8 @@ import { toast } from 'sonner'
 import { JustificationRejectDialog } from './justification-reject-dialog'
 import { useRouter } from 'next/navigation'
 import { FileText, ExternalLink } from 'lucide-react'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface JustificationsTableProps {
   justifications: AttendanceJustification[]
@@ -22,6 +24,7 @@ const STATUS_COLORS = {
 
 export function JustificationsTable({ justifications }: JustificationsTableProps) {
   const router = useRouter()
+  const { i18n } = useLingui()
   const [processing, setProcessing] = useState<Record<string, boolean>>({})
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [selectedJustification, setSelectedJustification] = useState<AttendanceJustification | null>(null)
@@ -31,13 +34,13 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
     try {
       const result = await approveJustificationAction(id)
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to approve')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to approve`))
       } else {
-        toast.success('Justification approved')
+        toast.success(i18n._(msg`Justification approved`))
         router.refresh()
       }
     } catch {
-      toast.error('An error occurred')
+      toast.error(i18n._(msg`An error occurred`))
     } finally {
       setProcessing((prev) => ({ ...prev, [id]: false }))
     }
@@ -53,13 +56,13 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
     try {
       const result = await rejectJustificationAction(id, note)
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to reject')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to reject`))
         throw new Error('Rejection failed')
       } else {
-        toast.success('Justification rejected')
+        toast.success(i18n._(msg`Justification rejected`))
       }
     } catch {
-      toast.error('An error occurred')
+      toast.error(i18n._(msg`An error occurred`))
       throw new Error('Rejection failed')
     } finally {
       setProcessing((prev) => ({ ...prev, [id]: false }))
@@ -69,7 +72,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
   if (justifications.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-sm text-muted-foreground">No pending justifications</p>
+        <p className="text-sm text-muted-foreground">{i18n._(msg`No pending justifications`)}</p>
       </div>
     )
   }
@@ -79,20 +82,20 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
       <table className="min-w-full divide-y divide-border">
         <thead className="bg-muted/30">
           <tr className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            <th className="px-4 py-3">Employee</th>
-            <th className="px-4 py-3">Date</th>
-            <th className="px-4 py-3">Reason</th>
-            <th className="px-4 py-3">Document</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3">Submitted</th>
-            <th className="px-4 py-3 text-right">Actions</th>
+            <th className="px-4 py-3">{i18n._(msg`Employee`)}</th>
+            <th className="px-4 py-3">{i18n._(msg`Date`)}</th>
+            <th className="px-4 py-3">{i18n._(msg`Reason`)}</th>
+            <th className="px-4 py-3">{i18n._(msg`Document`)}</th>
+            <th className="px-4 py-3">{i18n._(msg`Status`)}</th>
+            <th className="px-4 py-3">{i18n._(msg`Submitted`)}</th>
+            <th className="px-4 py-3 text-right">{i18n._(msg`Actions`)}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
           {justifications.map((justification) => (
             <tr key={justification.id} className="hover:bg-muted/50">
               <td className="px-4 py-3 text-sm font-medium">
-                {justification.employee_name || `Employee #${justification.employee_id}`}
+                {justification.employee_name || `${i18n._(msg`Employee`)} #${justification.employee_id}`}
               </td>
               <td className="px-4 py-3 text-sm text-muted-foreground">
                 {new Date(justification.date).toLocaleDateString('en-US', {
@@ -111,13 +114,13 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
                     size="sm"
                     onClick={() => window.open(justification.document_url, '_blank')}
                     className="flex items-center gap-1 text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                    title={justification.document_filename || 'View document'}
+                    title={justification.document_filename || i18n._(msg`View document`)}
                   >
                     <FileText className="h-4 w-4" />
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 ) : (
-                  <span className="text-muted-foreground text-xs">No document</span>
+                  <span className="text-muted-foreground text-xs">{i18n._(msg`No document`)}</span>
                 )}
               </td>
               <td className="px-4 py-3">
@@ -145,7 +148,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
                       disabled={processing[justification.id]}
                       className="text-green-600 hover:text-green-700 hover:bg-green-50/50 dark:hover:bg-green-950/20"
                     >
-                      Approve
+                      {i18n._(msg`Approve`)}
                     </Button>
                     <Button
                       variant="ghost"
@@ -154,7 +157,7 @@ export function JustificationsTable({ justifications }: JustificationsTableProps
                       disabled={processing[justification.id]}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50/50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/20"
                     >
-                      Reject
+                      {i18n._(msg`Reject`)}
                     </Button>
                   </div>
                 ) : (

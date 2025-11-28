@@ -9,6 +9,8 @@ import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { Calendar, MapPin, User } from 'lucide-react'
 import { formatDateTime } from '@/lib/utils'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface MeetingCardProps {
   meeting: Meeting
@@ -17,6 +19,7 @@ interface MeetingCardProps {
 }
 
 export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps) {
+  const { i18n } = useLingui()
   const router = useRouter()
   const toast = useToastHelpers()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -72,15 +75,15 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
     try {
       const result = await cancelMeetingAction(meeting.id)
       if (result.errors) {
-        toast.error(result.errors._form?.[0] || 'Failed to cancel meeting')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to cancel meeting`))
         return
       }
-      toast.success('Meeting cancelled')
+      toast.success(i18n._(msg`Meeting cancelled`))
       setIsCancelledLocally(true)
       setShowCancelDialog(false)
       router.refresh()
     } catch {
-      toast.error('Failed to cancel meeting')
+      toast.error(i18n._(msg`Failed to cancel meeting`))
     } finally {
       setIsProcessing(false)
     }
@@ -91,14 +94,14 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
     try {
       const result = await deleteMeetingAction(meeting.id)
       if (result.errors) {
-        toast.error(result.errors._form?.[0] || 'Failed to delete meeting')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to delete meeting`))
         return
       }
-      toast.success('Meeting deleted')
+      toast.success(i18n._(msg`Meeting deleted`))
       setShowDeleteDialog(false)
       router.refresh()
     } catch {
-      toast.error('Failed to delete meeting')
+      toast.error(i18n._(msg`Failed to delete meeting`))
     } finally {
       setIsProcessing(false)
     }
@@ -109,14 +112,14 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
     try {
       const result = await respondToMeetingAction(meeting.id, decision)
       if (result.errors) {
-        toast.error(result.errors._form?.[0] || `Failed to ${decision} meeting`)
+        toast.error(result.errors._form?.[0] || (decision === 'accept' ? i18n._(msg`Failed to accept meeting`) : i18n._(msg`Failed to decline meeting`)))
         return
       }
-      toast.success(`Meeting ${decision}ed`)
+      toast.success(decision === 'accept' ? i18n._(msg`Meeting accepted`) : i18n._(msg`Meeting declined`))
       setResponseStatus(decision === 'accept' ? 'accepted' : 'declined')
       router.refresh()
     } catch {
-      toast.error(`Failed to ${decision} meeting`)
+      toast.error(decision === 'accept' ? i18n._(msg`Failed to accept meeting`) : i18n._(msg`Failed to decline meeting`))
     } finally {
       setIsProcessing(false)
     }
@@ -124,7 +127,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
 
   const formattedDateTime = meeting.datetime
     ? formatDateTime(meeting.datetime)
-    : 'Date TBD'
+    : i18n._(msg`Date TBD`)
 
   return (
     <div className="border border-[var(--border)] rounded-lg p-4 mb-3 bg-card">
@@ -151,7 +154,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <User className="h-3 w-3" />
             <span>
-              Organizer: <span className="font-medium">{meeting.organizer_name || 'Unknown'}</span>
+              {i18n._(msg`Organizer:`)}{' '}<span className="font-medium">{meeting.organizer_name || i18n._(msg`Unknown`)}</span>
             </span>
           </div>
 
@@ -169,7 +172,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                   : 'bg-gray-200 text-gray-800 border-gray-300'
               }`}
             >
-              {(responseStatus || userResponseStatus) === 'accepted' ? 'Accepted' : 'Declined'}
+              {(responseStatus || userResponseStatus) === 'accepted' ? i18n._(msg`Accepted`) : i18n._(msg`Declined`)}
             </span>
           ) : isOrganizer ? (
             <>
@@ -180,7 +183,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                   onClick={() => onEdit(meeting)}
                   disabled={isProcessing || isCancelledLocally || meeting.status !== 'scheduled'}
                 >
-                  Edit
+                  {i18n._(msg`Edit`)}
                 </Button>
               )}
 
@@ -192,20 +195,20 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                     disabled={isProcessing || isCancelledLocally || meeting.status !== 'scheduled'}
                     className="border-red-200 text-red-500 hover:bg-red-50 "
                   >
-                    Cancel
+                    {i18n._(msg`Cancel`)}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Cancel meeting?</AlertDialogTitle>
+                    <AlertDialogTitle>{i18n._(msg`Cancel meeting?`)}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will cancel the meeting for all participants. This action cannot be undone.
+                      {i18n._(msg`This will cancel the meeting for all participants. This action cannot be undone.`)}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isProcessing}>Keep meeting</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isProcessing}>{i18n._(msg`Keep meeting`)}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleCancel} disabled={isProcessing} className="bg-red-600 hover:bg-red-600 text-white">
-                      {isProcessing ? 'Cancelling…' : 'Cancel meeting'}
+                      {isProcessing ? i18n._(msg`Cancelling…`) : i18n._(msg`Cancel meeting`)}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -219,20 +222,20 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                     disabled={isProcessing}
                     className="border-red-300 text-red-600 hover:bg-red-50"
                   >
-                    Delete
+                    {i18n._(msg`Delete`)}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete meeting permanently?</AlertDialogTitle>
+                    <AlertDialogTitle>{i18n._(msg`Delete meeting permanently?`)}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This removes the meeting entirely. Participants will no longer see it. This cannot be undone.
+                      {i18n._(msg`This removes the meeting entirely. Participants will no longer see it. This cannot be undone.`)}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isProcessing}>{i18n._(msg`Cancel`)}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleDelete} disabled={isProcessing} className="bg-red-700 hover:bg-red-700 text-white">
-                      {isProcessing ? 'Deleting…' : 'Delete meeting'}
+                      {isProcessing ? i18n._(msg`Deleting…`) : i18n._(msg`Delete meeting`)}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -246,7 +249,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                 disabled={isProcessing}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                Accept
+                {i18n._(msg`Accept`)}
               </Button>
               <Button
                 variant="outline"
@@ -254,7 +257,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
                 onClick={() => handleRespond('decline')}
                 disabled={isProcessing}
               >
-                Decline
+                {i18n._(msg`Decline`)}
               </Button>
             </>
           ) : null}
@@ -263,7 +266,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
 
       {meeting.participants && meeting.participants.length > 0 ? (
         <div className="mt-3 pt-3 border-t border-[var(--border)]">
-          <div className="text-xs text-muted-foreground mb-2">Participants</div>
+          <div className="text-xs text-muted-foreground mb-2">{i18n._(msg`Participants`)}</div>
           <div className="flex flex-wrap gap-2">
             {meeting.participants.map((participant, idx) => (
               <span
@@ -280,7 +283,7 @@ export function MeetingCard({ meeting, currentUserId, onEdit }: MeetingCardProps
         </div>
       ) : (
         <div className="mt-3 pt-3 border-t border-[var(--border)]">
-          <div className="text-xs text-muted-foreground">No participants listed</div>
+          <div className="text-xs text-muted-foreground">{i18n._(msg`No participants listed`)}</div>
         </div>
       )}
     </div>

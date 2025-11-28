@@ -4,6 +4,8 @@ import type { Paystub } from "@/lib/types/paystubs";
 import { PaystubCard } from "@/components/paystubs/paystub-card";
 import { PaystubDetailDialog } from "@/components/paystubs/paystub-detail-dialog";
 import { useToastHelpers } from "@/components/ui/toast";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface PaystubsSectionProps {
   paystubs: Paystub[];
@@ -20,6 +22,7 @@ export function PaystubsSection({
   employeeInfo,
 }: PaystubsSectionProps) {
   const toast = useToastHelpers();
+  const { i18n } = useLingui();
   const [selectedPaystub, setSelectedPaystub] = useState<Paystub | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
@@ -37,9 +40,9 @@ export function PaystubsSection({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Downloading paystub...");
+      toast.success(i18n._(msg`Downloading paystub...`));
     } catch {
-      toast.error("Failed to download paystub");
+      toast.error(i18n._(msg`Failed to download paystub`));
     }
   }
 
@@ -58,13 +61,13 @@ export function PaystubsSection({
               )}
               {employeeInfo?.employeeId && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Employee ID: {employeeInfo.employeeId}
+                  {i18n._(msg`Employee ID`)}: {employeeInfo.employeeId}
                 </p>
               )}
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground mb-1">
-                Total Paystubs
+                {i18n._(msg`Total Paystubs`)}
               </p>
               <p className="text-3xl font-bold text-blue-600">
                 {totalPaystubs}
@@ -76,9 +79,9 @@ export function PaystubsSection({
 
       {/* Paystub History Header */}
       <div>
-        <h2 className="text-lg font-medium">Paystub History</h2>
+        <h2 className="text-lg font-medium">{i18n._(msg`Paystub History`)}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          View and download your paystubs
+          {i18n._(msg`View and download your paystubs`)}
         </p>
       </div>
 
@@ -86,10 +89,10 @@ export function PaystubsSection({
       {paystubs.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-[var(--border)] rounded-lg">
           <div className="text-muted-foreground">
-            No paystubs found
+            {i18n._(msg`No paystubs found`)}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Your paystubs will appear here once they are generated
+            {i18n._(msg`Your paystubs will appear here once they are generated`)}
           </p>
         </div>
       ) : (

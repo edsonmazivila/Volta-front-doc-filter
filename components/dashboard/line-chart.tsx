@@ -1,11 +1,15 @@
+'use client'
 import { useId } from 'react'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 export function LineChartPlaceholder({ className = '' }: { className?: string }) {
   const id = useId()
+  const { i18n } = useLingui()
   return (
     <svg className={className} viewBox='0 0 600 240' role='img' aria-labelledby={`title-${id} desc-${id}`}>
-      <title id={`title-${id}`}>Payroll trend line chart</title>
-      <desc id={`desc-${id}`}>Displays total payroll amounts across periods</desc>
+      <title id={`title-${id}`}>{i18n._(msg`Payroll trend line chart`)}</title>
+      <desc id={`desc-${id}`}>{i18n._(msg`Displays total payroll amounts across periods`)}</desc>
       <defs>
         <linearGradient id={`g-${id}`} x1='0' x2='0' y1='0' y2='1'>
           <stop offset='0%' stopColor='rgba(59,130,246,0.65)' />

@@ -12,6 +12,8 @@ import { Button } from "@/components/ui";
 import { FormField, Input, Checkbox } from "./form-field";
 import { PasswordInput, PasswordStrength } from "./password-input";
 import type { AnyZodObject, TypeOf } from "zod";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface AuthFormProps<TSchema extends AnyZodObject> {
   title: string;
@@ -39,6 +41,7 @@ export function AuthForm<TSchema extends AnyZodObject>({
   isLoading = false,
   footer,
 }: AuthFormProps<TSchema>) {
+  const { i18n } = useLingui();
   const methods = useForm<TypeOf<TSchema>>({
     resolver: zodResolver(schema),
     defaultValues,
@@ -74,7 +77,7 @@ export function AuthForm<TSchema extends AnyZodObject>({
               disabled={methods.formState.isSubmitting || isLoading}
             >
               {methods.formState.isSubmitting || isLoading
-                ? "Please wait..."
+                ? i18n._(msg`Please wait...`)
                 : submitText}
             </Button>
           </form>
@@ -88,6 +91,7 @@ export function AuthForm<TSchema extends AnyZodObject>({
 
 // Reusable form field components
 export function EmailField() {
+  const { i18n } = useLingui();
   const {
     register,
     formState: { errors, isSubmitting },
@@ -95,7 +99,7 @@ export function EmailField() {
 
   return (
     <FormField
-      label="Email address"
+      label={i18n._(msg`Email address`)}
       error={errors.email?.message as string}
       required
     >
@@ -119,6 +123,7 @@ export function PasswordField({
   placeholder = "••••••••",
   showStrength = false,
 }: PasswordFieldProps) {
+  const { i18n } = useLingui();
   const {
     register,
     formState: { errors, isSubmitting },
@@ -128,7 +133,7 @@ export function PasswordField({
 
   return (
     <FormField
-      label="Password"
+      label={i18n._(msg`Password`)}
       error={errors.password?.message as string}
       required
     >
@@ -144,13 +149,14 @@ export function PasswordField({
 }
 
 export function ConfirmPasswordField() {
+  const { i18n } = useLingui();
   const {
     register,
     formState: { errors, isSubmitting },
   } = useFormContext();
   return (
     <FormField
-      label="Confirm password"
+      label={i18n._(msg`Confirm password`)}
       error={errors.confirmPassword?.message as string}
       required
     >
@@ -165,13 +171,14 @@ export function ConfirmPasswordField() {
 }
 
 export function NameField() {
+  const { i18n } = useLingui();
   const {
     register,
     formState: { errors, isSubmitting },
   } = useFormContext();
   return (
     <FormField
-      label="Full name"
+      label={i18n._(msg`Full name`)}
       error={errors.name?.message as string}
       required
     >
@@ -187,13 +194,14 @@ export function NameField() {
 }
 
 export function CompanyNameField() {
+  const { i18n } = useLingui();
   const {
     register,
     formState: { errors, isSubmitting },
   } = useFormContext();
   return (
     <FormField
-      label="Company name"
+      label={i18n._(msg`Company name`)}
       error={errors.companyName?.message as string}
       required
     >
@@ -209,6 +217,7 @@ export function CompanyNameField() {
 }
 
 export function TermsField() {
+  const { i18n } = useLingui();
   const {
     register,
     formState: { errors, isSubmitting },
@@ -218,19 +227,19 @@ export function TermsField() {
       <Checkbox
         label={
           <>
-            I agree to the{" "}
+            {i18n._(msg`I agree to the`)}{" "}
             <a
               href="/terms"
               className="text-blue-400 hover:text-blue-300 underline"
             >
-              Terms of Service
+              {i18n._(msg`Terms of Service`)}
             </a>{" "}
-            and{" "}
+            {i18n._(msg`and`)}{" "}
             <a
               href="/privacy"
               className="text-blue-400 hover:text-blue-300 underline"
             >
-              Privacy Policy
+              {i18n._(msg`Privacy Policy`)}
             </a>
           </>
         }

@@ -5,7 +5,8 @@ import {
   deleteUserAction,
   toggleUserStatusAction,
 } from "@/lib/services/users";
-
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 type EmployeeListParams = {
   status?: 'active' | 'inactive' | 'all';
@@ -43,6 +44,7 @@ interface EmployeeTableProps {
 export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { i18n } = useLingui();
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<EmployeeListParams["status"]>("all");
@@ -80,11 +82,11 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
     setIsSubmitting(true);
     try {
       await deleteUserAction(employee.id);
-      showToast({ type: "success", message: "Employee deleted successfully" });
+      showToast({ type: "success", message: i18n._(msg`Employee deleted successfully`) });
       setDeletingEmployee(null);
       router.refresh();
     } catch {
-      showToast({ type: "error", message: "Failed to delete employee" });
+      showToast({ type: "error", message: i18n._(msg`Failed to delete employee`) });
     } finally {
       setIsSubmitting(false);
     }
@@ -96,28 +98,28 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       await toggleUserStatusAction(employeeId, newStatus);
       showToast({
         type: "success",
-        message: newStatus ? "Employee activated successfully" : "Employee deactivated successfully",
+        message: newStatus ? i18n._(msg`Employee activated successfully`) : i18n._(msg`Employee deactivated successfully`),
       });
       router.refresh();
     } catch {
-      showToast({ type: "error", message: "Failed to update employee status" });
+      showToast({ type: "error", message: i18n._(msg`Failed to update employee status`) });
     }
   };
 
   const handleDeactivateConfirm = async () => {
     if (!employeeToDeactivate) return;
-    
+
     try {
       await toggleUserStatusAction(employeeToDeactivate.id, false);
       showToast({
         type: "success",
-        message: "Employee deactivated successfully",
+        message: i18n._(msg`Employee deactivated successfully`),
       });
       setDeactivateOpen(false);
       setEmployeeToDeactivate(null);
       router.refresh();
     } catch {
-      showToast({ type: "error", message: "Failed to deactivate employee" });
+      showToast({ type: "error", message: i18n._(msg`Failed to deactivate employee`) });
     }
   };
 
@@ -141,25 +143,25 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       if (failed === 0) {
         showToast({
           type: "success",
-          message: `Successfully deleted ${succeeded} employee${
-            succeeded > 1 ? "s" : ""
-          }`,
+          message: succeeded > 1
+            ? i18n._(msg`Successfully deleted ${succeeded} employees`)
+            : i18n._(msg`Successfully deleted 1 employee`),
         });
       } else if (succeeded === 0) {
         showToast({
           type: "error",
-          message: `Failed to delete all ${failed} employees. Please try again.`,
+          message: i18n._(msg`Failed to delete all ${failed} employees. Please try again.`),
         });
       } else {
         showToast({
           type: "warning",
-          message: `Deleted ${succeeded} employee${
-            succeeded > 1 ? "s" : ""
-          }, but ${failed} failed. Please review and retry.`,
+          message: succeeded > 1
+            ? i18n._(msg`Deleted ${succeeded} employees, but ${failed} failed. Please review and retry.`)
+            : i18n._(msg`Deleted 1 employee, but ${failed} failed. Please review and retry.`),
         });
       }
     } catch {
-      showToast({ type: "error", message: "An unexpected error occurred" });
+      showToast({ type: "error", message: i18n._(msg`An unexpected error occurred`) });
       setSelectedIds(new Set());
       setShowBulkDelete(false);
     } finally {
@@ -254,7 +256,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
       {selectedIds.size > 0 && (
         <div className="p-2 bg-blue-500/10 border-b border-blue-500/20 flex sm:items-center flex-col sm:flex-row sm:justify-between">
           <span className="text-sm font-medium mb-3 sm:mb-0">
-            {selectedIds.size} selected
+            {i18n._(msg`${selectedIds.size} selected`)}
           </span>
           <div className="flex gap-2">
             <Button
@@ -262,14 +264,14 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
               variant="outline"
               onClick={() => setSelectedIds(new Set())}
             >
-              Clear
+              {i18n._(msg`Clear`)}
             </Button>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setShowBulkDelete(true)}
             >
-              Delete Selected
+              {i18n._(msg`Delete Selected`)}
             </Button>
           </div>
         </div>
@@ -280,17 +282,17 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Search employees"
+          placeholder={i18n._(msg`Search employees`)}
         />
         <Select
           value={department || "all"}
           onValueChange={(v) => setDepartment(v === "all" ? "" : v)}
         >
           <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
-            <SelectValue placeholder="All Departments" />
+            <SelectValue placeholder={i18n._(msg`All Departments`)} />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
-            <SelectItem value="all">All Departments</SelectItem>
+            <SelectItem value="all">{i18n._(msg`All Departments`)}</SelectItem>
             {departments.map((dept) => {
               const val = String(dept || "");
               return (
@@ -306,12 +308,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           onValueChange={(v) => setStatus(v as EmployeeListParams["status"])}
         >
           <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={i18n._(msg`Status`)} />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="all">{i18n._(msg`All Status`)}</SelectItem>
+            <SelectItem value="active">{i18n._(msg`Active`)}</SelectItem>
+            <SelectItem value="inactive">{i18n._(msg`Inactive`)}</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -319,12 +321,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           onValueChange={(v) => setLogin(v as EmployeeListParams["login"])}
         >
           <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
-            <SelectValue placeholder="Login Access" />
+            <SelectValue placeholder={i18n._(msg`Login Access`)} />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
-            <SelectItem value="all">All Login Access</SelectItem>
-            <SelectItem value="can_login">Can Login</SelectItem>
-            <SelectItem value="cannot_login">Cannot Login</SelectItem>
+            <SelectItem value="all">{i18n._(msg`All Login Access`)}</SelectItem>
+            <SelectItem value="can_login">{i18n._(msg`Can Login`)}</SelectItem>
+            <SelectItem value="cannot_login">{i18n._(msg`Cannot Login`)}</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -332,12 +334,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           onValueChange={(v) => setSort(v as EmployeeListParams["sort"])}
         >
           <SelectTrigger className="w-full sm:w-[180px] bg-background border-[var(--border)]">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={i18n._(msg`Sort by`)} />
           </SelectTrigger>
           <SelectContent className="bg-background border-[var(--border)]">
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="status">Status</SelectItem>
-            <SelectItem value="department">Department</SelectItem>
+            <SelectItem value="name">{i18n._(msg`Name`)}</SelectItem>
+            <SelectItem value="status">{i18n._(msg`Status`)}</SelectItem>
+            <SelectItem value="department">{i18n._(msg`Department`)}</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -345,7 +347,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           onClick={() => router.push("/dashboard/employees/new")}
           className="w-full sm:w-auto sm:ml-auto"
         >
-          Add Employee
+          {i18n._(msg`Add Employee`)}
         </Button>
       </div>
       <div className="overflow-x-auto">
@@ -365,24 +367,24 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
               </th>
               <th className="text-left p-3 min-w-[200px]">
                 <div className="flex items-center gap-2">
-                  Name
+                  {i18n._(msg`Name`)}
                   <span className="text-xs text-muted-foreground">
-                    (click to view details)
+                    {i18n._(msg`(click to view details)`)}
                   </span>
                 </div>
               </th>
-              <th className="text-left p-3 min-w-[180px]">Email</th>
-              <th className="text-left p-3 min-w-[120px]">Role</th>
-              <th className="text-left p-3 min-w-[120px]">Department</th>
-              <th className="text-left p-3 min-w-[100px]">Status</th>
-              <th className="text-left p-3 min-w-[100px]">Actions</th>
+              <th className="text-left p-3 min-w-[180px]">{i18n._(msg`Email`)}</th>
+              <th className="text-left p-3 min-w-[120px]">{i18n._(msg`Role`)}</th>
+              <th className="text-left p-3 min-w-[120px]">{i18n._(msg`Department`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Status`)}</th>
+              <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Actions`)}</th>
             </tr>
           </thead>
           <tbody>
             {filteredAndSortedItems.length === 0 ? (
               <tr>
                 <td className="p-4" colSpan={7}>
-                  No employees found
+                  {i18n._(msg`No employees found`)}
                 </td>
               </tr>
             ) : (
@@ -416,7 +418,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                           : "bg-red-500/20 text-red-400"
                       }`}
                     >
-                      {e.is_active ? "Active" : "Inactive"}
+                      {e.is_active ? i18n._(msg`Active`) : i18n._(msg`Inactive`)}
                     </span>
                   </td>
                   <td className="p-3 min-w-[100px]">
@@ -439,7 +441,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                           }}
                         >
                           <Eye className="mr-2 h-4 w-4" />
-                          View Details
+                          {i18n._(msg`View Details`)}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(event) => {
@@ -449,14 +451,13 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                             } else {
                               showToast({
                                 type: "error",
-                                message:
-                                  "Cannot edit employee: Invalid employee ID",
+                                message: i18n._(msg`Cannot edit employee: Invalid employee ID`),
                               });
                             }
                           }}
                         >
                           <Edit className="mr-2 h-4 w-4" />
-                          Edit
+                          {i18n._(msg`Edit`)}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(event) => {
@@ -474,12 +475,12 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                           {e.is_active ? (
                             <>
                               <UserX className="mr-2 h-4 w-4" />
-                              Deactivate
+                              {i18n._(msg`Deactivate`)}
                             </>
                           ) : (
                             <>
                               <UserCheck className="mr-2 h-4 w-4" />
-                              Activate
+                              {i18n._(msg`Activate`)}
                             </>
                           )}
                         </DropdownMenuItem>
@@ -491,7 +492,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                           className="text-red-400 focus:text-red-400"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          {i18n._(msg`Delete`)}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -528,7 +529,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
         <DeleteEmployeeDialog
           employee={{
             id: "",
-            full_name: `${selectedIds.size} employees`,
+            full_name: i18n._(msg`${selectedIds.size} employees`),
             email: "",
             role: "employee",
             company_id: "",
@@ -552,12 +553,10 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           setDeactivateOpen(open);
           if (!open) setEmployeeToDeactivate(null);
         }}
-        title="Deactivate Employee?"
-        description={`Are you sure you want to deactivate "${employeeToDeactivate?.full_name || employeeToDeactivate?.email}"? 
-
-This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed.`}
-        confirmText="Deactivate"
-        cancelText="Cancel"
+        title={i18n._(msg`Deactivate Employee?`)}
+        description={i18n._(msg`Are you sure you want to deactivate "${employeeToDeactivate?.full_name ?? employeeToDeactivate?.email ?? ''}"? This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed.`)}
+        confirmText={i18n._(msg`Deactivate`)}
+        cancelText={i18n._(msg`Cancel`)}
         onConfirm={handleDeactivateConfirm}
         variant="destructive"
       />

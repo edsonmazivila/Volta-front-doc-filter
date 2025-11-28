@@ -7,6 +7,8 @@ import type { User } from '@/lib/services/users'
 import { Button } from '@/components/ui'
 import { Input } from '../ui/input'
 import { toast } from 'sonner'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface AttendanceFormProps {
   employees: User[]
@@ -16,6 +18,7 @@ interface AttendanceFormProps {
 }
 
 export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: AttendanceFormProps) {
+  const { i18n } = useLingui()
   const [createState, createAction, createPending] = useActionState(
     createAttendanceAction,
     null
@@ -36,7 +39,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
 
   // Handle success
   if (state && 'success' in state && state.success) {
-    toast.success(editRecord ? 'Attendance updated' : 'Attendance recorded')
+    toast.success(editRecord ? i18n._(msg`Attendance updated`) : i18n._(msg`Attendance recorded`))
     onSuccess?.()
   }
 
@@ -46,7 +49,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
       {!editRecord && (
         <div>
           <label htmlFor="employee_id" className="block text-sm font-medium mb-2">
-            Employee *
+            {i18n._(msg`Employee`)} *
           </label>
           <select
             name="employee_id"
@@ -56,7 +59,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
             onChange={(e) => setSelectedEmployee(e.target.value)}
             className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary [&_option]:bg-background [&_option]:text-foreground"
           >
-            <option value="" className="bg-background text-foreground">Select employee</option>
+            <option value="" className="bg-background text-foreground">{i18n._(msg`Select employee`)}</option>
             {employees.map((emp) => (
               <option key={emp.id} value={emp.id} className="bg-background text-foreground">
                 {emp.full_name || emp.email} - {emp.email}
@@ -72,7 +75,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
       {/* Date */}
       <div>
         <label htmlFor="date" className="block text-sm font-medium mb-2">
-          Date *
+          {i18n._(msg`Date`)} *
         </label>
         <Input
           type="date"
@@ -89,7 +92,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
       {/* Status */}
       <div>
         <label htmlFor="status" className="block text-sm font-medium mb-2">
-          Status *
+          {i18n._(msg`Status`)} *
         </label>
         <select
           name="status"
@@ -99,11 +102,11 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
           onChange={(e) => setSelectedStatus(e.target.value as AttendanceRecord['status'])}
           className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary [&_option]:bg-background [&_option]:text-foreground"
         >
-          <option value="present" className="bg-background text-foreground">Present</option>
-          <option value="absent" className="bg-background text-foreground">Absent</option>
-          <option value="late" className="bg-background text-foreground">Late</option>
-          <option value="half_day" className="bg-background text-foreground">Half Day</option>
-          <option value="on_leave" className="bg-background text-foreground">On Leave</option>
+          <option value="present" className="bg-background text-foreground">{i18n._(msg`Present`)}</option>
+          <option value="absent" className="bg-background text-foreground">{i18n._(msg`Absent`)}</option>
+          <option value="late" className="bg-background text-foreground">{i18n._(msg`Late`)}</option>
+          <option value="half_day" className="bg-background text-foreground">{i18n._(msg`Half Day`)}</option>
+          <option value="on_leave" className="bg-background text-foreground">{i18n._(msg`On Leave`)}</option>
         </select>
         {state && 'errors' in state && state.errors && 'status' in state.errors && state.errors.status && (
           <p className="text-sm text-red-500 mt-1">{state.errors.status[0]}</p>
@@ -115,7 +118,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="clock_in" className="block text-sm font-medium mb-2">
-              Clock In
+              {i18n._(msg`Clock In`)}
             </label>
             <Input
               type="time"
@@ -126,7 +129,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
           </div>
           <div>
             <label htmlFor="clock_out" className="block text-sm font-medium mb-2">
-              Clock Out
+              {i18n._(msg`Clock Out`)}
             </label>
             <Input
               type="time"
@@ -142,7 +145,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
       {(selectedStatus === 'absent' || selectedStatus === 'late') && (
         <div>
           <label htmlFor="justification" className="block text-sm font-medium mb-2">
-            Justification
+            {i18n._(msg`Justification`)}
           </label>
           <textarea
             name="justification"
@@ -150,7 +153,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
             rows={3}
             className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             defaultValue={editRecord?.justification}
-            placeholder="Provide a reason..."
+            placeholder={i18n._(msg`Provide a reason...`)}
           />
           {state && 'errors' in state && state.errors && 'justification' in state.errors && state.errors.justification && (
             <p className="text-sm text-red-500 mt-1">{state.errors.justification[0]}</p>
@@ -168,11 +171,11 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
       {/* Actions */}
       <div className="flex gap-3 pt-4">
         <Button type="submit" disabled={pending}>
-          {pending ? 'Saving...' : editRecord ? 'Update' : 'Record Attendance'}
+          {pending ? i18n._(msg`Saving...`) : editRecord ? i18n._(msg`Update`) : i18n._(msg`Record Attendance`)}
         </Button>
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {i18n._(msg`Cancel`)}
           </Button>
         )}
       </div>

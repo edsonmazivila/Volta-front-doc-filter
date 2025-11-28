@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui'
 import { Download } from 'lucide-react'
 import type { Document } from '@/lib/services/documents'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface DocumentViewDialogProps {
 	open: boolean
@@ -18,14 +20,15 @@ export function DocumentViewDialog({
 	document: doc,
 	documentId
 }: DocumentViewDialogProps) {
+	const { i18n } = useLingui()
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className='max-w-4xl max-h-[90vh] flex flex-col'>
 				<DialogHeader>
-					<DialogTitle>Document Details</DialogTitle>
+					<DialogTitle>{i18n._(msg`Document Details`)}</DialogTitle>
 					<DialogDescription>
-						View and download the document.
+						{i18n._(msg`View and download the document.`)}
 					</DialogDescription>
 				</DialogHeader>
 				{doc ? (
@@ -33,15 +36,15 @@ export function DocumentViewDialog({
 						{/* Document Info */}
 						<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm'>
 							<div>
-								<span className='text-muted-foreground'>Title:</span>{' '}
+								<span className='text-muted-foreground'>{i18n._(msg`Title:`)}</span>{' '}
 								<span className='font-medium'>{doc.title || '-'}</span>
 							</div>
 							<div>
-								<span className='text-muted-foreground'>Type:</span>{' '}
+								<span className='text-muted-foreground'>{i18n._(msg`Type:`)}</span>{' '}
 								<span className='font-medium uppercase'>{doc.document_type}</span>
 							</div>
 							<div>
-								<span className='text-muted-foreground'>Status:</span>{' '}
+								<span className='text-muted-foreground'>{i18n._(msg`Status:`)}</span>{' '}
 								<span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
 									doc.document_status === 'approved' ? 'bg-green-500/20 text-green-400' :
 									doc.document_status === 'rejected' ? 'bg-red-500/20 text-red-400' :
@@ -52,31 +55,31 @@ export function DocumentViewDialog({
 								</span>
 							</div>
 							<div>
-								<span className='text-muted-foreground'>Uploaded:</span>{' '}
+								<span className='text-muted-foreground'>{i18n._(msg`Uploaded:`)}</span>{' '}
 								<span className='font-medium'>{doc.created_at?.slice(0, 10) || '-'}</span>
 							</div>
 							{doc.access_level && (
 								<div>
-									<span className='text-muted-foreground'>Access level:</span>{' '}
+									<span className='text-muted-foreground'>{i18n._(msg`Access level:`)}</span>{' '}
 									<span className='font-medium'>{doc.access_level}</span>
 								</div>
 							)}
 							{(doc.is_confidential !== undefined) && (
 								<div>
-									<span className='text-muted-foreground'>Confidential:</span>{' '}
-									<span className='font-medium'>{doc.is_confidential ? 'Yes' : 'No'}</span>
+									<span className='text-muted-foreground'>{i18n._(msg`Confidential:`)}</span>{' '}
+									<span className='font-medium'>{doc.is_confidential ? i18n._(msg`Yes`) : i18n._(msg`No`)}</span>
 								</div>
 							)}
 
 							{doc.approved_by_full_name && (
 								<div>
-									<span className='text-muted-foreground'>Approved by:</span>{' '}
+									<span className='text-muted-foreground'>{i18n._(msg`Approved by:`)}</span>{' '}
 									<span className='font-medium'>{doc.approved_by_full_name}</span>
 								</div>
 							)}
 							{doc.approved_at && (
 								<div>
-									<span className='text-muted-foreground'>Approved at:</span>{' '}
+									<span className='text-muted-foreground'>{i18n._(msg`Approved at:`)}</span>{' '}
 									<span className='font-medium'>{doc.approved_at.slice(0, 19).replace('T', ' ')}</span>
 								</div>
 							)}
@@ -88,7 +91,7 @@ export function DocumentViewDialog({
 							<iframe
 								className='w-full h-full min-h-[400px]'
 								src={`/api/documents/${documentId}/preview`}
-								title='Document preview'
+								title={i18n._(msg`Document preview`)}
 							/>
 						</div>
 
@@ -98,7 +101,7 @@ export function DocumentViewDialog({
 								variant='outline'
 								onClick={() => onOpenChange(false)}
 							>
-								Close
+								{i18n._(msg`Close`)}
 							</Button>
 							<Button
 								onClick={() => {
@@ -111,12 +114,12 @@ export function DocumentViewDialog({
 								}}
 							>
 								<Download className='h-4 w-4 mr-2' />
-								Download
+								{i18n._(msg`Download`)}
 							</Button>
 						</div>
 					</div>
 				) : (
-					<div className='text-sm text-muted-foreground text-center py-8'>Loading…</div>
+					<div className='text-sm text-muted-foreground text-center py-8'>{i18n._(msg`Loading…`)}</div>
 				)}
 			</DialogContent>
 		</Dialog>

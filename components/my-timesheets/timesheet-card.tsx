@@ -1,4 +1,3 @@
-
 'use client'
 import { format } from 'date-fns'
 import { Calendar, Clock, FileText, Send, Trash2, Edit } from 'lucide-react'
@@ -9,6 +8,8 @@ import { submitMyTimesheetAction, deleteMyTimesheetAction } from '@/lib/services
 import { toast } from 'sonner'
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface TimesheetCardProps {
   timesheet: MyTimesheet
@@ -18,6 +19,7 @@ interface TimesheetCardProps {
 export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { i18n } = useLingui()
 
   const statusColors = {
     draft: 'bg-gray-500',
@@ -36,10 +38,10 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
     startTransition(async () => {
       try {
         await submitMyTimesheetAction(timesheet.id)
-        toast.success('Timesheet submitted successfully')
+        toast.success(i18n._(msg`Timesheet submitted successfully`))
         router.refresh()
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to submit timesheet')
+        toast.error(error instanceof Error ? error.message : i18n._(msg`Failed to submit timesheet`))
       }
     })
   }
@@ -47,15 +49,15 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
   function handleDelete() {
     if (!canDelete) return
 
-    if (!confirm('Are you sure you want to delete this timesheet?')) return
+    if (!confirm(i18n._(msg`Are you sure you want to delete this timesheet?`))) return
 
     startTransition(async () => {
       try {
         await deleteMyTimesheetAction(timesheet.id)
-        toast.success('Timesheet deleted successfully')
+        toast.success(i18n._(msg`Timesheet deleted successfully`))
         router.refresh()
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to delete timesheet')
+        toast.error(error instanceof Error ? error.message : i18n._(msg`Failed to delete timesheet`))
       }
     })
   }
@@ -80,7 +82,7 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              {timesheet.total_hours} hours
+              {timesheet.total_hours} {i18n._(msg`hours`)}
             </span>
           </div>
         </div>
@@ -98,7 +100,7 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
 
       {timesheet.submitted_at && (
         <div className="text-xs text-muted-foreground mb-3">
-          Submitted: {format(new Date(timesheet.submitted_at), 'MMM d, yyyy h:mm a')}
+          {i18n._(msg`Submitted`)}: {format(new Date(timesheet.submitted_at), 'MMM d, yyyy h:mm a')}
         </div>
       )}
 
@@ -112,7 +114,7 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
             className="flex-1"
           >
             <Edit className="w-4 h-4 mr-1" />
-            Edit
+            {i18n._(msg`Edit`)}
           </Button>
         )}
         {canSubmit && (
@@ -124,7 +126,7 @@ export function TimesheetCard({ timesheet, onEdit }: TimesheetCardProps) {
             className="flex-1"
           >
             <Send className="w-4 h-4 mr-1" />
-            Submit
+            {i18n._(msg`Submit`)}
           </Button>
         )}
         {canDelete && (
