@@ -608,6 +608,7 @@ msgstr "Data"
 #: components/attendance/my-attendance-section.tsx:272
 #: components/payroll/payroll-section.tsx:292
 #: components/timesheets/timesheet-form-dialog.tsx:184
+#: components/timesheets/timesheet-table.tsx:91
 msgid "Status"
 msgstr "Estado"
 
@@ -766,6 +767,7 @@ msgstr "Comece por criar um novo registo de assiduidade"
 
 #: components/attendance/attendance-table.tsx:100
 #: components/timesheets/timesheet-form-dialog.tsx:106
+#: components/timesheets/timesheet-table.tsx:84
 msgid "Employee"
 msgstr "Colaborador"
 
@@ -776,20 +778,23 @@ msgstr "Horas"
 
 #: components/attendance/attendance-table.tsx:107
 #: components/payroll/payroll-section.tsx:293
+#: components/timesheets/timesheet-table.tsx:92
 msgid "Actions"
 msgstr "Ações"
 
 #: components/attendance/attendance-table.tsx:165
+#: components/timesheets/timesheet-table.tsx:151
 msgid "Edit"
 msgstr "Editar"
 
 #: components/attendance/attendance-table.tsx:174
-msgid "Deleting..."
-msgstr "A eliminar..."
-
-#: components/attendance/attendance-table.tsx:174
+#: components/timesheets/timesheet-table.tsx:194
 msgid "Delete"
 msgstr "Eliminar"
+
+#: components/attendance/attendance-table.tsx:174
+msgid "Deleting..."
+msgstr "A eliminar..."
 
 #: components/attendance/my-attendance-section.tsx:86
 #: components/attendance/my-attendance-section.tsx:92
@@ -859,6 +864,8 @@ msgstr "Histórico de Assiduidade"
 
 #: components/attendance/my-attendance-section.tsx:276
 #: components/timesheets/timesheet-form-dialog.tsx:207
+#: components/timesheets/timesheet-table.tsx:90
+#: components/timesheets/timesheet-view-dialog.tsx:175
 msgid "Notes"
 msgstr "Notas"
 
@@ -1228,18 +1235,25 @@ msgid "Pay Period End"
 msgstr "Fim do Período de Pagamento"
 
 #: components/timesheets/timesheet-form-dialog.tsx:149
+#: components/timesheets/timesheet-view-dialog.tsx:147
 msgid "Regular Hours"
 msgstr "Horas Normais"
 
 #: components/timesheets/timesheet-form-dialog.tsx:161
+#: components/timesheets/timesheet-view-dialog.tsx:154
 msgid "Overtime Hours"
 msgstr "Horas Extraordinárias"
 
 #: components/timesheets/timesheet-form-dialog.tsx:176
+#: components/timesheets/timesheet-table.tsx:89
+#: components/timesheets/timesheet-view-dialog.tsx:161
 msgid "Total Hours"
 msgstr "Total de Horas"
 
 #: components/timesheets/timesheet-form-dialog.tsx:178
+#: components/timesheets/timesheet-view-dialog.tsx:149
+#: components/timesheets/timesheet-view-dialog.tsx:156
+#: components/timesheets/timesheet-view-dialog.tsx:163
 msgid "hours"
 msgstr "horas"
 
@@ -1266,3 +1280,65 @@ msgstr "Rejeitado"
 #: components/timesheets/timesheet-form-dialog.tsx:213
 msgid "Saving…"
 msgstr "A guardar…"
+
+#: components/timesheets/timesheet-table.tsx:64
+#: components/timesheets/timesheet-table.tsx:99
+msgid "No timesheets found"
+msgstr "Nenhuma folha de horas encontrada"
+
+#: components/timesheets/timesheet-table.tsx:67
+msgid "New Timesheet"
+msgstr "Nova Folha de Horas"
+
+#: components/timesheets/timesheet-table.tsx:85
+msgid "click to view details"
+msgstr "clique para ver detalhes"
+
+#: components/timesheets/timesheet-table.tsx:88
+#: components/timesheets/timesheet-view-dialog.tsx:106
+msgid "Pay Period"
+msgstr "Período de Pagamento"
+
+#: components/timesheets/timesheet-table.tsx:142
+msgid "View Details"
+msgstr "Ver Detalhes"
+
+#: components/timesheets/timesheet-table.tsx:161
+msgid "Submit"
+msgstr "Submeter"
+
+#: components/timesheets/timesheet-table.tsx:172
+msgid "Approve"
+msgstr "Aprovar"
+
+#: components/timesheets/timesheet-table.tsx:183
+msgid "Reject"
+msgstr "Rejeitar"
+
+#: components/timesheets/timesheet-view-dialog.tsx:71
+msgid "Timesheet Details"
+msgstr "Detalhes da Folha de Horas"
+
+#: components/timesheets/timesheet-view-dialog.tsx:102
+msgid "Period Information"
+msgstr "Informação do Período"
+
+#: components/timesheets/timesheet-view-dialog.tsx:116
+msgid "Start Date"
+msgstr "Data de Início"
+
+#: components/timesheets/timesheet-view-dialog.tsx:123
+msgid "End Date"
+msgstr "Data de Fim"
+
+#: components/timesheets/timesheet-view-dialog.tsx:131
+msgid "Submitted At"
+msgstr "Submetido Em"
+
+#: components/timesheets/timesheet-view-dialog.tsx:143
+msgid "Hours Information"
+msgstr "Informação de Horas"
+
+#: components/timesheets/timesheet-view-dialog.tsx:188
+msgid "Close"
+msgstr "Fechar"
