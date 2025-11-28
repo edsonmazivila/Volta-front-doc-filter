@@ -87,6 +87,7 @@ msgid "My Leaves"
 msgstr "As Minhas Ausências"
 
 #: app/dashboard/my-timesheets/page.tsx:14
+#: components/my-timesheets/my-timesheets-section.tsx:57
 msgid "My Timesheets"
 msgstr "As Minhas Folhas de Horas"
 
@@ -129,6 +130,7 @@ msgstr "Ver a Minha Assiduidade"
 #: components/leaves/team-balances-table.tsx:79
 #: components/leaves/team-balances-table.tsx:89
 #: components/leaves/team-balances-table.tsx:99
+#: components/my-documents/my-documents-section.tsx:181
 msgid "Pending"
 msgstr "Pendente"
 
@@ -650,6 +652,7 @@ msgstr "Data"
 #: components/employees/employee-table.tsx:379
 #: components/leaves/leave-table.tsx:102
 #: components/leaves/my-leaves-section.tsx:248
+#: components/my-documents/my-documents-section.tsx:173
 #: components/payroll/payroll-section.tsx:292
 #: components/timesheets/timesheet-form-dialog.tsx:196
 #: components/timesheets/timesheet-table.tsx:91
@@ -695,6 +698,8 @@ msgstr "Opcional"
 #: components/company/company-documents-section.tsx:182
 #: components/company/company-documents-section.tsx:382
 #: components/documents/document-upload-form-dialog.tsx:94
+#: components/my-documents/my-documents-section.tsx:147
+#: components/my-documents/upload-document-dialog.tsx:114
 msgid "Upload Document"
 msgstr "Carregar Documento"
 
@@ -703,6 +708,7 @@ msgid "Supported: PDF, DOC, DOCX, JPG, PNG (Max 10MB)"
 msgstr "Suportados: PDF, DOC, DOCX, JPG, PNG (Máx. 10MB)"
 
 #: components/attendance/attendance-form-dialog.tsx:314
+#: components/my-documents/edit-document-dialog.tsx:155
 msgid "New file"
 msgstr "Novo ficheiro"
 
@@ -723,6 +729,7 @@ msgid "Current document"
 msgstr "Documento atual"
 
 #: components/attendance/attendance-form-dialog.tsx:354
+#: components/my-documents/document-card.tsx:80
 msgid "View document"
 msgstr "Ver documento"
 
@@ -732,6 +739,7 @@ msgstr "Substituir por novo documento"
 
 #: components/attendance/attendance-form-dialog.tsx:394
 #: components/company/company-documents-section.tsx:465
+#: components/my-documents/edit-document-dialog.tsx:213
 msgid "Updating..."
 msgstr "A atualizar..."
 
@@ -772,6 +780,10 @@ msgstr "Atualizar Assiduidade"
 #: components/meetings/meeting-card.tsx:198
 #: components/meetings/meeting-card.tsx:236
 #: components/meetings/meeting-form-dialog.tsx:253
+#: components/my-documents/edit-document-dialog.tsx:221
+#: components/my-documents/my-documents-section.tsx:275
+#: components/my-documents/upload-document-dialog.tsx:193
+#: components/my-timesheets/timesheet-form-dialog.tsx:142
 #: components/timesheets/timesheet-form-dialog.tsx:224
 msgid "Cancel"
 msgstr "Cancelar"
@@ -830,6 +842,7 @@ msgid "Attendance record deleted"
 msgstr "Registo de assiduidade eliminado"
 
 #: components/attendance/attendance-table.tsx:62
+#: components/my-timesheets/timesheet-form-dialog.tsx:70
 msgid "An error occurred"
 msgstr "Ocorreu um erro"
 
@@ -857,6 +870,7 @@ msgstr "Colaborador"
 
 #: components/attendance/attendance-table.tsx:105
 #: components/attendance/my-attendance-section.tsx:275
+#: components/paystubs/paystub-card.tsx:72
 msgid "Hours"
 msgstr "Horas"
 
@@ -880,6 +894,8 @@ msgstr "Ações"
 #: components/employees/employee-table.tsx:460
 #: components/leaves/leave-table.tsx:197
 #: components/meetings/meeting-card.tsx:186
+#: components/my-documents/document-card.tsx:95
+#: components/my-timesheets/timesheet-card.tsx:117
 #: components/timesheets/timesheet-table.tsx:151
 msgid "Edit"
 msgstr "Editar"
@@ -894,6 +910,7 @@ msgstr "Editar"
 #: components/documents/document-table.tsx:173
 #: components/employees/employee-table.tsx:495
 #: components/meetings/meeting-card.tsx:225
+#: components/my-documents/my-documents-section.tsx:274
 #: components/timesheets/timesheet-table.tsx:194
 msgid "Delete"
 msgstr "Eliminar"
@@ -974,6 +991,7 @@ msgstr "Histórico de Assiduidade"
 
 #: components/attendance/my-attendance-section.tsx:276
 #: components/leaves/leave-view-dialog.tsx:216
+#: components/my-timesheets/timesheet-form-dialog.tsx:129
 #: components/timesheets/timesheet-form-dialog.tsx:219
 #: components/timesheets/timesheet-table.tsx:90
 #: components/timesheets/timesheet-view-dialog.tsx:175
@@ -985,27 +1003,35 @@ msgid "No attendance records found"
 msgstr "Nenhum registo de assiduidade encontrado"
 
 #: components/company/company-documents-section.tsx:62
+#: components/my-documents/upload-document-dialog.tsx:94
 msgid "Document uploaded successfully"
 msgstr "Documento carregado com sucesso"
 
 #: components/company/company-documents-section.tsx:66
 #: components/company/company-documents-section.tsx:70
+#: components/my-documents/upload-document-dialog.tsx:90
+#: components/my-documents/upload-document-dialog.tsx:104
 msgid "Failed to upload document"
 msgstr "Falha ao carregar documento"
 
 #: components/company/company-documents-section.tsx:87
+#: components/my-documents/edit-document-dialog.tsx:105
 msgid "Document updated successfully"
 msgstr "Documento atualizado com sucesso"
 
 #: components/company/company-documents-section.tsx:96
+#: components/my-documents/edit-document-dialog.tsx:101
+#: components/my-documents/edit-document-dialog.tsx:109
 msgid "Failed to update document"
 msgstr "Falha ao atualizar documento"
 
 #: components/company/company-documents-section.tsx:112
+#: components/my-documents/my-documents-section.tsx:79
 msgid "Document deleted successfully"
 msgstr "Documento eliminado com sucesso"
 
 #: components/company/company-documents-section.tsx:117
+#: components/my-documents/my-documents-section.tsx:85
 msgid "Failed to delete document"
 msgstr "Falha ao eliminar documento"
 
@@ -1064,6 +1090,7 @@ msgstr "Data de Validade"
 
 #: components/company/company-documents-section.tsx:201
 #: components/documents/document-upload-form-dialog.tsx:79
+#: components/my-documents/my-documents-section.tsx:183
 msgid "Uploaded"
 msgstr "Carregado"
 
@@ -1072,6 +1099,7 @@ msgstr "Carregado"
 #: components/employees/employee-table.tsx:444
 #: components/leaves/leave-table.tsx:175
 #: components/leaves/pending-approvals-table.tsx:120
+#: components/paystubs/paystub-card.tsx:123
 #: components/timesheets/timesheet-table.tsx:142
 msgid "View Details"
 msgstr "Ver Detalhes"
@@ -1097,10 +1125,14 @@ msgstr "ex., Licença Comercial 2025"
 
 #: components/company/company-documents-section.tsx:313
 #: components/company/company-documents-section.tsx:406
+#: components/my-documents/edit-document-dialog.tsx:163
+#: components/my-documents/my-documents-section.tsx:154
+#: components/my-documents/upload-document-dialog.tsx:138
 msgid "Document Type"
 msgstr "Tipo de Documento"
 
 #: components/company/company-documents-section.tsx:319
+#: components/my-documents/edit-document-dialog.tsx:172
 msgid "Select document type..."
 msgstr "Selecionar tipo de documento..."
 
@@ -1145,6 +1177,8 @@ msgstr "Outro"
 #: components/documents/document-edit-dialog.tsx:96
 #: components/documents/document-upload-form-dialog.tsx:155
 #: components/meetings/meeting-form-dialog.tsx:194
+#: components/my-documents/edit-document-dialog.tsx:198
+#: components/my-documents/upload-document-dialog.tsx:171
 msgid "Description"
 msgstr "Descrição"
 
@@ -1173,15 +1207,18 @@ msgstr "Formatos suportados: PDF, DOC, DOCX, JPG, PNG, GIF (Máx 10MB)"
 
 #: components/company/company-documents-section.tsx:382
 #: components/documents/document-upload-form-dialog.tsx:238
+#: components/my-documents/upload-document-dialog.tsx:185
 msgid "Uploading..."
 msgstr "A carregar..."
 
 #: components/company/company-documents-section.tsx:393
 #: components/documents/document-edit-dialog.tsx:80
+#: components/my-documents/edit-document-dialog.tsx:129
 msgid "Edit Document"
 msgstr "Editar Documento"
 
 #: components/company/company-documents-section.tsx:465
+#: components/my-documents/edit-document-dialog.tsx:213
 msgid "Update Document"
 msgstr "Atualizar Documento"
 
@@ -1312,6 +1349,7 @@ msgstr "Políticas de Férias da Empresa"
 #: components/company/company-profile.tsx:331
 #: components/company/company-profile.tsx:361
 #: components/leaves/leave-request-form-dialog.tsx:220
+#: components/my-timesheets/timesheet-form-dialog.tsx:145
 msgid "Create"
 msgstr "Criar"
 
@@ -1724,6 +1762,7 @@ msgstr "Nenhum gestor atribuído"
 #: components/employees/employee-edit-form.tsx:819
 #: components/leaves/leave-request-form-dialog.tsx:220
 #: components/meetings/meeting-form-dialog.tsx:245
+#: components/my-timesheets/timesheet-form-dialog.tsx:145
 msgid "Saving..."
 msgstr "A guardar..."
 
@@ -1810,6 +1849,8 @@ msgstr "Atualizado"
 #: components/documents/document-edit-dialog.tsx:86
 #: components/documents/document-upload-form-dialog.tsx:134
 #: components/meetings/meeting-form-dialog.tsx:141
+#: components/my-documents/edit-document-dialog.tsx:184
+#: components/my-documents/upload-document-dialog.tsx:158
 msgid "Title"
 msgstr "Título"
 
@@ -1830,6 +1871,8 @@ msgstr "Falha ao rejeitar"
 
 #: components/documents/document-reject-dialog.tsx:50
 #: components/leaves/leave-management.tsx:190
+#: components/my-documents/my-documents-section.tsx:182
+#: components/my-timesheets/my-timesheets-section.tsx:90
 #: components/timesheets/timesheet-form-dialog.tsx:209
 msgid "Rejected"
 msgstr "Rejeitado"
@@ -1878,6 +1921,7 @@ msgid "Document"
 msgstr "Documento"
 
 #: components/documents/document-table.tsx:91
+#: components/my-documents/my-documents-section.tsx:204
 msgid "No documents found"
 msgstr "Nenhum documento encontrado"
 
@@ -1914,6 +1958,7 @@ msgid "Select type"
 msgstr "Selecionar tipo"
 
 #: components/documents/document-upload-form-dialog.tsx:167
+#: components/my-documents/upload-document-dialog.tsx:120
 msgid "File"
 msgstr "Ficheiro"
 
@@ -1931,6 +1976,7 @@ msgstr "Escolher ficheiro"
 
 #: components/documents/document-upload-form-dialog.tsx:238
 #: components/documents/documents-section.tsx:89
+#: components/my-documents/upload-document-dialog.tsx:185
 msgid "Upload"
 msgstr "Carregar"
 
@@ -1988,16 +2034,21 @@ msgstr "Pré-visualização do documento"
 #: components/documents/document-view-dialog.tsx:104
 #: components/employees/employee-view-dialog.tsx:407
 #: components/leaves/leave-view-dialog.tsx:227
+#: components/paystubs/paystub-detail-dialog.tsx:229
 #: components/timesheets/timesheet-view-dialog.tsx:188
 msgid "Close"
 msgstr "Fechar"
 
 #: components/documents/documents-section.tsx:87
+#: components/my-documents/my-documents-section.tsx:192
 msgid "Search documents..."
 msgstr "Pesquisar documentos..."
 
 #: components/documents/documents-section.tsx:99
 #: components/leaves/leave-management.tsx:121
+#: components/my-documents/my-documents-section.tsx:180
+#: components/my-timesheets/my-timesheets-section.tsx:89
+#: components/my-timesheets/my-timesheets-section.tsx:117
 #: components/timesheets/timesheet-form-dialog.tsx:208
 msgid "Approved"
 msgstr "Aprovado"
@@ -2416,6 +2467,7 @@ msgstr "Salário"
 
 #: components/employees/employee-create-form.tsx:731
 #: components/employees/employee-edit-form.tsx:726
+#: components/paystubs/paystub-card.tsx:107
 msgid "Commission"
 msgstr "Comissão"
 
@@ -2731,6 +2783,7 @@ msgid "Pay Information"
 msgstr "Informação de Pagamento"
 
 #: components/employees/employee-view-dialog.tsx:378
+#: components/paystubs/paystub-detail-dialog.tsx:99
 msgid "Overtime Rate"
 msgstr "Taxa de Horas Extra"
 
@@ -2892,6 +2945,9 @@ msgstr "Novo pedido"
 #: components/leaves/leave-view-dialog.tsx:175
 #: components/leaves/my-leaves-section.tsx:192
 #: components/leaves/pending-approvals-table.tsx:64
+#: components/my-timesheets/my-timesheets-section.tsx:88
+#: components/my-timesheets/my-timesheets-section.tsx:111
+#: components/my-timesheets/timesheet-card.tsx:103
 #: components/timesheets/timesheet-form-dialog.tsx:207
 msgid "Submitted"
 msgstr "Submetido"
@@ -3030,6 +3086,7 @@ msgid "Days"
 msgstr "Dias"
 
 #: components/leaves/leave-table.tsx:211
+#: components/my-timesheets/timesheet-card.tsx:129
 #: components/timesheets/timesheet-table.tsx:161
 msgid "Submit"
 msgstr "Submeter"
@@ -3110,6 +3167,8 @@ msgstr "dia(s)"
 #~ msgstr "Total de Horas"
 
 #: components/leaves/leave-view-dialog.tsx:159
+#: components/my-timesheets/timesheet-form-dialog.tsx:115
+#: components/paystubs/paystub-detail-dialog.tsx:109
 #: components/timesheets/timesheet-form-dialog.tsx:188
 #: components/timesheets/timesheet-table.tsx:89
 #: components/timesheets/timesheet-view-dialog.tsx:161
@@ -3229,12 +3288,13 @@ msgid "Date TBD"
 msgstr "Data a definir"
 
 #: components/meetings/meeting-card.tsx:157
-msgid "Organizer:"
-msgstr "Organizador:"
-
-#: components/meetings/meeting-card.tsx:157
+#: components/my-documents/edit-document-dialog.tsx:138
 msgid "Unknown"
 msgstr "Desconhecido"
+
+#: components/meetings/meeting-card.tsx:157
+msgid "Organizer:"
+msgstr "Organizador:"
 
 #: components/meetings/meeting-card.tsx:175
 msgid "Accepted"
@@ -3380,6 +3440,192 @@ msgstr "Nenhuma reunião agendada"
 msgid "Schedule a Meeting"
 msgstr "Agendar uma Reunião"
 
+#: components/my-documents/document-card.tsx:43
+msgid "Unknown date"
+msgstr "Data desconhecida"
+
+#: components/my-documents/document-card.tsx:83
+msgid "View"
+msgstr "Ver"
+
+#: components/my-documents/document-card.tsx:92
+msgid "Edit document"
+msgstr "Editar documento"
+
+#: components/my-documents/document-card.tsx:104
+msgid "Delete document"
+msgstr "Eliminar documento"
+
+#: components/my-documents/edit-document-dialog.tsx:86
+msgid "Document type is required"
+msgstr "Tipo de documento é obrigatório"
+
+#: components/my-documents/edit-document-dialog.tsx:138
+msgid "Current file"
+msgstr "Ficheiro atual"
+
+#: components/my-documents/edit-document-dialog.tsx:145
+msgid "Replace File (Optional)"
+msgstr "Substituir Ficheiro (Opcional)"
+
+#: components/my-documents/edit-document-dialog.tsx:191
+#: components/my-documents/upload-document-dialog.tsx:165
+msgid "Document title (optional)"
+msgstr "Título do documento (opcional)"
+
+#: components/my-documents/edit-document-dialog.tsx:206
+msgid "Document description (optional)"
+msgstr "Descrição do documento (opcional)"
+
+#: components/my-documents/my-documents-section.tsx:125
+#: components/paystubs/paystubs-section.tsx:64
+msgid "Employee ID"
+msgstr "ID do Colaborador"
+
+#: components/my-documents/my-documents-section.tsx:131
+msgid "Total Documents"
+msgstr "Total de Documentos"
+
+#: components/my-documents/my-documents-section.tsx:144
+msgid "Manage Documents"
+msgstr "Gerir Documentos"
+
+#: components/my-documents/my-documents-section.tsx:161
+msgid "All Types"
+msgstr "Todos os Tipos"
+
+#: components/my-documents/my-documents-section.tsx:179
+#: components/my-timesheets/my-timesheets-section.tsx:83
+#: components/my-timesheets/my-timesheets-section.tsx:86
+msgid "All Statuses"
+msgstr "Todos os Estados"
+
+#: components/my-documents/my-documents-section.tsx:188
+msgid "Search"
+msgstr "Pesquisar"
+
+#: components/my-documents/my-documents-section.tsx:203
+msgid "No documents match your filters"
+msgstr "Nenhum documento corresponde aos seus filtros"
+
+#: components/my-documents/my-documents-section.tsx:214
+msgid "Upload Your First Document"
+msgstr "Carregue o Seu Primeiro Documento"
+
+#: components/my-documents/my-documents-section.tsx:272
+msgid "Delete Document?"
+msgstr "Eliminar Documento?"
+
+#: components/my-documents/my-documents-section.tsx:273
+msgid "Are you sure you want to delete \"{deletingDocumentTitle}\"? This action cannot be undone."
+msgstr "Tem a certeza de que pretende eliminar \"{deletingDocumentTitle}\"? Esta ação não pode ser desfeita."
+
+#: components/my-documents/upload-document-dialog.tsx:74
+msgid "Please select a file and document type"
+msgstr "Por favor selecione um ficheiro e tipo de documento"
+
+#: components/my-documents/upload-document-dialog.tsx:131
+msgid "Selected"
+msgstr "Selecionado"
+
+#: components/my-documents/upload-document-dialog.tsx:147
+msgid "Select type..."
+msgstr "Selecionar tipo..."
+
+#: components/my-documents/upload-document-dialog.tsx:179
+msgid "Additional notes (optional)"
+msgstr "Notas adicionais (opcional)"
+
+#: components/my-timesheets/my-timesheets-section.tsx:59
+msgid "Manage your timesheet submissions"
+msgstr "Gerir as suas submissões de folhas de horas"
+
+#: components/my-timesheets/my-timesheets-section.tsx:64
+#: components/my-timesheets/timesheet-form-dialog.tsx:86
+#: components/timesheets/timesheet-table.tsx:67
+msgid "New Timesheet"
+msgstr "Nova Folha de Horas"
+
+#: components/my-timesheets/my-timesheets-section.tsx:74
+msgid "Search timesheets..."
+msgstr "Pesquisar folhas de horas..."
+
+#: components/my-timesheets/my-timesheets-section.tsx:87
+#: components/my-timesheets/my-timesheets-section.tsx:105
+#: components/timesheets/timesheet-form-dialog.tsx:206
+msgid "Draft"
+msgstr "Rascunho"
+
+#: components/my-timesheets/my-timesheets-section.tsx:99
+msgid "Total"
+msgstr "Total"
+
+#: components/my-timesheets/my-timesheets-section.tsx:124
+#: components/timesheets/timesheet-table.tsx:64
+#: components/timesheets/timesheet-table.tsx:99
+msgid "No timesheets found"
+msgstr "Nenhuma folha de horas encontrada"
+
+#: components/my-timesheets/my-timesheets-section.tsx:127
+msgid "Create Your First Timesheet"
+msgstr "Crie a Sua Primeira Folha de Horas"
+
+#: components/my-timesheets/timesheet-card.tsx:41
+msgid "Timesheet submitted successfully"
+msgstr "Folha de horas submetida com sucesso"
+
+#: components/my-timesheets/timesheet-card.tsx:44
+msgid "Failed to submit timesheet"
+msgstr "Falha ao submeter folha de horas"
+
+#: components/my-timesheets/timesheet-card.tsx:52
+msgid "Are you sure you want to delete this timesheet?"
+msgstr "Tem a certeza de que pretende eliminar esta folha de horas?"
+
+#: components/my-timesheets/timesheet-card.tsx:57
+msgid "Timesheet deleted successfully"
+msgstr "Folha de horas eliminada com sucesso"
+
+#: components/my-timesheets/timesheet-card.tsx:60
+msgid "Failed to delete timesheet"
+msgstr "Falha ao eliminar folha de horas"
+
+#: components/my-timesheets/timesheet-card.tsx:85
+#: components/timesheets/timesheet-form-dialog.tsx:190
+#: components/timesheets/timesheet-view-dialog.tsx:149
+#: components/timesheets/timesheet-view-dialog.tsx:156
+#: components/timesheets/timesheet-view-dialog.tsx:163
+msgid "hours"
+msgstr "horas"
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:63
+msgid "Timesheet updated successfully"
+msgstr "Folha de horas atualizada com sucesso"
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:63
+msgid "Timesheet created successfully"
+msgstr "Folha de horas criada com sucesso"
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:86
+msgid "Edit Timesheet"
+msgstr "Editar Folha de Horas"
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:91
+msgid "Period Start"
+msgstr "Início do Período"
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:103
+msgid "Period End"
+msgstr "Fim do Período"
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:136
+msgid "Optional notes about this timesheet..."
+msgstr "Notas opcionais sobre esta folha de horas..."
+
+#: components/my-timesheets/timesheet-form-dialog.tsx:145
+msgid "Update"
+msgstr "Atualizar"
+
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"
 msgstr "Selecione as datas de início e fim"
@@ -3474,6 +3720,8 @@ msgid "Recent Runs"
 msgstr "Execuções Recentes"
 
 #: components/payroll/payroll-section.tsx:288
+#: components/paystubs/paystub-card.tsx:46
+#: components/paystubs/paystub-detail-dialog.tsx:67
 msgid "Pay Date"
 msgstr "Data de Pagamento"
 
@@ -3482,10 +3730,14 @@ msgid "Employees"
 msgstr "Colaboradores"
 
 #: components/payroll/payroll-section.tsx:290
+#: components/paystubs/paystub-card.tsx:61
+#: components/paystubs/paystub-detail-dialog.tsx:165
 msgid "Gross Pay"
 msgstr "Salário Bruto"
 
 #: components/payroll/payroll-section.tsx:291
+#: components/paystubs/paystub-card.tsx:51
+#: components/paystubs/paystub-detail-dialog.tsx:185
 msgid "Net Pay"
 msgstr "Salário Líquido"
 
@@ -3508,6 +3760,138 @@ msgstr "Ainda sem execuções de processamento salarial"
 #: components/payroll/payroll-section.tsx:355
 msgid "Calculate payroll to get started"
 msgstr "Calcule o processamento salarial para começar"
+
+#: components/paystubs/paystub-card.tsx:19
+#: components/paystubs/paystub-card.tsx:23
+#: components/paystubs/paystub-detail-dialog.tsx:31
+#: components/paystubs/paystub-detail-dialog.tsx:35
+msgid "N/A"
+msgstr "N/D"
+
+#: components/paystubs/paystub-card.tsx:33
+#: components/paystubs/paystub-detail-dialog.tsx:63
+#: components/timesheets/timesheet-table.tsx:88
+#: components/timesheets/timesheet-view-dialog.tsx:106
+msgid "Pay Period"
+msgstr "Período de Pagamento"
+
+#: components/paystubs/paystub-card.tsx:65
+#: components/paystubs/paystub-detail-dialog.tsx:173
+msgid "Deductions"
+msgstr "Deduções"
+
+#: components/paystubs/paystub-card.tsx:83
+msgid "Rate"
+msgstr "Taxa"
+
+#: components/paystubs/paystub-card.tsx:97
+#: components/paystubs/paystub-detail-dialog.tsx:119
+msgid "Additional Pay"
+msgstr "Pagamento Adicional"
+
+#: components/paystubs/paystub-card.tsx:101
+msgid "Bonus"
+msgstr "Bónus"
+
+#: components/paystubs/paystub-detail-dialog.tsx:46
+msgid "Paystub Details"
+msgstr "Detalhes do Recibo de Vencimento"
+
+#: components/paystubs/paystub-detail-dialog.tsx:76
+msgid "Hours & Rates"
+msgstr "Horas e Taxas"
+
+#: components/paystubs/paystub-detail-dialog.tsx:81
+#: components/timesheets/timesheet-form-dialog.tsx:161
+#: components/timesheets/timesheet-view-dialog.tsx:147
+msgid "Regular Hours"
+msgstr "Horas Normais"
+
+#: components/paystubs/paystub-detail-dialog.tsx:85
+msgid "Regular Rate"
+msgstr "Taxa Normal"
+
+#: components/paystubs/paystub-detail-dialog.tsx:89
+#: components/paystubs/paystub-detail-dialog.tsx:143
+msgid "Regular Pay"
+msgstr "Pagamento Normal"
+
+#: components/paystubs/paystub-detail-dialog.tsx:95
+#: components/timesheets/timesheet-form-dialog.tsx:173
+#: components/timesheets/timesheet-view-dialog.tsx:154
+msgid "Overtime Hours"
+msgstr "Horas Extraordinárias"
+
+#: components/paystubs/paystub-detail-dialog.tsx:103
+#: components/paystubs/paystub-detail-dialog.tsx:148
+msgid "Overtime Pay"
+msgstr "Pagamento de Horas Extraordinárias"
+
+#: components/paystubs/paystub-detail-dialog.tsx:124
+#: components/paystubs/paystub-detail-dialog.tsx:154
+msgid "Bonus Pay"
+msgstr "Pagamento de Bónus"
+
+#: components/paystubs/paystub-detail-dialog.tsx:130
+#: components/paystubs/paystub-detail-dialog.tsx:160
+msgid "Commission Pay"
+msgstr "Pagamento de Comissão"
+
+#: components/paystubs/paystub-detail-dialog.tsx:140
+msgid "Earnings Summary"
+msgstr "Resumo de Rendimentos"
+
+#: components/paystubs/paystub-detail-dialog.tsx:176
+msgid "Total Deductions"
+msgstr "Total de Deduções"
+
+#: components/paystubs/paystub-detail-dialog.tsx:196
+msgid "Year-to-Date Summary"
+msgstr "Resumo Acumulado do Ano"
+
+#: components/paystubs/paystub-detail-dialog.tsx:200
+msgid "YTD Gross Pay"
+msgstr "Salário Bruto Acumulado"
+
+#: components/paystubs/paystub-detail-dialog.tsx:204
+msgid "YTD Deductions"
+msgstr "Deduções Acumuladas"
+
+#: components/paystubs/paystub-detail-dialog.tsx:208
+msgid "YTD Net Pay"
+msgstr "Salário Líquido Acumulado"
+
+#: components/paystubs/paystub-detail-dialog.tsx:222
+msgid "Download PDF"
+msgstr "Transferir PDF"
+
+#: components/paystubs/paystubs-section.tsx:43
+msgid "Downloading paystub..."
+msgstr "A transferir recibo de vencimento..."
+
+#: components/paystubs/paystubs-section.tsx:45
+msgid "Failed to download paystub"
+msgstr "Falha ao transferir recibo de vencimento"
+
+#: components/paystubs/paystubs-section.tsx:70
+msgid "Total Paystubs"
+msgstr "Total de Recibos"
+
+#: components/paystubs/paystubs-section.tsx:82
+msgid "Paystub History"
+msgstr "Histórico de Recibos de Vencimento"
+
+#: components/paystubs/paystubs-section.tsx:84
+msgid "View and download your paystubs"
+msgstr "Visualize e transfira os seus recibos de vencimento"
+
+#: components/paystubs/paystubs-section.tsx:92
+msgid "No paystubs found"
+msgstr "Nenhum recibo de vencimento encontrado"
+
+#: components/paystubs/paystubs-section.tsx:95
+msgid "Your paystubs will appear here once they are generated"
+msgstr "Os seus recibos de vencimento aparecerão aqui assim que forem gerados"
 
 #: components/timesheets/timesheet-form-dialog.tsx:50
 msgid "Employee is required"
@@ -3542,44 +3926,9 @@ msgstr "Início do Período de Pagamento"
 msgid "Pay Period End"
 msgstr "Fim do Período de Pagamento"
 
-#: components/timesheets/timesheet-form-dialog.tsx:161
-#: components/timesheets/timesheet-view-dialog.tsx:147
-msgid "Regular Hours"
-msgstr "Horas Normais"
-
-#: components/timesheets/timesheet-form-dialog.tsx:173
-#: components/timesheets/timesheet-view-dialog.tsx:154
-msgid "Overtime Hours"
-msgstr "Horas Extraordinárias"
-
-#: components/timesheets/timesheet-form-dialog.tsx:190
-#: components/timesheets/timesheet-view-dialog.tsx:149
-#: components/timesheets/timesheet-view-dialog.tsx:156
-#: components/timesheets/timesheet-view-dialog.tsx:163
-msgid "hours"
-msgstr "horas"
-
-#: components/timesheets/timesheet-form-dialog.tsx:206
-msgid "Draft"
-msgstr "Rascunho"
-
-#: components/timesheets/timesheet-table.tsx:64
-#: components/timesheets/timesheet-table.tsx:99
-msgid "No timesheets found"
-msgstr "Nenhuma folha de horas encontrada"
-
-#: components/timesheets/timesheet-table.tsx:67
-msgid "New Timesheet"
-msgstr "Nova Folha de Horas"
-
 #: components/timesheets/timesheet-table.tsx:85
 msgid "click to view details"
 msgstr "clique para ver detalhes"
-
-#: components/timesheets/timesheet-table.tsx:88
-#: components/timesheets/timesheet-view-dialog.tsx:106
-msgid "Pay Period"
-msgstr "Período de Pagamento"
 
 #: components/timesheets/timesheet-view-dialog.tsx:71
 msgid "Timesheet Details"

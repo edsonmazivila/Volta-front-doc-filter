@@ -16,6 +16,8 @@ import { Button } from "@/components/ui";
 import { useToastHelpers } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface MyDocumentsSectionProps {
   documents: DocumentListItem[];
@@ -32,6 +34,7 @@ export function MyDocumentsSection({
 }: MyDocumentsSectionProps) {
   const router = useRouter();
   const toast = useToastHelpers();
+  const { i18n } = useLingui();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -73,13 +76,13 @@ export function MyDocumentsSection({
     setIsDeleting(true);
     try {
       await deleteDocumentAction(deletingDocumentId);
-      toast.success("Document deleted successfully");
+      toast.success(i18n._(msg`Document deleted successfully`));
       setDeleteDialogOpen(false);
       setDeletingDocumentId(null);
       setDeletingDocumentTitle("");
       router.refresh();
     } catch {
-      toast.error("Failed to delete document");
+      toast.error(i18n._(msg`Failed to delete document`));
     } finally {
       setIsDeleting(false);
     }
@@ -119,13 +122,13 @@ export function MyDocumentsSection({
               <h2 className="text-xl font-semibold">{employeeName}</h2>
               {employeeId && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Employee ID: {employeeId}
+                  {i18n._(msg`Employee ID`)}: {employeeId}
                 </p>
               )}
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground mb-1">
-                Total Documents
+                {i18n._(msg`Total Documents`)}
               </p>
               <p className="text-3xl font-bold text-blue-600">
                 {documents.length}
@@ -138,24 +141,24 @@ export function MyDocumentsSection({
       {/* Filters and Actions */}
       <div className="border border-[var(--border)] rounded-lg p-4 bg-card">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold">Manage Documents</h3>
+          <h3 className="text-sm font-semibold">{i18n._(msg`Manage Documents`)}</h3>
           <Button onClick={() => setUploadDialogOpen(true)} size="sm">
             <Upload className="h-4 w-4 mr-1" />
-            Upload Document
+            {i18n._(msg`Upload Document`)}
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-medium mb-1">
-              Document Type
+              {i18n._(msg`Document Type`)}
             </label>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Types</option>
+              <option value="">{i18n._(msg`All Types`)}</option>
               {uniqueTypes.map((type) => (
                 <option key={type} value={type}>
                   {type
@@ -167,26 +170,26 @@ export function MyDocumentsSection({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1">Status</label>
+            <label className="block text-xs font-medium mb-1">{i18n._(msg`Status`)}</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Statuses</option>
-              <option value="approved">Approved</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-              <option value="uploaded">Uploaded</option>
+              <option value="">{i18n._(msg`All Statuses`)}</option>
+              <option value="approved">{i18n._(msg`Approved`)}</option>
+              <option value="pending">{i18n._(msg`Pending`)}</option>
+              <option value="rejected">{i18n._(msg`Rejected`)}</option>
+              <option value="uploaded">{i18n._(msg`Uploaded`)}</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1">Search</label>
+            <label className="block text-xs font-medium mb-1">{i18n._(msg`Search`)}</label>
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Search documents..."
+              placeholder={i18n._(msg`Search documents...`)}
             />
           </div>
         </div>
@@ -197,8 +200,8 @@ export function MyDocumentsSection({
         <div className="text-center py-12 border border-dashed border-[var(--border)] rounded-lg">
           <div className="text-muted-foreground">
             {search || typeFilter || statusFilter
-              ? "No documents match your filters"
-              : "No documents found"}
+              ? i18n._(msg`No documents match your filters`)
+              : i18n._(msg`No documents found`)}
           </div>
           {!search && !typeFilter && !statusFilter && (
             <Button
@@ -208,7 +211,7 @@ export function MyDocumentsSection({
               className="mt-3"
             >
               <Upload className="h-4 w-4 mr-1" />
-              Upload Your First Document
+              {i18n._(msg`Upload Your First Document`)}
             </Button>
           )}
         </div>
@@ -266,10 +269,10 @@ export function MyDocumentsSection({
             setDeletingDocumentTitle("");
           }
         }}
-        title="Delete Document?"
-        description={`Are you sure you want to delete "${deletingDocumentTitle}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={i18n._(msg`Delete Document?`)}
+        description={i18n._(msg`Are you sure you want to delete "${deletingDocumentTitle}"? This action cannot be undone.`)}
+        confirmText={i18n._(msg`Delete`)}
+        cancelText={i18n._(msg`Cancel`)}
         onConfirm={confirmDelete}
         variant="destructive"
         isLoading={isDeleting}

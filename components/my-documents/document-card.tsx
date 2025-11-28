@@ -4,6 +4,8 @@ import { Button } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Edit, Trash2, Eye } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface DocumentCardProps {
   document: DocumentListItem;
@@ -18,6 +20,7 @@ export function DocumentCard({
   onDelete,
   onView,
 }: DocumentCardProps) {
+  const { i18n } = useLingui();
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved":
@@ -37,7 +40,7 @@ export function DocumentCard({
 
   const formattedDate = document.createdAt
     ? format(parseISO(document.createdAt), "MMM d, yyyy")
-    : "Unknown date";
+    : i18n._(msg`Unknown date`);
 
   const displayType = document.type
     .replace(/_/g, " ")
@@ -74,10 +77,10 @@ export function DocumentCard({
                 size="sm"
                 onClick={() => onView(document.id)}
                 className="flex-1"
-                title="View document"
+                title={i18n._(msg`View document`)}
               >
                 <Eye className="h-3 w-3 mr-1" />
-                View
+                {i18n._(msg`View`)}
               </Button>
             )}
             {onEdit && document.canEdit !== false && (
@@ -86,10 +89,10 @@ export function DocumentCard({
                 size="sm"
                 onClick={() => onEdit(document)}
                 className="flex-1"
-                title="Edit document"
+                title={i18n._(msg`Edit document`)}
               >
                 <Edit className="h-3 w-3 mr-1" />
-                Edit
+                {i18n._(msg`Edit`)}
               </Button>
             )}
             {onDelete && document.canEdit !== false && (
@@ -98,7 +101,7 @@ export function DocumentCard({
                 size="sm"
                 onClick={() => onDelete(document.id)}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                title="Delete document"
+                title={i18n._(msg`Delete document`)}
               >
                 <Trash2 className="h-3 w-3" />
               </Button>

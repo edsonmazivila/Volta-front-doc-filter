@@ -9,6 +9,8 @@ import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { FileText, Edit } from 'lucide-react'
 import type { DocumentListItem } from '@/lib/services/documents'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface EditDocumentDialogProps {
   open: boolean
@@ -25,6 +27,7 @@ export function EditDocumentDialog({
 }: EditDocumentDialogProps) {
   const router = useRouter()
   const toast = useToastHelpers()
+  const { i18n } = useLingui()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
@@ -80,7 +83,7 @@ export function EditDocumentDialog({
     if (!document) return
 
     if (!documentType) {
-      toast.error('Document type is required')
+      toast.error(i18n._(msg`Document type is required`))
       return
     }
 
@@ -95,15 +98,15 @@ export function EditDocumentDialog({
       const result = await updateDocumentAction(document.id, null, formData)
 
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to update document')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to update document`))
         return
       }
 
-      toast.success('Document updated successfully')
+      toast.success(i18n._(msg`Document updated successfully`))
       onOpenChange(false)
       router.refresh()
     } catch {
-      toast.error('Failed to update document')
+      toast.error(i18n._(msg`Failed to update document`))
     } finally {
       setIsSubmitting(false)
     }
@@ -123,7 +126,7 @@ export function EditDocumentDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
-            Edit Document
+            {i18n._(msg`Edit Document`)}
           </DialogTitle>
         </DialogHeader>
 
@@ -132,14 +135,14 @@ export function EditDocumentDialog({
           <div className="p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <FileText className="h-4 w-4" />
-              <span>Current file: {document.title || 'Unknown'}</span>
+              <span>{i18n._(msg`Current file`)}: {document.title || i18n._(msg`Unknown`)}</span>
             </div>
           </div>
 
           {/* New File (Optional) */}
           <div>
             <label htmlFor="file" className="block text-sm font-medium mb-2">
-              Replace File (Optional)
+              {i18n._(msg`Replace File (Optional)`)}
             </label>
             <Input
               id="file"
@@ -149,7 +152,7 @@ export function EditDocumentDialog({
             />
             {selectedFile && (
               <p className="text-xs text-muted-foreground mt-1">
-                New file: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                {i18n._(msg`New file`)}: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
               </p>
             )}
           </div>
@@ -157,7 +160,7 @@ export function EditDocumentDialog({
           {/* Document Type */}
           <div>
             <label htmlFor="document_type" className="block text-sm font-medium mb-2">
-              Document Type <span className="text-red-400">*</span>
+              {i18n._(msg`Document Type`)} <span className="text-red-400">*</span>
             </label>
             <select
               id="document_type"
@@ -166,7 +169,7 @@ export function EditDocumentDialog({
               className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select document type...</option>
+              <option value="">{i18n._(msg`Select document type...`)}</option>
               {types.map((type) => (
                 <option key={type.type} value={type.type}>
                   {type.display_name}
@@ -178,21 +181,21 @@ export function EditDocumentDialog({
           {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium mb-2">
-              Title
+              {i18n._(msg`Title`)}
             </label>
             <Input
               id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Document title (optional)"
+              placeholder={i18n._(msg`Document title (optional)`)}
             />
           </div>
 
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium mb-2">
-              Description
+              {i18n._(msg`Description`)}
             </label>
             <textarea
               id="description"
@@ -200,14 +203,14 @@ export function EditDocumentDialog({
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Document description (optional)"
+              placeholder={i18n._(msg`Document description (optional)`)}
             />
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2 pt-4 border-t border-[var(--border)]">
             <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? 'Updating...' : 'Update Document'}
+              {isSubmitting ? i18n._(msg`Updating...`) : i18n._(msg`Update Document`)}
             </Button>
             <Button
               type="button"
@@ -215,7 +218,7 @@ export function EditDocumentDialog({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              Cancel
+              {i18n._(msg`Cancel`)}
             </Button>
           </div>
         </form>

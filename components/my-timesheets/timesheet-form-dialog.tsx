@@ -1,4 +1,3 @@
-
 'use client'
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -7,6 +6,8 @@ import { createMyTimesheetAction, updateMyTimesheetAction } from '@/lib/services
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import type { MyTimesheet } from '@/lib/types/my-timesheets'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface TimesheetFormDialogProps {
   open: boolean
@@ -16,6 +17,7 @@ interface TimesheetFormDialogProps {
 
 export function TimesheetFormDialog({ open, onOpenChange, timesheet }: TimesheetFormDialogProps) {
   const router = useRouter()
+  const { i18n } = useLingui()
   const isEdit = !!timesheet
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -58,14 +60,14 @@ export function TimesheetFormDialog({ open, onOpenChange, timesheet }: Timesheet
       }
 
       if (result.success) {
-        toast.success(isEdit ? 'Timesheet updated successfully' : 'Timesheet created successfully')
+        toast.success(isEdit ? i18n._(msg`Timesheet updated successfully`) : i18n._(msg`Timesheet created successfully`))
         onOpenChange(false)
         router.refresh()
       } else if (result.errors?._form) {
         toast.error(result.errors._form[0])
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'An error occurred')
+      toast.error(error instanceof Error ? error.message : i18n._(msg`An error occurred`))
     } finally {
       setIsSubmitting(false)
     }
@@ -81,12 +83,12 @@ export function TimesheetFormDialog({ open, onOpenChange, timesheet }: Timesheet
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Timesheet' : 'New Timesheet'}</DialogTitle>
+          <DialogTitle>{isEdit ? i18n._(msg`Edit Timesheet`) : i18n._(msg`New Timesheet`)}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="period_start" className="text-sm font-medium">Period Start *</label>
+            <label htmlFor="period_start" className="text-sm font-medium">{i18n._(msg`Period Start`)} *</label>
             <input
               type="date"
               id="period_start"
@@ -98,7 +100,7 @@ export function TimesheetFormDialog({ open, onOpenChange, timesheet }: Timesheet
           </div>
 
           <div>
-            <label htmlFor="period_end" className="text-sm font-medium">Period End *</label>
+            <label htmlFor="period_end" className="text-sm font-medium">{i18n._(msg`Period End`)} *</label>
             <input
               type="date"
               id="period_end"
@@ -110,7 +112,7 @@ export function TimesheetFormDialog({ open, onOpenChange, timesheet }: Timesheet
           </div>
 
           <div>
-            <label htmlFor="total_hours" className="text-sm font-medium">Total Hours *</label>
+            <label htmlFor="total_hours" className="text-sm font-medium">{i18n._(msg`Total Hours`)} *</label>
             <input
               type="number"
               id="total_hours"
@@ -124,23 +126,23 @@ export function TimesheetFormDialog({ open, onOpenChange, timesheet }: Timesheet
           </div>
 
           <div>
-            <label htmlFor="notes" className="text-sm font-medium">Notes</label>
+            <label htmlFor="notes" className="text-sm font-medium">{i18n._(msg`Notes`)}</label>
             <textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full mt-1 rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm"
-              placeholder="Optional notes about this timesheet..."
+              placeholder={i18n._(msg`Optional notes about this timesheet...`)}
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
-              Cancel
+              {i18n._(msg`Cancel`)}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : isEdit ? 'Update' : 'Create'}
+              {isSubmitting ? i18n._(msg`Saving...`) : isEdit ? i18n._(msg`Update`) : i18n._(msg`Create`)}
             </Button>
           </div>
         </form>
