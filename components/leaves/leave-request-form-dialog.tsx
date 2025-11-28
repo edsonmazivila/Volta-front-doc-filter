@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToastHelpers } from '@/components/ui/toast'
 import { createLeaveRequestAction, updateLeaveRequestAction } from '@/lib/services/leaves'
 import type { LeaveRequestItem } from '@/lib/services/leaves'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface LeaveRequestFormDialogProps {
 	open: boolean
@@ -34,6 +36,7 @@ export function LeaveRequestFormDialog({
 }: LeaveRequestFormDialogProps) {
 	const router = useRouter()
 	const toast = useToastHelpers()
+	const { i18n } = useLingui()
 	const isEditMode = mode === 'edit' && editItem
 
 	const [leaveType, setLeaveType] = useState(editItem?.leave_type || 'vacation')
@@ -76,12 +79,12 @@ export function LeaveRequestFormDialog({
 
 	const validateForm = (): boolean => {
 		if (!leaveType || !startDate || !endDate) {
-			toast.error('Type, start and end dates are required')
+			toast.error(i18n._(msg`Type, start and end dates are required`))
 			return false
 		}
 
 		if (new Date(startDate) > new Date(endDate)) {
-			toast.error('End date must be after start date')
+			toast.error(i18n._(msg`End date must be after start date`))
 			return false
 		}
 
@@ -111,17 +114,17 @@ export function LeaveRequestFormDialog({
 
 			if ('errors' in result) {
 				const errs = result.errors as Record<string, string[]>
-				const msg = errs._form?.[0] || Object.values(errs)[0]?.[0] || 'Failed to save request'
+				const msg = errs._form?.[0] || Object.values(errs)[0]?.[0] || i18n._(msg`Failed to save request`)
 				toast.error(msg)
 				return
 			}
 
-			toast.success(isEditMode ? 'Leave request updated' : 'Leave request created')
+			toast.success(isEditMode ? i18n._(msg`Leave request updated`) : i18n._(msg`Leave request created`))
 			handleClose()
 			router.refresh()
 		} catch (error) {
 			console.error('[LeaveRequestForm] Error:', error)
-			toast.error('Failed to save request')
+			toast.error(i18n._(msg`Failed to save request`))
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -132,16 +135,16 @@ export function LeaveRequestFormDialog({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						{isEditMode ? 'Edit Leave Request' : 'New Leave Request'}
+						{isEditMode ? i18n._(msg`Edit Leave Request`) : i18n._(msg`New Leave Request`)}
 					</DialogTitle>
 				</DialogHeader>
 				<div className='grid gap-3'>
 					{/* Leave Type */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Type</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Type`)}</label>
 						<Select value={leaveType} onValueChange={setLeaveType}>
 							<SelectTrigger className='w-full bg-background border border-[var(--border)]'>
-								<SelectValue placeholder='Select type' />
+								<SelectValue placeholder={i18n._(msg`Select type`)} />
 							</SelectTrigger>
 							<SelectContent className='bg-background border border-[var(--border)]'>
 								{LEAVE_TYPES.map(type => (
@@ -156,7 +159,7 @@ export function LeaveRequestFormDialog({
 					{/* Date Range */}
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>Start date</label>
+							<label className='text-sm font-medium'>{i18n._(msg`Start date`)}</label>
 							<input
 								type='date'
 								className='w-full border rounded-md px-3 py-2 bg-background'
@@ -165,7 +168,7 @@ export function LeaveRequestFormDialog({
 							/>
 						</div>
 						<div className='flex flex-col gap-1'>
-							<label className='text-sm font-medium'>End date</label>
+							<label className='text-sm font-medium'>{i18n._(msg`End date`)}</label>
 							<input
 								type='date'
 								className='w-full border rounded-md px-3 py-2 bg-background'
@@ -185,19 +188,19 @@ export function LeaveRequestFormDialog({
 							className='h-4 w-4'
 						/>
 						<label htmlFor='half-day' className='text-sm'>
-							Half day
+							{i18n._(msg`Half day`)}
 						</label>
 					</div>
 
 					{/* Reason */}
 					<div className='flex flex-col gap-1'>
-						<label className='text-sm font-medium'>Reason</label>
+						<label className='text-sm font-medium'>{i18n._(msg`Reason`)}</label>
 						<textarea
 							className='w-full border rounded-md px-3 py-2 bg-background'
 							rows={3}
 							value={reason}
 							onChange={(e) => setReason(e.target.value)}
-							placeholder='Enter reason for leave request...'
+							placeholder={i18n._(msg`Enter reason for leave request...`)}
 						/>
 					</div>
 
@@ -208,13 +211,13 @@ export function LeaveRequestFormDialog({
 							onClick={handleClose}
 							disabled={isSubmitting}
 						>
-							Cancel
+							{i18n._(msg`Cancel`)}
 						</Button>
 						<Button
 							onClick={handleSubmit}
 							disabled={isSubmitting}
 						>
-							{isSubmitting ? 'Saving...' : isEditMode ? 'Save' : 'Create'}
+							{isSubmitting ? i18n._(msg`Saving...`) : isEditMode ? i18n._(msg`Save`) : i18n._(msg`Create`)}
 						</Button>
 					</div>
 				</div>

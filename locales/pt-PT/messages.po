@@ -700,6 +700,7 @@ msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
 #: components/leaves/leave-management.tsx:181
+#: components/leaves/leave-request-form-dialog.tsx:214
 #: components/leaves/leave-table.tsx:227
 #: components/timesheets/timesheet-form-dialog.tsx:212
 msgid "Cancel"
@@ -1144,6 +1145,7 @@ msgid "Reject Leave Request"
 msgstr "Rejeitar Pedido de Ausência"
 
 #: components/leaves/leave-management.tsx:177
+#: components/leaves/leave-request-form-dialog.tsx:197
 #: components/leaves/leave-table.tsx:111
 #: components/leaves/leave-view-dialog.tsx:189
 msgid "Reason"
@@ -1196,6 +1198,72 @@ msgstr "A cancelar…"
 msgid "Cancel Request"
 msgstr "Cancelar Pedido"
 
+#: components/leaves/leave-request-form-dialog.tsx:82
+msgid "Type, start and end dates are required"
+msgstr "Tipo, data de início e data de fim são obrigatórios"
+
+#: components/leaves/leave-request-form-dialog.tsx:87
+#: components/payroll/payroll-section.tsx:81
+msgid "End date must be after start date"
+msgstr "A data de fim deve ser posterior à data de início"
+
+#: components/leaves/leave-request-form-dialog.tsx:122
+msgid "Leave request updated"
+msgstr "Pedido de férias atualizado"
+
+#: components/leaves/leave-request-form-dialog.tsx:122
+msgid "Leave request created"
+msgstr "Pedido de férias criado"
+
+#: components/leaves/leave-request-form-dialog.tsx:127
+msgid "Failed to save request"
+msgstr "Falha ao guardar pedido"
+
+#: components/leaves/leave-request-form-dialog.tsx:138
+msgid "Edit Leave Request"
+msgstr "Editar Pedido de Férias"
+
+#: components/leaves/leave-request-form-dialog.tsx:138
+msgid "New Leave Request"
+msgstr "Novo Pedido de Férias"
+
+#: components/leaves/leave-request-form-dialog.tsx:144
+#: components/leaves/leave-table.tsx:108
+msgid "Type"
+msgstr "Tipo"
+
+#: components/leaves/leave-request-form-dialog.tsx:147
+msgid "Select type"
+msgstr "Selecionar tipo"
+
+#: components/leaves/leave-request-form-dialog.tsx:162
+msgid "Start date"
+msgstr "Data de início"
+
+#: components/leaves/leave-request-form-dialog.tsx:171
+msgid "End date"
+msgstr "Data de fim"
+
+#: components/leaves/leave-request-form-dialog.tsx:191
+msgid "Half day"
+msgstr "Meio dia"
+
+#: components/leaves/leave-request-form-dialog.tsx:203
+msgid "Enter reason for leave request..."
+msgstr "Introduza o motivo do pedido de férias..."
+
+#: components/leaves/leave-request-form-dialog.tsx:220
+msgid "Saving..."
+msgstr "A guardar..."
+
+#: components/leaves/leave-request-form-dialog.tsx:220
+msgid "Save"
+msgstr "Guardar"
+
+#: components/leaves/leave-request-form-dialog.tsx:220
+msgid "Create"
+msgstr "Criar"
+
 #: components/leaves/leave-table.tsx:81
 #: components/leaves/leave-table.tsx:120
 msgid "No leave requests found"
@@ -1204,10 +1272,6 @@ msgstr "Nenhum pedido de ausência encontrado"
 #: components/leaves/leave-table.tsx:104
 msgid "(click to view details)"
 msgstr "(clique para ver detalhes)"
-
-#: components/leaves/leave-table.tsx:108
-msgid "Type"
-msgstr "Tipo"
 
 #: components/leaves/leave-table.tsx:109
 msgid "Dates"
@@ -1390,10 +1454,6 @@ msgstr "Os períodos quinzenais devem alinhar-se com os intervalos de 1-15 ou 16
 #: components/payroll/payroll-section.tsx:71
 msgid "Monthly periods should start on the first and end on the last day of the month"
 msgstr "Os períodos mensais devem começar no primeiro e terminar no último dia do mês"
-
-#: components/payroll/payroll-section.tsx:81
-msgid "End date must be after start date"
-msgstr "A data de fim deve ser posterior à data de início"
 
 #: components/payroll/payroll-section.tsx:111
 #: components/payroll/payroll-section.tsx:120
