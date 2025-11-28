@@ -3,6 +3,8 @@ import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { CompanyProfile as CompanyProfileComponent } from '@/components/company/company-profile'
 import { getCompany, getLeavePolicies, getPaySchedules, getCompanyDocuments } from '@/lib/services/company'
+import { t } from '@lingui/core/macro'
+
 export default async function CompanyPage() {
   // Only HR managers and admins can manage company settings
   await requireRole(['hr_manager', 'system_admin'])
@@ -30,13 +32,13 @@ export default async function CompanyPage() {
   }
   return (
     <>
-      <Header title='Company Management' />
+      <Header title={t`Company Management`} />
       <section className='p-2 grid gap-4 overflow-y-auto overflow-x-hidden'>
         <Card className="overflow-hidden">
-          <CardHeader title='Company Profile' />
-          <CompanyProfileComponent 
-            company={safeCompany} 
-            paySchedules={paySchedules || []} 
+          <CardHeader title={t`Company Profile`} />
+          <CompanyProfileComponent
+            company={safeCompany}
+            paySchedules={paySchedules || []}
             leavePolicies={leavePolicies || []}
             companyDocuments={companyDocuments}
           />

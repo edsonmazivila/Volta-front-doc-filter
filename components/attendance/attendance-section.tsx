@@ -13,6 +13,8 @@ import { Card, CardHeader } from "@/components/dashboard/card";
 import { exportAttendanceCSV } from "@/lib/services/attendance";
 import { toast } from "sonner";
 import type { User } from "@/lib/services/users";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 interface AttendanceSectionProps {
   initialRecords: AttendanceRecord[];
@@ -25,6 +27,7 @@ export function AttendanceSection({
   initialJustifications,
   employees,
 }: AttendanceSectionProps) {
+  const { i18n } = useLingui();
   const [showForm, setShowForm] = useState(false);
   const [editRecord, setEditRecord] = useState<AttendanceRecord | undefined>();
   const [exporting, setExporting] = useState(false);
@@ -54,12 +57,12 @@ export function AttendanceSection({
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        toast.success("CSV exported successfully");
+        toast.success(i18n._(msg`CSV exported successfully`));
       } else {
-        toast.error("Failed to export CSV");
+        toast.error(i18n._(msg`Failed to export CSV`));
       }
     } catch {
-      toast.error("Export failed");
+      toast.error(i18n._(msg`Export failed`));
     } finally {
       setExporting(false);
     }
@@ -70,24 +73,24 @@ export function AttendanceSection({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground">Total Records</div>
+          <div className="text-sm text-muted-foreground">{i18n._(msg`Total Records`)}</div>
           <div className="text-2xl font-bold mt-1">{initialRecords.length}</div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground">Present</div>
+          <div className="text-sm text-muted-foreground">{i18n._(msg`Present`)}</div>
           <div className="text-2xl font-bold mt-1 text-green-600">
             {initialRecords.filter((r) => r.status === "present").length}
           </div>
         </Card>
         <Card className="p-4">
-          <div className="text-sm text-muted-foreground">Absent</div>
+          <div className="text-sm text-muted-foreground">{i18n._(msg`Absent`)}</div>
           <div className="text-2xl font-bold mt-1 text-red-600">
             {initialRecords.filter((r) => r.status === "absent").length}
           </div>
         </Card>
         <Card className="p-4">
           <div className="text-sm text-muted-foreground">
-            Pending Justifications
+            {i18n._(msg`Pending Justifications`)}
           </div>
           <div className="text-2xl font-bold mt-1 text-yellow-600">
             {initialJustifications.filter((j) => j.status === "pending" || j.status === "justified").length}
@@ -97,7 +100,7 @@ export function AttendanceSection({
 
       {/* Attendance Records */}
       <Card>
-        <CardHeader title="Attendance Records" />
+        <CardHeader title={i18n._(msg`Attendance Records`)} />
         <div className="flex gap-2 flex-col sm:flex-row sm:items-center justify-end my-2">
           <Button
             variant="outline"
@@ -105,16 +108,16 @@ export function AttendanceSection({
             onClick={handleExportCSV}
             disabled={exporting}
           >
-            {exporting ? "Exporting..." : "Export CSV"}
+            {exporting ? i18n._(msg`Exporting...`) : i18n._(msg`Export CSV`)}
           </Button>
           <Button size="sm" onClick={() => setShowForm(true)}>
-            + Record Attendance
+            + {i18n._(msg`Record Attendance`)}
           </Button>
         </div>
         {showForm && (
           <div className="border-b border-border p-6 bg-muted/30">
             <h3 className="text-lg font-semibold mb-4">
-              {editRecord ? "Edit Attendance" : "Record Attendance"}
+              {editRecord ? i18n._(msg`Edit Attendance`) : i18n._(msg`Record Attendance`)}
             </h3>
             <AttendanceForm
               employees={employees}
@@ -134,7 +137,7 @@ export function AttendanceSection({
       {/* Pending Justifications */}
       {initialJustifications.length > 0 && (
         <Card>
-          <CardHeader title="Pending Justifications" />
+          <CardHeader title={i18n._(msg`Pending Justifications`)} />
           <JustificationsTable justifications={initialJustifications} />
         </Card>
       )}

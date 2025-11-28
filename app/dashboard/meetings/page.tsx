@@ -2,6 +2,7 @@ import { Header } from '@/components/dashboard/header'
 import { requireUser, verifySession } from '@/lib/auth/dal'
 import { getMyMeetings, getAvailableParticipants } from '@/lib/services/meetings'
 import { MeetingsSection } from '@/components/meetings/meetings-section'
+import { t } from '@lingui/core/macro'
 
 export const metadata = {
   title: 'Meetings - NexuPayroll',
@@ -19,7 +20,7 @@ export default async function MeetingsPage() {
 
   return (
     <>
-      <Header title="Meetings" />
+      <Header title={t`Meetings`} />
       <section className="p-4 overflow-y-auto">
         <MeetingsSection
           meetings={meetings}

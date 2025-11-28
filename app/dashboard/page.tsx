@@ -11,6 +11,7 @@ import { getPayrollRuns } from "@/lib/services/payroll";
 import { getTimesheets } from "@/lib/services/timesheets";
 import { getMyLeaveRequests, getLeavesOverview } from "@/lib/services/leaves";
 import { getMyAttendance } from "@/lib/services/attendance";
+import { t } from "@lingui/core/macro";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -100,32 +101,32 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <Header title="Dashboard" />
+      <Header title={t`Dashboard`} />
       <div className="overflow-y-auto">
         {!isEmployee && (
           <section className={`p-4 grid grid-cols-1 ${statsGridCols} gap-4`}>
             {showTotalEmployees && (
-            <StatsCard label="Total Employees" value={stats.totalEmployees} />
+            <StatsCard label={t`Total Employees`} value={stats.totalEmployees} />
             )}
-            <StatsCard label="Active Timesheets" value={timesheets.length} />
+            <StatsCard label={t`Active Timesheets`} value={timesheets.length} />
             {canViewPayroll && (
-              <StatsCard label="Monthly Payroll" value={`$${stats.monthlyPayroll.toLocaleString()}`} />
+              <StatsCard label={t`Monthly Payroll`} value={`$${stats.monthlyPayroll.toLocaleString()}`} />
             )}
           </section>
         )}
         {isEmployee && (
           <section className="px-4 pb-4 grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-[1] mt-4">
             <Card className="min-h-[200px]">
-              <CardHeader title="My Attendance" />
+              <CardHeader title={t`My Attendance`} />
               <div className="p-4 grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <div className="text-sm font-medium">Present this month</div>
+                  <div className="text-sm font-medium">{t`Present this month`}</div>
                   <span className="text-lg font-semibold">{presentThisMonth}</span>
                 </div>
-                
+
                 {/* Last Attendance Entry - Full Width */}
                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <div className="text-sm font-medium mb-1">Last Attendance Entry</div>
+                  <div className="text-sm font-medium mb-1">{t`Last Attendance Entry`}</div>
                   <div className="text-sm text-muted-foreground">
                     {lastAttendance ? (
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
@@ -138,36 +139,36 @@ export default async function DashboardPage() {
                         })}</span>
                       </div>
                     ) : (
-                      <span>No attendance recorded</span>
+                      <span>{t`No attendance recorded`}</span>
                     )}
                   </div>
                 </div>
               </div>
               <div className="px-4 pb-4">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/my-attendance">View My Attendance</Link>
+                  <Link href="/dashboard/my-attendance">{t`View My Attendance`}</Link>
                 </Button>
               </div>
             </Card>
 
             <Card className="min-h-[200px]">
-              <CardHeader title="My Leaves" />
+              <CardHeader title={t`My Leaves`} />
               <div className="p-4 grid grid-cols-1 gap-3">
                 {/* Leave Counts - Single Row */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center justify-between p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <div className="text-sm font-medium">Pending</div>
+                    <div className="text-sm font-medium">{t`Pending`}</div>
                     <span className="text-lg font-semibold">{pendingMyLeaves}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                    <div className="text-sm font-medium">Upcoming</div>
+                    <div className="text-sm font-medium">{t`Upcoming`}</div>
                     <span className="text-lg font-semibold">{upcomingMyLeaves}</span>
                   </div>
                 </div>
-                
+
                 {/* Recent Leave Request - Full Width */}
                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <div className="text-sm font-medium mb-1">Recent Leave Request</div>
+                  <div className="text-sm font-medium mb-1">{t`Recent Leave Request`}</div>
                   <div className="text-sm text-muted-foreground">
                     {leaveRequests.length > 0 ? (
                       (() => {
@@ -201,21 +202,21 @@ export default async function DashboardPage() {
                         );
                       })()
                     ) : (
-                      <span>No leave requests</span>
+                      <span>{t`No leave requests`}</span>
                     )}
                   </div>
                 </div>
               </div>
               <div className="px-4 pb-4">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/my-leaves">View My Leaves</Link>
+                  <Link href="/dashboard/my-leaves">{t`View My Leaves`}</Link>
                 </Button>
               </div>
             </Card>
           </section>
         )}
         <section className="px-4 pb-4">
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">Quick Actions</h2>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">{t`Quick Actions`}</h2>
           <div className={`grid ${!isEmployee ? managerQuickActionsCols : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'} gap-3`}>
             {isEmployee ? (
               <>
@@ -228,8 +229,8 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm mb-0.5">Timesheets</h3>
-                        <p className="text-xs text-muted-foreground">Submit and track hours</p>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">{t`Timesheets`}</h3>
+                        <p className="text-xs text-muted-foreground">{t`Submit and track hours`}</p>
                       </div>
                     </div>
                   </Card>
@@ -243,8 +244,8 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm mb-0.5">My Paystubs</h3>
-                        <p className="text-xs text-muted-foreground">View payment history</p>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">{t`My Paystubs`}</h3>
+                        <p className="text-xs text-muted-foreground">{t`View payment history`}</p>
                       </div>
                     </div>
                   </Card>
@@ -258,8 +259,8 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm mb-0.5">My Documents</h3>
-                        <p className="text-xs text-muted-foreground">Access your files</p>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">{t`My Documents`}</h3>
+                        <p className="text-xs text-muted-foreground">{t`Access your files`}</p>
                       </div>
                     </div>
                   </Card>
@@ -277,8 +278,8 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm mb-0.5">Manage Employees</h3>
-                        <p className="text-xs text-muted-foreground">Add and update members</p>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">{t`Manage Employees`}</h3>
+                        <p className="text-xs text-muted-foreground">{t`Add and update members`}</p>
                       </div>
                     </div>
                   </Card>
@@ -293,8 +294,8 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm mb-0.5">View Timesheets</h3>
-                        <p className="text-xs text-muted-foreground">Review and approve</p>
+                        <h3 className="font-medium text-foreground text-sm mb-0.5">{t`View Timesheets`}</h3>
+                        <p className="text-xs text-muted-foreground">{t`Review and approve`}</p>
                       </div>
                     </div>
                   </Card>
@@ -309,8 +310,8 @@ export default async function DashboardPage() {
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-foreground text-sm mb-0.5">Run Payroll</h3>
-                          <p className="text-xs text-muted-foreground">Process payments</p>
+                          <h3 className="font-medium text-foreground text-sm mb-0.5">{t`Run Payroll`}</h3>
+                          <p className="text-xs text-muted-foreground">{t`Process payments`}</p>
                         </div>
                       </div>
                     </Card>
@@ -326,8 +327,8 @@ export default async function DashboardPage() {
               <Card className="h-[360px] p-0 overflow-hidden">
                 <div className="h-full w-full grid grid-rows-[auto,1fr]">
                   <div className="p-4 flex items-center justify-between">
-                    <span className="text-sm font-medium">Payroll Totals</span>
-                    <Link href="/dashboard/payroll" className="text-xs text-blue-400 hover:underline">View All</Link>
+                    <span className="text-sm font-medium">{t`Payroll Totals`}</span>
+                    <Link href="/dashboard/payroll" className="text-xs text-blue-400 hover:underline">{t`View All`}</Link>
                   </div>
                   <div className="overflow-hidden">
                     <PayrollChart data={payrollRuns} className="w-full h-[300px]" />
@@ -338,8 +339,8 @@ export default async function DashboardPage() {
             <Card className="h-[360px] p-0 overflow-hidden">
               <div className="h-full w-full grid grid-rows-[auto,1fr]">
                 <div className="p-4 flex items-center justify-between">
-                  <span className="text-sm font-medium">This Week&apos;s Hours</span>
-                  <Link href="/dashboard/timesheets" className="text-xs text-blue-400 hover:underline">View All</Link>
+                  <span className="text-sm font-medium">{t`This Week's Hours`}</span>
+                  <Link href="/dashboard/timesheets" className="text-xs text-blue-400 hover:underline">{t`View All`}</Link>
                 </div>
                 <div className="pb-2">
                   <BarChart data={timesheetDataByDay} />
@@ -351,7 +352,7 @@ export default async function DashboardPage() {
         {!isEmployee && (
           <section className="px-4 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-[1]">
             <Card className="min-h-[200px]">
-              <CardHeader title="Pending Approvals" />
+              <CardHeader title={t`Pending Approvals`} />
               {pendingLeaves.length > 0 || pendingTimesheetsCount > 0 ? (
                 <div className="space-y-3">
                   {pendingTimesheetsCount > 0 && (
@@ -363,12 +364,12 @@ export default async function DashboardPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{pendingTimesheetsCount} Pending Timesheet{pendingTimesheetsCount !== 1 ? 's' : ''}</p>
-                          <p className="text-xs text-muted-foreground">Requires approval</p>
+                          <p className="text-sm font-medium">{pendingTimesheetsCount} {t`Pending Timesheet`}{pendingTimesheetsCount !== 1 ? 's' : ''}</p>
+                          <p className="text-xs text-muted-foreground">{t`Requires approval`}</p>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <Link href="/dashboard/timesheets">Review</Link>
+                        <Link href="/dashboard/timesheets">{t`Review`}</Link>
                       </Button>
                     </div>
                   )}
@@ -381,25 +382,25 @@ export default async function DashboardPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-medium capitalize">{leave.leave_type} Leave</p>
+                          <p className="text-sm font-medium capitalize">{leave.leave_type} {t`Leave`}</p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <Link href="/dashboard/leaves">Review</Link>
+                        <Link href="/dashboard/leaves">{t`Review`}</Link>
                       </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-sm text-muted-foreground py-8 text-center">No pending approvals</div>
+                <div className="text-sm text-muted-foreground py-8 text-center">{t`No pending approvals`}</div>
               )}
             </Card>
 
             <Card className="min-h-[200px]">
-              <CardHeader title="System Overview" />
+              <CardHeader title={t`System Overview`} />
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -409,8 +410,8 @@ export default async function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Upcoming Leaves</p>
-                      <p className="text-xs text-muted-foreground">Next 7 days</p>
+                      <p className="text-sm font-medium">{t`Upcoming Leaves`}</p>
+                      <p className="text-xs text-muted-foreground">{t`Next 7 days`}</p>
                     </div>
                   </div>
                   <span className="text-lg font-semibold">
@@ -432,14 +433,14 @@ export default async function DashboardPage() {
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Upcoming Payroll</p>
+                        <p className="text-sm font-medium">{t`Upcoming Payroll`}</p>
                         <p className="text-xs text-muted-foreground">
-                          {upcomingPayroll.payDate ? new Date(upcomingPayroll.payDate).toLocaleDateString() : 'Pending'}
+                          {upcomingPayroll.payDate ? new Date(upcomingPayroll.payDate).toLocaleDateString() : t`Pending`}
                         </p>
                       </div>
                     </div>
                     <Button variant="outline" size="sm" asChild>
-                      <Link href="/dashboard/payroll">Process</Link>
+                      <Link href="/dashboard/payroll">{t`Process`}</Link>
                     </Button>
                   </div>
                 )}
@@ -453,8 +454,8 @@ export default async function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Payroll Runs</p>
-                      <p className="text-xs text-muted-foreground">This month</p>
+                      <p className="text-sm font-medium">{t`Payroll Runs`}</p>
+                      <p className="text-xs text-muted-foreground">{t`This month`}</p>
                     </div>
                   </div>
                   <span className="text-lg font-semibold">{payrollRuns.length}</span>
@@ -470,7 +471,7 @@ export default async function DashboardPage() {
           <section className="px-4 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-[1]">
             {/* Currently Out */}
             <Card className="min-h-[200px]">
-              <CardHeader title="Currently Out" />
+              <CardHeader title={t`Currently Out`} />
               <div className="space-y-2">
                 {leavesOverview.currentlyOut && leavesOverview.currentlyOut.length > 0 ? (
                   leavesOverview.currentlyOut.map((leave, idx) => (
@@ -481,13 +482,13 @@ export default async function DashboardPage() {
                       </div>
                       <div className="text-right text-xs text-muted-foreground">
                         <p>{new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                        <p>to {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                        <p>{t`to`} {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
-                    No one currently out
+                    {t`No one currently out`}
                   </div>
                 )}
               </div>
@@ -495,7 +496,7 @@ export default async function DashboardPage() {
 
             {/* Upcoming Leaves */}
             <Card className="min-h-[200px]">
-              <CardHeader title="Upcoming Leaves" />
+              <CardHeader title={t`Upcoming Leaves`} />
               <div className="space-y-2">
                 {leavesOverview.upcomingLeaves.length > 0 ? (
                   <>
@@ -507,19 +508,19 @@ export default async function DashboardPage() {
                         </div>
                         <div className="text-right text-xs text-muted-foreground">
                           <p>{new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                          <p>to {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                          <p>{t`to`} {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                         </div>
                       </div>
                     ))}
                     {leavesOverview.upcomingLeaves.length > 5 && (
                       <Link href="/dashboard/leaves" className="block text-center py-2 text-xs text-blue-400 hover:underline">
-                        View all {leavesOverview.upcomingLeaves.length} upcoming leaves
+                        {t`View all`} {leavesOverview.upcomingLeaves.length} {t`upcoming leaves`}
                       </Link>
                     )}
                   </>
                 ) : (
                   <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
-                    No upcoming leaves
+                    {t`No upcoming leaves`}
                   </div>
                 )}
               </div>

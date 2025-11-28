@@ -10,6 +10,8 @@ import { createMyAttendanceAction, clockOutMyAttendanceAction } from '@/lib/serv
 import { AttendanceFormDialog } from './attendance-form-dialog'
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import { formatTime } from '@/lib/utils'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface MyAttendanceSectionProps {
 	records: AttendanceRecord[]
@@ -25,15 +27,6 @@ const STATUS_COLORS = {
 	justified: 'bg-gray-100 text-gray-800 border-gray-200',
 }
 
-const STATUS_LABELS = {
-	present: 'Present',
-	absent: 'Absent',
-	late: 'Late',
-	half_day: 'Half Day',
-	on_leave: 'On Leave',
-	justified: 'Justified',
-}
-
 const STATUS_ICONS = {
 	present: CheckCircle,
 	absent: XCircle,
@@ -44,6 +37,7 @@ const STATUS_ICONS = {
 }
 
 export function MyAttendanceSection({ records, isLoading = false }: MyAttendanceSectionProps) {
+	const { i18n } = useLingui()
 	const router = useRouter()
 	const [clockingIn, setClockingIn] = useState(false)
 	const [clockingOut, setClockingOut] = useState(false)
@@ -53,6 +47,15 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 		const now = new Date()
 		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 	})
+
+	const STATUS_LABELS = {
+		present: i18n._(msg`Present`),
+		absent: i18n._(msg`Absent`),
+		late: i18n._(msg`Late`),
+		half_day: i18n._(msg`Half Day`),
+		on_leave: i18n._(msg`On Leave`),
+		justified: i18n._(msg`Justified`),
+	}
 
 	const todayRecord = useMemo(() => {
 		const today = new Date().toISOString().split('T')[0]
@@ -77,16 +80,16 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 			formData.append('date', now.toISOString().split('T')[0])
 			formData.append('clock_in', now.toTimeString().slice(0, 5))
 			formData.append('timezone', timezone)
-			
+
 			const result = await createMyAttendanceAction(null, formData)
 			if ('errors' in result) {
-				toast.error(result.errors._form?.[0] || 'Failed to clock in')
+				toast.error(result.errors._form?.[0] || i18n._(msg`Failed to clock in`))
 			} else {
-				toast.success('Clocked in successfully')
+				toast.success(i18n._(msg`Clocked in successfully`))
 				router.refresh()
 			}
 		} catch {
-			toast.error('Failed to clock in')
+			toast.error(i18n._(msg`Failed to clock in`))
 		} finally {
 			setClockingIn(false)
 		}
@@ -94,7 +97,7 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 
 	const handleClockOut = async () => {
 		if (!todayRecord?.date) return
-		
+
 		setClockingOut(true)
 		try {
 			const now = new Date()
@@ -103,16 +106,16 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 			formData.append('date', todayRecord.date.split('T')[0])
 			formData.append('clock_out', now.toTimeString().slice(0, 5))
 			formData.append('timezone', timezone)
-			
+
 			const result = await clockOutMyAttendanceAction(null, formData)
 			if ('errors' in result) {
-				toast.error(result.errors._form?.[0] || 'Failed to clock out')
+				toast.error(result.errors._form?.[0] || i18n._(msg`Failed to clock out`))
 			} else {
-				toast.success('Clocked out successfully')
+				toast.success(i18n._(msg`Clocked out successfully`))
 				router.refresh()
 			}
 		} catch {
-			toast.error('Failed to clock out')
+			toast.error(i18n._(msg`Failed to clock out`))
 		} finally {
 			setClockingOut(false)
 		}

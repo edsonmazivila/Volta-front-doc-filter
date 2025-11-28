@@ -6,12 +6,16 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui'
 import { signupAction } from '@/lib/auth/actions'
 import { PasswordInput } from '@/components/auth/password-input'
+import { useLingui } from '@lingui/react'
+import { Trans } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
 
 export function SignupForm() {
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState(false)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const router = useRouter()
+	const { i18n } = useLingui()
 
 	if (success) {
 		return (
@@ -22,9 +26,9 @@ export function SignupForm() {
 							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
 						</svg>
 					</div>
-					<h1 className="text-xl font-bold text-foreground mb-2">Account Created!</h1>
+					<h1 className="text-xl font-bold text-foreground mb-2"><Trans>Account Created!</Trans></h1>
 					<p className="text-muted-foreground text-sm">
-						Your account has been created successfully. Redirecting to login...
+						<Trans>Your account has been created successfully. Redirecting to login...</Trans>
 					</p>
 				</div>
 			</div>
@@ -61,9 +65,9 @@ export function SignupForm() {
 		<div className="w-full max-w-2xl mx-auto">
 			<div className="glass rounded-xl p-8">
 				<div className="mb-6 text-center">
-					<h1 className="text-2xl font-bold text-foreground mb-2">Create your account</h1>
+					<h1 className="text-2xl font-bold text-foreground mb-2"><Trans>Create your account</Trans></h1>
 					<p className="text-muted-foreground text-sm">
-						Register your company and admin account
+						<Trans>Register your company and admin account</Trans>
 					</p>
 				</div>
 
@@ -72,24 +76,26 @@ export function SignupForm() {
 						<p className="text-sm text-red-700 dark:text-red-400">{error}</p>
 					</div>
 				)}
-				
+
 				<form onSubmit={handleSubmit} className="space-y-6">
 					{/* Admin Details */}
 					<div className="space-y-4">
-						<h3 className="text-lg font-semibold text-foreground">Admin Details</h3>
+						<h3 className="text-lg font-semibold text-foreground"><Trans>Admin Details</Trans></h3>
 						<div className="flex flex-col gap-1">
-							<label className="text-sm text-foreground">Full Name *</label>
+							<label htmlFor="full_name" className="text-sm text-foreground"><Trans>Full Name</Trans> *</label>
 							<Input
+								id="full_name"
 								name="full_name"
 								type="text"
-								placeholder="John Doe"
+								placeholder={i18n._(msg`John Doe`)}
 								required
 								disabled={isSubmitting}
 							/>
 						</div>
 						<div className="flex flex-col gap-1">
-							<label className="text-sm text-foreground">Email *</label>
+							<label htmlFor="email" className="text-sm text-foreground"><Trans>Email</Trans> *</label>
 							<Input
+								id="email"
 								name="email"
 								type="email"
 								placeholder="admin@company.com"
@@ -98,44 +104,48 @@ export function SignupForm() {
 							/>
 						</div>
 						<div className="flex flex-col gap-1">
-							<label className="text-sm text-foreground">Password *</label>
+							<label htmlFor="password" className="text-sm text-foreground"><Trans>Password</Trans> *</label>
 							<PasswordInput
+								id="password"
 								name="password"
-								placeholder="Create a strong password"
+								placeholder={i18n._(msg`Create a strong password`)}
 								required
 								disabled={isSubmitting}
 							/>
-							<p className="text-xs text-muted-foreground">Minimum 8 characters</p>
+							<p className="text-xs text-muted-foreground"><Trans>Minimum 8 characters</Trans></p>
 						</div>
 					</div>
 
 					{/* Company Details */}
 					<div className="space-y-4 pt-4 border-t border-border">
-						<h3 className="text-lg font-semibold text-foreground">Company Details</h3>
+						<h3 className="text-lg font-semibold text-foreground"><Trans>Company Details</Trans></h3>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Company Name *</label>
+								<label htmlFor="company_name" className="text-sm text-foreground"><Trans>Company Name</Trans> *</label>
 								<Input
+									id="company_name"
 									name="company_name"
 									type="text"
-									placeholder="Acme Inc"
+									placeholder={i18n._(msg`Acme Inc`)}
 									required
 									disabled={isSubmitting}
 								/>
 							</div>
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Legal Name *</label>
+								<label htmlFor="legal_name" className="text-sm text-foreground"><Trans>Legal Name</Trans> *</label>
 								<Input
+									id="legal_name"
 									name="legal_name"
 									type="text"
-									placeholder="Acme Inc."
+									placeholder={i18n._(msg`Acme Inc.`)}
 									required
 									disabled={isSubmitting}
 								/>
 							</div>
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Tax ID *</label>
+								<label htmlFor="tax_id" className="text-sm text-foreground"><Trans>Tax ID</Trans> *</label>
 								<Input
+									id="tax_id"
 									name="tax_id"
 									type="text"
 									placeholder="XX123456789"
@@ -144,11 +154,12 @@ export function SignupForm() {
 								/>
 							</div>
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Country *</label>
+								<label htmlFor="country" className="text-sm text-foreground"><Trans>Country</Trans> *</label>
 								<Input
+									id="country"
 									name="country"
 									type="text"
-									placeholder="US"
+									placeholder="PT"
 									required
 									disabled={isSubmitting}
 								/>
@@ -156,11 +167,12 @@ export function SignupForm() {
 						</div>
 
 						<div className="flex flex-col gap-1">
-							<label className="text-sm text-foreground">Address *</label>
+							<label htmlFor="address_line1" className="text-sm text-foreground"><Trans>Address</Trans> *</label>
 							<Input
+								id="address_line1"
 								name="address_line1"
 								type="text"
-								placeholder="123 Main St"
+								placeholder={i18n._(msg`123 Main St`)}
 								required
 								disabled={isSubmitting}
 							/>
@@ -168,31 +180,34 @@ export function SignupForm() {
 
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">City *</label>
+								<label htmlFor="city" className="text-sm text-foreground"><Trans>City</Trans> *</label>
 								<Input
+									id="city"
 									name="city"
 									type="text"
-									placeholder="New York"
+									placeholder={i18n._(msg`Lisbon`)}
 									required
 									disabled={isSubmitting}
 								/>
 							</div>
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">State *</label>
+								<label htmlFor="state" className="text-sm text-foreground"><Trans>State/District</Trans> *</label>
 								<Input
+									id="state"
 									name="state"
 									type="text"
-									placeholder="NY"
+									placeholder={i18n._(msg`Lisboa`)}
 									required
 									disabled={isSubmitting}
 								/>
 							</div>
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Postal Code *</label>
+								<label htmlFor="postal_code" className="text-sm text-foreground"><Trans>Postal Code</Trans> *</label>
 								<Input
+									id="postal_code"
 									name="postal_code"
 									type="text"
-									placeholder="10001"
+									placeholder="1000-001"
 									required
 									disabled={isSubmitting}
 								/>
@@ -201,18 +216,20 @@ export function SignupForm() {
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Company Phone *</label>
+								<label htmlFor="company_phone" className="text-sm text-foreground"><Trans>Company Phone</Trans> *</label>
 								<Input
+									id="company_phone"
 									name="company_phone"
 									type="tel"
-									placeholder="+1 (555) 000-0000"
+									placeholder="+351 210 000 000"
 									required
 									disabled={isSubmitting}
 								/>
 							</div>
 							<div className="flex flex-col gap-1">
-								<label className="text-sm text-foreground">Company Email *</label>
+								<label htmlFor="company_email" className="text-sm text-foreground"><Trans>Company Email</Trans> *</label>
 								<Input
+									id="company_email"
 									name="company_email"
 									type="email"
 									placeholder="contact@company.com"
@@ -223,8 +240,9 @@ export function SignupForm() {
 						</div>
 
 						<div className="flex flex-col gap-1">
-							<label className="text-sm text-foreground">Website (optional)</label>
+							<label htmlFor="website" className="text-sm text-foreground"><Trans>Website (optional)</Trans></label>
 							<Input
+								id="website"
 								name="website"
 								type="url"
 								placeholder="https://company.com"
@@ -244,7 +262,7 @@ export function SignupForm() {
 							className="mt-1"
 						/>
 						<label htmlFor="termsAccepted" className="text-sm text-foreground">
-							I agree to the Terms of Service and Privacy Policy
+							<Trans>I agree to the Terms of Service and Privacy Policy</Trans>
 						</label>
 					</div>
 
@@ -254,7 +272,7 @@ export function SignupForm() {
 						className="w-full py-3 text-base font-semibold cursor-pointer"
 						disabled={isSubmitting}
 					>
-						{isSubmitting ? 'Creating account...' : 'Create account'}
+						{isSubmitting ? <Trans>Creating account...</Trans> : <Trans>Create account</Trans>}
 					</Button>
 				</form>
 			</div>

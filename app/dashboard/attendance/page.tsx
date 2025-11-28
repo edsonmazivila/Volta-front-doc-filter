@@ -6,6 +6,7 @@ import {
 } from '@/lib/services/attendance'
 import { getUsers } from '@/lib/services/users'
 import { AttendanceSection } from '@/components/attendance/attendance-section'
+import { t } from '@lingui/core/macro'
 
 export default async function AttendancePage() {
   await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
@@ -24,7 +25,7 @@ export default async function AttendancePage() {
 
   return (
     <>
-      <Header title="Attendance Management" />
+      <Header title={t`Attendance Management`} />
       <section className="p-4 overflow-y-auto">
         <AttendanceSection
           initialRecords={attendanceRecords}

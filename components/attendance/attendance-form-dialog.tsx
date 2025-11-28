@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation'
 import { Calendar, Clock, FileText, Upload, X, ExternalLink } from 'lucide-react'
 import type { AttendanceRecord } from '@/lib/types/attendance'
 import { formatTimeForInput } from '@/lib/utils'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface AttendanceFormDialogProps {
   open: boolean
@@ -18,25 +20,26 @@ interface AttendanceFormDialogProps {
   isEdit?: boolean
 }
 
-const STATUS_OPTIONS = [
-  { value: 'present', label: 'Present' },
-  { value: 'absent', label: 'Absent' },
-  { value: 'late', label: 'Late' },
-  { value: 'half_day', label: 'Half Day' },
-  { value: 'on_leave', label: 'On Leave' },
-  { value: 'justified', label: 'Justified' },
-]
-
-export function AttendanceFormDialog({ 
-  open, 
-  onOpenChange, 
-  attendance, 
-  isEdit = false 
+export function AttendanceFormDialog({
+  open,
+  onOpenChange,
+  attendance,
+  isEdit = false
 }: AttendanceFormDialogProps) {
   const router = useRouter()
   const toast = useToastHelpers()
+  const { i18n } = useLingui()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const STATUS_OPTIONS = [
+    { value: 'present', label: i18n._(msg`Present`) },
+    { value: 'absent', label: i18n._(msg`Absent`) },
+    { value: 'late', label: i18n._(msg`Late`) },
+    { value: 'half_day', label: i18n._(msg`Half Day`) },
+    { value: 'on_leave', label: i18n._(msg`On Leave`) },
+    { value: 'justified', label: i18n._(msg`Justified`) },
+  ]
 
   // Form state
   const [date, setDate] = useState('')
@@ -78,7 +81,7 @@ export function AttendanceFormDialog({
     if (file) {
       // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        toast.error('File size must be less than 10MB')
+        toast.error(i18n._(msg`File size must be less than 10MB`))
         return
       }
       setUploadedFile(file)
@@ -96,17 +99,17 @@ export function AttendanceFormDialog({
     e.preventDefault()
 
     if (!date.trim()) {
-      toast.error('Date is required')
+      toast.error(i18n._(msg`Date is required`))
       return
     }
 
     if (status === 'absent' && !justification.trim()) {
-      toast.error('Justification is required for absent status')
+      toast.error(i18n._(msg`Justification is required for absent status`))
       return
     }
 
     if (status === 'late' && !justification.trim()) {
-      toast.error('Justification is required for late status')
+      toast.error(i18n._(msg`Justification is required for late status`))
       return
     }
 
@@ -141,15 +144,20 @@ export function AttendanceFormDialog({
       }
 
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || 'Failed to save attendance')
+        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to save attendance`))
         return
       }
 
-      toast.success(isEdit ? 'Attendance updated successfully' : (status === 'absent' || status === 'late' ? 'Justification submitted successfully' : 'Attendance issue reported successfully'))
+      const successMessage = isEdit
+        ? i18n._(msg`Attendance updated successfully`)
+        : (status === 'absent' || status === 'late'
+          ? i18n._(msg`Justification submitted successfully`)
+          : i18n._(msg`Attendance issue reported successfully`))
+      toast.success(successMessage)
       onOpenChange(false)
       router.refresh()
     } catch {
-      toast.error('Failed to save attendance')
+      toast.error(i18n._(msg`Failed to save attendance`))
     } finally {
       setIsSubmitting(false)
     }
@@ -167,7 +175,7 @@ export function AttendanceFormDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            {isEdit ? 'Edit Attendance' : 'Report Attendance Issue'}
+            {isEdit ? i18n._(msg`Edit Attendance`) : i18n._(msg`Report Attendance Issue`)}
           </DialogTitle>
         </DialogHeader>
 
@@ -175,7 +183,7 @@ export function AttendanceFormDialog({
           {/* Date */}
           <div>
             <label htmlFor="date" className="block text-sm font-medium mb-1">
-              Date <span className="text-red-400">*</span>
+              {i18n._(msg`Date`)} <span className="text-red-400">*</span>
             </label>
             <Input
               id="date"
@@ -190,7 +198,7 @@ export function AttendanceFormDialog({
           {/* Status */}
           <div>
             <label htmlFor="status" className="block text-sm font-medium mb-1">
-              Status <span className="text-red-400">*</span>
+              {i18n._(msg`Status`)} <span className="text-red-400">*</span>
             </label>
             <select
               id="status"
@@ -212,7 +220,7 @@ export function AttendanceFormDialog({
           <div>
             <label htmlFor="clockIn" className="flex items-center gap-1 text-sm font-medium mb-1">
               <Clock className="h-4 w-4" />
-              Clock In
+              {i18n._(msg`Clock In`)}
             </label>
             <Input
               id="clockIn"
@@ -229,7 +237,7 @@ export function AttendanceFormDialog({
           <div>
             <label htmlFor="clockOut" className="flex items-center gap-1 text-sm font-medium mb-1">
               <Clock className="h-4 w-4" />
-              Clock Out
+              {i18n._(msg`Clock Out`)}
             </label>
             <Input
               id="clockOut"
@@ -247,7 +255,7 @@ export function AttendanceFormDialog({
               <div>
                 <label htmlFor="justification" className="flex items-center gap-1 text-sm font-medium mb-1">
                   <FileText className="h-4 w-4" />
-                  Justification
+                  {i18n._(msg`Justification`)}
                   {(status === 'absent' || status === 'late') && <span className="text-red-400">*</span>}
                 </label>
                 <textarea
@@ -256,7 +264,7 @@ export function AttendanceFormDialog({
                   onChange={(e) => setJustification(e.target.value)}
                   rows={3}
                   className="w-full rounded-md border border-[var(--border)] bg-background text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter reason for absence/lateness or additional notes..."
+                  placeholder={i18n._(msg`Enter reason for absence/lateness or additional notes...`)}
                   disabled={isSubmitting}
                   required={status === 'absent' || status === 'late'}
                 />
@@ -266,8 +274,8 @@ export function AttendanceFormDialog({
               <div>
                 <label className="flex items-center gap-1 text-sm font-medium mb-2">
                   <Upload className="h-4 w-4" />
-                  Supporting Document{' '}
-                  <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+                  {i18n._(msg`Supporting Document`)}{' '}
+                  <span className="text-xs text-muted-foreground font-normal">({i18n._(msg`Optional`)})</span>
                 </label>
                 
                 {!uploadedFile && !attendance?.justification_document_url ? (
@@ -289,10 +297,10 @@ export function AttendanceFormDialog({
                       className="w-full"
                     >
                       <Upload className="h-4 w-4 mr-2" />
-                      Upload Document
+                      {i18n._(msg`Upload Document`)}
                     </Button>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Supported: PDF, DOC, DOCX, JPG, PNG (Max 10MB)
+                      {i18n._(msg`Supported: PDF, DOC, DOCX, JPG, PNG (Max 10MB)`)}
                     </p>
                   </div>
                 ) : uploadedFile ? (
@@ -303,7 +311,7 @@ export function AttendanceFormDialog({
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate text-green-900 dark:text-green-100">{uploadedFile.name}</p>
                         <p className="text-xs text-green-700 dark:text-green-400">
-                          New file · {(uploadedFile.size / 1024).toFixed(1)} KB
+                          {i18n._(msg`New file`)} · {(uploadedFile.size / 1024).toFixed(1)} KB
                         </p>
                       </div>
                       <Button
@@ -319,7 +327,7 @@ export function AttendanceFormDialog({
                     </div>
                     {attendance?.justification_document_url && (
                       <p className="text-xs text-muted-foreground">
-                        This will replace: {attendance.justification_document_filename || 'existing document'}
+                        {i18n._(msg`This will replace`)}: {attendance.justification_document_filename || i18n._(msg`existing document`)}
                       </p>
                     )}
                   </div>
@@ -330,10 +338,10 @@ export function AttendanceFormDialog({
                       <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {attendance.justification_document_filename || 'Uploaded document'}
+                          {attendance.justification_document_filename || i18n._(msg`Uploaded document`)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Current document
+                          {i18n._(msg`Current document`)}
                         </p>
                       </div>
                       <Button
@@ -343,7 +351,7 @@ export function AttendanceFormDialog({
                         onClick={() => window.open(attendance.justification_document_url, '_blank')}
                         disabled={isSubmitting}
                         className="flex-shrink-0"
-                        title="View document"
+                        title={i18n._(msg`View document`)}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -366,7 +374,7 @@ export function AttendanceFormDialog({
                         size="sm"
                       >
                         <Upload className="h-4 w-4 mr-2" />
-                        Replace with new document
+                        {i18n._(msg`Replace with new document`)}
                       </Button>
                     </div>
                   </div>
@@ -377,14 +385,14 @@ export function AttendanceFormDialog({
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)]">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="flex-1"
             >
-              {isSubmitting 
-                ? (isEdit ? 'Updating...' : 'Reporting...') 
-                : (isEdit ? 'Update Attendance' : 'Report Issue')
+              {isSubmitting
+                ? (isEdit ? i18n._(msg`Updating...`) : i18n._(msg`Reporting...`))
+                : (isEdit ? i18n._(msg`Update Attendance`) : i18n._(msg`Report Issue`))
               }
             </Button>
             <Button
@@ -393,7 +401,7 @@ export function AttendanceFormDialog({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              Cancel
+              {i18n._(msg`Cancel`)}
             </Button>
           </div>
         </form>
