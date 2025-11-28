@@ -531,7 +531,7 @@ export function CompanyDocumentsSection({ documents, total }: CompanyDocumentsSe
 				<AlertDialogHeader>
 					<AlertDialogTitle>{i18n._(msg`Delete document?`)}</AlertDialogTitle>
 					<AlertDialogDescription>
-						{i18n._(msg`This action cannot be undone. This will permanently delete ${deleteTarget?.name} and remove the file from the system.`)}
+						{i18n._(msg`This action cannot be undone. This will permanently delete ${deleteTarget?.name ?? ''} and remove the file from the system.`)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

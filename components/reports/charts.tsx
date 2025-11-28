@@ -1,6 +1,10 @@
+'use client'
 import { ResponsiveContainer, LineChart as RLineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, BarChart as RBarChart, Bar, PieChart as RPieChart, Pie, Cell } from 'recharts'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 export function PayrollLineChart({ labels, total, net, className = '' }: { labels: string[], total: number[], net: number[], className?: string }) {
+	const { i18n } = useLingui()
 	const data = labels.map((l, i) => ({ label: l, total: total[i] ?? 0, net: net[i] ?? 0 }))
 	return (
 		<div className={className}>
@@ -11,8 +15,8 @@ export function PayrollLineChart({ labels, total, net, className = '' }: { label
 					<YAxis tick={{ fontSize: 12 }} />
 					<Tooltip />
 					<Legend />
-					<Line type='monotone' dataKey='total' stroke='#3b82f6' strokeWidth={2} dot={false} name='Total Payroll' />
-					<Line type='monotone' dataKey='net' stroke='#10b981' strokeWidth={2} dot={false} name='Net Pay' />
+					<Line type='monotone' dataKey='total' stroke='#3b82f6' strokeWidth={2} dot={false} name={i18n._(msg`Total Payroll`)} />
+					<Line type='monotone' dataKey='net' stroke='#10b981' strokeWidth={2} dot={false} name={i18n._(msg`Net Pay`)} />
 				</RLineChart>
 			</ResponsiveContainer>
 		</div>

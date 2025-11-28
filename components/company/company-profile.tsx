@@ -670,7 +670,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 				<AlertDialogHeader>
 					<AlertDialogTitle>{i18n._(msg`Delete leave policy?`)}</AlertDialogTitle>
 					<AlertDialogDescription>
-						{i18n._(msg`This action cannot be undone. This will permanently delete ${deletePolicyTarget?.name}.`)}
+						{i18n._(msg`This action cannot be undone. This will permanently delete ${deletePolicyTarget?.name ?? ''}.`)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
@@ -688,7 +688,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 				<AlertDialogHeader>
 					<AlertDialogTitle>{i18n._(msg`Delete pay schedule?`)}</AlertDialogTitle>
 					<AlertDialogDescription>
-						{i18n._(msg`This action cannot be undone. This will permanently delete ${deletePayScheduleTarget?.name}.`)}
+						{i18n._(msg`This action cannot be undone. This will permanently delete ${deletePayScheduleTarget?.name ?? ''}.`)}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

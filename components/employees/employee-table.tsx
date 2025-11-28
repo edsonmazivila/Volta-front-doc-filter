@@ -554,7 +554,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           if (!open) setEmployeeToDeactivate(null);
         }}
         title={i18n._(msg`Deactivate Employee?`)}
-        description={i18n._(msg`Are you sure you want to deactivate "${employeeToDeactivate?.full_name || employeeToDeactivate?.email}"? This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed.`)}
+        description={i18n._(msg`Are you sure you want to deactivate "${employeeToDeactivate?.full_name ?? employeeToDeactivate?.email ?? ''}"? This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed.`)}
         confirmText={i18n._(msg`Deactivate`)}
         cancelText={i18n._(msg`Cancel`)}
         onConfirm={handleDeactivateConfirm}

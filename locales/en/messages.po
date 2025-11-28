@@ -1491,7 +1491,7 @@ msgstr "Download to View"
 msgid "Delete document?"
 msgstr "Delete document?"
 
-#. placeholder {0}: deleteTarget?.name
+#. placeholder {0}: deleteTarget?.name ?? ''
 #: components/company/company-documents-section.tsx:534
 msgid "This action cannot be undone. This will permanently delete {0} and remove the file from the system."
 msgstr "This action cannot be undone. This will permanently delete {0} and remove the file from the system."
@@ -1896,8 +1896,8 @@ msgstr "Active Policy"
 msgid "Delete leave policy?"
 msgstr "Delete leave policy?"
 
-#. placeholder {0}: deletePayScheduleTarget?.name
-#. placeholder {0}: deletePolicyTarget?.name
+#. placeholder {0}: deletePayScheduleTarget?.name ?? ''
+#. placeholder {0}: deletePolicyTarget?.name ?? ''
 #: components/company/company-profile.tsx:673
 #: components/company/company-profile.tsx:691
 msgid "This action cannot be undone. This will permanently delete {0}."
@@ -1914,6 +1914,14 @@ msgstr "User menu"
 #: components/dashboard/header.tsx:50
 msgid "Theme"
 msgstr "Theme"
+
+#: components/dashboard/line-chart.tsx:11
+msgid "Payroll trend line chart"
+msgstr "Payroll trend line chart"
+
+#: components/dashboard/line-chart.tsx:12
+msgid "Displays total payroll amounts across periods"
+msgstr "Displays total payroll amounts across periods"
 
 #: components/dashboard/logout-button.tsx:20
 #: components/dashboard/logout-button.tsx:21
@@ -1952,6 +1960,46 @@ msgstr "Mark all read"
 #: components/dashboard/notifications-menu.tsx:125
 msgid "Clear all"
 msgstr "Clear all"
+
+#. placeholder {0}: index + 1
+#: components/dashboard/payroll-chart.tsx:79
+msgid "Run {0}"
+msgstr "Run {0}"
+
+#: components/dashboard/payroll-chart.tsx:91
+msgid "No payroll data available yet"
+msgstr "No payroll data available yet"
+
+#: components/dashboard/payroll-chart.tsx:140
+msgid "Gross"
+msgstr "Gross"
+
+#: components/dashboard/payroll-chart.tsx:163
+msgid "Net"
+msgstr "Net"
+
+#: components/dashboard/payroll-chart.tsx:188
+#: components/payroll/payroll-section.tsx:290
+#: components/paystubs/paystub-card.tsx:61
+#: components/paystubs/paystub-detail-dialog.tsx:165
+msgid "Gross Pay"
+msgstr "Gross Pay"
+
+#: components/dashboard/payroll-chart.tsx:192
+#: components/payroll/payroll-section.tsx:291
+#: components/paystubs/paystub-card.tsx:51
+#: components/paystubs/paystub-detail-dialog.tsx:185
+#: components/reports/charts.tsx:19
+msgid "Net Pay"
+msgstr "Net Pay"
+
+#: components/dashboard/payroll-chart.tsx:200
+msgid "Total Gross"
+msgstr "Total Gross"
+
+#: components/dashboard/payroll-chart.tsx:206
+msgid "Total Net"
+msgstr "Total Net"
 
 #: components/dashboard/sidebar.tsx:57
 #: components/reports/reports-section.tsx:64
@@ -2126,7 +2174,7 @@ msgstr "Edit Department"
 msgid "Are you sure?"
 msgstr "Are you sure?"
 
-#. placeholder {0}: departmentToDelete?.name
+#. placeholder {0}: departmentToDelete?.name ?? ''
 #: components/departments/department-management.tsx:312
 msgid "This will permanently delete the department \"{0}\". This action cannot be undone."
 msgstr "This will permanently delete the department \"{0}\". This action cannot be undone."
@@ -2966,7 +3014,7 @@ msgstr "{0} employees"
 msgid "Deactivate Employee?"
 msgstr "Deactivate Employee?"
 
-#. placeholder {0}: employeeToDeactivate?.full_name || employeeToDeactivate?.email
+#. placeholder {0}: employeeToDeactivate?.full_name ?? employeeToDeactivate?.email ?? ''
 #: components/employees/employee-table.tsx:557
 msgid "Are you sure you want to deactivate \"{0}\"? This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed."
 msgstr "Are you sure you want to deactivate \"{0}\"? This will prevent the employee from logging into the system and accessing their account. The employee can be reactivated later if needed."
@@ -4005,18 +4053,6 @@ msgstr "Pay Date"
 msgid "Employees"
 msgstr "Employees"
 
-#: components/payroll/payroll-section.tsx:290
-#: components/paystubs/paystub-card.tsx:61
-#: components/paystubs/paystub-detail-dialog.tsx:165
-msgid "Gross Pay"
-msgstr "Gross Pay"
-
-#: components/payroll/payroll-section.tsx:291
-#: components/paystubs/paystub-card.tsx:51
-#: components/paystubs/paystub-detail-dialog.tsx:185
-msgid "Net Pay"
-msgstr "Net Pay"
-
 #: components/payroll/payroll-section.tsx:327
 msgid "View Paystubs"
 msgstr "View Paystubs"
@@ -4168,6 +4204,10 @@ msgstr "No paystubs found"
 #: components/paystubs/paystubs-section.tsx:95
 msgid "Your paystubs will appear here once they are generated"
 msgstr "Your paystubs will appear here once they are generated"
+
+#: components/reports/charts.tsx:18
+msgid "Total Payroll"
+msgstr "Total Payroll"
 
 #: components/reports/reports-section.tsx:40
 msgid "PNG Image"

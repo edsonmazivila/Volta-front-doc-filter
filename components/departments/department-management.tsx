@@ -309,7 +309,7 @@ export function DepartmentManagement({
           <AlertDialogHeader>
             <AlertDialogTitle>{i18n._(msg`Are you sure?`)}</AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n._(msg`This will permanently delete the department "${departmentToDelete?.name}". This action cannot be undone.`)}
+              {i18n._(msg`This will permanently delete the department "${departmentToDelete?.name ?? ''}". This action cannot be undone.`)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

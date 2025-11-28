@@ -1,6 +1,8 @@
 'use client'
 
 import type { PayrollRunItem } from '@/lib/services/payroll'
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface PayrollChartProps {
 	data: PayrollRunItem[]
@@ -8,6 +10,7 @@ interface PayrollChartProps {
 }
 
 export function PayrollChart({ data, className = '' }: PayrollChartProps) {
+	const { i18n } = useLingui()
 	// Take last 6 payroll runs and reverse to show chronologically
 	// If no data, create placeholder entries
 	const recentRuns = data.length > 0 
@@ -73,10 +76,10 @@ export function PayrollChart({ data, className = '' }: PayrollChartProps) {
 	const formatDate = (dateStr: string, index: number) => {
 		if (!dateStr) {
 			// Show placeholder labels like "Run 1", "Run 2", etc.
-			return `Run ${index + 1}`
+			return i18n._(msg`Run ${index + 1}`)
 		}
 		const date = new Date(dateStr)
-		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+		return date.toLocaleDateString(i18n.locale, { month: 'short', day: 'numeric' })
 	}
 
 	return (
@@ -85,7 +88,7 @@ export function PayrollChart({ data, className = '' }: PayrollChartProps) {
 			{!hasData && (
 				<div className='absolute inset-0 flex items-center justify-center pointer-events-none z-10'>
 					<div className='bg-background/80 backdrop-blur-sm border border-border rounded-lg px-4 py-2'>
-						<p className='text-sm text-muted-foreground'>No payroll data available yet</p>
+						<p className='text-sm text-muted-foreground'>{i18n._(msg`No payroll data available yet`)}</p>
 					</div>
 				</div>
 			)}
@@ -134,7 +137,7 @@ export function PayrollChart({ data, className = '' }: PayrollChartProps) {
 										{hasData && (
 											<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20'>
 												<div className='bg-popover border border-border rounded-lg px-3 py-2 shadow-lg whitespace-nowrap'>
-													<p className='text-xs font-medium'>Gross</p>
+													<p className='text-xs font-medium'>{i18n._(msg`Gross`)}</p>
 													<p className='text-sm font-bold'>{formatCurrency(run.grossAmount || 0)}</p>
 												</div>
 											</div>
@@ -157,7 +160,7 @@ export function PayrollChart({ data, className = '' }: PayrollChartProps) {
 										{hasData && (
 											<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20'>
 												<div className='bg-popover border border-border rounded-lg px-3 py-2 shadow-lg whitespace-nowrap'>
-													<p className='text-xs font-medium'>Net</p>
+													<p className='text-xs font-medium'>{i18n._(msg`Net`)}</p>
 													<p className='text-sm font-bold'>{formatCurrency(run.netAmount || 0)}</p>
 												</div>
 											</div>
@@ -182,11 +185,11 @@ export function PayrollChart({ data, className = '' }: PayrollChartProps) {
 			<div className='flex items-center justify-center gap-6 px-4 pb-4 pt-2 border-t border-border/50'>
 				<div className='flex items-center gap-2'>
 					<div className='w-3 h-3 rounded bg-blue-500/80' />
-					<span className='text-xs text-muted-foreground'>Gross Pay</span>
+					<span className='text-xs text-muted-foreground'>{i18n._(msg`Gross Pay`)}</span>
 				</div>
 				<div className='flex items-center gap-2'>
 					<div className='w-3 h-3 rounded bg-green-500/80' />
-					<span className='text-xs text-muted-foreground'>Net Pay</span>
+					<span className='text-xs text-muted-foreground'>{i18n._(msg`Net Pay`)}</span>
 				</div>
 			</div>
 
@@ -194,13 +197,13 @@ export function PayrollChart({ data, className = '' }: PayrollChartProps) {
 			<div className='px-4 pb-4'>
 				<div className='grid grid-cols-2 gap-4 text-center'>
 					<div>
-						<p className='text-xs text-muted-foreground mb-1'>Total Gross</p>
+						<p className='text-xs text-muted-foreground mb-1'>{i18n._(msg`Total Gross`)}</p>
 						<p className={`text-lg font-bold ${hasData ? 'text-blue-500' : 'text-muted-foreground'}`}>
 							{formatCurrency(recentRuns.reduce((sum, r) => sum + (r.grossAmount || 0), 0))}
 						</p>
 					</div>
 					<div>
-						<p className='text-xs text-muted-foreground mb-1'>Total Net</p>
+						<p className='text-xs text-muted-foreground mb-1'>{i18n._(msg`Total Net`)}</p>
 						<p className={`text-lg font-bold ${hasData ? 'text-green-500' : 'text-muted-foreground'}`}>
 							{formatCurrency(recentRuns.reduce((sum, r) => sum + (r.netAmount || 0), 0))}
 						</p>
