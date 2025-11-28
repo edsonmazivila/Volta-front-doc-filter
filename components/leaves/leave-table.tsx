@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { LeaveViewDialog } from "./leave-view-dialog";
 import { formatDate, formatDateRange, getLeaveStatusColor } from "@/lib/utils";
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
 
 interface LeaveTableProps {
   items?: LeaveRequestItem[];
@@ -40,6 +42,7 @@ export function LeaveTable({
   onApproveL1,
   onReject,
 }: LeaveTableProps) {
+  const { i18n } = useLingui()
   const rows = useMemo(() => items, [items]);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [viewingLeave, setViewingLeave] = useState<LeaveRequestItem | null>(
@@ -75,10 +78,10 @@ export function LeaveTable({
     return (
       <div className="glass rounded-xl overflow-hidden">
         <div className="p-6 text-center text-sm text-muted-foreground">
-          No leave requests found
+          {i18n._(msg`No leave requests found`)}
           {onNew ? (
             <div className="mt-3">
-              <Button onClick={onNew}>New request</Button>
+              <Button onClick={onNew}>{i18n._(msg`New request`)}</Button>
             </div>
           ) : null}
         </div>
@@ -93,28 +96,28 @@ export function LeaveTable({
           <table className="w-full text-sm">
             <thead className="border-b border-[var(--border)] text-neutral-400">
               <tr>
-                <th className="text-left p-3">Employee</th>
+                <th className="text-left p-3">{i18n._(msg`Employee`)}</th>
                 <th className="text-left p-3">
                   <div className="flex items-center gap-2">
-                    Status
+                    {i18n._(msg`Status`)}
                     <span className="text-xs text-muted-foreground">
-                      (click to view details)
+                      {i18n._(msg`(click to view details)`)}
                     </span>
                   </div>
                 </th>
-                <th className="text-left p-3">Type</th>
-                <th className="text-left p-3">Dates</th>
-                <th className="text-left p-3">Days</th>
-                <th className="text-left p-3">Reason</th>
-                <th className="text-left p-3">Created</th>
-                <th className="text-left p-3">Actions</th>
+                <th className="text-left p-3">{i18n._(msg`Type`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Dates`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Days`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Reason`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Created`)}</th>
+                <th className="text-left p-3">{i18n._(msg`Actions`)}</th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
                 <tr>
                   <td className="p-4" colSpan={8}>
-                    No leave requests found
+                    {i18n._(msg`No leave requests found`)}
                   </td>
                 </tr>
               ) : (
@@ -140,7 +143,7 @@ export function LeaveTable({
                     </td>
                     <td className="p-3">
                       {row.total_days}
-                      {row.is_half_day ? " (Half Day)" : ""}
+                      {row.is_half_day ? i18n._(msg` (Half Day)`) : ""}
                     </td>
                     <td
                       className="p-3 max-w-[240px] truncate"
@@ -169,7 +172,7 @@ export function LeaveTable({
                             }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
-                            View Details
+                            {i18n._(msg`View Details`)}
                           </DropdownMenuItem>
                           {row.status === "SUBMITTED" && onApproveL1 && (
                             <DropdownMenuItem
@@ -180,7 +183,7 @@ export function LeaveTable({
                               className="text-green-400 focus:text-green-400"
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
-                              Approve
+                              {i18n._(msg`Approve`)}
                             </DropdownMenuItem>
                           )}
                           {onEdit && (
@@ -191,7 +194,7 @@ export function LeaveTable({
                               }}
                             >
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              {i18n._(msg`Edit`)}
                             </DropdownMenuItem>
                           )}
                           {row.status === "DRAFT" && onSubmit && (
@@ -205,7 +208,7 @@ export function LeaveTable({
                               disabled={pendingId === row.id}
                             >
                               <Clock className="mr-2 h-4 w-4" />
-                              Submit
+                              {i18n._(msg`Submit`)}
                             </DropdownMenuItem>
                           )}
                           {["DRAFT", "SUBMITTED"].includes(
@@ -221,7 +224,7 @@ export function LeaveTable({
                                 className="text-yellow-400 focus:text-yellow-400"
                               >
                                 <XCircle className="mr-2 h-4 w-4" />
-                                Cancel
+                                {i18n._(msg`Cancel`)}
                               </DropdownMenuItem>
                             )}
                           {row.status === "SUBMITTED" &&
@@ -234,7 +237,7 @@ export function LeaveTable({
                                 className="text-red-400 focus:text-red-400"
                               >
                                 <XCircle className="mr-2 h-4 w-4" />
-                                Reject
+                                {i18n._(msg`Reject`)}
                               </DropdownMenuItem>
                             )}
                         </DropdownMenuContent>

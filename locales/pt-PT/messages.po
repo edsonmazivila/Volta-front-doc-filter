@@ -606,6 +606,7 @@ msgstr "Data"
 #: components/attendance/attendance-form-dialog.tsx:201
 #: components/attendance/attendance-table.tsx:102
 #: components/attendance/my-attendance-section.tsx:272
+#: components/leaves/leave-table.tsx:102
 #: components/payroll/payroll-section.tsx:292
 #: components/timesheets/timesheet-form-dialog.tsx:184
 #: components/timesheets/timesheet-table.tsx:91
@@ -698,6 +699,7 @@ msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
 #: components/leaves/leave-management.tsx:181
+#: components/leaves/leave-table.tsx:227
 #: components/timesheets/timesheet-form-dialog.tsx:212
 msgid "Cancel"
 msgstr "Cancelar"
@@ -767,6 +769,7 @@ msgid "Get started by creating a new attendance record"
 msgstr "Comece por criar um novo registo de assiduidade"
 
 #: components/attendance/attendance-table.tsx:100
+#: components/leaves/leave-table.tsx:99
 #: components/timesheets/timesheet-form-dialog.tsx:106
 #: components/timesheets/timesheet-table.tsx:84
 msgid "Employee"
@@ -778,12 +781,14 @@ msgid "Hours"
 msgstr "Horas"
 
 #: components/attendance/attendance-table.tsx:107
+#: components/leaves/leave-table.tsx:113
 #: components/payroll/payroll-section.tsx:293
 #: components/timesheets/timesheet-table.tsx:92
 msgid "Actions"
 msgstr "Ações"
 
 #: components/attendance/attendance-table.tsx:165
+#: components/leaves/leave-table.tsx:197
 #: components/timesheets/timesheet-table.tsx:151
 msgid "Edit"
 msgstr "Editar"
@@ -1073,6 +1078,7 @@ msgid "All types"
 msgstr "Todos os tipos"
 
 #: components/leaves/leave-management.tsx:90
+#: components/leaves/leave-table.tsx:84
 msgid "New request"
 msgstr "Novo pedido"
 
@@ -1111,12 +1117,13 @@ msgid "Dates:"
 msgstr "Datas:"
 
 #: components/leaves/leave-management.tsx:163
-msgid "Days:"
-msgstr "Dias:"
-
-#: components/leaves/leave-management.tsx:163
+#: components/leaves/leave-table.tsx:146
 msgid " (Half Day)"
 msgstr " (Meio Dia)"
+
+#: components/leaves/leave-management.tsx:163
+msgid "Days:"
+msgstr "Dias:"
 
 #: components/leaves/leave-management.tsx:164
 msgid "Reason:"
@@ -1131,6 +1138,7 @@ msgid "Reject Leave Request"
 msgstr "Rejeitar Pedido de Ausência"
 
 #: components/leaves/leave-management.tsx:177
+#: components/leaves/leave-table.tsx:111
 msgid "Reason"
 msgstr "Motivo"
 
@@ -1144,6 +1152,7 @@ msgid "Failed to reject"
 msgstr "Falha ao rejeitar"
 
 #: components/leaves/leave-management.tsx:200
+#: components/leaves/leave-table.tsx:240
 #: components/timesheets/timesheet-table.tsx:183
 msgid "Reject"
 msgstr "Rejeitar"
@@ -1179,6 +1188,46 @@ msgstr "A cancelar…"
 #: components/leaves/leave-management.tsx:240
 msgid "Cancel Request"
 msgstr "Cancelar Pedido"
+
+#: components/leaves/leave-table.tsx:81
+#: components/leaves/leave-table.tsx:120
+msgid "No leave requests found"
+msgstr "Nenhum pedido de ausência encontrado"
+
+#: components/leaves/leave-table.tsx:104
+msgid "(click to view details)"
+msgstr "(clique para ver detalhes)"
+
+#: components/leaves/leave-table.tsx:108
+msgid "Type"
+msgstr "Tipo"
+
+#: components/leaves/leave-table.tsx:109
+msgid "Dates"
+msgstr "Datas"
+
+#: components/leaves/leave-table.tsx:110
+msgid "Days"
+msgstr "Dias"
+
+#: components/leaves/leave-table.tsx:112
+msgid "Created"
+msgstr "Criado"
+
+#: components/leaves/leave-table.tsx:175
+#: components/timesheets/timesheet-table.tsx:142
+msgid "View Details"
+msgstr "Ver Detalhes"
+
+#: components/leaves/leave-table.tsx:186
+#: components/timesheets/timesheet-table.tsx:172
+msgid "Approve"
+msgstr "Aprovar"
+
+#: components/leaves/leave-table.tsx:211
+#: components/timesheets/timesheet-table.tsx:161
+msgid "Submit"
+msgstr "Submeter"
 
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"
@@ -1422,18 +1471,6 @@ msgstr "clique para ver detalhes"
 #: components/timesheets/timesheet-view-dialog.tsx:106
 msgid "Pay Period"
 msgstr "Período de Pagamento"
-
-#: components/timesheets/timesheet-table.tsx:142
-msgid "View Details"
-msgstr "Ver Detalhes"
-
-#: components/timesheets/timesheet-table.tsx:161
-msgid "Submit"
-msgstr "Submeter"
-
-#: components/timesheets/timesheet-table.tsx:172
-msgid "Approve"
-msgstr "Aprovar"
 
 #: components/timesheets/timesheet-view-dialog.tsx:71
 msgid "Timesheet Details"
