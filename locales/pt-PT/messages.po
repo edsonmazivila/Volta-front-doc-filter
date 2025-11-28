@@ -695,13 +695,13 @@ msgid "Reporting..."
 msgstr "A reportar..."
 
 #: components/attendance/attendance-form-dialog.tsx:395
-msgid "Update Attendance"
-msgstr "Atualizar Assiduidade"
-
-#: components/attendance/attendance-form-dialog.tsx:395
 #: components/attendance/my-attendance-section.tsx:247
 msgid "Report Issue"
 msgstr "Reportar Problema"
+
+#: components/attendance/attendance-form-dialog.tsx:395
+msgid "Update Attendance"
+msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
 #: components/leaves/leave-management.tsx:181
@@ -756,6 +756,7 @@ msgid "Are you sure you want to delete this attendance record?"
 msgstr "Tem a certeza que deseja eliminar este registo de assiduidade?"
 
 #: components/attendance/attendance-table.tsx:57
+#: components/documents/documents-section.tsx:120
 msgid "Failed to delete"
 msgstr "Falha ao eliminar"
 
@@ -963,6 +964,37 @@ msgstr "Abrir menu"
 msgid "Menu"
 msgstr "Menu"
 
+#: components/documents/documents-section.tsx:82
+msgid "Company Documents"
+msgstr "Documentos da Empresa"
+
+#: components/documents/documents-section.tsx:87
+msgid "Search documents..."
+msgstr "Pesquisar documentos..."
+
+#: components/documents/documents-section.tsx:89
+msgid "Upload"
+msgstr "Carregar"
+
+#: components/documents/documents-section.tsx:99
+#: components/leaves/leave-management.tsx:121
+#: components/timesheets/timesheet-form-dialog.tsx:196
+msgid "Approved"
+msgstr "Aprovado"
+
+#: components/documents/documents-section.tsx:102
+#: components/leaves/leave-management.tsx:124
+msgid "Failed to approve"
+msgstr "Falha ao aprovar"
+
+#: components/documents/documents-section.tsx:114
+msgid "Delete document?"
+msgstr "Eliminar documento?"
+
+#: components/documents/documents-section.tsx:118
+msgid "Deleted"
+msgstr "Eliminado"
+
 #: components/features.tsx:23
 msgid "Payroll summary by department and month for leadership reviews."
 msgstr "Resumo de processamento salarial por departamento e mês para revisões de gestão."
@@ -1113,15 +1145,6 @@ msgstr "Submetido"
 #: components/leaves/my-leaves-section.tsx:195
 msgid "Failed to submit"
 msgstr "Falha ao submeter"
-
-#: components/leaves/leave-management.tsx:121
-#: components/timesheets/timesheet-form-dialog.tsx:196
-msgid "Approved"
-msgstr "Aprovado"
-
-#: components/leaves/leave-management.tsx:124
-msgid "Failed to approve"
-msgstr "Falha ao aprovar"
 
 #: components/leaves/leave-management.tsx:140
 msgid "Team Leave Balances"

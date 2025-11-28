@@ -26,6 +26,7 @@ interface DocumentsSectionProps {
 }
 
 export function DocumentsSection({ items, initialTypes = [], initialEmployees = [] }: DocumentsSectionProps) {
+  const { i18n } = useLingui();
   const toast = useToastHelpers();
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -78,14 +79,14 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-sm font-medium">Company Documents</h2>
+        <h2 className="text-sm font-medium">{i18n._(msg`Company Documents`)}</h2>
         <div className="flex items-center gap-2 flex-1 justify-end">
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder="Search documents..."
+            placeholder={i18n._(msg`Search documents...`)}
           />
-          <Button onClick={() => setUploadOpen(true)}>Upload</Button>
+          <Button onClick={() => setUploadOpen(true)}>{i18n._(msg`Upload`)}</Button>
         </div>
       </div>
       <DocumentTable
@@ -95,10 +96,10 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
           setOperationInProgress(prev => ({ ...prev, [id]: true }));
           try {
             await approveDocumentAction(id);
-            toast.success("Approved");
+            toast.success(i18n._(msg`Approved`));
             router.refresh();
           } catch {
-            toast.error("Failed to approve");
+            toast.error(i18n._(msg`Failed to approve`));
           } finally {
             setOperationInProgress(prev => ({ ...prev, [id]: false }));
           }
@@ -110,13 +111,13 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
         }}
         onDelete={async (id) => {
           if (operationInProgress[id]) return; // Prevent double-click
-          if (!confirm("Delete document?")) return;
+          if (!confirm(i18n._(msg`Delete document?`))) return;
           setOperationInProgress(prev => ({ ...prev, [id]: true }));
           try {
             await deleteDocumentAction(id);
-            toast.success("Deleted");
+            toast.success(i18n._(msg`Deleted`));
           } catch {
-            toast.error("Failed to delete");
+            toast.error(i18n._(msg`Failed to delete`));
           } finally {
             setOperationInProgress(prev => ({ ...prev, [id]: false }));
           }

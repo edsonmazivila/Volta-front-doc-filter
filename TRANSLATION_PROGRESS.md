@@ -42,7 +42,7 @@ All translations follow this consistent pattern:
 
 ## Current Status
 
-### ✅ Completed Components (15 components)
+### ✅ Completed Components (16 components)
 
 #### Attendance Components (4/4 complete)
 - ✅ `components/attendance/attendance-form-dialog.tsx` - Form dialog with 100+ strings
@@ -67,15 +67,24 @@ All translations follow this consistent pattern:
 - ✅ `components/leaves/pending-approvals-table.tsx` - Pending approvals table with actions (1 string)
 - ✅ `components/leaves/team-balances-table.tsx` - Team balances table with leave types (5 strings)
 
+#### Document Components (1/6 complete)
+- ✅ `components/documents/documents-section.tsx` - Main documents section with search and actions (5 strings)
+
 ### ⏳ In Progress
 
 #### Currently working on
-- ⏳ **READY FOR NEXT COMPONENT CATEGORY**
+- ⏳ **READY FOR NEXT COMPONENT**
 
 ### ❌ Remaining Components (~70+ components)
 
-#### Other Component Categories (~70+ components)
-- ❌ **Documents**: document-table.tsx, document-view-dialog.tsx, document-edit-dialog.tsx, document-reject-dialog.tsx
+#### Document Components (5 remaining)
+- ❌ `components/documents/document-table.tsx` - **NEXT TO TRANSLATE**
+- ❌ `components/documents/document-view-dialog.tsx`
+- ❌ `components/documents/document-edit-dialog.tsx`
+- ❌ `components/documents/document-reject-dialog.tsx`
+- ❌ `components/documents/document-upload-form-dialog.tsx`
+
+#### Other Component Categories (~65+ components)
 - ❌ **Departments**: department-form.tsx and related components
 - ❌ **Company**: company-documents-section.tsx, company-profile.tsx
 - ❌ **Meetings**: meeting-card.tsx, meeting-form-dialog.tsx, meetings-section.tsx
@@ -86,8 +95,8 @@ All translations follow this consistent pattern:
 ## Translation Statistics
 
 **Latest Status** (as of last commit):
-- **Total messages**: 396
-- **Translated**: 396 (100%)
+- **Total messages**: 401
+- **Translated**: 401 (100%)
 - **Missing**: 0 ✅
 
 **Note**: This will increase as more components are translated.
