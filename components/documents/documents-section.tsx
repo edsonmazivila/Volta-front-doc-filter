@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui";
 import { useToastHelpers } from "@/components/ui/toast";
 import { SearchInput } from "@/components/search-input";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 
 interface DocumentsSectionProps {
   items: DocumentListItem[];
