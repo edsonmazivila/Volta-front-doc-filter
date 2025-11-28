@@ -141,19 +141,19 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 			{/* Stats Cards */}
 			<div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
 				<Card className='p-4'>
-					<div className='text-sm text-muted-foreground'>Total Days</div>
+					<div className='text-sm text-muted-foreground'>{i18n._(msg`Total Days`)}</div>
 					<div className='text-2xl font-bold mt-1'>{stats.total}</div>
 				</Card>
 				<Card className='p-4'>
-					<div className='text-sm text-muted-foreground'>Present</div>
+					<div className='text-sm text-muted-foreground'>{i18n._(msg`Present`)}</div>
 					<div className='text-2xl font-bold mt-1 text-green-600'>{stats.present}</div>
 				</Card>
 				<Card className='p-4'>
-					<div className='text-sm text-muted-foreground'>Absent</div>
+					<div className='text-sm text-muted-foreground'>{i18n._(msg`Absent`)}</div>
 					<div className='text-2xl font-bold mt-1 text-red-600'>{stats.absent}</div>
 				</Card>
 				<Card className='p-4'>
-					<div className='text-sm text-muted-foreground'>Attendance Rate</div>
+					<div className='text-sm text-muted-foreground'>{i18n._(msg`Attendance Rate`)}</div>
 					<div className='text-2xl font-bold mt-1'>{stats.rate.toFixed(1)}%</div>
 				</Card>
 			</div>
@@ -162,7 +162,7 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 			<Card className='p-6'>
 				<div className='flex items-center justify-between mb-4'>
 					<div>
-						<h3 className='text-lg font-semibold'>Today&apos;s Attendance</h3>
+						<h3 className='text-lg font-semibold'>{i18n._(msg`Today's Attendance`)}</h3>
 						<p className='text-sm text-muted-foreground'>
 							{new Date().toLocaleDateString('en-US', {
 								weekday: 'long',
@@ -177,7 +177,7 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 				{todayRecord ? (
 					<div className='space-y-3'>
 						<div className='flex items-center gap-3'>
-							<span className='text-sm text-muted-foreground'>Status:</span>
+							<span className='text-sm text-muted-foreground'>{i18n._(msg`Status:`)}</span>
 							<span
 								className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border ${
 									STATUS_COLORS[todayRecord.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.present
@@ -192,59 +192,59 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 						</div>
 						{todayRecord.clock_in && (
 							<div className='flex items-center gap-3'>
-								<span className='text-sm text-muted-foreground'>Clock In:</span>
+								<span className='text-sm text-muted-foreground'>{i18n._(msg`Clock In:`)}</span>
 								<span className='text-sm font-medium'>{formatTime(todayRecord.clock_in)}</span>
 							</div>
 						)}
 						{todayRecord.clock_out && (
 							<div className='flex items-center gap-3'>
-								<span className='text-sm text-muted-foreground'>Clock Out:</span>
+								<span className='text-sm text-muted-foreground'>{i18n._(msg`Clock Out:`)}</span>
 								<span className='text-sm font-medium'>{formatTime(todayRecord.clock_out)}</span>
 							</div>
 						)}
 						{todayRecord.hours_worked !== undefined && todayRecord.hours_worked !== null && (
 							<div className='flex items-center gap-3'>
-								<span className='text-sm text-muted-foreground'>Hours Worked:</span>
+								<span className='text-sm text-muted-foreground'>{i18n._(msg`Hours Worked:`)}</span>
 								<span className='text-sm font-medium'>{todayRecord.hours_worked.toFixed(1)}h</span>
 							</div>
 						)}
-						
+
 						{/* Action Buttons */}
 						<div className='mt-4 pt-4 border-t border-[var(--border)] space-y-2'>
 							{todayRecord.clock_in && !todayRecord.clock_out && (
-								<Button 
-									onClick={handleClockOut} 
-									disabled={clockingOut} 
+								<Button
+									onClick={handleClockOut}
+									disabled={clockingOut}
 									variant="outline"
 									className="w-full"
 								>
-									{clockingOut ? 'Clocking Out...' : 'Clock Out'}
+									{clockingOut ? i18n._(msg`Clocking Out...`) : i18n._(msg`Clock Out`)}
 								</Button>
 							)}
-							<Button 
-								onClick={() => handleEditAttendance(todayRecord)} 
+							<Button
+								onClick={() => handleEditAttendance(todayRecord)}
 								variant="outline"
 								className="w-full"
 								size="sm"
 							>
-								Edit Today&apos;s Attendance
+								{i18n._(msg`Edit Today's Attendance`)}
 							</Button>
 						</div>
 					</div>
 				) : (
 					<div className='text-center py-6'>
-						<p className='text-muted-foreground mb-4'>No attendance recorded for today</p>
+						<p className='text-muted-foreground mb-4'>{i18n._(msg`No attendance recorded for today`)}</p>
 						<div className='space-y-2'>
 							<Button onClick={handleClockIn} disabled={clockingIn} size='lg' className='w-full'>
-								{clockingIn ? 'Clocking In...' : 'Clock In'}
+								{clockingIn ? i18n._(msg`Clocking In...`) : i18n._(msg`Clock In`)}
 							</Button>
-							<Button 
-								onClick={handleOpenAttendanceDialog} 
-								variant="outline" 
-								size="sm" 
+							<Button
+								onClick={handleOpenAttendanceDialog}
+								variant="outline"
+								size="sm"
 								className='w-full'
 							>
-								Report Issue
+								{i18n._(msg`Report Issue`)}
 							</Button>
 						</div>
 					</div>
@@ -254,7 +254,7 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 			{/* Attendance History */}
 			<Card>
 				<CardHeader
-					title='Attendance History'
+					title={i18n._(msg`Attendance History`)}
 					action={
 						<input
 							type='month'
@@ -268,12 +268,12 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 					<table className='min-w-full divide-y divide-border'>
 						<thead>
 							<tr className='text-left text-xs font-medium text-muted-foreground uppercase'>
-								<th className='px-4 py-3'>Date</th>
-								<th className='px-4 py-3'>Status</th>
-								<th className='px-4 py-3'>Clock In</th>
-								<th className='px-4 py-3'>Clock Out</th>
-								<th className='px-4 py-3'>Hours</th>
-								<th className='px-4 py-3'>Notes</th>
+								<th className='px-4 py-3'>{i18n._(msg`Date`)}</th>
+								<th className='px-4 py-3'>{i18n._(msg`Status`)}</th>
+								<th className='px-4 py-3'>{i18n._(msg`Clock In`)}</th>
+								<th className='px-4 py-3'>{i18n._(msg`Clock Out`)}</th>
+								<th className='px-4 py-3'>{i18n._(msg`Hours`)}</th>
+								<th className='px-4 py-3'>{i18n._(msg`Notes`)}</th>
 							</tr>
 						</thead>
 						<tbody className='divide-y divide-border'>
@@ -288,7 +288,7 @@ export function MyAttendanceSection({ records, isLoading = false }: MyAttendance
 							) : records.length === 0 ? (
 								<tr>
 									<td colSpan={6} className='px-4 py-8 text-center text-muted-foreground'>
-										No attendance records found
+										{i18n._(msg`No attendance records found`)}
 									</td>
 								</tr>
 							) : (

@@ -188,6 +188,7 @@ msgid "Review and approve"
 msgstr "Review and approve"
 
 #: app/dashboard/page.tsx:313
+#: components/payroll/payroll-section.tsx:323
 msgid "Run Payroll"
 msgstr "Run Payroll"
 
@@ -517,32 +518,40 @@ msgstr "Create account"
 #: components/attendance/attendance-form-dialog.tsx:36
 #: components/attendance/attendance-section.tsx:80
 #: components/attendance/attendance-table.tsx:42
+#: components/attendance/my-attendance-section.tsx:52
+#: components/attendance/my-attendance-section.tsx:148
 msgid "Present"
 msgstr "Present"
 
 #: components/attendance/attendance-form-dialog.tsx:37
 #: components/attendance/attendance-section.tsx:86
 #: components/attendance/attendance-table.tsx:43
+#: components/attendance/my-attendance-section.tsx:53
+#: components/attendance/my-attendance-section.tsx:152
 msgid "Absent"
 msgstr "Absent"
 
 #: components/attendance/attendance-form-dialog.tsx:38
 #: components/attendance/attendance-table.tsx:44
+#: components/attendance/my-attendance-section.tsx:54
 msgid "Late"
 msgstr "Late"
 
 #: components/attendance/attendance-form-dialog.tsx:39
 #: components/attendance/attendance-table.tsx:45
+#: components/attendance/my-attendance-section.tsx:55
 msgid "Half Day"
 msgstr "Half Day"
 
 #: components/attendance/attendance-form-dialog.tsx:40
 #: components/attendance/attendance-table.tsx:46
+#: components/attendance/my-attendance-section.tsx:56
 msgid "On Leave"
 msgstr "On Leave"
 
 #: components/attendance/attendance-form-dialog.tsx:41
 #: components/attendance/attendance-table.tsx:47
+#: components/attendance/my-attendance-section.tsx:57
 msgid "Justified"
 msgstr "Justified"
 
@@ -590,21 +599,28 @@ msgstr "Report Attendance Issue"
 
 #: components/attendance/attendance-form-dialog.tsx:186
 #: components/attendance/attendance-table.tsx:101
+#: components/attendance/my-attendance-section.tsx:271
 msgid "Date"
 msgstr "Date"
 
 #: components/attendance/attendance-form-dialog.tsx:201
 #: components/attendance/attendance-table.tsx:102
+#: components/attendance/my-attendance-section.tsx:272
+#: components/payroll/payroll-section.tsx:292
 msgid "Status"
 msgstr "Status"
 
 #: components/attendance/attendance-form-dialog.tsx:223
 #: components/attendance/attendance-table.tsx:103
+#: components/attendance/my-attendance-section.tsx:239
+#: components/attendance/my-attendance-section.tsx:273
 msgid "Clock In"
 msgstr "Clock In"
 
 #: components/attendance/attendance-form-dialog.tsx:240
 #: components/attendance/attendance-table.tsx:104
+#: components/attendance/my-attendance-section.tsx:221
+#: components/attendance/my-attendance-section.tsx:274
 msgid "Clock Out"
 msgstr "Clock Out"
 
@@ -670,12 +686,13 @@ msgid "Reporting..."
 msgstr "Reporting..."
 
 #: components/attendance/attendance-form-dialog.tsx:395
-msgid "Update Attendance"
-msgstr "Update Attendance"
-
-#: components/attendance/attendance-form-dialog.tsx:395
+#: components/attendance/my-attendance-section.tsx:247
 msgid "Report Issue"
 msgstr "Report Issue"
+
+#: components/attendance/attendance-form-dialog.tsx:395
+msgid "Update Attendance"
+msgstr "Update Attendance"
 
 #: components/attendance/attendance-form-dialog.tsx:404
 msgid "Cancel"
@@ -690,6 +707,8 @@ msgid "Failed to export CSV"
 msgstr "Failed to export CSV"
 
 #: components/attendance/attendance-section.tsx:65
+#: components/payroll/payroll-section.tsx:174
+#: components/payroll/payroll-section.tsx:194
 msgid "Export failed"
 msgstr "Export failed"
 
@@ -748,10 +767,12 @@ msgid "Employee"
 msgstr "Employee"
 
 #: components/attendance/attendance-table.tsx:105
+#: components/attendance/my-attendance-section.tsx:275
 msgid "Hours"
 msgstr "Hours"
 
 #: components/attendance/attendance-table.tsx:107
+#: components/payroll/payroll-section.tsx:293
 msgid "Actions"
 msgstr "Actions"
 
@@ -766,6 +787,80 @@ msgstr "Deleting..."
 #: components/attendance/attendance-table.tsx:174
 msgid "Delete"
 msgstr "Delete"
+
+#: components/attendance/my-attendance-section.tsx:86
+#: components/attendance/my-attendance-section.tsx:92
+msgid "Failed to clock in"
+msgstr "Failed to clock in"
+
+#: components/attendance/my-attendance-section.tsx:88
+msgid "Clocked in successfully"
+msgstr "Clocked in successfully"
+
+#: components/attendance/my-attendance-section.tsx:112
+#: components/attendance/my-attendance-section.tsx:118
+msgid "Failed to clock out"
+msgstr "Failed to clock out"
+
+#: components/attendance/my-attendance-section.tsx:114
+msgid "Clocked out successfully"
+msgstr "Clocked out successfully"
+
+#: components/attendance/my-attendance-section.tsx:144
+msgid "Total Days"
+msgstr "Total Days"
+
+#: components/attendance/my-attendance-section.tsx:156
+msgid "Attendance Rate"
+msgstr "Attendance Rate"
+
+#: components/attendance/my-attendance-section.tsx:165
+msgid "Today's Attendance"
+msgstr "Today's Attendance"
+
+#: components/attendance/my-attendance-section.tsx:180
+msgid "Status:"
+msgstr "Status:"
+
+#: components/attendance/my-attendance-section.tsx:195
+msgid "Clock In:"
+msgstr "Clock In:"
+
+#: components/attendance/my-attendance-section.tsx:201
+msgid "Clock Out:"
+msgstr "Clock Out:"
+
+#: components/attendance/my-attendance-section.tsx:207
+msgid "Hours Worked:"
+msgstr "Hours Worked:"
+
+#: components/attendance/my-attendance-section.tsx:221
+msgid "Clocking Out..."
+msgstr "Clocking Out..."
+
+#: components/attendance/my-attendance-section.tsx:230
+msgid "Edit Today's Attendance"
+msgstr "Edit Today's Attendance"
+
+#: components/attendance/my-attendance-section.tsx:236
+msgid "No attendance recorded for today"
+msgstr "No attendance recorded for today"
+
+#: components/attendance/my-attendance-section.tsx:239
+msgid "Clocking In..."
+msgstr "Clocking In..."
+
+#: components/attendance/my-attendance-section.tsx:257
+msgid "Attendance History"
+msgstr "Attendance History"
+
+#: components/attendance/my-attendance-section.tsx:276
+msgid "Notes"
+msgstr "Notes"
+
+#: components/attendance/my-attendance-section.tsx:291
+msgid "No attendance records found"
+msgstr "No attendance records found"
 
 #: components/dashboard/sidebar.tsx:57
 msgid "Overview"
@@ -937,3 +1032,152 @@ msgstr "Sign Up"
 #: components/home-header.tsx:156
 msgid "Sign In"
 msgstr "Sign In"
+
+#: components/payroll/payroll-section.tsx:39
+msgid "Select start and end dates"
+msgstr "Select start and end dates"
+
+#: components/payroll/payroll-section.tsx:49
+msgid "Invalid start or end date"
+msgstr "Invalid start or end date"
+
+#: components/payroll/payroll-section.tsx:61
+msgid "Weekly period must cover exactly 7 days"
+msgstr "Weekly period must cover exactly 7 days"
+
+#: components/payroll/payroll-section.tsx:65
+msgid "Biweekly period must cover exactly 14 days"
+msgstr "Biweekly period must cover exactly 14 days"
+
+#: components/payroll/payroll-section.tsx:68
+msgid "Semi-monthly periods should align with 1st-15th or 16th-end of month ranges"
+msgstr "Semi-monthly periods should align with 1st-15th or 16th-end of month ranges"
+
+#: components/payroll/payroll-section.tsx:71
+msgid "Monthly periods should start on the first and end on the last day of the month"
+msgstr "Monthly periods should start on the first and end on the last day of the month"
+
+#: components/payroll/payroll-section.tsx:81
+msgid "End date must be after start date"
+msgstr "End date must be after start date"
+
+#: components/payroll/payroll-section.tsx:111
+#: components/payroll/payroll-section.tsx:120
+msgid "Failed to calculate payroll"
+msgstr "Failed to calculate payroll"
+
+#: components/payroll/payroll-section.tsx:117
+msgid "Payroll calculated"
+msgstr "Payroll calculated"
+
+#: components/payroll/payroll-section.tsx:129
+msgid "No calculated payroll to run"
+msgstr "No calculated payroll to run"
+
+#: components/payroll/payroll-section.tsx:135
+#: components/payroll/payroll-section.tsx:145
+msgid "Payroll executed"
+msgstr "Payroll executed"
+
+#: components/payroll/payroll-section.tsx:138
+#: components/payroll/payroll-section.tsx:148
+msgid "Failed to run payroll"
+msgstr "Failed to run payroll"
+
+#: components/payroll/payroll-section.tsx:155
+msgid "No payroll run selected"
+msgstr "No payroll run selected"
+
+#: components/payroll/payroll-section.tsx:172
+#: components/payroll/payroll-section.tsx:192
+msgid "Export started"
+msgstr "Export started"
+
+#: components/payroll/payroll-section.tsx:228
+msgid "Period start"
+msgstr "Period start"
+
+#: components/payroll/payroll-section.tsx:237
+msgid "Period end"
+msgstr "Period end"
+
+#: components/payroll/payroll-section.tsx:246
+msgid "Pay frequency"
+msgstr "Pay frequency"
+
+#: components/payroll/payroll-section.tsx:252
+msgid "Weekly"
+msgstr "Weekly"
+
+#: components/payroll/payroll-section.tsx:253
+msgid "Biweekly"
+msgstr "Biweekly"
+
+#: components/payroll/payroll-section.tsx:254
+msgid "Semi-monthly"
+msgstr "Semi-monthly"
+
+#: components/payroll/payroll-section.tsx:255
+msgid "Monthly"
+msgstr "Monthly"
+
+#: components/payroll/payroll-section.tsx:262
+msgid "Processing…"
+msgstr "Processing…"
+
+#: components/payroll/payroll-section.tsx:262
+msgid "Calculate"
+msgstr "Calculate"
+
+#: components/payroll/payroll-section.tsx:265
+msgid "Run"
+msgstr "Run"
+
+#: components/payroll/payroll-section.tsx:268
+msgid "Export Excel"
+msgstr "Export Excel"
+
+#: components/payroll/payroll-section.tsx:271
+#: components/payroll/payroll-section.tsx:333
+msgid "Export BCI"
+msgstr "Export BCI"
+
+#: components/payroll/payroll-section.tsx:278
+msgid "Recent Runs"
+msgstr "Recent Runs"
+
+#: components/payroll/payroll-section.tsx:288
+msgid "Pay Date"
+msgstr "Pay Date"
+
+#: components/payroll/payroll-section.tsx:289
+msgid "Employees"
+msgstr "Employees"
+
+#: components/payroll/payroll-section.tsx:290
+msgid "Gross Pay"
+msgstr "Gross Pay"
+
+#: components/payroll/payroll-section.tsx:291
+msgid "Net Pay"
+msgstr "Net Pay"
+
+#: components/payroll/payroll-section.tsx:327
+msgid "View Paystubs"
+msgstr "View Paystubs"
+
+#: components/payroll/payroll-section.tsx:330
+msgid "Export Summary"
+msgstr "Export Summary"
+
+#: components/payroll/payroll-section.tsx:336
+msgid "Export Tabela"
+msgstr "Export Tabela"
+
+#: components/payroll/payroll-section.tsx:354
+msgid "No payroll runs yet"
+msgstr "No payroll runs yet"
+
+#: components/payroll/payroll-section.tsx:355
+msgid "Calculate payroll to get started"
+msgstr "Calculate payroll to get started"

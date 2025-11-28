@@ -188,6 +188,7 @@ msgid "Review and approve"
 msgstr "Rever e aprovar"
 
 #: app/dashboard/page.tsx:313
+#: components/payroll/payroll-section.tsx:323
 msgid "Run Payroll"
 msgstr "Executar Processamento Salarial"
 
@@ -517,32 +518,40 @@ msgstr "Criar conta"
 #: components/attendance/attendance-form-dialog.tsx:36
 #: components/attendance/attendance-section.tsx:80
 #: components/attendance/attendance-table.tsx:42
+#: components/attendance/my-attendance-section.tsx:52
+#: components/attendance/my-attendance-section.tsx:148
 msgid "Present"
 msgstr "Presente"
 
 #: components/attendance/attendance-form-dialog.tsx:37
 #: components/attendance/attendance-section.tsx:86
 #: components/attendance/attendance-table.tsx:43
+#: components/attendance/my-attendance-section.tsx:53
+#: components/attendance/my-attendance-section.tsx:152
 msgid "Absent"
 msgstr "Ausente"
 
 #: components/attendance/attendance-form-dialog.tsx:38
 #: components/attendance/attendance-table.tsx:44
+#: components/attendance/my-attendance-section.tsx:54
 msgid "Late"
 msgstr "Atrasado"
 
 #: components/attendance/attendance-form-dialog.tsx:39
 #: components/attendance/attendance-table.tsx:45
+#: components/attendance/my-attendance-section.tsx:55
 msgid "Half Day"
 msgstr "Meio Dia"
 
 #: components/attendance/attendance-form-dialog.tsx:40
 #: components/attendance/attendance-table.tsx:46
+#: components/attendance/my-attendance-section.tsx:56
 msgid "On Leave"
 msgstr "De Férias"
 
 #: components/attendance/attendance-form-dialog.tsx:41
 #: components/attendance/attendance-table.tsx:47
+#: components/attendance/my-attendance-section.tsx:57
 msgid "Justified"
 msgstr "Justificado"
 
@@ -590,21 +599,28 @@ msgstr "Reportar Problema de Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:186
 #: components/attendance/attendance-table.tsx:101
+#: components/attendance/my-attendance-section.tsx:271
 msgid "Date"
 msgstr "Data"
 
 #: components/attendance/attendance-form-dialog.tsx:201
 #: components/attendance/attendance-table.tsx:102
+#: components/attendance/my-attendance-section.tsx:272
+#: components/payroll/payroll-section.tsx:292
 msgid "Status"
 msgstr "Estado"
 
 #: components/attendance/attendance-form-dialog.tsx:223
 #: components/attendance/attendance-table.tsx:103
+#: components/attendance/my-attendance-section.tsx:239
+#: components/attendance/my-attendance-section.tsx:273
 msgid "Clock In"
 msgstr "Entrada"
 
 #: components/attendance/attendance-form-dialog.tsx:240
 #: components/attendance/attendance-table.tsx:104
+#: components/attendance/my-attendance-section.tsx:221
+#: components/attendance/my-attendance-section.tsx:274
 msgid "Clock Out"
 msgstr "Saída"
 
@@ -670,12 +686,13 @@ msgid "Reporting..."
 msgstr "A reportar..."
 
 #: components/attendance/attendance-form-dialog.tsx:395
-msgid "Update Attendance"
-msgstr "Atualizar Assiduidade"
-
-#: components/attendance/attendance-form-dialog.tsx:395
+#: components/attendance/my-attendance-section.tsx:247
 msgid "Report Issue"
 msgstr "Reportar Problema"
+
+#: components/attendance/attendance-form-dialog.tsx:395
+msgid "Update Attendance"
+msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
 msgid "Cancel"
@@ -690,6 +707,8 @@ msgid "Failed to export CSV"
 msgstr "Falha ao exportar CSV"
 
 #: components/attendance/attendance-section.tsx:65
+#: components/payroll/payroll-section.tsx:174
+#: components/payroll/payroll-section.tsx:194
 msgid "Export failed"
 msgstr "Exportação falhou"
 
@@ -748,10 +767,12 @@ msgid "Employee"
 msgstr "Colaborador"
 
 #: components/attendance/attendance-table.tsx:105
+#: components/attendance/my-attendance-section.tsx:275
 msgid "Hours"
 msgstr "Horas"
 
 #: components/attendance/attendance-table.tsx:107
+#: components/payroll/payroll-section.tsx:293
 msgid "Actions"
 msgstr "Ações"
 
@@ -766,6 +787,80 @@ msgstr "A eliminar..."
 #: components/attendance/attendance-table.tsx:174
 msgid "Delete"
 msgstr "Eliminar"
+
+#: components/attendance/my-attendance-section.tsx:86
+#: components/attendance/my-attendance-section.tsx:92
+msgid "Failed to clock in"
+msgstr "Falha ao registar entrada"
+
+#: components/attendance/my-attendance-section.tsx:88
+msgid "Clocked in successfully"
+msgstr "Entrada registada com sucesso"
+
+#: components/attendance/my-attendance-section.tsx:112
+#: components/attendance/my-attendance-section.tsx:118
+msgid "Failed to clock out"
+msgstr "Falha ao registar saída"
+
+#: components/attendance/my-attendance-section.tsx:114
+msgid "Clocked out successfully"
+msgstr "Saída registada com sucesso"
+
+#: components/attendance/my-attendance-section.tsx:144
+msgid "Total Days"
+msgstr "Total de Dias"
+
+#: components/attendance/my-attendance-section.tsx:156
+msgid "Attendance Rate"
+msgstr "Taxa de Assiduidade"
+
+#: components/attendance/my-attendance-section.tsx:165
+msgid "Today's Attendance"
+msgstr "Assiduidade de Hoje"
+
+#: components/attendance/my-attendance-section.tsx:180
+msgid "Status:"
+msgstr "Estado:"
+
+#: components/attendance/my-attendance-section.tsx:195
+msgid "Clock In:"
+msgstr "Entrada:"
+
+#: components/attendance/my-attendance-section.tsx:201
+msgid "Clock Out:"
+msgstr "Saída:"
+
+#: components/attendance/my-attendance-section.tsx:207
+msgid "Hours Worked:"
+msgstr "Horas Trabalhadas:"
+
+#: components/attendance/my-attendance-section.tsx:221
+msgid "Clocking Out..."
+msgstr "A registar saída..."
+
+#: components/attendance/my-attendance-section.tsx:230
+msgid "Edit Today's Attendance"
+msgstr "Editar Assiduidade de Hoje"
+
+#: components/attendance/my-attendance-section.tsx:236
+msgid "No attendance recorded for today"
+msgstr "Sem assiduidade registada para hoje"
+
+#: components/attendance/my-attendance-section.tsx:239
+msgid "Clocking In..."
+msgstr "A registar entrada..."
+
+#: components/attendance/my-attendance-section.tsx:257
+msgid "Attendance History"
+msgstr "Histórico de Assiduidade"
+
+#: components/attendance/my-attendance-section.tsx:276
+msgid "Notes"
+msgstr "Notas"
+
+#: components/attendance/my-attendance-section.tsx:291
+msgid "No attendance records found"
+msgstr "Nenhum registo de assiduidade encontrado"
 
 #: components/dashboard/sidebar.tsx:57
 msgid "Overview"
@@ -937,3 +1032,152 @@ msgstr "Registar"
 #: components/home-header.tsx:156
 msgid "Sign In"
 msgstr "Entrar"
+
+#: components/payroll/payroll-section.tsx:39
+msgid "Select start and end dates"
+msgstr "Selecione as datas de início e fim"
+
+#: components/payroll/payroll-section.tsx:49
+msgid "Invalid start or end date"
+msgstr "Data de início ou fim inválida"
+
+#: components/payroll/payroll-section.tsx:61
+msgid "Weekly period must cover exactly 7 days"
+msgstr "O período semanal deve cobrir exatamente 7 dias"
+
+#: components/payroll/payroll-section.tsx:65
+msgid "Biweekly period must cover exactly 14 days"
+msgstr "O período quinzenal deve cobrir exatamente 14 dias"
+
+#: components/payroll/payroll-section.tsx:68
+msgid "Semi-monthly periods should align with 1st-15th or 16th-end of month ranges"
+msgstr "Os períodos quinzenais devem alinhar-se com os intervalos de 1-15 ou 16-fim do mês"
+
+#: components/payroll/payroll-section.tsx:71
+msgid "Monthly periods should start on the first and end on the last day of the month"
+msgstr "Os períodos mensais devem começar no primeiro e terminar no último dia do mês"
+
+#: components/payroll/payroll-section.tsx:81
+msgid "End date must be after start date"
+msgstr "A data de fim deve ser posterior à data de início"
+
+#: components/payroll/payroll-section.tsx:111
+#: components/payroll/payroll-section.tsx:120
+msgid "Failed to calculate payroll"
+msgstr "Falha ao calcular processamento salarial"
+
+#: components/payroll/payroll-section.tsx:117
+msgid "Payroll calculated"
+msgstr "Processamento salarial calculado"
+
+#: components/payroll/payroll-section.tsx:129
+msgid "No calculated payroll to run"
+msgstr "Sem processamento salarial calculado para executar"
+
+#: components/payroll/payroll-section.tsx:135
+#: components/payroll/payroll-section.tsx:145
+msgid "Payroll executed"
+msgstr "Processamento salarial executado"
+
+#: components/payroll/payroll-section.tsx:138
+#: components/payroll/payroll-section.tsx:148
+msgid "Failed to run payroll"
+msgstr "Falha ao executar processamento salarial"
+
+#: components/payroll/payroll-section.tsx:155
+msgid "No payroll run selected"
+msgstr "Nenhum processamento salarial selecionado"
+
+#: components/payroll/payroll-section.tsx:172
+#: components/payroll/payroll-section.tsx:192
+msgid "Export started"
+msgstr "Exportação iniciada"
+
+#: components/payroll/payroll-section.tsx:228
+msgid "Period start"
+msgstr "Início do período"
+
+#: components/payroll/payroll-section.tsx:237
+msgid "Period end"
+msgstr "Fim do período"
+
+#: components/payroll/payroll-section.tsx:246
+msgid "Pay frequency"
+msgstr "Frequência de pagamento"
+
+#: components/payroll/payroll-section.tsx:252
+msgid "Weekly"
+msgstr "Semanal"
+
+#: components/payroll/payroll-section.tsx:253
+msgid "Biweekly"
+msgstr "Quinzenal"
+
+#: components/payroll/payroll-section.tsx:254
+msgid "Semi-monthly"
+msgstr "Quinzenal"
+
+#: components/payroll/payroll-section.tsx:255
+msgid "Monthly"
+msgstr "Mensal"
+
+#: components/payroll/payroll-section.tsx:262
+msgid "Processing…"
+msgstr "A processar…"
+
+#: components/payroll/payroll-section.tsx:262
+msgid "Calculate"
+msgstr "Calcular"
+
+#: components/payroll/payroll-section.tsx:265
+msgid "Run"
+msgstr "Executar"
+
+#: components/payroll/payroll-section.tsx:268
+msgid "Export Excel"
+msgstr "Exportar Excel"
+
+#: components/payroll/payroll-section.tsx:271
+#: components/payroll/payroll-section.tsx:333
+msgid "Export BCI"
+msgstr "Exportar BCI"
+
+#: components/payroll/payroll-section.tsx:278
+msgid "Recent Runs"
+msgstr "Execuções Recentes"
+
+#: components/payroll/payroll-section.tsx:288
+msgid "Pay Date"
+msgstr "Data de Pagamento"
+
+#: components/payroll/payroll-section.tsx:289
+msgid "Employees"
+msgstr "Colaboradores"
+
+#: components/payroll/payroll-section.tsx:290
+msgid "Gross Pay"
+msgstr "Salário Bruto"
+
+#: components/payroll/payroll-section.tsx:291
+msgid "Net Pay"
+msgstr "Salário Líquido"
+
+#: components/payroll/payroll-section.tsx:327
+msgid "View Paystubs"
+msgstr "Ver Recibos de Vencimento"
+
+#: components/payroll/payroll-section.tsx:330
+msgid "Export Summary"
+msgstr "Exportar Resumo"
+
+#: components/payroll/payroll-section.tsx:336
+msgid "Export Tabela"
+msgstr "Exportar Tabela"
+
+#: components/payroll/payroll-section.tsx:354
+msgid "No payroll runs yet"
+msgstr "Ainda sem execuções de processamento salarial"
+
+#: components/payroll/payroll-section.tsx:355
+msgid "Calculate payroll to get started"
+msgstr "Calcule o processamento salarial para começar"
