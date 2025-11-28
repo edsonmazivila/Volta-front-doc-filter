@@ -13,6 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { CalendarDays, Phone, MapPin, User as UserIcon, Building, DollarSign, Users, Loader2, CreditCard } from "lucide-react"
 import { ROLE_DISPLAY_NAMES } from "@/lib/rbac/types"
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface EmployeeViewDialogProps {
 	employee: User
@@ -25,7 +27,8 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 	const [internalOpen, setInternalOpen] = useState(false)
 	const open = controlledOpen !== undefined ? controlledOpen : internalOpen
 	const setOpen = onOpenChange || setInternalOpen
-	
+	const { i18n } = useLingui()
+
 	// Since we now have unified User structure, we already have all details
 	const employeeDetails = employee
 	const isLoading = false
@@ -35,7 +38,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 
 	// Format date for display
 	const formatDate = (dateString?: string) => {
-		if (!dateString) return "Not provided"
+		if (!dateString) return i18n._(msg`Not provided`)
 		try {
 			return new Date(dateString).toLocaleDateString("en-US", {
 				year: "numeric",
@@ -43,20 +46,20 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 				day: "numeric",
 			})
 		} catch {
-			return "Invalid date"
+			return i18n._(msg`Invalid date`)
 		}
 	}
 
 	// Format phone number
 	const formatPhone = (phone?: string) => {
-		if (!phone) return "Not provided"
+		if (!phone) return i18n._(msg`Not provided`)
 		// Simple phone formatting - you can enhance this
 		return phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")
 	}
 
 	// Format employment type for display
 	const formatEmploymentType = (type?: string) => {
-		if (!type) return "Not provided"
+		if (!type) return i18n._(msg`Not provided`)
 		return type
 			.split('_')
 			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -75,14 +78,14 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<UserIcon className="h-5 w-5" />
-						Employee Details
+						{i18n._(msg`Employee Details`)}
 					</DialogTitle>
 				</DialogHeader>
 
 				{isLoading && (
 					<div className="flex items-center justify-center py-8">
 						<Loader2 className="h-6 w-6 animate-spin" />
-						<span className="ml-2">Loading employee details...</span>
+						<span className="ml-2">{i18n._(msg`Loading employee details...`)}</span>
 					</div>
 				)}
 
@@ -101,11 +104,11 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 								{employeeDetails.full_name || employee.full_name}
 							</h2>
 							<p className="text-muted-foreground">
-								{employeeDetails.email || employee.email || "No email provided"}
+								{employeeDetails.email || employee.email || i18n._(msg`No email provided`)}
 							</p>
 							{employeeDetails.employee_number && (
 								<p className="text-sm text-muted-foreground">
-									Employee #: {employeeDetails.employee_number}
+									{i18n._(msg`Employee #`)}: {employeeDetails.employee_number}
 								</p>
 							)}
 							<div className="flex items-center gap-2 mt-2">
@@ -117,7 +120,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 											: "bg-gray-500/20 text-gray-400 border-gray-500/30"
 									}
 								>
-									{employeeDetails.can_login ? "Can Login" : "No Login Access"}
+									{employeeDetails.can_login ? i18n._(msg`Can Login`) : i18n._(msg`No Login Access`)}
 								</Badge>
 							</div>
 						</div>
@@ -129,7 +132,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									: "bg-red-500/20 text-red-400 border-red-500/30"
 							}
 						>
-							{(employeeDetails.is_active ?? employee.is_active) ? "Active" : "Inactive"}
+							{(employeeDetails.is_active ?? employee.is_active) ? i18n._(msg`Active`) : i18n._(msg`Inactive`)}
 						</Badge>
 					</div>
 
@@ -138,14 +141,14 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<UserIcon className="h-4 w-4" />
-								Basic Information
+								{i18n._(msg`Basic Information`)}
 							</h3>
 							<div className="space-y-3">
 								{employeeDetails.phone_primary && (
 									<div className="flex items-center gap-3">
 										<Phone className="h-4 w-4 text-muted-foreground" />
 										<div>
-											<p className="text-sm font-medium">Primary Phone</p>
+											<p className="text-sm font-medium">{i18n._(msg`Primary Phone`)}</p>
 											<p className="text-sm text-muted-foreground">
 												{formatPhone(employeeDetails.phone_primary)}
 											</p>
@@ -157,7 +160,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									<div className="flex items-center gap-3">
 										<Phone className="h-4 w-4 text-muted-foreground" />
 										<div>
-											<p className="text-sm font-medium">Secondary Phone</p>
+											<p className="text-sm font-medium">{i18n._(msg`Secondary Phone`)}</p>
 											<p className="text-sm text-muted-foreground">
 												{formatPhone(employeeDetails.phone_secondary)}
 											</p>
@@ -169,7 +172,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									<div className="flex items-center gap-3">
 										<Building className="h-4 w-4 text-muted-foreground" />
 										<div>
-											<p className="text-sm font-medium">Job Title</p>
+											<p className="text-sm font-medium">{i18n._(msg`Job Title`)}</p>
 											<p className="text-sm text-muted-foreground">{employeeDetails.job_title}</p>
 										</div>
 									</div>
@@ -179,7 +182,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									<div className="flex items-center gap-3">
 										<Building className="h-4 w-4 text-muted-foreground" />
 										<div>
-											<p className="text-sm font-medium">Department</p>
+											<p className="text-sm font-medium">{i18n._(msg`Department`)}</p>
 											<p className="text-sm text-muted-foreground">{employeeDetails.department}</p>
 										</div>
 									</div>
@@ -189,7 +192,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 									<div className="flex items-center gap-3">
 										<UserIcon className="h-4 w-4 text-muted-foreground" />
 										<div>
-											<p className="text-sm font-medium">Role</p>
+											<p className="text-sm font-medium">{i18n._(msg`Role`)}</p>
 											<p className="text-sm text-muted-foreground">
 												{ROLE_DISPLAY_NAMES[employeeDetails.role as keyof typeof ROLE_DISPLAY_NAMES] || employeeDetails.role}
 											</p>
@@ -202,19 +205,19 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<CalendarDays className="h-4 w-4" />
-								Employment Details
+								{i18n._(msg`Employment Details`)}
 							</h3>
 							<div className="space-y-3">
 								{employeeDetails.employment_type && (
 									<div>
-										<p className="text-sm font-medium">Employment Type</p>
+										<p className="text-sm font-medium">{i18n._(msg`Employment Type`)}</p>
 										<p className="text-sm text-muted-foreground">{formatEmploymentType(employeeDetails.employment_type)}</p>
 									</div>
 								)}
 
 								{employeeDetails.hire_date && (
 									<div>
-										<p className="text-sm font-medium">Hire Date</p>
+										<p className="text-sm font-medium">{i18n._(msg`Hire Date`)}</p>
 										<p className="text-sm text-muted-foreground">
 											{formatDate(employeeDetails.hire_date)}
 										</p>
@@ -223,7 +226,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 
 								{employeeDetails.date_of_birth && (
 									<div>
-										<p className="text-sm font-medium">Date of Birth</p>
+										<p className="text-sm font-medium">{i18n._(msg`Date of Birth`)}</p>
 										<p className="text-sm text-muted-foreground">
 											{formatDate(employeeDetails.date_of_birth)}
 										</p>
@@ -232,7 +235,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 
 								{employeeDetails.created_at && (
 									<div>
-										<p className="text-sm font-medium">Created</p>
+										<p className="text-sm font-medium">{i18n._(msg`Created`)}</p>
 										<p className="text-sm text-muted-foreground">
 											{formatDate(employeeDetails.created_at)}
 										</p>
@@ -247,7 +250,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<MapPin className="h-4 w-4" />
-								Address Information
+								{i18n._(msg`Address Information`)}
 							</h3>
 							<div className="p-4 bg-muted/30 rounded-lg space-y-2">
 								{employeeDetails.address_line1 && (
@@ -275,18 +278,18 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<Users className="h-4 w-4" />
-								Emergency Contact
+								{i18n._(msg`Emergency Contact`)}
 							</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
 								{employeeDetails.emergency_contact_name && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Name</p>
+										<p className="text-sm font-medium">{i18n._(msg`Name`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.emergency_contact_name}</p>
 									</div>
 								)}
 								{employeeDetails.emergency_contact_phone && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Phone</p>
+										<p className="text-sm font-medium">{i18n._(msg`Phone`)}</p>
 										<p className="text-sm text-muted-foreground">
 											{formatPhone(employeeDetails.emergency_contact_phone)}
 										</p>
@@ -294,7 +297,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 								)}
 								{employeeDetails.emergency_contact_relationship && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Relationship</p>
+										<p className="text-sm font-medium">{i18n._(msg`Relationship`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.emergency_contact_relationship}</p>
 									</div>
 								)}
@@ -307,42 +310,42 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<CreditCard className="h-4 w-4" />
-								Tax & Bank Information
+								{i18n._(msg`Tax & Bank Information`)}
 							</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
 								{employeeDetails.tax_filing_status && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Tax Filing Status</p>
+										<p className="text-sm font-medium">{i18n._(msg`Tax Filing Status`)}</p>
 										<p className="text-sm text-muted-foreground capitalize">{employeeDetails.tax_filing_status.replace('_', ' ')}</p>
 									</div>
 								)}
 								{employeeDetails.tax_allowances !== undefined && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Tax Allowances</p>
+										<p className="text-sm font-medium">{i18n._(msg`Tax Allowances`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.tax_allowances}</p>
 									</div>
 								)}
 								{employeeDetails.additional_tax_withholding !== undefined && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Additional Tax Withholding</p>
+										<p className="text-sm font-medium">{i18n._(msg`Additional Tax Withholding`)}</p>
 										<p className="text-sm text-muted-foreground">${employeeDetails.additional_tax_withholding.toFixed(2)}</p>
 									</div>
 								)}
 								{employeeDetails.tax_exempt !== undefined && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Tax Exempt</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.tax_exempt ? "Yes" : "No"}</p>
+										<p className="text-sm font-medium">{i18n._(msg`Tax Exempt`)}</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.tax_exempt ? i18n._(msg`Yes`) : i18n._(msg`No`)}</p>
 									</div>
 								)}
 								{employeeDetails.bank_name && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Bank Name</p>
+										<p className="text-sm font-medium">{i18n._(msg`Bank Name`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.bank_name}</p>
 									</div>
 								)}
 								{employeeDetails.bank_account_type && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Bank Account Type</p>
+										<p className="text-sm font-medium">{i18n._(msg`Bank Account Type`)}</p>
 										<p className="text-sm text-muted-foreground capitalize">{employeeDetails.bank_account_type}</p>
 									</div>
 								)}
@@ -355,43 +358,43 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 						<div className="space-y-4">
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<DollarSign className="h-4 w-4" />
-								Pay Information
+								{i18n._(msg`Pay Information`)}
 							</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
 								{employeeDetails.compensation.pay_type && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Pay Type</p>
+										<p className="text-sm font-medium">{i18n._(msg`Pay Type`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.pay_type}</p>
 									</div>
 								)}
 								{employeeDetails.compensation.pay_frequency && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Pay Frequency</p>
+										<p className="text-sm font-medium">{i18n._(msg`Pay Frequency`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.pay_frequency}</p>
 									</div>
 								)}
 								{employeeDetails.compensation.overtime_rate && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Overtime Rate</p>
+										<p className="text-sm font-medium">{i18n._(msg`Overtime Rate`)}</p>
 										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.overtime_rate}x</p>
 									</div>
 								)}
 								{employeeDetails.compensation.standard_hours && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Standard Hours</p>
-										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.standard_hours} hrs/week</p>
+										<p className="text-sm font-medium">{i18n._(msg`Standard Hours`)}</p>
+										<p className="text-sm text-muted-foreground">{employeeDetails.compensation.standard_hours} {i18n._(msg`hrs/week`)}</p>
 									</div>
 								)}
 								{employeeDetails.compensation.annual_salary && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Annual Salary</p>
+										<p className="text-sm font-medium">{i18n._(msg`Annual Salary`)}</p>
 										<p className="text-sm text-muted-foreground">${employeeDetails.compensation.annual_salary.toLocaleString()}</p>
 									</div>
 								)}
 								{employeeDetails.compensation.hourly_rate && (
 									<div className="space-y-2">
-										<p className="text-sm font-medium">Hourly Rate</p>
-										<p className="text-sm text-muted-foreground">${employeeDetails.compensation.hourly_rate.toFixed(2)}/hr</p>
+										<p className="text-sm font-medium">{i18n._(msg`Hourly Rate`)}</p>
+										<p className="text-sm text-muted-foreground">${employeeDetails.compensation.hourly_rate.toFixed(2)}/{i18n._(msg`hr`)}</p>
 									</div>
 								)}
 							</div>
@@ -401,7 +404,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 					{/* Actions */}
 					<div className="flex justify-end gap-2 pt-4 border-t">
 						<Button variant="outline" onClick={() => setOpen(false)}>
-							Close
+							{i18n._(msg`Close`)}
 						</Button>
 					</div>
 					</div>
@@ -410,7 +413,7 @@ export function EmployeeViewDialog({ employee, trigger, open: controlledOpen, on
 				{/* Empty state when details are unavailable (e.g., 404 due to RBAC) */}
 				{!isLoading && !error && !employeeDetails && (
 					<div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-400">
-						You do not have permission to view detailed information for this employee.
+						{i18n._(msg`You do not have permission to view detailed information for this employee.`)}
 					</div>
 				)}
 			</DialogContent>

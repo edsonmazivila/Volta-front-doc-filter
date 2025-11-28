@@ -11,6 +11,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { useLingui } from "@lingui/react"
+import { msg } from "@lingui/core/macro"
 
 interface DeleteEmployeeDialogProps {
 	employee: User
@@ -27,22 +29,26 @@ export function DeleteEmployeeDialog({
 	onConfirm,
 	isSubmitting
 }: DeleteEmployeeDialogProps) {
+	const { i18n } = useLingui()
+
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+					<AlertDialogTitle>{i18n._(msg`Are you absolutely sure?`)}</AlertDialogTitle>
 				<AlertDialogDescription>
-					This will permanently delete{' '}
+					{i18n._(msg`This will permanently delete`)}
+					{' '}
 					<span className="font-semibold text-foreground">
 						{employee.full_name}
-					</span>{' '}
-					from the system. This action cannot be undone.
+					</span>
+					{' '}
+					{i18n._(msg`from the system. This action cannot be undone.`)}
 				</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={isSubmitting}>
-						Cancel
+						{i18n._(msg`Cancel`)}
 					</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={(e) => {
@@ -52,7 +58,7 @@ export function DeleteEmployeeDialog({
 						disabled={isSubmitting}
 						className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
 					>
-						{isSubmitting ? 'Deleting...' : 'Delete Employee'}
+						{isSubmitting ? i18n._(msg`Deleting...`) : i18n._(msg`Delete Employee`)}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

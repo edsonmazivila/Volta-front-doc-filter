@@ -18,6 +18,8 @@ import { useToastHelpers } from "@/components/ui/toast";
 import { updateUserAction, type User } from "@/lib/services/users";
 import { toDateOnly } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 const schema = z.object({
   // Account & User
@@ -82,6 +84,7 @@ interface EmployeeEditFormProps {
 export function EmployeeEditForm({ employee, companyName, departments }: EmployeeEditFormProps) {
   const router = useRouter();
   const toast = useToastHelpers();
+  const { i18n } = useLingui();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canLogin, setCanLogin] = useState<boolean>(employee.can_login || true);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -143,7 +146,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
       // Dynamic validation based on can_login
       if (canLogin) {
         if (!values.email?.trim()) {
-          const error = 'Please enter an email address. Email is required when user can login.';
+          const error = i18n._(msg`Please enter an email address. Email is required when user can login.`);
           setValidationErrors([error]);
           toast.error(error);
           setIsSubmitting(false);
@@ -151,7 +154,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         }
         // Password is optional when editing - only validate if provided
         if (values.password && values.password.length < 6) {
-          const error = 'Password must be at least 6 characters if you want to change it.';
+          const error = i18n._(msg`Password must be at least 6 characters if you want to change it.`);
           setValidationErrors([error]);
           toast.error(error);
           setIsSubmitting(false);
@@ -214,24 +217,24 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             // If multiple errors, show a hint
             if (errorMessages.length > 1) {
               setTimeout(() => {
-                toast.error(`${errorMessages.length - 1} more validation error(s). See below for details.`);
+                toast.error(i18n._(msg`${errorMessages.length - 1} more validation error(s). See below for details.`));
               }, 300);
             }
           } else {
-            const error = 'Please check all required fields and try again.';
+            const error = i18n._(msg`Please check all required fields and try again.`);
             setValidationErrors([error]);
             toast.error(error);
           }
         }
       } else {
         setValidationErrors([]);
-        toast.success("Employee updated successfully!");
+        toast.success(i18n._(msg`Employee updated successfully!`));
         router.push("/dashboard/employees");
         router.refresh();
       }
     } catch (error) {
       console.error('[EDIT FORM] Error updating employee:', error);
-      const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+      const errorMsg = error instanceof Error ? error.message : i18n._(msg`An unexpected error occurred. Please try again.`);
       setValidationErrors([errorMsg]);
       toast.error(errorMsg);
     } finally {
@@ -249,7 +252,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
           onClick={() => router.back()}
         >
           <ChevronLeft className="w-4 h-4" />
-          Back
+          {i18n._(msg`Back`)}
         </Button>
       </div>
 
@@ -261,7 +264,9 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-destructive mb-2">
-                Please fix the following {validationErrors.length === 1 ? 'error' : 'errors'}:
+                {validationErrors.length === 1
+                  ? i18n._(msg`Please fix the following error:`)
+                  : i18n._(msg`Please fix the following errors:`)}
               </h4>
               <ul className="list-disc list-inside space-y-1">
                 {validationErrors.map((error, index) => (
@@ -277,17 +282,17 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         {/* Account & User Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Account & User</h3>
+            <h3 className="text-lg font-semibold mb-1">{i18n._(msg`Account & User`)}</h3>
             <p className="text-sm text-muted-foreground">
-              Update the employee&apos;s basic information.
+              {i18n._(msg`Update the employee's basic information.`)}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Full Name *</label>
+              <label className="text-sm font-medium">{i18n._(msg`Full Name`)} *</label>
               <Input
                 {...register("full_name")}
-                placeholder="Enter full name"
+                placeholder={i18n._(msg`Enter full name`)}
               />
               {errors.full_name && (
                 <span className="text-xs text-destructive">
@@ -298,7 +303,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             {canLogin && (
               <>
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium">Email (required only if can login)</label>
+                  <label className="text-sm font-medium">{i18n._(msg`Email (required only if can login)`)}</label>
                   <Input
                     type="email"
                     {...register("email")}
@@ -311,11 +316,11 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                   )}
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium">Password (required only if can login)</label>
+                  <label className="text-sm font-medium">{i18n._(msg`Password (required only if can login)`)}</label>
                   <Input
                     type="password"
                     {...register("password")}
-                    placeholder="Enter new password"
+                    placeholder={i18n._(msg`Enter new password`)}
                   />
                   {errors.password && (
                     <span className="text-xs text-destructive">
@@ -326,21 +331,21 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               </>
             )}
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Role *</label>
+              <label className="text-sm font-medium">{i18n._(msg`Role`)} *</label>
               <Controller
                 name="role"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select role" />
+                      <SelectValue placeholder={i18n._(msg`Select role`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="operational_manager">Operational Manager</SelectItem>
-                      <SelectItem value="hr_manager">HR Manager</SelectItem>
-                      <SelectItem value="payroll_manager">Payroll Manager</SelectItem>
-                      <SelectItem value="system_admin">System Admin</SelectItem>
+                      <SelectItem value="employee">{i18n._(msg`Employee`)}</SelectItem>
+                      <SelectItem value="operational_manager">{i18n._(msg`Operational Manager`)}</SelectItem>
+                      <SelectItem value="hr_manager">{i18n._(msg`HR Manager`)}</SelectItem>
+                      <SelectItem value="payroll_manager">{i18n._(msg`Payroll Manager`)}</SelectItem>
+                      <SelectItem value="system_admin">{i18n._(msg`System Admin`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -370,7 +375,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
                   )}
                 />
                 <label htmlFor="can_login" className="text-sm font-medium">
-                  Can login to system
+                  {i18n._(msg`Can login to system`)}
                 </label>
               </div>
             </div>
@@ -381,31 +386,31 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
             <h3 className="text-lg font-semibold mb-1">
-              Employment & Organization
+              {i18n._(msg`Employment & Organization`)}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Update the employee&apos;s role and organizational details.
+              {i18n._(msg`Update the employee's role and organizational details.`)}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Company *</label>
+              <label className="text-sm font-medium">{i18n._(msg`Company`)} *</label>
               <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-muted-foreground">
                 {companyName}
               </div>
               <p className="text-xs text-muted-foreground">
-                Company is automatically set based on your account
+                {i18n._(msg`Company is automatically set based on your account`)}
               </p>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Department</label>
+              <label className="text-sm font-medium">{i18n._(msg`Department`)}</label>
               <Controller
                 name="department_id"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue placeholder={i18n._(msg`Select department`)} />
                     </SelectTrigger>
                     <SelectContent>
                       {(departments || []).map((d) => (
@@ -422,10 +427,10 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Employee Number</label>
+              <label className="text-sm font-medium">{i18n._(msg`Employee Number`)}</label>
               <Input
                 {...register("employee_number")}
-                placeholder="e.g., EMP001"
+                placeholder={i18n._(msg`e.g., EMP001`)}
               />
               {errors.employee_number && (
                 <span className="text-xs text-destructive">
@@ -434,10 +439,10 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Job Title</label>
+              <label className="text-sm font-medium">{i18n._(msg`Job Title`)}</label>
               <Input
                 {...register("job_title")}
-                placeholder="e.g., Software Engineer"
+                placeholder={i18n._(msg`e.g., Software Engineer`)}
               />
               {errors.job_title && (
                 <span className="text-xs text-destructive">
@@ -446,48 +451,48 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Employment Type</label>
+              <label className="text-sm font-medium">{i18n._(msg`Employment Type`)}</label>
               <Controller
                 name="employment_type"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue placeholder={i18n._(msg`Select type`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="full_time">Full Time</SelectItem>
-                      <SelectItem value="part_time">Part Time</SelectItem>
-                      <SelectItem value="contract">Contract</SelectItem>
-                      <SelectItem value="temporary">Temporary</SelectItem>
-                      <SelectItem value="intern">Intern</SelectItem>
+                      <SelectItem value="full_time">{i18n._(msg`Full Time`)}</SelectItem>
+                      <SelectItem value="part_time">{i18n._(msg`Part Time`)}</SelectItem>
+                      <SelectItem value="contract">{i18n._(msg`Contract`)}</SelectItem>
+                      <SelectItem value="temporary">{i18n._(msg`Temporary`)}</SelectItem>
+                      <SelectItem value="intern">{i18n._(msg`Intern`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Employment Status</label>
+              <label className="text-sm font-medium">{i18n._(msg`Employment Status`)}</label>
               <Controller
                 name="employment_status"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={i18n._(msg`Select status`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="terminated">Terminated</SelectItem>
-                      <SelectItem value="on_leave">On Leave</SelectItem>
+                      <SelectItem value="active">{i18n._(msg`Active`)}</SelectItem>
+                      <SelectItem value="inactive">{i18n._(msg`Inactive`)}</SelectItem>
+                      <SelectItem value="terminated">{i18n._(msg`Terminated`)}</SelectItem>
+                      <SelectItem value="on_leave">{i18n._(msg`On Leave`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Hire Date</label>
+              <label className="text-sm font-medium">{i18n._(msg`Hire Date`)}</label>
               <Input type="date" {...register("hire_date")} />
               {errors.hire_date && (
                 <span className="text-xs text-destructive">
@@ -497,7 +502,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">
-                Termination Date <span className="text-muted-foreground font-normal text-xs">(Optional)</span>
+                {i18n._(msg`Termination Date`)} <span className="text-muted-foreground font-normal text-xs">({i18n._(msg`Optional`)})</span>
               </label>
               <Input type="date" {...register("termination_date")} />
             </div>
@@ -507,14 +512,14 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         {/* Contact & Address Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Contact & Address</h3>
+            <h3 className="text-lg font-semibold mb-1">{i18n._(msg`Contact & Address`)}</h3>
             <p className="text-sm text-muted-foreground">
-              Optional contact details for the employee.
+              {i18n._(msg`Optional contact details for the employee.`)}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Primary Phone</label>
+              <label className="text-sm font-medium">{i18n._(msg`Primary Phone`)}</label>
               <Input
                 type="tel"
                 {...register("phone_primary")}
@@ -522,7 +527,7 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Secondary Phone</label>
+              <label className="text-sm font-medium">{i18n._(msg`Secondary Phone`)}</label>
               <Input
                 type="tel"
                 {...register("phone_secondary")}
@@ -530,41 +535,41 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Date of Birth</label>
+              <label className="text-sm font-medium">{i18n._(msg`Date of Birth`)}</label>
               <Input type="date" {...register("date_of_birth")} />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Address Line 1</label>
+              <label className="text-sm font-medium">{i18n._(msg`Address Line 1`)}</label>
               <Input
                 {...register("address_line1")}
-                placeholder="Street address"
+                placeholder={i18n._(msg`Street address`)}
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Address Line 2</label>
+              <label className="text-sm font-medium">{i18n._(msg`Address Line 2`)}</label>
               <Input
                 {...register("address_line2")}
-                placeholder="Apartment, suite, etc."
+                placeholder={i18n._(msg`Apartment, suite, etc.`)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">City</label>
-              <Input {...register("city")} placeholder="City" />
+              <label className="text-sm font-medium">{i18n._(msg`City`)}</label>
+              <Input {...register("city")} placeholder={i18n._(msg`City`)} />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">State</label>
-              <Input {...register("state")} placeholder="State/Province" />
+              <label className="text-sm font-medium">{i18n._(msg`State`)}</label>
+              <Input {...register("state")} placeholder={i18n._(msg`State/Province`)} />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Postal Code</label>
+              <label className="text-sm font-medium">{i18n._(msg`Postal Code`)}</label>
               <Input
                 {...register("postal_code")}
-                placeholder="ZIP/Postal code"
+                placeholder={i18n._(msg`ZIP/Postal code`)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Country</label>
-              <Input {...register("country")} placeholder="Country" />
+              <label className="text-sm font-medium">{i18n._(msg`Country`)}</label>
+              <Input {...register("country")} placeholder={i18n._(msg`Country`)} />
             </div>
           </div>
         </div>
@@ -572,21 +577,21 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         {/* Emergency Contact Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Emergency Contact</h3>
+            <h3 className="text-lg font-semibold mb-1">{i18n._(msg`Emergency Contact`)}</h3>
             <p className="text-sm text-muted-foreground">
-              Who should we contact in an emergency?
+              {i18n._(msg`Who should we contact in an emergency?`)}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Name</label>
+              <label className="text-sm font-medium">{i18n._(msg`Name`)}</label>
               <Input
                 {...register("emergency_contact_name")}
-                placeholder="Full name"
+                placeholder={i18n._(msg`Full name`)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Phone</label>
+              <label className="text-sm font-medium">{i18n._(msg`Phone`)}</label>
               <Input
                 type="tel"
                 {...register("emergency_contact_phone")}
@@ -594,10 +599,10 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               />
             </div>
             <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-sm font-medium">Relationship</label>
+              <label className="text-sm font-medium">{i18n._(msg`Relationship`)}</label>
               <Input
                 {...register("emergency_contact_relationship")}
-                placeholder="e.g., Spouse, Parent, Sibling"
+                placeholder={i18n._(msg`e.g., Spouse, Parent, Sibling`)}
               />
             </div>
           </div>
@@ -606,88 +611,88 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         {/* Tax & Bank Information Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Tax & Bank Information</h3>
+            <h3 className="text-lg font-semibold mb-1">{i18n._(msg`Tax & Bank Information`)}</h3>
             <p className="text-sm text-muted-foreground">
-              Tax filing and banking details.
+              {i18n._(msg`Tax filing and banking details.`)}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Tax Filing Status</label>
+              <label className="text-sm font-medium">{i18n._(msg`Tax Filing Status`)}</label>
               <Controller
                 name="tax_filing_status"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select filing status" />
+                      <SelectValue placeholder={i18n._(msg`Select filing status`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="married">Married</SelectItem>
-                      <SelectItem value="married_separate">Married Filing Separately</SelectItem>
-                      <SelectItem value="head_of_household">Head of Household</SelectItem>
+                      <SelectItem value="single">{i18n._(msg`Single`)}</SelectItem>
+                      <SelectItem value="married">{i18n._(msg`Married`)}</SelectItem>
+                      <SelectItem value="married_separate">{i18n._(msg`Married Filing Separately`)}</SelectItem>
+                      <SelectItem value="head_of_household">{i18n._(msg`Head of Household`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Tax Allowances</label>
+              <label className="text-sm font-medium">{i18n._(msg`Tax Allowances`)}</label>
               <Input
                 type="number"
                 step="1"
                 {...register("tax_allowances")}
-                placeholder="e.g., 1"
+                placeholder={i18n._(msg`e.g., 1`)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Additional Tax Withholding</label>
+              <label className="text-sm font-medium">{i18n._(msg`Additional Tax Withholding`)}</label>
               <Input
                 type="number"
                 step="0.01"
                 {...register("additional_tax_withholding")}
-                placeholder="e.g., 0.00"
+                placeholder={i18n._(msg`e.g., 0.00`)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Tax Exempt</label>
+              <label className="text-sm font-medium">{i18n._(msg`Tax Exempt`)}</label>
               <Controller
                 name="tax_exempt"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value ? "true" : "false"} onValueChange={(v) => field.onChange(v === "true")}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select tax status" />
+                      <SelectValue placeholder={i18n._(msg`Select tax status`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="false">Not Exempt</SelectItem>
-                      <SelectItem value="true">Tax Exempt</SelectItem>
+                      <SelectItem value="false">{i18n._(msg`Not Exempt`)}</SelectItem>
+                      <SelectItem value="true">{i18n._(msg`Tax Exempt`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Bank Name</label>
+              <label className="text-sm font-medium">{i18n._(msg`Bank Name`)}</label>
               <Input
                 {...register("bank_name")}
-                placeholder="e.g., Chase Bank"
+                placeholder={i18n._(msg`e.g., Chase Bank`)}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Bank Account Type</label>
+              <label className="text-sm font-medium">{i18n._(msg`Bank Account Type`)}</label>
               <Controller
                 name="bank_account_type"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select account type" />
+                      <SelectValue placeholder={i18n._(msg`Select account type`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="checking">Checking</SelectItem>
-                      <SelectItem value="savings">Savings</SelectItem>
+                      <SelectItem value="checking">{i18n._(msg`Checking`)}</SelectItem>
+                      <SelectItem value="savings">{i18n._(msg`Savings`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -699,58 +704,58 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
         {/* Compensation Section */}
         <div className="bg-card border border-[var(--border)] rounded-lg p-6 space-y-4">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Compensation</h3>
+            <h3 className="text-lg font-semibold mb-1">{i18n._(msg`Compensation`)}</h3>
             <p className="text-sm text-muted-foreground">
-              Pay structure and hours.
+              {i18n._(msg`Pay structure and hours.`)}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Pay Type</label>
+              <label className="text-sm font-medium">{i18n._(msg`Pay Type`)}</label>
               <Controller
                 name="pay_type"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select pay type" />
+                      <SelectValue placeholder={i18n._(msg`Select pay type`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hourly">Hourly</SelectItem>
-                      <SelectItem value="salary">Salary</SelectItem>
-                      <SelectItem value="commission">Commission</SelectItem>
+                      <SelectItem value="hourly">{i18n._(msg`Hourly`)}</SelectItem>
+                      <SelectItem value="salary">{i18n._(msg`Salary`)}</SelectItem>
+                      <SelectItem value="commission">{i18n._(msg`Commission`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Pay Frequency</label>
+              <label className="text-sm font-medium">{i18n._(msg`Pay Frequency`)}</label>
               <Controller
                 name="pay_frequency"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="bg-background w-full">
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder={i18n._(msg`Select frequency`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="biweekly">Biweekly</SelectItem>
-                      <SelectItem value="semi_monthly">Semi-Monthly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="weekly">{i18n._(msg`Weekly`)}</SelectItem>
+                      <SelectItem value="biweekly">{i18n._(msg`Biweekly`)}</SelectItem>
+                      <SelectItem value="semi_monthly">{i18n._(msg`Semi-Monthly`)}</SelectItem>
+                      <SelectItem value="monthly">{i18n._(msg`Monthly`)}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Annual Salary</label>
+              <label className="text-sm font-medium">{i18n._(msg`Annual Salary`)}</label>
               <Input
                 type="number"
                 step="1"
                 {...register("annual_salary")}
-                placeholder="e.g., 48000"
+                placeholder={i18n._(msg`e.g., 48000`)}
               />
               {errors.annual_salary && (
                 <span className="text-xs text-destructive">
@@ -759,12 +764,12 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Hourly Rate</label>
+              <label className="text-sm font-medium">{i18n._(msg`Hourly Rate`)}</label>
               <Input
                 type="number"
                 step="0.01"
                 {...register("hourly_rate")}
-                placeholder="e.g., 25.00"
+                placeholder={i18n._(msg`e.g., 25.00`)}
               />
               {errors.hourly_rate && (
                 <span className="text-xs text-destructive">
@@ -774,27 +779,27 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">
-                Overtime Rate (Multiplier)
+                {i18n._(msg`Overtime Rate (Multiplier)`)}
               </label>
               <Input
                 type="number"
                 step="0.1"
                 {...register("overtime_rate")}
-                placeholder="e.g., 1.5"
+                placeholder={i18n._(msg`e.g., 1.5`)}
               />
               <p className="text-xs text-muted-foreground">
-                Standard is 1.5x for overtime
+                {i18n._(msg`Standard is 1.5x for overtime`)}
               </p>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">
-                Standard Hours (per week)
+                {i18n._(msg`Standard Hours (per week)`)}
               </label>
               <Input
                 type="number"
                 step="1"
                 {...register("standard_hours")}
-                placeholder="e.g., 40"
+                placeholder={i18n._(msg`e.g., 40`)}
               />
             </div>
           </div>
@@ -808,10 +813,10 @@ export function EmployeeEditForm({ employee, companyName, departments }: Employe
             onClick={() => router.back()}
             disabled={isSubmitting}
           >
-            Cancel
+            {i18n._(msg`Cancel`)}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Changes"}
+            {isSubmitting ? i18n._(msg`Saving...`) : i18n._(msg`Save Changes`)}
           </Button>
         </div>
       </form>
