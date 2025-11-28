@@ -227,6 +227,7 @@ msgid "Review"
 msgstr "Rever"
 
 #: app/dashboard/page.tsx:385
+#: components/leaves/leave-view-dialog.tsx:89
 msgid "Leave"
 msgstr "Ausência"
 
@@ -770,6 +771,7 @@ msgstr "Comece por criar um novo registo de assiduidade"
 
 #: components/attendance/attendance-table.tsx:100
 #: components/leaves/leave-table.tsx:99
+#: components/leaves/leave-view-dialog.tsx:67
 #: components/timesheets/timesheet-form-dialog.tsx:106
 #: components/timesheets/timesheet-table.tsx:84
 msgid "Employee"
@@ -821,6 +823,7 @@ msgid "Clocked out successfully"
 msgstr "Saída registada com sucesso"
 
 #: components/attendance/my-attendance-section.tsx:144
+#: components/leaves/leave-view-dialog.tsx:150
 msgid "Total Days"
 msgstr "Total de Dias"
 
@@ -870,6 +873,7 @@ msgid "Attendance History"
 msgstr "Histórico de Assiduidade"
 
 #: components/attendance/my-attendance-section.tsx:276
+#: components/leaves/leave-view-dialog.tsx:215
 #: components/timesheets/timesheet-form-dialog.tsx:207
 #: components/timesheets/timesheet-table.tsx:90
 #: components/timesheets/timesheet-view-dialog.tsx:175
@@ -1083,6 +1087,7 @@ msgid "New request"
 msgstr "Novo pedido"
 
 #: components/leaves/leave-management.tsx:102
+#: components/leaves/leave-view-dialog.tsx:174
 #: components/timesheets/timesheet-form-dialog.tsx:195
 msgid "Submitted"
 msgstr "Submetido"
@@ -1105,6 +1110,7 @@ msgid "Team Leave Balances"
 msgstr "Saldos de Ausências da Equipa"
 
 #: components/leaves/leave-management.tsx:156
+#: components/leaves/leave-view-dialog.tsx:77
 msgid "Leave Request Details"
 msgstr "Detalhes do Pedido de Ausência"
 
@@ -1139,6 +1145,7 @@ msgstr "Rejeitar Pedido de Ausência"
 
 #: components/leaves/leave-management.tsx:177
 #: components/leaves/leave-table.tsx:111
+#: components/leaves/leave-view-dialog.tsx:189
 msgid "Reason"
 msgstr "Motivo"
 
@@ -1211,6 +1218,7 @@ msgid "Days"
 msgstr "Dias"
 
 #: components/leaves/leave-table.tsx:112
+#: components/leaves/leave-view-dialog.tsx:165
 msgid "Created"
 msgstr "Criado"
 
@@ -1228,6 +1236,136 @@ msgstr "Aprovar"
 #: components/timesheets/timesheet-table.tsx:161
 msgid "Submit"
 msgstr "Submeter"
+
+#: components/leaves/leave-view-dialog.tsx:77
+#~ msgid "Detalhes do Pedido de Férias"
+#~ msgstr "Detalhes do Pedido de Férias"
+
+#: components/leaves/leave-view-dialog.tsx:89
+#~ msgid "Férias"
+#~ msgstr "Férias"
+
+#: components/leaves/leave-view-dialog.tsx:110
+msgid "Leave Details"
+msgstr "Detalhes das Férias"
+
+#: components/leaves/leave-view-dialog.tsx:110
+#~ msgid "Detalhes das Férias"
+#~ msgstr "Detalhes das Férias"
+
+#: components/leaves/leave-view-dialog.tsx:114
+msgid "Leave Type"
+msgstr "Tipo de Férias"
+
+#: components/leaves/leave-view-dialog.tsx:114
+#~ msgid "Tipo de Férias"
+#~ msgstr "Tipo de Férias"
+
+#: components/leaves/leave-view-dialog.tsx:121
+msgid "Date Range"
+msgstr "Intervalo de Datas"
+
+#: components/leaves/leave-view-dialog.tsx:121
+#~ msgid "Intervalo de Datas"
+#~ msgstr "Intervalo de Datas"
+
+#: components/leaves/leave-view-dialog.tsx:128
+#: components/timesheets/timesheet-view-dialog.tsx:116
+msgid "Start Date"
+msgstr "Data de Início"
+
+#: components/leaves/leave-view-dialog.tsx:128
+#~ msgid "Data de Início"
+#~ msgstr "Data de Início"
+
+#: components/leaves/leave-view-dialog.tsx:135
+#: components/timesheets/timesheet-view-dialog.tsx:123
+msgid "End Date"
+msgstr "Data de Fim"
+
+#: components/leaves/leave-view-dialog.tsx:135
+#~ msgid "Data de Fim"
+#~ msgstr "Data de Fim"
+
+#: components/leaves/leave-view-dialog.tsx:146
+msgid "Duration & Status"
+msgstr "Duração e Estado"
+
+#: components/leaves/leave-view-dialog.tsx:146
+#~ msgid "Duração e Estado"
+#~ msgstr "Duração e Estado"
+
+#: components/leaves/leave-view-dialog.tsx:150
+#~ msgid "Total de Dias"
+#~ msgstr "Total de Dias"
+
+#: components/leaves/leave-view-dialog.tsx:153
+msgid "(Half Day)"
+msgstr "(Meio Dia)"
+
+#: components/leaves/leave-view-dialog.tsx:153
+msgid "day(s)"
+msgstr "dia(s)"
+
+#: components/leaves/leave-view-dialog.tsx:153
+#~ msgid "(Meio Dia)"
+#~ msgstr "(Meio Dia)"
+
+#: components/leaves/leave-view-dialog.tsx:153
+#~ msgid "dia(s)"
+#~ msgstr "dia(s)"
+
+#: components/leaves/leave-view-dialog.tsx:158
+#: components/timesheets/timesheet-form-dialog.tsx:176
+#: components/timesheets/timesheet-table.tsx:89
+#: components/timesheets/timesheet-view-dialog.tsx:161
+msgid "Total Hours"
+msgstr "Total de Horas"
+
+#: components/leaves/leave-view-dialog.tsx:158
+#~ msgid "Total de Horas"
+#~ msgstr "Total de Horas"
+
+#: components/leaves/leave-view-dialog.tsx:165
+#~ msgid "Criado"
+#~ msgstr "Criado"
+
+#: components/leaves/leave-view-dialog.tsx:174
+#~ msgid "Submetido"
+#~ msgstr "Submetido"
+
+#: components/leaves/leave-view-dialog.tsx:189
+#~ msgid "Motivo"
+#~ msgstr "Motivo"
+
+#: components/leaves/leave-view-dialog.tsx:204
+msgid "Approval Details"
+msgstr "Detalhes da Aprovação"
+
+#: components/leaves/leave-view-dialog.tsx:204
+#~ msgid "Detalhes da Aprovação"
+#~ msgstr "Detalhes da Aprovação"
+
+#: components/leaves/leave-view-dialog.tsx:209
+msgid "Approved At"
+msgstr "Aprovado em"
+
+#: components/leaves/leave-view-dialog.tsx:209
+#~ msgid "Aprovado em"
+#~ msgstr "Aprovado em"
+
+#: components/leaves/leave-view-dialog.tsx:215
+#~ msgid "Notas"
+#~ msgstr "Notas"
+
+#: components/leaves/leave-view-dialog.tsx:226
+#: components/timesheets/timesheet-view-dialog.tsx:188
+msgid "Close"
+msgstr "Fechar"
+
+#: components/leaves/leave-view-dialog.tsx:226
+#~ msgid "Fechar"
+#~ msgstr "Fechar"
 
 #: components/payroll/payroll-section.tsx:39
 msgid "Select start and end dates"
@@ -1429,12 +1567,6 @@ msgstr "Horas Normais"
 msgid "Overtime Hours"
 msgstr "Horas Extraordinárias"
 
-#: components/timesheets/timesheet-form-dialog.tsx:176
-#: components/timesheets/timesheet-table.tsx:89
-#: components/timesheets/timesheet-view-dialog.tsx:161
-msgid "Total Hours"
-msgstr "Total de Horas"
-
 #: components/timesheets/timesheet-form-dialog.tsx:178
 #: components/timesheets/timesheet-view-dialog.tsx:149
 #: components/timesheets/timesheet-view-dialog.tsx:156
@@ -1480,14 +1612,6 @@ msgstr "Detalhes da Folha de Horas"
 msgid "Period Information"
 msgstr "Informação do Período"
 
-#: components/timesheets/timesheet-view-dialog.tsx:116
-msgid "Start Date"
-msgstr "Data de Início"
-
-#: components/timesheets/timesheet-view-dialog.tsx:123
-msgid "End Date"
-msgstr "Data de Fim"
-
 #: components/timesheets/timesheet-view-dialog.tsx:131
 msgid "Submitted At"
 msgstr "Submetido Em"
@@ -1495,7 +1619,3 @@ msgstr "Submetido Em"
 #: components/timesheets/timesheet-view-dialog.tsx:143
 msgid "Hours Information"
 msgstr "Informação de Horas"
-
-#: components/timesheets/timesheet-view-dialog.tsx:188
-msgid "Close"
-msgstr "Fechar"

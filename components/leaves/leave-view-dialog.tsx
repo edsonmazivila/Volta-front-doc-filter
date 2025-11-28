@@ -27,6 +27,8 @@ import {
   formatDateRange,
   getLeaveStatusColor,
 } from "@/lib/utils";
+import { useLingui } from '@lingui/react';
+import { msg } from '@lingui/core/macro';
 
 interface LeaveViewDialogProps {
   leave: LeaveRequestItem;
@@ -62,7 +64,7 @@ export function LeaveViewDialog({
   };
 
   const getEmployeeName = () => {
-    return leave.employee_full_name || "Employee";
+    return leave.employee_full_name || i18n._(msg`Employee`);
   };
 
   return (
@@ -72,7 +74,7 @@ export function LeaveViewDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Leave Request Details
+            {i18n._(msg`Leave Request Details`)}
           </DialogTitle>
         </DialogHeader>
 
@@ -84,7 +86,7 @@ export function LeaveViewDialog({
                 {getEmployeeName()}
               </h2>
               <p className="text-muted-foreground capitalize">
-                {leave.leave_type} Leave
+                {leave.leave_type} {i18n._(msg`Leave`)}
               </p>
             </div>
             <Badge
@@ -105,32 +107,32 @@ export function LeaveViewDialog({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <CalendarDays className="h-4 w-4" />
-                Leave Details
+                {i18n._(msg`Leave Details`)}
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium">Leave Type</p>
+                  <p className="text-sm font-medium">{i18n._(msg`Leave Type`)}</p>
                   <p className="text-sm text-muted-foreground capitalize">
                     {leave.leave_type}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">Date Range</p>
+                  <p className="text-sm font-medium">{i18n._(msg`Date Range`)}</p>
                   <p className="text-sm text-muted-foreground">
                     {formatDateRange(leave.start_date, leave.end_date)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">Start Date</p>
+                  <p className="text-sm font-medium">{i18n._(msg`Start Date`)}</p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(leave.start_date)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium">End Date</p>
+                  <p className="text-sm font-medium">{i18n._(msg`End Date`)}</p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(leave.end_date)}
                   </p>
@@ -141,26 +143,26 @@ export function LeaveViewDialog({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Duration & Status
+                {i18n._(msg`Duration & Status`)}
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium">Total Days</p>
+                  <p className="text-sm font-medium">{i18n._(msg`Total Days`)}</p>
                   <p className="text-lg font-semibold text-foreground">
                     {leave.total_days}{" "}
-                    {leave.is_half_day ? "(Half Day)" : "day(s)"}
+                    {leave.is_half_day ? i18n._(msg`(Half Day)`) : i18n._(msg`day(s)`)}
                   </p>
                 </div>
                 {typeof leave.total_hours === 'number' && (
                   <div>
-                    <p className="text-sm font-medium">Total Hours</p>
+                    <p className="text-sm font-medium">{i18n._(msg`Total Hours`)}</p>
                     <p className="text-sm text-muted-foreground">{leave.total_hours}</p>
                   </div>
                 )}
 
                 {leave.created_at && (
                   <div>
-                    <p className="text-sm font-medium">Created</p>
+                    <p className="text-sm font-medium">{i18n._(msg`Created`)}</p>
                     <p className="text-sm text-muted-foreground">
                       {formatDateTime(leave.created_at)}
                     </p>
@@ -169,7 +171,7 @@ export function LeaveViewDialog({
 
                 {leave.submitted_at && (
                   <div>
-                    <p className="text-sm font-medium">Submitted</p>
+                    <p className="text-sm font-medium">{i18n._(msg`Submitted`)}</p>
                     <p className="text-sm text-muted-foreground">
                       {formatDateTime(leave.submitted_at)}
                     </p>
@@ -184,7 +186,7 @@ export function LeaveViewDialog({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Reason
+                {i18n._(msg`Reason`)}
               </h3>
               <div className="p-4 bg-muted/30 rounded-lg">
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
@@ -199,18 +201,18 @@ export function LeaveViewDialog({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                Approval Details
+                {i18n._(msg`Approval Details`)}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {leave.approved_at && (
                   <div>
-                    <p className="text-sm font-medium">Approved At</p>
+                    <p className="text-sm font-medium">{i18n._(msg`Approved At`)}</p>
                     <p className="text-sm text-muted-foreground">{formatDateTime(leave.approved_at)}</p>
                   </div>
                 )}
                 {leave.approved_notes && (
                   <div className="md:col-span-2">
-                    <p className="text-sm font-medium">Notes</p>
+                    <p className="text-sm font-medium">{i18n._(msg`Notes`)}</p>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{leave.approved_notes}</p>
                   </div>
                 )}
@@ -221,7 +223,7 @@ export function LeaveViewDialog({
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Close
+              {i18n._(msg`Close`)}
             </Button>
           </div>
         </div>

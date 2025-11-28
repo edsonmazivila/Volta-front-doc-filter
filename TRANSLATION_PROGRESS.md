@@ -42,7 +42,7 @@ All translations follow this consistent pattern:
 
 ## Current Status
 
-### ✅ Completed Components (10 components)
+### ✅ Completed Components (11 components)
 
 #### Attendance Components (4/4 complete)
 - ✅ `components/attendance/attendance-form-dialog.tsx` - Form dialog with 100+ strings
@@ -58,26 +58,23 @@ All translations follow this consistent pattern:
 - ✅ `components/timesheets/timesheet-table.tsx` - Table headers and actions
 - ✅ `components/timesheets/timesheet-view-dialog.tsx` - View dialog with period/hours info
 
-#### Leave Components (2/7 complete)
+#### Leave Components (3/7 complete)
 - ✅ `components/leaves/leave-management.tsx` - Main management page with tabs, filters, dialogs
 - ✅ `components/leaves/leave-table.tsx` - Table with headers and dropdown actions
+- ✅ `components/leaves/leave-view-dialog.tsx` - Leave request details dialog with 19 strings
 
 ### ⏳ In Progress
 
 #### Leave Components (Currently working on)
-- ⏳ `components/leaves/leave-view-dialog.tsx` - **NEXT TO TRANSLATE**
-  - Started viewing the file (232 lines total)
-  - Contains leave request details dialog
-  - Includes status icons, employee info, leave details, duration info
+- ⏳ **READY FOR NEXT COMPONENT**
 
 ### ❌ Remaining Components (~75+ components)
 
-#### Leave Components (5 remaining)
-- ❌ `components/leaves/leave-request-form-dialog.tsx`
+#### Leave Components (4 remaining)
+- ❌ `components/leaves/leave-request-form-dialog.tsx` - **NEXT TO TRANSLATE**
 - ❌ `components/leaves/my-leaves-section.tsx`
 - ❌ `components/leaves/pending-approvals-table.tsx`
 - ❌ `components/leaves/team-balances-table.tsx`
-- ❌ Other leave-related components
 
 #### Other Component Categories (~70+ components)
 - ❌ **Documents**: document-table.tsx, document-view-dialog.tsx, document-edit-dialog.tsx, document-reject-dialog.tsx
@@ -91,8 +88,8 @@ All translations follow this consistent pattern:
 ## Translation Statistics
 
 **Latest Status** (as of last commit):
-- **Total messages**: 344
-- **Translated**: 344 (100%)
+- **Total messages**: 371
+- **Translated**: 371 (100%)
 - **Missing**: 0 ✅
 
 **Note**: This will increase as more components are translated.
