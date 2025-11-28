@@ -607,6 +607,7 @@ msgstr "Data"
 #: components/attendance/attendance-table.tsx:102
 #: components/attendance/my-attendance-section.tsx:272
 #: components/payroll/payroll-section.tsx:292
+#: components/timesheets/timesheet-form-dialog.tsx:184
 msgid "Status"
 msgstr "Estado"
 
@@ -695,6 +696,7 @@ msgid "Update Attendance"
 msgstr "Atualizar Assiduidade"
 
 #: components/attendance/attendance-form-dialog.tsx:404
+#: components/timesheets/timesheet-form-dialog.tsx:212
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -763,6 +765,7 @@ msgid "Get started by creating a new attendance record"
 msgstr "Comece por criar um novo registo de assiduidade"
 
 #: components/attendance/attendance-table.tsx:100
+#: components/timesheets/timesheet-form-dialog.tsx:106
 msgid "Employee"
 msgstr "Colaborador"
 
@@ -855,6 +858,7 @@ msgid "Attendance History"
 msgstr "Histórico de Assiduidade"
 
 #: components/attendance/my-attendance-section.tsx:276
+#: components/timesheets/timesheet-form-dialog.tsx:207
 msgid "Notes"
 msgstr "Notas"
 
@@ -1181,3 +1185,84 @@ msgstr "Ainda sem execuções de processamento salarial"
 #: components/payroll/payroll-section.tsx:355
 msgid "Calculate payroll to get started"
 msgstr "Calcule o processamento salarial para começar"
+
+#: components/timesheets/timesheet-form-dialog.tsx:37
+msgid "Employee is required"
+msgstr "Colaborador é obrigatório"
+
+#: components/timesheets/timesheet-form-dialog.tsx:38
+msgid "Period start is required"
+msgstr "Início do período é obrigatório"
+
+#: components/timesheets/timesheet-form-dialog.tsx:39
+msgid "Period end is required"
+msgstr "Fim do período é obrigatório"
+
+#: components/timesheets/timesheet-form-dialog.tsx:40
+#: components/timesheets/timesheet-form-dialog.tsx:41
+msgid "Must be >= 0"
+msgstr "Deve ser >= 0"
+
+#: components/timesheets/timesheet-form-dialog.tsx:42
+msgid "Status is required"
+msgstr "Estado é obrigatório"
+
+#: components/timesheets/timesheet-form-dialog.tsx:98
+msgid "Fill in the timesheet details for the selected employee."
+msgstr "Preencha os detalhes da folha de horas para o colaborador selecionado."
+
+#: components/timesheets/timesheet-form-dialog.tsx:113
+msgid "Select employee"
+msgstr "Selecionar colaborador"
+
+#: components/timesheets/timesheet-form-dialog.tsx:117
+msgid "No employees found"
+msgstr "Nenhum colaborador encontrado"
+
+#: components/timesheets/timesheet-form-dialog.tsx:135
+msgid "Pay Period Start"
+msgstr "Início do Período de Pagamento"
+
+#: components/timesheets/timesheet-form-dialog.tsx:140
+msgid "Pay Period End"
+msgstr "Fim do Período de Pagamento"
+
+#: components/timesheets/timesheet-form-dialog.tsx:149
+msgid "Regular Hours"
+msgstr "Horas Normais"
+
+#: components/timesheets/timesheet-form-dialog.tsx:161
+msgid "Overtime Hours"
+msgstr "Horas Extraordinárias"
+
+#: components/timesheets/timesheet-form-dialog.tsx:176
+msgid "Total Hours"
+msgstr "Total de Horas"
+
+#: components/timesheets/timesheet-form-dialog.tsx:178
+msgid "hours"
+msgstr "horas"
+
+#: components/timesheets/timesheet-form-dialog.tsx:191
+msgid "Select status"
+msgstr "Selecionar estado"
+
+#: components/timesheets/timesheet-form-dialog.tsx:194
+msgid "Draft"
+msgstr "Rascunho"
+
+#: components/timesheets/timesheet-form-dialog.tsx:195
+msgid "Submitted"
+msgstr "Submetido"
+
+#: components/timesheets/timesheet-form-dialog.tsx:196
+msgid "Approved"
+msgstr "Aprovado"
+
+#: components/timesheets/timesheet-form-dialog.tsx:197
+msgid "Rejected"
+msgstr "Rejeitado"
+
+#: components/timesheets/timesheet-form-dialog.tsx:213
+msgid "Saving…"
+msgstr "A guardar…"

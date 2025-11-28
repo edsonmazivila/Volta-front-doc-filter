@@ -607,6 +607,7 @@ msgstr "Date"
 #: components/attendance/attendance-table.tsx:102
 #: components/attendance/my-attendance-section.tsx:272
 #: components/payroll/payroll-section.tsx:292
+#: components/timesheets/timesheet-form-dialog.tsx:184
 msgid "Status"
 msgstr "Status"
 
@@ -695,6 +696,7 @@ msgid "Update Attendance"
 msgstr "Update Attendance"
 
 #: components/attendance/attendance-form-dialog.tsx:404
+#: components/timesheets/timesheet-form-dialog.tsx:212
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -763,6 +765,7 @@ msgid "Get started by creating a new attendance record"
 msgstr "Get started by creating a new attendance record"
 
 #: components/attendance/attendance-table.tsx:100
+#: components/timesheets/timesheet-form-dialog.tsx:106
 msgid "Employee"
 msgstr "Employee"
 
@@ -855,6 +858,7 @@ msgid "Attendance History"
 msgstr "Attendance History"
 
 #: components/attendance/my-attendance-section.tsx:276
+#: components/timesheets/timesheet-form-dialog.tsx:207
 msgid "Notes"
 msgstr "Notes"
 
@@ -1181,3 +1185,84 @@ msgstr "No payroll runs yet"
 #: components/payroll/payroll-section.tsx:355
 msgid "Calculate payroll to get started"
 msgstr "Calculate payroll to get started"
+
+#: components/timesheets/timesheet-form-dialog.tsx:37
+msgid "Employee is required"
+msgstr "Employee is required"
+
+#: components/timesheets/timesheet-form-dialog.tsx:38
+msgid "Period start is required"
+msgstr "Period start is required"
+
+#: components/timesheets/timesheet-form-dialog.tsx:39
+msgid "Period end is required"
+msgstr "Period end is required"
+
+#: components/timesheets/timesheet-form-dialog.tsx:40
+#: components/timesheets/timesheet-form-dialog.tsx:41
+msgid "Must be >= 0"
+msgstr "Must be >= 0"
+
+#: components/timesheets/timesheet-form-dialog.tsx:42
+msgid "Status is required"
+msgstr "Status is required"
+
+#: components/timesheets/timesheet-form-dialog.tsx:98
+msgid "Fill in the timesheet details for the selected employee."
+msgstr "Fill in the timesheet details for the selected employee."
+
+#: components/timesheets/timesheet-form-dialog.tsx:113
+msgid "Select employee"
+msgstr "Select employee"
+
+#: components/timesheets/timesheet-form-dialog.tsx:117
+msgid "No employees found"
+msgstr "No employees found"
+
+#: components/timesheets/timesheet-form-dialog.tsx:135
+msgid "Pay Period Start"
+msgstr "Pay Period Start"
+
+#: components/timesheets/timesheet-form-dialog.tsx:140
+msgid "Pay Period End"
+msgstr "Pay Period End"
+
+#: components/timesheets/timesheet-form-dialog.tsx:149
+msgid "Regular Hours"
+msgstr "Regular Hours"
+
+#: components/timesheets/timesheet-form-dialog.tsx:161
+msgid "Overtime Hours"
+msgstr "Overtime Hours"
+
+#: components/timesheets/timesheet-form-dialog.tsx:176
+msgid "Total Hours"
+msgstr "Total Hours"
+
+#: components/timesheets/timesheet-form-dialog.tsx:178
+msgid "hours"
+msgstr "hours"
+
+#: components/timesheets/timesheet-form-dialog.tsx:191
+msgid "Select status"
+msgstr "Select status"
+
+#: components/timesheets/timesheet-form-dialog.tsx:194
+msgid "Draft"
+msgstr "Draft"
+
+#: components/timesheets/timesheet-form-dialog.tsx:195
+msgid "Submitted"
+msgstr "Submitted"
+
+#: components/timesheets/timesheet-form-dialog.tsx:196
+msgid "Approved"
+msgstr "Approved"
+
+#: components/timesheets/timesheet-form-dialog.tsx:197
+msgid "Rejected"
+msgstr "Rejected"
+
+#: components/timesheets/timesheet-form-dialog.tsx:213
+msgid "Saving…"
+msgstr "Saving…"
