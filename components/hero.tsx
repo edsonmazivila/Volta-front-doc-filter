@@ -1,11 +1,16 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { Spotlight } from "@/components/ui/spotlight";
 import { Button } from "@/components/ui";
 import Link from "next/link";
-import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react";
+import { msg } from "@lingui/core/macro";
 
 const Hero = () => {
+  const { i18n } = useLingui();
+
   return (
     <div className="relative min-h-screen flex flex-col w-full overflow-hidden bg-transparent ">
       {/* Left beam */}
@@ -16,14 +21,10 @@ const Hero = () => {
       {/* Bottom moon image */}
       <div className="z-10 mx-auto w-full max-w-7xl p-4 mt-24">
         <h1 className="tracking-wide leading-tight bg-opacity-50 bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-center text-4xl font-bold text-transparent md:text-7xl">
-          <Trans>All‑in‑one HR &amp; Payroll Platform</Trans>
+          {i18n._(msg`All‑in‑one HR & Payroll Platform`)}
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-center text-base md:text-lg font-normal text-neutral-300">
-          <Trans>
-            Streamline employee management, time &amp; attendance, documents, and
-            payroll in a secure system with bank approvals and actionable
-            reporting.
-          </Trans>
+          {i18n._(msg`Streamline employee management, time & attendance, documents, and payroll in a secure system with bank approvals and actionable reporting.`)}
         </p>
         <div className="mt-6 flex items-center justify-center gap-3">
           <Button
@@ -31,7 +32,7 @@ const Hero = () => {
             className="px-8 py-4 text-lg font-semibold"
             asChild
           >
-            <Link href="/signup"><Trans>Get Started Free</Trans></Link>
+            <Link href="/signup">{i18n._(msg`Get Started Free`)}</Link>
           </Button>
         </div>
       </div>
@@ -47,7 +48,7 @@ const Hero = () => {
         {/* Temporarily hiding trust logos for future reuse */}
 
         <h1 className="absolute bottom-36 text-white text-2xl font-bold text-center mb-4">
-          <Trans>Trusted by Companies of All Sizes</Trans>
+          {i18n._(msg`Trusted by Companies of All Sizes`)}
         </h1>
         {/*
         <div className="absolute bottom-12 overflow-hidden max-w-4xl">
