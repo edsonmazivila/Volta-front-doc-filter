@@ -10,18 +10,16 @@ import type { User } from '@/lib/services/users'
 import { useLingui } from '@lingui/react'
 import { msg } from '@lingui/core/macro'
 
-// Define a base schema for type inference
-const baseTimesheetSchema = z.object({
-	employee_id: z.string().min(1),
-	periodStart: z.string().min(1),
-	periodEnd: z.string().min(1),
-	regularHours: z.coerce.number().min(0),
-	overtimeHours: z.coerce.number().min(0),
-	status: z.enum(['draft', 'submitted', 'approved', 'rejected']),
-	notes: z.string().optional(),
-})
-
-export type TimesheetFormValues = z.infer<typeof baseTimesheetSchema>
+// Define form values type
+export type TimesheetFormValues = {
+	employee_id: string
+	periodStart: string
+	periodEnd: string
+	regularHours: number
+	overtimeHours: number
+	status: 'draft' | 'submitted' | 'approved' | 'rejected'
+	notes?: string
+}
 
 interface TimesheetFormDialogProps {
 	open: boolean
