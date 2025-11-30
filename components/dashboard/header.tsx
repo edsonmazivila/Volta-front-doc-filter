@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import React from 'react'
 import { ThemeToggle } from '@/components/dashboard/theme-toggle'
+import { LanguageToggle } from '@/components/dashboard/language-toggle'
 import { LogoutButton } from '@/components/dashboard/logout-button'
 import { UserCog } from 'lucide-react'
 import { NotificationsMenu } from '@/components/dashboard/notifications-menu'
@@ -49,6 +50,10 @@ export function Header({ title }: { title: string }) {
               <DropdownMenuLabel className='flex items-center justify-between'>
                 <span>{i18n._(msg`Theme`)}</span>
                 <ThemeToggle />
+              </DropdownMenuLabel>
+              <DropdownMenuLabel className='flex items-center justify-between'>
+                <span>{i18n._(msg`Language`)}</span>
+                <LanguageToggle />
               </DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href='/dashboard/profile' className='flex items-center gap-2 cursor-pointer hover:bg-accent hover:text-accent-foreground'>
