@@ -285,7 +285,9 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 					<div className='mt-3 grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6'>
 						<div className='flex flex-col items-start gap-3'>
 							{company.logo ? (
-								<Image src={company.logo} alt={i18n._(msg`Company Logo`)} className='h-24 w-24 rounded-lg object-cover border border-white/10' width={96} height={96} />
+								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden'>
+									<Image src={company.logo} alt={i18n._(msg`Company Logo`)} className='max-h-full max-w-full object-contain' width={96} height={96} />
+								</div>
 							) : (
 								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground'>{i18n._(msg`Logo`)}</div>
 							)}
