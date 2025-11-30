@@ -8,7 +8,7 @@
  */
 
 import { cache } from "react";
-import { setupI18n as linguiSetupI18n, type I18n, type Messages } from "@lingui/core";
+import { setupI18n as linguiSetupI18n, type I18n, type Messages, i18n as globalI18n } from "@lingui/core";
 import { setI18n } from "@lingui/react/server";
 import { type Locale, defaultLocale, isValidLocale, loadMessages } from "./index";
 
@@ -66,10 +66,15 @@ export async function getI18nInstance(locale: Locale): Promise<I18n> {
 export const initializeI18n = cache(async (locale: string): Promise<I18n> => {
   const validLocale = isValidLocale(locale) ? locale : defaultLocale;
   const i18nInstance = await getI18nInstance(validLocale);
-  
+
   // Make it available to Lingui's server-side Trans/useLingui
   setI18n(i18nInstance);
-  
+
+  // Also activate the global i18n instance for the `t` macro from @lingui/core/macro
+  const messages = await loadMessages(validLocale);
+  globalI18n.load(validLocale, messages);
+  globalI18n.activate(validLocale);
+
   return i18nInstance;
 });
 
