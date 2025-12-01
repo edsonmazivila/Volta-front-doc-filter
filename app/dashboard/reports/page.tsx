@@ -8,11 +8,13 @@ import { t } from '@lingui/core/macro'
 export default async function ReportsPage() {
   // Only managers and admins can access reports
   await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
+
+  // Fetch data with fallbacks to prevent errors
   const [list, payroll, employee, tax] = await Promise.all([
-    getReportsList(),
-    getPayrollChart('monthly'),
-    getEmployeeMetrics(),
-    getTaxTrend('monthly'),
+    getReportsList().catch(() => []),
+    getPayrollChart('monthly').catch(() => ({ labels: [], totalPayroll: [], netPay: [] })),
+    getEmployeeMetrics().catch(() => ({ employmentTypes: { labels: [], data: [] } })),
+    getTaxTrend('monthly').catch(() => ({ labels: [] })),
   ])
   return (
     <>
