@@ -291,16 +291,26 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 							) : (
 								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground'>{i18n._(msg`Logo`)}</div>
 							)}
-							<label className='text-xs text-muted-foreground inline-flex items-center gap-2 cursor-pointer'>
+							<label className='text-xs text-muted-foreground inline-flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors'>
 								<Upload className='h-3.5 w-3.5' />
 								<span>{i18n._(msg`Upload logo`)}</span>
 								<input type='file' accept='image/*' className='hidden' onChange={async (e)=>{
 									const file = e.target.files?.[0]
 									if (!file) return
-									const formData = new FormData()
-									formData.append('logo', file)
-									await fetch('/api/company/logo', { method: 'POST', body: formData, credentials: 'include' })
-									window.location.reload()
+									try {
+										const formData = new FormData()
+										formData.append('logo', file)
+										const res = await fetch('/api/company/logo', { method: 'POST', body: formData, credentials: 'include' })
+										if (!res.ok) {
+											const error = await res.json().catch(() => ({}))
+											toast.error(error.error || i18n._(msg`Failed to upload logo`))
+											return
+										}
+										toast.success(i18n._(msg`Logo uploaded successfully`))
+										router.refresh()
+									} catch {
+										toast.error(i18n._(msg`Failed to upload logo`))
+									}
 								}} />
 							</label>
 						</div>
