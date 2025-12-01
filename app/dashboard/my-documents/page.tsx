@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/rbac/server'
 import { getMyDocuments, getDocumentTypes } from '@/lib/services/documents'
 import { MyDocumentsSection } from '@/components/my-documents/my-documents-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export const metadata = {
   title: 'My Documents - NexuPayroll',
@@ -11,6 +12,7 @@ export const metadata = {
 }
 
 export default async function MyDocumentsPage() {
+  await getLocaleAndInitialize()
   await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
   const session = await verifySession()
 

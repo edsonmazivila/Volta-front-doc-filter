@@ -3,8 +3,10 @@ import { EmployeeTable } from "@/components/employees/employee-table";
 import { getUsers } from "@/lib/services/users";
 import { requireRole } from "@/lib/rbac/server";
 import { t } from "@lingui/core/macro";
+import { getLocaleAndInitialize } from "@/lib/i18n/server";
 
 export default async function EmployeesPage() {
+  await getLocaleAndInitialize();
   await requireRole([
     "hr_manager",
     "system_admin",

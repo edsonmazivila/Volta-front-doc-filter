@@ -12,8 +12,10 @@ import { getTimesheets } from "@/lib/services/timesheets";
 import { getMyLeaveRequests, getLeavesOverview } from "@/lib/services/leaves";
 import { getMyAttendance } from "@/lib/services/attendance";
 import { t } from "@lingui/core/macro";
+import { getLocaleAndInitialize } from "@/lib/i18n/server";
 
 export default async function DashboardPage() {
+  await getLocaleAndInitialize();
   const user = await requireUser();
 
   const isEmployee = user.role === 'employee'

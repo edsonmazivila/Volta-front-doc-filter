@@ -6,8 +6,10 @@ import { PayrollSection } from '@/components/payroll/payroll-section'
 import { formatCurrency } from '@/lib/utils'
 import { DollarSign, TrendingUp, Receipt } from 'lucide-react'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function PayrollPage() {
+  await getLocaleAndInitialize()
   await requireRole(['payroll_manager', 'system_admin'])
   const [runs, stats] = await Promise.all([getPayrollRuns(), getPayrollStats()])
 

@@ -7,8 +7,8 @@ export function PayrollLineChart({ labels, total, net, className = '' }: { label
 	const { i18n } = useLingui()
 	const data = labels.map((l, i) => ({ label: l, total: total[i] ?? 0, net: net[i] ?? 0 }))
 	return (
-		<div className={className}>
-			<ResponsiveContainer width='100%' height='100%'>
+		<div className={`min-h-[200px] ${className}`}>
+			<ResponsiveContainer width='100%' height='100%' minHeight={200}>
 				<RLineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
 					<CartesianGrid strokeDasharray='3 3' opacity={0.3} />
 					<XAxis dataKey='label' tick={{ fontSize: 12 }} />
@@ -27,8 +27,8 @@ export function DoughnutChart({ labels, data, className = '' }: { labels: string
 	const colors = labels.map((_, i) => `hsl(${(i*57)%360} 70% 50%)`)
 	const chartData = labels.map((l, i) => ({ name: l, value: data[i] ?? 0 }))
 	return (
-		<div className={className}>
-			<ResponsiveContainer width='100%' height='100%'>
+		<div className={`min-h-[150px] ${className}`}>
+			<ResponsiveContainer width='100%' height='100%' minHeight={150}>
 				<RPieChart>
 					<Pie data={chartData} dataKey='value' nameKey='name' innerRadius={'60%'} outerRadius={'85%'} paddingAngle={2}>
 						{chartData.map((_, i) => (<Cell key={i} fill={colors[i]} />))}
@@ -43,8 +43,8 @@ export function DoughnutChart({ labels, data, className = '' }: { labels: string
 export function StackedBarChart({ labels, datasets, className = '' }: { labels: string[], datasets: Array<{ label: string, color: string, data: number[] }>, className?: string }) {
 	const data = labels.map((l, i) => Object.assign({ label: l }, ...datasets.map(d => ({ [d.label]: d.data[i] ?? 0 }))))
 	return (
-		<div className={className}>
-			<ResponsiveContainer width='100%' height='100%'>
+		<div className={`min-h-[200px] ${className}`}>
+			<ResponsiveContainer width='100%' height='100%' minHeight={200}>
 				<RBarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
 					<CartesianGrid strokeDasharray='3 3' opacity={0.3} />
 					<XAxis dataKey='label' tick={{ fontSize: 12 }} />

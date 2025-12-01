@@ -3,8 +3,10 @@ import { requireRole } from '@/lib/rbac/server'
 import { getLeaveRequests, getTeamBalances } from '@/lib/services/leaves'
 import { LeaveManagement } from '@/components/leaves/leave-management'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function LeavesPage() {
+  await getLocaleAndInitialize()
   await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
   const [requestsList, teamBalances] = await Promise.all([
     getLeaveRequests(),

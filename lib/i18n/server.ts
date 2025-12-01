@@ -85,3 +85,31 @@ export async function getMessagesForLocale(locale: Locale): Promise<Messages> {
   return loadMessages(locale);
 }
 
+/**
+ * Get locale from cookies/headers and initialize i18n
+ * Use this in page components that use the `t` macro
+ */
+export async function getLocaleAndInitialize(): Promise<Locale> {
+  // Dynamic imports to avoid issues with server-only code
+  const { cookies, headers } = await import('next/headers');
+  const { LOCALE_COOKIE_NAME } = await import('./locales');
+
+  const cookieStore = await cookies();
+  const headersList = await headers();
+
+  let locale: Locale = defaultLocale;
+
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE_NAME)?.value;
+  if (cookieLocale && isValidLocale(cookieLocale)) {
+    locale = cookieLocale;
+  } else {
+    const headerLocale = headersList.get('x-locale');
+    if (headerLocale && isValidLocale(headerLocale)) {
+      locale = headerLocale;
+    }
+  }
+
+  await initializeI18n(locale);
+  return locale;
+}
+

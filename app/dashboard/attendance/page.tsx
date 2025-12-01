@@ -7,8 +7,10 @@ import {
 import { getUsers } from '@/lib/services/users'
 import { AttendanceSection } from '@/components/attendance/attendance-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function AttendancePage() {
+  await getLocaleAndInitialize()
   await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
 
   const now = new Date()

@@ -4,8 +4,10 @@ import { EmployeeCreateForm } from '@/components/employees/employee-create-form'
 import { getCompany } from '@/lib/services/company'
 import { getActiveDepartments } from '@/lib/services/departments'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function NewEmployeePage() {
+	await getLocaleAndInitialize()
 	await requireRole(['hr_manager', 'payroll_manager', 'system_admin'])
 
 	const [company, departments] = await Promise.all([

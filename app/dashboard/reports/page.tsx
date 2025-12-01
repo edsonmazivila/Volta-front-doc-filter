@@ -4,8 +4,11 @@ import { requireRole } from '@/lib/rbac/server'
 import { getReportsList, getPayrollChart, getEmployeeMetrics, getTaxTrend } from '@/lib/services/reports'
 import { ReportsSection } from '@/components/reports/reports-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function ReportsPage() {
+  // Initialize i18n for this page to ensure `t` macro works
+  await getLocaleAndInitialize()
   // Only managers and admins can access reports
   await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
 

@@ -4,8 +4,12 @@ import { requireRole } from '@/lib/rbac/server'
 import { CompanyProfile as CompanyProfileComponent } from '@/components/company/company-profile'
 import { getCompany, getLeavePolicies, getPaySchedules, getCompanyDocuments } from '@/lib/services/company'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function CompanyPage() {
+  // Initialize i18n for this page to ensure `t` macro works
+  await getLocaleAndInitialize()
+
   // Only HR managers and admins can manage company settings
   await requireRole(['hr_manager', 'system_admin'])
   const [company, paySchedules, leavePolicies, companyDocuments] = await Promise.all([

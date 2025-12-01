@@ -5,8 +5,10 @@ import { getDocuments, getDocumentTypes } from '@/lib/services/documents'
 import { getUsers } from '@/lib/services/users'
 import { DocumentsSection } from '@/components/documents/documents-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function DocumentsPage() {
+  await getLocaleAndInitialize()
   await requireRole(['hr_manager', 'system_admin'])
   const [items, types, users] = await Promise.all([
     getDocuments(),

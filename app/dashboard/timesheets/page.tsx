@@ -5,8 +5,10 @@ import { getTimesheets } from '@/lib/services/timesheets'
 import { getUsers, type User } from '@/lib/services/users'
 import { TimesheetsSection } from '@/components/timesheets/timesheets-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function TimesheetsPage() {
+  await getLocaleAndInitialize()
   // Only managers and admins can access timesheet management
   const user = await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
   const canFetchUsers = ['operational_manager', 'hr_manager', 'system_admin'].includes(user.role)

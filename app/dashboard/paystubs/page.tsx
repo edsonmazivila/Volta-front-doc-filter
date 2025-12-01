@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/rbac/server'
 import { getMyPaystubs } from '@/lib/services/paystubs'
 import { PaystubsSection } from '@/components/paystubs/paystubs-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export const metadata = {
   title: 'My Paystubs - NexuPayroll',
@@ -11,6 +12,7 @@ export const metadata = {
 }
 
 export default async function PaystubsPage() {
+  await getLocaleAndInitialize()
   await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
   const session = await verifySession()
 

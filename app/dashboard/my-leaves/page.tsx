@@ -3,8 +3,10 @@ import { requireUser } from '@/lib/auth/dal'
 import { getMyLeaveRequests, getLeaveBalances } from '@/lib/services/leaves'
 import { MyLeavesSection } from '@/components/leaves/my-leaves-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function MyLeavesPage() {
+  await getLocaleAndInitialize()
   await requireUser()
 
   const [requests, balances] = await Promise.all([

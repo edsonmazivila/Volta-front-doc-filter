@@ -6,8 +6,10 @@ import { getUsers } from '@/lib/services/users'
 import { getActiveDepartments } from '@/lib/services/departments'
 import { notFound } from 'next/navigation'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function EditEmployeePage(props: { params: Promise<{ id: string }> }) {
+	await getLocaleAndInitialize()
 	await requireRole(['hr_manager', 'payroll_manager', 'system_admin'])
 
 	const [company, users, departments] = await Promise.all([

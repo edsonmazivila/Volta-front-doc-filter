@@ -3,6 +3,7 @@ import { requireUser, verifySession } from '@/lib/auth/dal'
 import { getMyMeetings, getAvailableParticipants } from '@/lib/services/meetings'
 import { MeetingsSection } from '@/components/meetings/meetings-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export const metadata = {
   title: 'Meetings - NexuPayroll',
@@ -10,6 +11,7 @@ export const metadata = {
 }
 
 export default async function MeetingsPage() {
+  await getLocaleAndInitialize()
   await requireUser()
   const session = await verifySession()
 

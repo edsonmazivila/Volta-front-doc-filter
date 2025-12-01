@@ -18,8 +18,8 @@ export function BarChart({ data = [] as BarPoint[] }: { data?: BarPoint[] }) {
 	), [data])
 
 	return (
-		<div className="w-full h-[280px]">
-			<ResponsiveContainer width="100%" height="100%">
+		<div className="w-full h-[280px] min-h-[280px]">
+			<ResponsiveContainer width="100%" height="100%" minHeight={280}>
 				<RBarChart data={safeData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }} barSize={24}>
 					<CartesianGrid vertical={false} stroke="var(--border)" opacity={0.3} />
 					<XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} interval={0} />

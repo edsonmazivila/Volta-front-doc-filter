@@ -3,8 +3,10 @@ import { requireRole } from '@/lib/rbac/server'
 import { getMyAttendance, getMyJustifications } from '@/lib/services/attendance'
 import { MyAttendanceSection } from '@/components/attendance/my-attendance-section'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function MyAttendancePage() {
+	await getLocaleAndInitialize()
 	await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
 
 	const now = new Date()

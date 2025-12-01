@@ -4,8 +4,10 @@ import { DepartmentManagement } from '@/components/departments/department-manage
 import { getDepartments, getDepartmentStats } from '@/lib/services/departments'
 import { getUsers } from '@/lib/services/users'
 import { t } from '@lingui/core/macro'
+import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function DepartmentsPage() {
+  await getLocaleAndInitialize()
   await requireRole(['hr_manager', 'system_admin'])
 
   const [departments, stats, allUsers] = await Promise.all([
