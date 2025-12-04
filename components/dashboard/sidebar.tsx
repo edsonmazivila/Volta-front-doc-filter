@@ -85,7 +85,7 @@ function useNavSections(): NavSection[] {
         { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
         { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
         { href: "/dashboard/my-documents", label: i18n._(msg`Documents`), icon: FolderOpen },
-        { href: "/dashboard/my-profile", label: i18n._(msg`Profile`), icon: UserCog },
+        { href: "/dashboard/profile", label: i18n._(msg`Profile`), icon: UserCog },
       ],
     },
     {

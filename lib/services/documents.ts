@@ -389,6 +389,7 @@ export const getDocumentCategories = cache(async (): Promise<DocumentCategory[]>
 
 /**
  * Upload a new document (multipart/form-data)
+ * For HR/Admin uploading documents for employees (Team Documents)
  */
 export async function uploadDocumentAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
   const employeeId = formData.get('employee_id')
@@ -424,6 +425,51 @@ export async function uploadDocumentAction(prevState: unknown, formData: FormDat
     const data = await res.json()
 
     // Revalidate caches for documents and my-documents views
+    revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
+
+    return { success: true, data }
+  } catch {
+    return { errors: { _form: ['Failed to upload document'] } }
+  }
+}
+
+/**
+ * Upload a document for the current user (My Documents)
+ * Uses /api/my-documents/upload which automatically uses session user
+ */
+export async function uploadMyDocumentAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
+  const documentType = formData.get('document_type')
+  const file = formData.get('file')
+
+  // Basic validation - employee_id not needed (backend uses session)
+  if (!documentType || !file) {
+    return {
+      errors: {
+        _form: ['Document type and file are required']
+      }
+    }
+  }
+
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+
+    // Use /api/my-documents/upload endpoint which uses session user
+    const res = await fetch(`${API_BASE_URL}/api/my-documents/upload`, {
+      method: 'POST',
+      headers: {
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      body: formData,
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      return { errors: { _form: [error.error || error.message || 'Failed to upload document'] } }
+    }
+
+    const data = await res.json()
+
+    // Revalidate caches for my-documents view
     revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
 
     return { success: true, data }
