@@ -1,30 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { API_BASE_URL } from '@/lib/config'
+import { cookies } from 'next/headers'
+import { API_BASE_URL, COOKIE_NAMES } from '@/lib/config'
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+	request: NextRequest,
+	{ params }: { params: Promise<{ id: string }> }
+) {
 	try {
 		const { id } = await params
-		const cookieHeader = request.headers.get('cookie') || ''
-		const res = await fetch(`${API_BASE_URL}/api/documents/${id}/preview`, {
-			headers: {
-				...(cookieHeader && { Cookie: cookieHeader }),
-			},
-		})
+		const cookieStore = await cookies()
+		const sessionToken = cookieStore.get(COOKIE_NAMES.SESSION_TOKEN)
 
-		if (!res.ok) {
-			return NextResponse.json({ error: 'Failed to fetch preview' }, { status: res.status })
+		if (!sessionToken) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const contentType = res.headers.get('content-type') || 'application/pdf'
-		const buffer = await res.arrayBuffer()
+		const response = await fetch(
+			`${API_BASE_URL}/api/documents/${id}/preview`,
+			{
+				headers: {
+					Cookie: `${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken.value}`,
+				},
+			}
+		)
+
+		if (!response.ok) {
+			return NextResponse.json(
+				{ error: 'Failed to fetch preview' },
+				{ status: response.status }
+			)
+		}
+
+		// Get the content type from the backend response
+		const contentType = response.headers.get('content-type') || 'application/pdf'
+		const buffer = await response.arrayBuffer()
+
 		return new NextResponse(buffer, {
 			headers: {
 				'Content-Type': contentType,
 				'Cache-Control': 'private, max-age=3600',
 			},
 		})
-	} catch {
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+	} catch (error) {
+		console.error('Preview proxy error:', error)
+		return NextResponse.json(
+			{ error: 'Internal server error' },
+			{ status: 500 }
+		)
 	}
 }
 

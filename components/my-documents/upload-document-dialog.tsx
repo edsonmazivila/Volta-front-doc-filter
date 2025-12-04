@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui'
 import { Input } from '@/components/ui/input'
-import { uploadDocumentAction } from '@/lib/services/documents'
+import { uploadMyDocumentAction } from '@/lib/services/documents'
 import { useToastHelpers } from '@/components/ui/toast'
 import { useRouter } from 'next/navigation'
 import { useLingui } from "@lingui/react"
@@ -78,16 +78,18 @@ export function UploadDocumentDialog({
     setIsSubmitting(true)
     try {
       const formData = new FormData()
-      if (employeeId) formData.append('employee_id', employeeId)
+      // No need for employee_id - backend uses session
       formData.append('file', selectedFile)
       formData.append('document_type', documentType)
       if (title) formData.append('title', title)
       if (description) formData.append('description', description)
 
-      const result = await uploadDocumentAction(null, formData)
+      const result = await uploadMyDocumentAction(null, formData)
 
       if ('errors' in result) {
-        toast.error(result.errors._form?.[0] || i18n._(msg`Failed to upload document`))
+        const errorMsg = result.errors._form?.[0] || i18n._(msg`Failed to upload document`)
+        toast.error(errorMsg)
+        console.error('Upload error:', result.errors)
         return
       }
 
