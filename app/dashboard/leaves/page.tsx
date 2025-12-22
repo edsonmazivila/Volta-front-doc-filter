@@ -7,10 +7,13 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function LeavesPage() {
   await getLocaleAndInitialize()
-  await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
+  await requireRole(['operational_manager', 'hr_manager', 'system_admin', 'organization_admin'])
   const [requestsList, teamBalances] = await Promise.all([
     getLeaveRequests(),
-    getTeamBalances(),
+    getTeamBalances().catch((err) => {
+      console.error('Failed to fetch team balances:', err.message);
+      return [];
+    }),
   ])
   const requests = requestsList.requests.filter(request => request.status !== 'DRAFT')
 

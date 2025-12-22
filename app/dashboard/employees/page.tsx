@@ -10,6 +10,7 @@ export default async function EmployeesPage() {
   await requireRole([
     "hr_manager",
     "system_admin",
+    "organization_admin",
   ]);
   const users = await getUsers();
   const employees = users;

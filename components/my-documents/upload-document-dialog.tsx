@@ -19,7 +19,7 @@ interface UploadDocumentDialogProps {
 export function UploadDocumentDialog({
   open,
   onOpenChange,
-  employeeId,
+  employeeId, // eslint-disable-line @typescript-eslint/no-unused-vars -- Not needed for My Documents (uses session)
   documentTypes = [],
 }: UploadDocumentDialogProps) {
   const router = useRouter()

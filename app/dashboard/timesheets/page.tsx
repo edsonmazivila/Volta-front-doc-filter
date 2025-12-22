@@ -10,8 +10,8 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 export default async function TimesheetsPage() {
   await getLocaleAndInitialize()
   // Only managers and admins can access timesheet management
-  const user = await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
-  const canFetchUsers = ['operational_manager', 'hr_manager', 'system_admin'].includes(user.role)
+  const user = await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin', 'organization_admin'])
+  const canFetchUsers = ['operational_manager', 'hr_manager', 'system_admin', 'organization_admin'].includes(user.role)
 
   const [items, fetchedUsers] = await Promise.all([
     getTimesheets(),

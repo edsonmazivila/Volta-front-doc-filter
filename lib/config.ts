@@ -2,8 +2,8 @@
 // Client-side: use NEXT_PUBLIC_API_URL only
 export const API_BASE_URL =
 	typeof window === 'undefined'
-		? process.env.API_URL || process.env.NEXT_PUBLIC_API_URL
-		: process.env.NEXT_PUBLIC_API_URL
+		? process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
+		: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
 
 export const COOKIE_NAMES = {
 	SESSION_TOKEN: 'session_token',

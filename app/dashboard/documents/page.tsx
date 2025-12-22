@@ -9,7 +9,7 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function DocumentsPage() {
   await getLocaleAndInitialize()
-  await requireRole(['hr_manager', 'system_admin'])
+  await requireRole(['hr_manager', 'system_admin', 'organization_admin'])
   const [items, types, users] = await Promise.all([
     getDocuments(),
     getDocumentTypes(),

@@ -11,7 +11,7 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function AttendancePage() {
   await getLocaleAndInitialize()
-  await requireRole(['operational_manager', 'hr_manager', 'system_admin'])
+  await requireRole(['operational_manager', 'hr_manager', 'system_admin', 'organization_admin'])
 
   const now = new Date()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`

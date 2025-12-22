@@ -506,3 +506,73 @@ export async function toggleUserStatusAction(id: string, isActive: boolean): Pro
 	// Revalidate users and all dependent caches (departments, employees, etc.)
 	revalidateEntityMutation('USERS')
 }
+
+/**
+ * Get users list with optional filters (for Organization Admin)
+ * For Organization Admin: can filter by company_id to see users in specific company
+ */
+export async function getUsersByCompany(filters?: { company_id?: string }): Promise<{ data: User[], count: number }> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	const params = new URLSearchParams()
+	if (filters?.company_id) {
+		params.set('company_id', filters.company_id)
+	}
+	
+	const url = `${API_BASE_URL}/api/users${params.toString() ? `?${params.toString()}` : ''}`
+	
+	const res = await fetch(url, {
+		method: 'GET',
+		headers: {
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		cache: 'no-store'
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to fetch users')
+	}
+
+	const json = await res.json()
+	return {
+		data: json.data || [],
+		count: json.count || 0
+	}
+}
+
+/**
+ * Create a new user (Organization Admin can specify company_id)
+ */
+export async function createUser(data: {
+	full_name: string
+	email: string
+	password?: string
+	role: string
+	company_id: string
+	can_login: boolean
+	department_id?: string
+}): Promise<User> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	const res = await fetch(`${API_BASE_URL}/api/users`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		body: JSON.stringify(data),
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to create user')
+	}
+
+	const json = await res.json()
+	
+	// Revalidate users cache
+	revalidateEntityMutation('USERS')
+	
+	return json.data
+}

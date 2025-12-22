@@ -27,6 +27,7 @@ import {
   X,
   ClipboardCheck,
   Video,
+  Network,
 } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useSession } from "@/components/auth/session-context";
@@ -51,56 +52,171 @@ type NavSection = {
  */
 function useNavSections(): NavSection[] {
   const { i18n } = useLingui();
+  const { user } = useSession();
 
-  return useMemo(() => [
-    {
-      title: i18n._(msg`Overview`),
-      items: [{ href: "/dashboard", label: i18n._(msg`Dashboard`), icon: LayoutDashboard }],
-    },
-    {
-      title: i18n._(msg`Management`),
-      items: [
+  return useMemo(() => {
+    const sections: NavSection[] = [
+      {
+        title: i18n._(msg`Overview`),
+        items: [{ href: "/dashboard", label: i18n._(msg`Dashboard`), icon: LayoutDashboard }],
+      },
+    ];
+
+    // Platform section for platform_owner
+    if (user?.role === 'platform_owner') {
+      sections.push({
+        title: i18n._(msg`Platform`),
+        items: [
+          {
+            href: "/platform/dashboard",
+            label: i18n._(msg`Platform Dashboard`),
+            icon: Network,
+          },
+        ],
+      });
+    }
+
+    // Organization section for organization_admin
+    if (user?.role === 'organization_admin') {
+      sections.push({
+        title: i18n._(msg`Organization`),
+        items: [
+          {
+            href: "/dashboard/organization",
+            label: i18n._(msg`Overview`),
+            icon: Network,
+          },
+          {
+            href: "/dashboard/organization/payrolls",
+            label: i18n._(msg`All Payrolls`),
+            icon: DollarSign,
+          },
+          {
+            href: "/dashboard/organization/timesheets",
+            label: i18n._(msg`All Timesheets`),
+            icon: Clock,
+          },
+          {
+            href: "/dashboard/organization/departments",
+            label: i18n._(msg`All Leaves`),
+            icon: Calendar,
+          },
+          {
+            href: "/dashboard/organization/all-departments",
+            label: i18n._(msg`All Departments`),
+            icon: Building2,
+          },
+          {
+            href: "/dashboard/organization/all-documents",
+            label: i18n._(msg`All Documents`),
+            icon: FileText,
+          },
+          {
+            href: "/dashboard/organization/company-documents",
+            label: i18n._(msg`Company Documents`),
+            icon: Briefcase,
+          },
+        ],
+      });
+
+      // Add Company Management section for organization_admin (organization is also a company)
+      sections.push(
         {
-          href: "/dashboard/employees",
-          label: i18n._(msg`Employees Management`),
-          icon: Users,
+          title: i18n._(msg`Management`),
+          items: [
+            {
+              href: "/dashboard/employees",
+              label: i18n._(msg`Employees Management`),
+              icon: Users,
+            },
+            { href: "/dashboard/timesheets", label: i18n._(msg`Team Timesheets`), icon: Clock },
+            {
+              href: "/dashboard/attendance",
+              label: i18n._(msg`Team Attendance`),
+              icon: ClipboardCheck,
+            },
+            { href: "/dashboard/leaves", label: i18n._(msg`Team time off`), icon: Calendar },
+            { href: "/dashboard/payroll", label: i18n._(msg`Payroll`), icon: DollarSign },
+            { href: "/dashboard/meetings", label: i18n._(msg`Meetings`), icon: Video },
+            { href: "/dashboard/documents", label: i18n._(msg`Team Documents`), icon: FileText },
+          ],
         },
-        { href: "/dashboard/timesheets", label: i18n._(msg`Team Timesheets`), icon: Clock },
         {
-          href: "/dashboard/attendance",
-          label: i18n._(msg`Team Attendance`),
-          icon: ClipboardCheck,
+          title: i18n._(msg`Self Service`),
+          items: [
+            { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+            { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
+            { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
+            { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
+            { href: "/dashboard/my-documents", label: i18n._(msg`Documents`), icon: FolderOpen },
+            { href: "/dashboard/profile", label: i18n._(msg`Profile`), icon: UserCog },
+          ],
         },
-        { href: "/dashboard/leaves", label: i18n._(msg`Team time off`), icon: Calendar },
-        { href: "/dashboard/payroll", label: i18n._(msg`Payroll`), icon: DollarSign },
-        { href: "/dashboard/meetings", label: i18n._(msg`Meetings`), icon: Video },
-        { href: "/dashboard/documents", label: i18n._(msg`Team Documents`), icon: FileText },
-      ],
-    },
-    {
-      title: i18n._(msg`Self Service`),
-      items: [
-        { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
-        { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
-        { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
-        { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
-        { href: "/dashboard/my-documents", label: i18n._(msg`Documents`), icon: FolderOpen },
-        { href: "/dashboard/profile", label: i18n._(msg`Profile`), icon: UserCog },
-      ],
-    },
-    {
-      title: i18n._(msg`Administration`),
-      items: [
         {
-          href: "/dashboard/departments",
-          label: i18n._(msg`Department Management`),
-          icon: Building2,
-        },
-        { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
-        { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
-      ],
-    },
-  ], [i18n]);
+          title: i18n._(msg`Administration`),
+          items: [
+            {
+              href: "/dashboard/departments",
+              label: i18n._(msg`Department Management`),
+              icon: Building2,
+            },
+            { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
+            { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
+          ],
+        }
+      );
+
+      return sections;
+    }
+
+    sections.push(
+      {
+        title: i18n._(msg`Management`),
+        items: [
+          {
+            href: "/dashboard/employees",
+            label: i18n._(msg`Employees Management`),
+            icon: Users,
+          },
+          { href: "/dashboard/timesheets", label: i18n._(msg`Team Timesheets`), icon: Clock },
+          {
+            href: "/dashboard/attendance",
+            label: i18n._(msg`Team Attendance`),
+            icon: ClipboardCheck,
+          },
+          { href: "/dashboard/leaves", label: i18n._(msg`Team time off`), icon: Calendar },
+          { href: "/dashboard/payroll", label: i18n._(msg`Payroll`), icon: DollarSign },
+          { href: "/dashboard/meetings", label: i18n._(msg`Meetings`), icon: Video },
+          { href: "/dashboard/documents", label: i18n._(msg`Team Documents`), icon: FileText },
+        ],
+      },
+      {
+        title: i18n._(msg`Self Service`),
+        items: [
+          { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+          { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
+          { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
+          { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
+          { href: "/dashboard/my-documents", label: i18n._(msg`Documents`), icon: FolderOpen },
+          { href: "/dashboard/profile", label: i18n._(msg`Profile`), icon: UserCog },
+        ],
+      },
+      {
+        title: i18n._(msg`Administration`),
+        items: [
+          {
+            href: "/dashboard/departments",
+            label: i18n._(msg`Department Management`),
+            icon: Building2,
+          },
+          { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
+          { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
+        ],
+      }
+    );
+
+    return sections;
+  }, [i18n, user?.role]);
 }
 
 // Keep for backwards compatibility with any external imports

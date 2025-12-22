@@ -10,7 +10,7 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function PayrollPage() {
   await getLocaleAndInitialize()
-  await requireRole(['payroll_manager', 'system_admin'])
+  await requireRole(['payroll_manager', 'system_admin', 'organization_admin'])
   const [runs, stats] = await Promise.all([getPayrollRuns(), getPayrollStats()])
 
   return (

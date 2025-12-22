@@ -72,11 +72,13 @@ export default async function RootLayout({
   const clientUser: ClientUser | null = user ? {
     id: user.id,
     email: user.email,
-    name: user.name,
+    full_name: user.full_name,
     role: user.role,
+    organization_id: user.organization_id,
+    company_id: user.company_id,
     avatar: user.avatar,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt
+    created_at: user.created_at,
+    updated_at: user.updated_at
   } : null
 
   return (

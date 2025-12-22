@@ -24,7 +24,7 @@ export default async function PaystubsPage() {
       <section className="p-4 overflow-y-auto">
         <PaystubsSection
           paystubs={paystubs}
-          employeeName={session?.user?.name}
+          employeeName={session?.user?.full_name}
           employeeInfo={{
             employeeId: session?.user?.id,
           }}

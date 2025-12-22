@@ -115,7 +115,8 @@ export async function middleware(request: NextRequest) {
 
 	// Session token exists - validate it with backend for protected routes
 	// Skip validation for auth pages (will be handled by page logic)
-	if (!isPublicRoute && !isAuthRoute) {
+	// TEMPORARY: Skip middleware validation in development due to Edge Runtime limitations with localhost
+	if (!isPublicRoute && !isAuthRoute && process.env.NODE_ENV === 'production') {
 		try {
 			// Validate session with backend
 			const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
@@ -154,6 +155,9 @@ export async function middleware(request: NextRequest) {
 
 	// If user is authenticated and trying to access auth pages, redirect to dashboard
 	if (sessionToken && isAuthRoute) {
+		// Check user role to redirect to appropriate dashboard
+		// In production, we'd validate with backend, but for now redirect to /dashboard
+		// The page logic will handle role-based redirects
 		return NextResponse.redirect(new URL('/dashboard', request.url))
 	}
 

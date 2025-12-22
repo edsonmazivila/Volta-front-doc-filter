@@ -28,7 +28,7 @@ export default async function MyDocumentsPage() {
         <MyDocumentsSection
           documents={documents}
           employeeId={session?.user?.id}
-          employeeName={session?.user?.name}
+          employeeName={session?.user?.full_name}
           documentTypes={documentTypes}
         />
       </section>

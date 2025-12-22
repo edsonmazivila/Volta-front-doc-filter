@@ -19,6 +19,7 @@ import { createUserAction } from "@/lib/services/users";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const schema = z.object({
   // Account & User
@@ -369,26 +370,37 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
               )}
             </div>
 
-            {/* Can Login Checkbox */}
-            <div className="flex flex-col gap-3 md:col-span-2">
-              <div className="flex items-center space-x-2">
-                <Controller
-                  name="can_login"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="can_login"
-                      checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
-                        setCanLogin(checked as boolean);
-                      }}
-                    />
-                  )}
-                />
-                <label htmlFor="can_login" className="text-sm font-medium">
-                  {i18n._(msg`Can login to system`)}
-                </label>
+            {/* Can Login Toggle with Description */}
+            <div className="md:col-span-2">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Controller
+                    name="can_login"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="can_login"
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          setCanLogin(checked as boolean);
+                        }}
+                        className="mt-1"
+                      />
+                    )}
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="can_login" className="text-sm font-medium text-blue-900 dark:text-blue-300 cursor-pointer">
+                      {i18n._(msg`Allow system login`)}
+                    </label>
+                    <p className="text-xs text-blue-800 dark:text-blue-400 mt-1">
+                      {canLogin 
+                        ? <Trans>User will be able to log in to the system. Email and password are required.</Trans>
+                        : <Trans>User will exist in the system but won&apos;t be able to log in. Useful for contractors or historical records.</Trans>
+                      }
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
