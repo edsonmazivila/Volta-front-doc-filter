@@ -4,6 +4,7 @@ import {
 	createCompany as createCompanyService, 
 	updateCompany as updateCompanyService,
 	deactivateCompany as deactivateCompanyService,
+	getCompanyStats as getCompanyStatsService,
 	type CreateCompanyData,
 	type UpdateCompanyData 
 } from '@/lib/services/companies'
@@ -15,6 +16,39 @@ export interface CompanyActionResult {
 	data?: {
 		id: string
 		name: string
+	}
+}
+
+export interface CompanyStatsResult {
+	success?: boolean
+	error?: string
+	data?: {
+		employees_count: number
+		active_employees: number
+		departments_count: number
+		pending_timesheets: number
+		active_leave_requests: number
+		next_payroll_date?: string
+	}
+}
+
+/**
+ * Server Action: Get company stats
+ */
+export async function getCompanyStatsAction(companyId: string): Promise<CompanyStatsResult> {
+	try {
+		const stats = await getCompanyStatsService(companyId)
+		
+		return {
+			success: true,
+			data: stats
+		}
+	} catch (error) {
+		console.error('[GET_COMPANY_STATS_ACTION] Error:', error)
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Failed to fetch company stats'
+		}
 	}
 }
 

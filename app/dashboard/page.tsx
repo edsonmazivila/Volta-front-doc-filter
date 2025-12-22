@@ -24,6 +24,11 @@ export default async function DashboardPage() {
     redirect('/platform/dashboard');
   }
 
+  // Redirect organization_admin to organization dashboard
+  if (user.role === 'organization_admin') {
+    redirect('/dashboard/organization');
+  }
+
   const isEmployee = user.role === 'employee'
   const canViewPayroll = user.role === 'payroll_manager' || user.role === 'system_admin'
   const showTotalEmployees = !isEmployee && user.role !== 'payroll_manager' && user.role !== 'operational_manager'

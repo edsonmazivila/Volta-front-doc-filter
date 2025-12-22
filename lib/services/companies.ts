@@ -98,6 +98,36 @@ export async function getAllCompanies(): Promise<{ data: Company[], count: numbe
 }
 
 /**
+ * Get companies by organization ID (Platform Owner)
+ * GET /api/organizations/:organization_id/companies
+ */
+export async function getCompaniesByOrganization(
+	organization_id: string
+): Promise<{ data: Company[], count: number, page: number, limit: number }> {
+	const headers = await getAuthCookieHeader()
+	
+	const response = await fetch(`${API_BASE_URL}/api/organizations/${organization_id}/companies`, {
+		method: 'GET',
+		headers,
+		credentials: 'include',
+		cache: 'no-store'
+	})
+
+	if (!response.ok) {
+		const error = await response.json().catch(() => ({ message: 'Failed to fetch companies' }))
+		throw new Error(error.message || 'Failed to fetch companies')
+	}
+
+	const json = await response.json() as ApiResponse<Company[]>
+	return {
+		data: json.data,
+		count: json.count || json.data.length,
+		page: 1,
+		limit: 50
+	}
+}
+
+/**
  * Get company by ID
  * GET /api/companies/:id
  */

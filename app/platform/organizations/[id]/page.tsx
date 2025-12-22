@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth/dal";
 import { getLocaleAndInitialize } from "@/lib/i18n/server";
 import { redirect, notFound } from "next/navigation";
 import { getOrganizationById, getOrganizationStats } from "@/lib/services/organizations";
-import { getCompanies } from "@/lib/services/companies";
+import { getCompaniesByOrganization } from "@/lib/services/companies";
 import { Card, CardHeader } from "@/components/dashboard/card";
 import { Trans } from "@lingui/react/macro";
 import { t } from "@lingui/core/macro";
@@ -42,7 +42,7 @@ export default async function OrganizationDetailsPage({ params }: PageProps) {
         total_payroll_mtd: 0
       };
     }),
-    getCompanies({ organization_id: id }).catch((err) => {
+    getCompaniesByOrganization(id).catch((err) => {
       console.error('[PlatformOrg] Failed to fetch companies:', err.message);
       return { data: [], count: 0, page: 1, limit: 50 };
     })

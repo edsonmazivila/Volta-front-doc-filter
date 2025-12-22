@@ -510,6 +510,7 @@ export async function toggleUserStatusAction(id: string, isActive: boolean): Pro
 /**
  * Get users list with optional filters (for Organization Admin)
  * For Organization Admin: can filter by company_id to see users in specific company
+ * If no company_id provided, returns all users in the organization
  */
 export async function getUsersByCompany(filters?: { company_id?: string }): Promise<{ data: User[], count: number }> {
 	const cookieHeader = await getAuthCookieHeader()
@@ -539,6 +540,45 @@ export async function getUsersByCompany(filters?: { company_id?: string }): Prom
 		data: json.data || [],
 		count: json.count || 0
 	}
+}
+
+/**
+ * Get ALL users across all companies in organization (Organization Admin only)
+ * Backend should handle organization filtering based on user session
+ */
+export async function getAllOrganizationUsers(): Promise<User[]> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	// Call without company_id filter - backend returns all users in organization
+	const res = await fetch(`${API_BASE_URL}/api/users`, {
+		method: 'GET',
+		headers: {
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		cache: 'no-store'
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to fetch organization users')
+	}
+
+	const json = await res.json()
+	const raw = Array.isArray(json) ? json : (json.data || json.users || [])
+	
+	return raw.map((u: Record<string, unknown>) => ({
+		id: String(u.id || ''),
+		email: String(u.email || ''),
+		role: String(u.role || ''),
+		full_name: String(u.full_name || ''),
+		company_id: String(u.company_id || ''),
+		is_active: Boolean(u.is_active),
+		last_login: u.last_login ? String(u.last_login) : null,
+		created_at: String(u.created_at || ''),
+		updated_at: String(u.updated_at || ''),
+		department_id: u.department_id ? String(u.department_id) : undefined,
+		department_name: u.department_name ? String(u.department_name) : undefined,
+	}))
 }
 
 /**

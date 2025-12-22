@@ -1,5 +1,3 @@
-"use client";
-
 interface SuccessMessageProps {
   searchParams: { success?: string; name?: string };
 }

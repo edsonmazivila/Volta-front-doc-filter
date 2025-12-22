@@ -8,7 +8,7 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function DepartmentsPage() {
   await getLocaleAndInitialize()
-  await requireRole(['hr_manager', 'system_admin'])
+  await requireRole(['hr_manager', 'system_admin', 'organization_admin'])
 
   const [departments, stats, allUsers] = await Promise.all([
     getDepartments(),

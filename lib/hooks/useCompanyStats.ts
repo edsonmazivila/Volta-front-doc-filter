@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getCompanyStats } from '@/lib/services/companies';
+import { getCompanyStatsAction } from '@/lib/actions/companies';
 
 interface CompanyStats {
   employees_count: number;
@@ -29,8 +29,13 @@ export function useCompanyStats(companyId: string | 'all') {
       setError(null);
       
       try {
-        const data = await getCompanyStats(companyId);
-        setStats({ ...data, total_payroll_mtd: 0 }); // Add missing field with default value
+        const result = await getCompanyStatsAction(companyId);
+        
+        if (result.success && result.data) {
+          setStats({ ...result.data, total_payroll_mtd: 0 }); // Add missing field with default value
+        } else {
+          throw new Error(result.error || 'Failed to fetch company stats');
+        }
       } catch (err) {
         console.error('[useCompanyStats] Failed to fetch:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch company stats');

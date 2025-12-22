@@ -11,7 +11,7 @@ export default async function CompanyPage() {
   await getLocaleAndInitialize()
 
   // Only HR managers and admins can manage company settings
-  await requireRole(['hr_manager', 'system_admin'])
+  await requireRole(['hr_manager', 'system_admin', 'organization_admin'])
   const [company, paySchedules, leavePolicies, companyDocuments] = await Promise.all([
     getCompany(),
     getPaySchedules(),

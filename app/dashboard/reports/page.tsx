@@ -10,7 +10,7 @@ export default async function ReportsPage() {
   // Initialize i18n for this page to ensure `t` macro works
   await getLocaleAndInitialize()
   // Only managers and admins can access reports
-  await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin'])
+  await requireRole(['operational_manager', 'hr_manager', 'payroll_manager', 'system_admin', 'organization_admin'])
 
   // Fetch data with fallbacks to prevent errors
   const [list, payroll, employee, tax] = await Promise.all([

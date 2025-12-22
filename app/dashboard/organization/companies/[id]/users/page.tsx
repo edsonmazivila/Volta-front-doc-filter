@@ -39,6 +39,7 @@ export default async function CompanyUsersPage({
   }
 
   const systemAdmins = users.data.filter(u => u.role === 'system_admin');
+  const allOtherUsers = users.data.filter(u => u.role !== 'system_admin');
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
@@ -115,9 +116,9 @@ export default async function CompanyUsersPage({
 
         {/* All Users Section */}
         <Card>
-          <CardHeader title={`All Users (${users.count})`} />
+          <CardHeader title={`All Users (${allOtherUsers.length})`} />
           <div className="p-6">
-            {users.count === 0 ? (
+            {allOtherUsers.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="w-16 h-16 mx-auto text-neutral-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -132,7 +133,7 @@ export default async function CompanyUsersPage({
                 </Link>
               </div>
             ) : (
-              <CompanyUsersTable users={users.data} companyId={id} />
+              <CompanyUsersTable users={allOtherUsers} companyId={id} />
             )}
           </div>
         </Card>

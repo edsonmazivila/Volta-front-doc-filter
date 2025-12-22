@@ -2,7 +2,7 @@ import { Header } from "@/components/dashboard/header";
 import { requireUser } from "@/lib/auth/dal";
 import { getLocaleAndInitialize } from "@/lib/i18n/server";
 import { redirect } from "next/navigation";
-import { getCompanies } from "@/lib/services/companies";
+import { getAllCompanies } from "@/lib/services/companies";
 import { Organization, OrganizationStats } from "@/lib/types/organization";
 import { Trans } from "@lingui/react/macro";
 import { t } from "@lingui/core/macro";
@@ -15,18 +15,16 @@ export default async function OrganizationPage({
 }: {
   searchParams: Promise<{ success?: string; name?: string }>;
 }) {
-  await getLocaleAndInitialize();
   const user = await requireUser();
-  
-  const params = await searchParams;
+  await getLocaleAndInitialize();
 
   // Only organization_admin and platform_owner can access
   if (user.role !== 'organization_admin' && user.role !== 'platform_owner') {
     redirect('/dashboard');
   }
 
-  // Fetch companies data
-  const companiesResponse = await getCompanies().catch((err) => {
+  // Fetch companies data with stats
+  const companiesResponse = await getAllCompanies().catch((err) => {
     console.warn('[Organization Page] Failed to fetch companies:', err.message);
     return { data: [], count: 0 };
   });
@@ -55,6 +53,9 @@ export default async function OrganizationPage({
     active_users: 0,
     pending_approvals: 0
   };
+
+  // Await searchParams at the very end
+  const params = await searchParams;
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">

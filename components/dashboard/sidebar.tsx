@@ -55,12 +55,15 @@ function useNavSections(): NavSection[] {
   const { user } = useSession();
 
   return useMemo(() => {
-    const sections: NavSection[] = [
-      {
+    const sections: NavSection[] = [];
+
+    // Overview section - skip for organization_admin (they go straight to /dashboard/organization)
+    if (user?.role !== 'organization_admin') {
+      sections.push({
         title: i18n._(msg`Overview`),
         items: [{ href: "/dashboard", label: i18n._(msg`Dashboard`), icon: LayoutDashboard }],
-      },
-    ];
+      });
+    }
 
     // Platform section for platform_owner
     if (user?.role === 'platform_owner') {
