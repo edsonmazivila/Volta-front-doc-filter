@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui'
 import { formatNumberFixed } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -35,6 +35,28 @@ export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
   const [lastRunId, setLastRunId] = useState<string | null>(null)
 
   const isPayrollActor = role === 'payroll_manager' || role === 'system_admin'
+
+  // Filter pay schedules by selected frequency
+  const filteredPaySchedules = useMemo(() => {
+    return paySchedules.filter(s => s.is_active && s.frequency === payFrequency)
+  }, [paySchedules, payFrequency])
+
+  // Auto-select pay schedule when frequency changes
+  useEffect(() => {
+    if (filteredPaySchedules.length === 1) {
+      // If there's only one matching schedule, auto-select it
+      setPayScheduleId(filteredPaySchedules[0].id)
+    } else if (filteredPaySchedules.length > 1) {
+      // If current selection doesn't match frequency, clear it
+      const currentSchedule = filteredPaySchedules.find(s => s.id === payScheduleId)
+      if (!currentSchedule) {
+        setPayScheduleId('')
+      }
+    } else {
+      // No matching schedules, clear selection
+      setPayScheduleId('')
+    }
+  }, [filteredPaySchedules, payScheduleId])
 
   async function handleProcess() {
     if (!startDate || !endDate) {
@@ -228,18 +250,37 @@ export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
 		<div className='grid gap-4'>
 			{/* Header with period selection and actions */}
 			<div className='flex flex-col gap-3'>
-				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-5 w-full'>
+				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4 w-full'>
+					<div>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay Frequency`)}</label>
+						<select
+							value={payFrequency}
+							onChange={(e) => setPayFrequency(e.target.value)}
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
+						>
+							<option value='weekly'>{i18n._(msg`Weekly`)}</option>
+							<option value='biweekly'>{i18n._(msg`Biweekly`)}</option>
+							<option value='semimonthly'>{i18n._(msg`Semi-monthly`)}</option>
+							<option value='monthly'>{i18n._(msg`Monthly`)}</option>
+						</select>
+					</div>
 					<div>
 						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay Schedule`)}</label>
 						<select
 							value={payScheduleId}
 							onChange={(e) => setPayScheduleId(e.target.value)}
 							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
+							disabled={filteredPaySchedules.length === 0}
 						>
-							<option value="">{i18n._(msg`Select schedule`)}</option>
-							{paySchedules.filter(s => s.is_active).map(schedule => (
+							<option value="">
+								{filteredPaySchedules.length === 0 
+									? i18n._(msg`No schedules available`)
+									: i18n._(msg`Select schedule`)
+								}
+							</option>
+							{filteredPaySchedules.map(schedule => (
 								<option key={schedule.id} value={schedule.id}>
-									{schedule.name} ({schedule.frequency})
+									{schedule.name}
 								</option>
 							))}
 						</select>
@@ -261,19 +302,6 @@ export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
 							value={endDate}
 							onChange={(e) => setEndDate(e.target.value)}
 						/>
-					</div>
-					<div>
-						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay frequency`)}</label>
-						<select
-							value={payFrequency}
-							onChange={(e) => setPayFrequency(e.target.value)}
-							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
-						>
-							<option value='weekly'>{i18n._(msg`Weekly`)}</option>
-							<option value='biweekly'>{i18n._(msg`Biweekly`)}</option>
-							<option value='semimonthly'>{i18n._(msg`Semi-monthly`)}</option>
-							<option value='monthly'>{i18n._(msg`Monthly`)}</option>
-						</select>
 					</div>
 				</div>
 				{isPayrollActor && (
