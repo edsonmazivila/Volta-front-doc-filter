@@ -520,7 +520,12 @@ export async function getUsersByCompany(filters?: { company_id?: string }): Prom
 	
 	const params = new URLSearchParams()
 	if (filters?.company_id) {
-		params.set('company_id', filters.company_id)
+		// Validate company_id is non-empty string
+		const trimmedId = filters.company_id.trim()
+		if (!trimmedId) {
+			throw new Error('company_id must be a non-empty string')
+		}
+		params.set('company_id', trimmedId)
 	}
 	
 	const url = `${API_BASE_URL}/api/users${params.toString() ? `?${params.toString()}` : ''}`
@@ -575,12 +580,45 @@ export async function getAllOrganizationUsers(): Promise<User[]> {
 		role: String(u.role || ''),
 		full_name: String(u.full_name || ''),
 		company_id: String(u.company_id || ''),
+		company_name: u.company_name ? String(u.company_name) : undefined,
+		organization_id: u.organization_id ? String(u.organization_id) : undefined,
+		organization_name: u.organization_name ? String(u.organization_name) : undefined,
 		is_active: Boolean(u.is_active),
 		last_login: u.last_login ? String(u.last_login) : null,
 		created_at: String(u.created_at || ''),
 		updated_at: String(u.updated_at || ''),
-		department_id: u.department_id ? String(u.department_id) : undefined,
-		department_name: u.department_name ? String(u.department_name) : undefined,
+		created_by: u.created_by ? String(u.created_by) : null,
+		updated_by: u.updated_by ? String(u.updated_by) : null,
+		is_employee: Boolean(u.is_employee),
+		can_login: Boolean(u.can_login),
+		department_id: u.department_id ? String(u.department_id) : null,
+		department: u.department ? String(u.department) : undefined,
+		employee_number: u.employee_number ? String(u.employee_number) : undefined,
+		employment_type: u.employment_type ? String(u.employment_type) : undefined,
+		employment_status: u.employment_status ? String(u.employment_status) : undefined,
+		hire_date: u.hire_date ? String(u.hire_date) : undefined,
+		termination_date: u.termination_date ? String(u.termination_date) : null,
+		job_title: u.job_title ? String(u.job_title) : undefined,
+		manager_id: u.manager_id ? String(u.manager_id) : null,
+		date_of_birth: u.date_of_birth ? String(u.date_of_birth) : undefined,
+		phone_primary: u.phone_primary ? String(u.phone_primary) : undefined,
+		phone_secondary: u.phone_secondary ? String(u.phone_secondary) : undefined,
+		emergency_contact_name: u.emergency_contact_name ? String(u.emergency_contact_name) : undefined,
+		emergency_contact_phone: u.emergency_contact_phone ? String(u.emergency_contact_phone) : undefined,
+		emergency_contact_relationship: u.emergency_contact_relationship ? String(u.emergency_contact_relationship) : undefined,
+		address_line1: u.address_line1 ? String(u.address_line1) : undefined,
+		address_line2: u.address_line2 ? String(u.address_line2) : undefined,
+		city: u.city ? String(u.city) : undefined,
+		state: u.state ? String(u.state) : undefined,
+		postal_code: u.postal_code ? String(u.postal_code) : undefined,
+		country: u.country ? String(u.country) : undefined,
+		tax_filing_status: u.tax_filing_status ? String(u.tax_filing_status) : undefined,
+		tax_allowances: u.tax_allowances ? Number(u.tax_allowances) : undefined,
+		additional_tax_withholding: u.additional_tax_withholding ? Number(u.additional_tax_withholding) : undefined,
+		tax_exempt: u.tax_exempt ? Boolean(u.tax_exempt) : undefined,
+		bank_name: u.bank_name ? String(u.bank_name) : undefined,
+		bank_account_type: u.bank_account_type ? String(u.bank_account_type) : undefined,
+		compensation: u.compensation as Compensation | undefined,
 	}))
 }
 

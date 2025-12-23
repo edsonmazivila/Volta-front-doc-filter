@@ -1,4 +1,4 @@
-import { getOrganizationTimesheets, OrganizationTimesheet } from '@/lib/services/organization-data';
+import { getOrganizationTimesheets } from '@/lib/services/organization-data';
 import { getAllCompanies } from '@/lib/services/companies';
 import { Card } from '@/components/dashboard/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

@@ -115,8 +115,7 @@ export async function middleware(request: NextRequest) {
 
 	// Session token exists - validate it with backend for protected routes
 	// Skip validation for auth pages (will be handled by page logic)
-	// TEMPORARY: Skip middleware validation in development due to Edge Runtime limitations with localhost
-	if (!isPublicRoute && !isAuthRoute && process.env.NODE_ENV === 'production') {
+	if (!isPublicRoute && !isAuthRoute) {
 		try {
 			// Validate session with backend
 			const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
@@ -126,7 +125,9 @@ export async function middleware(request: NextRequest) {
 					'Cookie': `${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken}`
 				},
 				// Don't cache auth checks
-				cache: 'no-store'
+				cache: 'no-store',
+				// Add timeout to prevent hanging in development
+				signal: AbortSignal.timeout(5000)
 			})
 
 			// Session is invalid
@@ -144,8 +145,18 @@ export async function middleware(request: NextRequest) {
 				return response
 			}
 		} catch (error) {
-			// Network error or backend down - redirect to login
+			// Network error or backend down
 			console.error('[Middleware] Session validation failed:', error)
+			
+			// In development, log warning but allow access if timeout/network error
+			// This prevents blocking during local development when backend might be restarting
+			if (process.env.NODE_ENV === 'development' && 
+			    (error instanceof Error && (error.name === 'TimeoutError' || error.message.includes('ECONNREFUSED')))) {
+				console.warn('[Middleware] Development mode: Allowing access despite backend connection issue')
+				return createResponseWithLocale(NextResponse.next(), locale)
+			}
+			
+			// In production or for other errors, redirect to login
 			const loginUrl = new URL('/login', request.url)
 			loginUrl.searchParams.set('redirect', pathname)
 			loginUrl.searchParams.set('error', 'auth_check_failed')

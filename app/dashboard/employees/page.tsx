@@ -36,12 +36,11 @@ export default async function EmployeesPage() {
   // Enrich users with company_name or organization_name
   const enrichedUsers = users.map(u => {
     const companyName = u.company_id ? companyMap.get(u.company_id) : undefined;
-    const orgName = u.organization_name || user.organization_name || 'Organization';
     
     return {
       ...u,
       company_name: companyName,
-      organization_name: orgName
+      organization_name: u.organization_name || 'Organization'
     };
   });
   

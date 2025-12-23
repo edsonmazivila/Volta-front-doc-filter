@@ -24,8 +24,8 @@ export default async function EditEmployeePage(props: { params: Promise<{ id: st
 		getActiveDepartments(),
 	])
 
-	// Extract users array from response
-	const users = Array.isArray(usersData) ? usersData : (usersData?.data || [])
+	// getAllOrganizationUsers returns User[], getUsers returns User[]
+	const users = usersData
 	
 	// Show all users (no filtering by is_employee)
 	const employee = users.find(e => String(e.id) === String(id))

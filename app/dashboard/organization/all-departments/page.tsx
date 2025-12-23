@@ -1,4 +1,4 @@
-import { getOrganizationDepartments, OrganizationDepartment } from '@/lib/services/organization-data';
+import { getOrganizationDepartments } from '@/lib/services/organization-data';
 import { getAllCompanies } from '@/lib/services/companies';
 import { Card } from '@/components/dashboard/card';
 import { Badge } from '@/components/ui/badge';

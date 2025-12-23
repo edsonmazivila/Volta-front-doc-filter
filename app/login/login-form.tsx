@@ -40,28 +40,22 @@ export function LoginForm() {
         title={i18n._(msg`Welcome back`)}
         subtitle={i18n._(msg`Sign in to your account to continue`)}
         onSubmit={async (data) => {
-          console.log('[LOGIN FORM] Starting submit with data:', { email: data.email });
           setError(null);
           const formData = new FormData();
           formData.append('email', data.email);
           formData.append('password', data.password);
-          
-          console.log('[LOGIN FORM] Calling loginAction...');
+
           const result = await loginAction(undefined, formData);
-          console.log('[LOGIN FORM] Result:', result);
-          
+
           if ("errors" in result) {
             const formErrors = (
               result.errors as Record<string, string[] | undefined>
             )._form;
             if (formErrors?.length) {
-              console.log('[LOGIN FORM] Setting error:', formErrors[0]);
               setError(formErrors[0]);
               return;
             }
           }
-          
-          console.log('[LOGIN FORM] Success! Redirecting to dashboard...');
           // Force full page reload to dashboard so server picks up new session cookie
           window.location.href = '/dashboard';
         }}

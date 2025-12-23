@@ -1,10 +1,10 @@
-import { getOrganizationCompanyDocuments, OrganizationCompanyDocument } from '@/lib/services/organization-data';
+import { getOrganizationCompanyDocuments } from '@/lib/services/organization-data';
 import { getAllCompanies } from '@/lib/services/companies';
 import { Card } from '@/components/dashboard/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, FileCheck } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 export default async function OrganizationCompanyDocumentsPage({
   searchParams

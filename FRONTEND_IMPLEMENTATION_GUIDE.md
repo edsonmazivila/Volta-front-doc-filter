@@ -1113,6 +1113,7 @@ session_token=<hash>;
 Path=/;
 Max-Age=1200;  // 20 minutos
 HttpOnly;       // Não acessível via JavaScript
+Secure;         // Apenas via HTTPS (obrigatório em produção)
 SameSite=Lax;   // CSRF protection
 ```
 

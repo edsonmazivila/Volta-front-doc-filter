@@ -9,16 +9,7 @@ import { Card, CardHeader } from "@/components/dashboard/card";
 import { Button } from "@/components/ui";
 import Link from "next/link";
 import { Trans } from "@lingui/react/macro";
-import { useMemo, useState, useEffect } from "react";
-import { ConsolidatedReports } from "./consolidated-reports";
-import { 
-  getConsolidatedPayrollReport,
-  getConsolidatedEmployeesReport,
-  getConsolidatedLeaveReport,
-  ConsolidatedPayrollReport,
-  ConsolidatedEmployeesReport,
-  ConsolidatedLeaveReport
-} from "@/lib/services/organization-reports";
+import { useMemo } from "react";
 
 interface OrganizationDashboardClientProps {
   companies: Company[];
@@ -31,26 +22,6 @@ export function OrganizationDashboardClient({
 }: OrganizationDashboardClientProps) {
   const { selectedCompany, setSelectedCompany } = useCompanyContext();
   const { stats: companyStats, isLoading: loadingCompanyStats } = useCompanyStats(selectedCompany);
-  
-  // Consolidated reports data
-  const [consolidatedData, setConsolidatedData] = useState<{
-    payroll?: ConsolidatedPayrollReport;
-    employees?: ConsolidatedEmployeesReport;
-    leave?: ConsolidatedLeaveReport;
-  }>({});
-
-  // Fetch consolidated reports when viewing "All Companies"
-  useEffect(() => {
-    if (selectedCompany === 'all') {
-      Promise.all([
-        getConsolidatedPayrollReport().catch(() => undefined),
-        getConsolidatedEmployeesReport().catch(() => undefined),
-        getConsolidatedLeaveReport().catch(() => undefined),
-      ]).then(([payroll, employees, leave]) => {
-        setConsolidatedData({ payroll, employees, leave });
-      });
-    }
-  }, [selectedCompany]);
 
   // Filter companies and determine display stats
   const { filteredCompanies, displayStats, isLoadingStats } = useMemo(() => {

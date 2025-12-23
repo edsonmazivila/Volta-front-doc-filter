@@ -1,4 +1,4 @@
-import { getOrganizationLeaves, OrganizationLeave } from '@/lib/services/organization-data';
+import { getOrganizationLeaves } from '@/lib/services/organization-data';
 import { getAllCompanies } from '@/lib/services/companies';
 import { Card } from '@/components/dashboard/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
