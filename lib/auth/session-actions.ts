@@ -11,20 +11,27 @@ import { AUTH_ENDPOINTS } from './utils'
 export async function logoutAction() {
 	const cookieStore = await cookies()
 
-	// Best-effort call to backend logout
+	// Best-effort call to backend logout with timeout
 	try {
 		const sessionToken = cookieStore.get(COOKIE_NAMES.SESSION_TOKEN)?.value
 		if (sessionToken) {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout for logout
+			
 			await fetch(`${API_BASE_URL}${AUTH_ENDPOINTS.LOGOUT}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					'Cookie': `${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken}`
 				},
+				signal: controller.signal
 			})
+			
+			clearTimeout(timeoutId);
 		}
-	} catch {
-		// Ignore logout API errors
+	} catch (error) {
+		// Ignore logout API errors - we clear cookies anyway
+		console.log('[LOGOUT] Backend logout error (ignored):', error);
 	}
 
 	// Clear cookies

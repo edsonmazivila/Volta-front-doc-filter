@@ -13,10 +13,21 @@ import { getMyLeaveRequests, getLeavesOverview } from "@/lib/services/leaves";
 import { getMyAttendance } from "@/lib/services/attendance";
 import { t } from "@lingui/core/macro";
 import { getLocaleAndInitialize } from "@/lib/i18n/server";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   await getLocaleAndInitialize();
   const user = await requireUser();
+
+  // Redirect platform_owner to their specific dashboard
+  if (user.role === 'platform_owner') {
+    redirect('/platform/dashboard');
+  }
+
+  // Redirect organization_admin to organization dashboard
+  if (user.role === 'organization_admin') {
+    redirect('/dashboard/organization');
+  }
 
   const isEmployee = user.role === 'employee'
   const canViewPayroll = user.role === 'payroll_manager' || user.role === 'system_admin'

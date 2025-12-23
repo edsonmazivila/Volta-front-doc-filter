@@ -39,12 +39,14 @@ export function LoginForm() {
       <AuthForm
         title={i18n._(msg`Welcome back`)}
         subtitle={i18n._(msg`Sign in to your account to continue`)}
-        onSubmit={async () => {
-          /* handled by action */
-        }}
-        action={async (formData) => {
+        onSubmit={async (data) => {
           setError(null);
+          const formData = new FormData();
+          formData.append('email', data.email);
+          formData.append('password', data.password);
+
           const result = await loginAction(undefined, formData);
+
           if ("errors" in result) {
             const formErrors = (
               result.errors as Record<string, string[] | undefined>

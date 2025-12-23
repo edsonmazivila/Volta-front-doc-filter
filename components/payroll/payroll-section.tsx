@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui'
 import { formatNumberFixed } from '@/lib/utils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -19,9 +19,10 @@ import { msg } from '@lingui/core/macro'
 
 interface PayrollSectionProps {
   runs: PayrollRunItem[]
+  paySchedules: Array<{ id: string; name: string; frequency: string; is_active: boolean }>
 }
 
-export function PayrollSection({ runs }: PayrollSectionProps) {
+export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
   const { i18n } = useLingui()
   const toast = useToastHelpers()
   const router = useRouter()
@@ -29,14 +30,42 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [payFrequency, setPayFrequency] = useState('biweekly')
+  const [payScheduleId, setPayScheduleId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastRunId, setLastRunId] = useState<string | null>(null)
 
   const isPayrollActor = role === 'payroll_manager' || role === 'system_admin'
 
+  // Filter pay schedules by selected frequency
+  const filteredPaySchedules = useMemo(() => {
+    return paySchedules.filter(s => s.is_active && s.frequency === payFrequency)
+  }, [paySchedules, payFrequency])
+
+  // Auto-select pay schedule when frequency changes
+  useEffect(() => {
+    if (filteredPaySchedules.length === 1) {
+      // If there's only one matching schedule, auto-select it
+      setPayScheduleId(filteredPaySchedules[0].id)
+    } else if (filteredPaySchedules.length > 1) {
+      // If current selection doesn't match frequency, clear it
+      const currentSchedule = filteredPaySchedules.find(s => s.id === payScheduleId)
+      if (!currentSchedule) {
+        setPayScheduleId('')
+      }
+    } else {
+      // No matching schedules, clear selection
+      setPayScheduleId('')
+    }
+  }, [filteredPaySchedules, payScheduleId])
+
   async function handleProcess() {
     if (!startDate || !endDate) {
       toast.error(i18n._(msg`Select start and end dates`))
+      return
+    }
+
+    if (!payScheduleId) {
+      toast.error(i18n._(msg`Please select a pay schedule`))
       return
     }
 
@@ -91,6 +120,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       formData.append('pay_period_end', endDate)
       formData.append('pay_date', payDate.toISOString().slice(0, 10))
       formData.append('pay_frequency', payFrequency)
+      formData.append('pay_schedule_id', payScheduleId)
 
       const result = await processPayrollAction(null, formData)
 
@@ -225,6 +255,40 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 			<div className='flex flex-col gap-3'>
 				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4 w-full'>
 					<div>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay Frequency`)}</label>
+						<select
+							value={payFrequency}
+							onChange={(e) => setPayFrequency(e.target.value)}
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
+						>
+							<option value='weekly'>{i18n._(msg`Weekly`)}</option>
+							<option value='biweekly'>{i18n._(msg`Biweekly`)}</option>
+							<option value='semimonthly'>{i18n._(msg`Semi-monthly`)}</option>
+							<option value='monthly'>{i18n._(msg`Monthly`)}</option>
+						</select>
+					</div>
+					<div>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay Schedule`)}</label>
+						<select
+							value={payScheduleId}
+							onChange={(e) => setPayScheduleId(e.target.value)}
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
+							disabled={filteredPaySchedules.length === 0}
+						>
+							<option value="">
+								{filteredPaySchedules.length === 0 
+									? i18n._(msg`No schedules available`)
+									: i18n._(msg`Select schedule`)
+								}
+							</option>
+							{filteredPaySchedules.map(schedule => (
+								<option key={schedule.id} value={schedule.id}>
+									{schedule.name}
+								</option>
+							))}
+						</select>
+					</div>
+					<div>
 						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Period start`)}</label>
 						<input
 							type='date'
@@ -241,19 +305,6 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 							value={endDate}
 							onChange={(e) => setEndDate(e.target.value)}
 						/>
-					</div>
-					<div>
-						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay frequency`)}</label>
-						<select
-							value={payFrequency}
-							onChange={(e) => setPayFrequency(e.target.value)}
-							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
-						>
-							<option value='weekly'>{i18n._(msg`Weekly`)}</option>
-							<option value='biweekly'>{i18n._(msg`Biweekly`)}</option>
-							<option value='semimonthly'>{i18n._(msg`Semi-monthly`)}</option>
-							<option value='monthly'>{i18n._(msg`Monthly`)}</option>
-						</select>
 					</div>
 				</div>
 				{isPayrollActor && (

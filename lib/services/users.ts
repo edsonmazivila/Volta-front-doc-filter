@@ -26,6 +26,9 @@ export interface User {
 	role: string
 	full_name: string
 	company_id: string
+	company_name?: string // Display name for company
+	organization_id?: string
+	organization_name?: string // Display name for organization (fallback when no company)
 	is_active: boolean
 	last_login?: string | null
 	created_at: string
@@ -505,4 +508,152 @@ export async function toggleUserStatusAction(id: string, isActive: boolean): Pro
 
 	// Revalidate users and all dependent caches (departments, employees, etc.)
 	revalidateEntityMutation('USERS')
+}
+
+/**
+ * Get users list with optional filters (for Organization Admin)
+ * For Organization Admin: can filter by company_id to see users in specific company
+ * If no company_id provided, returns all users in the organization
+ */
+export async function getUsersByCompany(filters?: { company_id?: string }): Promise<{ data: User[], count: number }> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	const params = new URLSearchParams()
+	if (filters?.company_id) {
+		// Validate company_id is non-empty string
+		const trimmedId = filters.company_id.trim()
+		if (!trimmedId) {
+			throw new Error('company_id must be a non-empty string')
+		}
+		params.set('company_id', trimmedId)
+	}
+	
+	const url = `${API_BASE_URL}/api/users${params.toString() ? `?${params.toString()}` : ''}`
+	
+	const res = await fetch(url, {
+		method: 'GET',
+		headers: {
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		cache: 'no-store'
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to fetch users')
+	}
+
+	const json = await res.json()
+	return {
+		data: json.data || [],
+		count: json.count || 0
+	}
+}
+
+/**
+ * Get ALL users across all companies in organization (Organization Admin only)
+ * Backend should handle organization filtering based on user session
+ */
+export async function getAllOrganizationUsers(): Promise<User[]> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	// Call without company_id filter - backend returns all users in organization
+	const res = await fetch(`${API_BASE_URL}/api/users`, {
+		method: 'GET',
+		headers: {
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		cache: 'no-store'
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to fetch organization users')
+	}
+
+	const json = await res.json()
+	const raw = Array.isArray(json) ? json : (json.data || json.users || [])
+	
+	return raw.map((u: Record<string, unknown>) => ({
+		id: String(u.id || ''),
+		email: String(u.email || ''),
+		role: String(u.role || ''),
+		full_name: String(u.full_name || ''),
+		company_id: String(u.company_id || ''),
+		company_name: u.company_name ? String(u.company_name) : undefined,
+		organization_id: u.organization_id ? String(u.organization_id) : undefined,
+		organization_name: u.organization_name ? String(u.organization_name) : undefined,
+		is_active: Boolean(u.is_active),
+		last_login: u.last_login ? String(u.last_login) : null,
+		created_at: String(u.created_at || ''),
+		updated_at: String(u.updated_at || ''),
+		created_by: u.created_by ? String(u.created_by) : null,
+		updated_by: u.updated_by ? String(u.updated_by) : null,
+		is_employee: Boolean(u.is_employee),
+		can_login: Boolean(u.can_login),
+		department_id: u.department_id ? String(u.department_id) : null,
+		department: u.department ? String(u.department) : undefined,
+		employee_number: u.employee_number ? String(u.employee_number) : undefined,
+		employment_type: u.employment_type ? String(u.employment_type) : undefined,
+		employment_status: u.employment_status ? String(u.employment_status) : undefined,
+		hire_date: u.hire_date ? String(u.hire_date) : undefined,
+		termination_date: u.termination_date ? String(u.termination_date) : null,
+		job_title: u.job_title ? String(u.job_title) : undefined,
+		manager_id: u.manager_id ? String(u.manager_id) : null,
+		date_of_birth: u.date_of_birth ? String(u.date_of_birth) : undefined,
+		phone_primary: u.phone_primary ? String(u.phone_primary) : undefined,
+		phone_secondary: u.phone_secondary ? String(u.phone_secondary) : undefined,
+		emergency_contact_name: u.emergency_contact_name ? String(u.emergency_contact_name) : undefined,
+		emergency_contact_phone: u.emergency_contact_phone ? String(u.emergency_contact_phone) : undefined,
+		emergency_contact_relationship: u.emergency_contact_relationship ? String(u.emergency_contact_relationship) : undefined,
+		address_line1: u.address_line1 ? String(u.address_line1) : undefined,
+		address_line2: u.address_line2 ? String(u.address_line2) : undefined,
+		city: u.city ? String(u.city) : undefined,
+		state: u.state ? String(u.state) : undefined,
+		postal_code: u.postal_code ? String(u.postal_code) : undefined,
+		country: u.country ? String(u.country) : undefined,
+		tax_filing_status: u.tax_filing_status ? String(u.tax_filing_status) : undefined,
+		tax_allowances: u.tax_allowances ? Number(u.tax_allowances) : undefined,
+		additional_tax_withholding: u.additional_tax_withholding ? Number(u.additional_tax_withholding) : undefined,
+		tax_exempt: u.tax_exempt ? Boolean(u.tax_exempt) : undefined,
+		bank_name: u.bank_name ? String(u.bank_name) : undefined,
+		bank_account_type: u.bank_account_type ? String(u.bank_account_type) : undefined,
+		compensation: u.compensation as Compensation | undefined,
+	}))
+}
+
+/**
+ * Create a new user (Organization Admin can specify company_id)
+ */
+export async function createUser(data: {
+	full_name: string
+	email: string
+	password?: string
+	role: string
+	company_id: string
+	can_login: boolean
+	department_id?: string
+}): Promise<User> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	const res = await fetch(`${API_BASE_URL}/api/users`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		body: JSON.stringify(data),
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to create user')
+	}
+
+	const json = await res.json()
+	
+	// Revalidate users cache
+	revalidateEntityMutation('USERS')
+	
+	return json.data
 }

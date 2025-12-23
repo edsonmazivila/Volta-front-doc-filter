@@ -13,7 +13,7 @@ export const metadata = {
 
 export default async function PaystubsPage() {
   await getLocaleAndInitialize()
-  await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
+  await requireRole(['employee','operational_manager','hr_manager','payroll_manager','organization_admin'])
   const session = await verifySession()
 
   const paystubs = await getMyPaystubs()
@@ -24,7 +24,7 @@ export default async function PaystubsPage() {
       <section className="p-4 overflow-y-auto">
         <PaystubsSection
           paystubs={paystubs}
-          employeeName={session?.user?.name}
+          employeeName={session?.user?.full_name}
           employeeInfo={{
             employeeId: session?.user?.id,
           }}

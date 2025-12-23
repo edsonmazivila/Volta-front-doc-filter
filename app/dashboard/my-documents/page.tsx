@@ -13,7 +13,7 @@ export const metadata = {
 
 export default async function MyDocumentsPage() {
   await getLocaleAndInitialize()
-  await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
+  await requireRole(['employee','operational_manager','hr_manager','payroll_manager','organization_admin'])
   const session = await verifySession()
 
   const [documents, documentTypes] = await Promise.all([
@@ -28,7 +28,7 @@ export default async function MyDocumentsPage() {
         <MyDocumentsSection
           documents={documents}
           employeeId={session?.user?.id}
-          employeeName={session?.user?.name}
+          employeeName={session?.user?.full_name}
           documentTypes={documentTypes}
         />
       </section>

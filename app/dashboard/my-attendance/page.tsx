@@ -7,7 +7,7 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function MyAttendancePage() {
 	await getLocaleAndInitialize()
-	await requireRole(['employee','operational_manager','hr_manager','payroll_manager'])
+	await requireRole(['employee','operational_manager','hr_manager','payroll_manager','organization_admin'])
 
 	const now = new Date()
 	const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`

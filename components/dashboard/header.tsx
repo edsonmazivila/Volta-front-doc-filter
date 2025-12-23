@@ -37,13 +37,13 @@ export function Header({ title }: { title: string }) {
                   className='rounded-full h-10 w-10 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'
                   suppressHydrationWarning
                 >
-                {(user?.name || user?.email || 'U').substring(0,1).toUpperCase()}
+                {(user?.full_name || user?.email || 'U').substring(0,1).toUpperCase()}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-56'>
               {isAuthenticated && (
                 <div className='px-3 py-2 text-sm'>
-                  <div className='font-medium truncate'>{user?.name || user?.email}</div>
+                  <div className='font-medium truncate'>{user?.full_name || user?.email}</div>
                   <div className='text-xs text-muted-foreground capitalize'>{user?.role}</div>
                 </div>
               )}
