@@ -41,6 +41,7 @@ const processPayrollSchema = z.object({
   pay_period_end: z.string().min(1, 'End date is required'),
   pay_date: z.string().min(1, 'Pay date is required'),
   pay_frequency: z.enum(['weekly', 'biweekly', 'semimonthly', 'monthly']).default('biweekly'),
+  pay_schedule_id: z.string().optional(),
 })
 
 // ============================================================================
@@ -51,26 +52,28 @@ const processPayrollSchema = z.object({
  * Get all payroll runs with tagged caching
  */
 export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
-  const cookieHeader = await getAuthCookieHeader()
-  const res = await fetch(`${API_BASE_URL}/api/payroll/history`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(cookieHeader && { Cookie: cookieHeader }),
-    },
-    next: { tags: ['payroll-runs'], revalidate: 60 },
-  })
+  try {
+    const cookieHeader = await getAuthCookieHeader()
+    const res = await fetch(`${API_BASE_URL}/api/payroll/history`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
+      },
+      next: { tags: ['payroll-runs'], revalidate: 60 },
+    })
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch payroll runs: ${res.status}`)
-  }
+    if (!res.ok) {
+      console.warn(`[getPayrollRuns] Failed to fetch payroll runs: ${res.status}`)
+      return []
+    }
 
-  const json = await res.json()
-  let raw = json.history || json.data?.recent_runs || json.recent_runs || json.runs || json.payroll || json.items || []
-  
-  // Ensure raw is an array
-  if (!Array.isArray(raw)) {
-    raw = []
-  }
+    const json = await res.json()
+    let raw = json.history || json.data?.recent_runs || json.recent_runs || json.runs || json.payroll || json.items || []
+    
+    // Ensure raw is an array
+    if (!Array.isArray(raw)) {
+      raw = []
+    }
 
   // Normalize various possible backend field names to the UI shape
   interface RawPayrollRun {
@@ -117,6 +120,10 @@ export const getPayrollRuns = cache(async (): Promise<PayrollRunItem[]> => {
       ? Number(r.employees ?? r.employees_count ?? r.employeesCount ?? 0) || 0
       : undefined,
   }))
+  } catch (error) {
+    console.error('[getPayrollRuns] Error fetching payroll runs:', error instanceof Error ? error.message : 'Unknown error')
+    return []
+  }
 })
 
 /**
@@ -141,8 +148,8 @@ export const getPayrollStats = cache(async (): Promise<PayrollStats> => {
         const empData = await empRes.json()
         totalEmployees = Number(empData?.employeeUsers ?? empData?.data?.employeeUsers ?? 0) || 0
       }
-    } catch {
-      // Fallback if employees stats not available
+    } catch (error) {
+      console.warn('[getPayrollStats] Failed to fetch employee count:', error instanceof Error ? error.message : 'Unknown error')
     }
 
     // Get payroll financial stats
@@ -155,6 +162,7 @@ export const getPayrollStats = cache(async (): Promise<PayrollStats> => {
     })
 
     if (!res.ok) {
+      console.warn(`[getPayrollStats] Payroll stats endpoint returned ${res.status}`)
       return { totalEmployees, gross: 0, net: 0, taxes: 0 }
     }
 
@@ -167,8 +175,8 @@ export const getPayrollStats = cache(async (): Promise<PayrollStats> => {
       net: Number(data.monthly_net ?? 0) || 0,
       taxes: Number(data.monthly_taxes ?? 0) || 0,
     }
-  } catch {
-    // Error handling - stats unavailable
+  } catch (error) {
+    console.error('[getPayrollStats] Error fetching payroll stats:', error instanceof Error ? error.message : 'Unknown error')
     return { totalEmployees: 0, gross: 0, net: 0, taxes: 0 }
   }
 })

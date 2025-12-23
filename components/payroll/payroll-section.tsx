@@ -19,9 +19,10 @@ import { msg } from '@lingui/core/macro'
 
 interface PayrollSectionProps {
   runs: PayrollRunItem[]
+  paySchedules: Array<{ id: string; name: string; frequency: string; is_active: boolean }>
 }
 
-export function PayrollSection({ runs }: PayrollSectionProps) {
+export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
   const { i18n } = useLingui()
   const toast = useToastHelpers()
   const router = useRouter()
@@ -29,6 +30,7 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [payFrequency, setPayFrequency] = useState('biweekly')
+  const [payScheduleId, setPayScheduleId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastRunId, setLastRunId] = useState<string | null>(null)
 
@@ -91,6 +93,9 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
       formData.append('pay_period_end', endDate)
       formData.append('pay_date', payDate.toISOString().slice(0, 10))
       formData.append('pay_frequency', payFrequency)
+      if (payScheduleId) {
+        formData.append('pay_schedule_id', payScheduleId)
+      }
 
       const result = await processPayrollAction(null, formData)
 
@@ -223,7 +228,22 @@ export function PayrollSection({ runs }: PayrollSectionProps) {
 		<div className='grid gap-4'>
 			{/* Header with period selection and actions */}
 			<div className='flex flex-col gap-3'>
-				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4 w-full'>
+				<div className='grid gap-2 sm:gap-3 sm:grid-cols-2 lg:grid-cols-5 w-full'>
+					<div>
+						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Pay Schedule`)}</label>
+						<select
+							value={payScheduleId}
+							onChange={(e) => setPayScheduleId(e.target.value)}
+							className='w-full border border-input rounded-md px-3 py-2 bg-background text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20'
+						>
+							<option value="">{i18n._(msg`Select schedule`)}</option>
+							{paySchedules.filter(s => s.is_active).map(schedule => (
+								<option key={schedule.id} value={schedule.id}>
+									{schedule.name} ({schedule.frequency})
+								</option>
+							))}
+						</select>
+					</div>
 					<div>
 						<label className='block text-xs text-muted-foreground mb-1'>{i18n._(msg`Period start`)}</label>
 						<input

@@ -2,6 +2,7 @@ import { Header } from '@/components/dashboard/header'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { getPayrollRuns, getPayrollStats } from '@/lib/services/payroll'
+import { getPaySchedules } from '@/lib/services/company'
 import { PayrollSection } from '@/components/payroll/payroll-section'
 import { formatCurrency } from '@/lib/utils'
 import { DollarSign, TrendingUp, Receipt } from 'lucide-react'
@@ -11,7 +12,22 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 export default async function PayrollPage() {
   await getLocaleAndInitialize()
   await requireRole(['payroll_manager', 'system_admin', 'organization_admin'])
-  const [runs, stats] = await Promise.all([getPayrollRuns(), getPayrollStats()])
+  
+  // Fetch data with proper error handling
+  const [runs, stats, paySchedules] = await Promise.all([
+    getPayrollRuns().catch((err) => {
+      console.warn('[Payroll Page] Failed to fetch payroll runs:', err.message)
+      return []
+    }), 
+    getPayrollStats().catch((err) => {
+      console.warn('[Payroll Page] Failed to fetch payroll stats:', err.message)
+      return { totalEmployees: 0, gross: 0, net: 0, taxes: 0 }
+    }),
+    getPaySchedules().catch((err) => {
+      console.warn('[Payroll Page] Failed to fetch pay schedules:', err.message)
+      return []
+    })
+  ])
 
   return (
     <>
@@ -62,7 +78,7 @@ export default async function PayrollPage() {
         </div>
         <Card>
           <CardHeader title={t`Payroll Processing`} />
-          <PayrollSection runs={runs} />
+          <PayrollSection runs={runs} paySchedules={paySchedules} />
         </Card>
       </section>
     </>
