@@ -194,6 +194,7 @@ export async function processPayrollAction(prevState: unknown, formData: FormDat
     pay_period_end: formData.get('pay_period_end'),
     pay_date: formData.get('pay_date'),
     pay_frequency: formData.get('pay_frequency') || 'biweekly',
+    pay_schedule_id: formData.get('pay_schedule_id'),
   })
 
   if (!parsed.success) {
