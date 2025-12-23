@@ -38,8 +38,19 @@ export default async function CompanyUsersPage({
     redirect('/dashboard/organization');
   }
 
-  const systemAdmins = users.data.filter(u => u.role === 'system_admin');
-  const allOtherUsers = users.data.filter(u => u.role !== 'system_admin');
+  // Debug: Log what we received from backend
+  console.log(`[CompanyUsers] Requested company_id: ${id}`);
+  console.log(`[CompanyUsers] Users received from backend:`, users.data.length);
+  console.log(`[CompanyUsers] User company_ids:`, users.data.map(u => ({ name: u.full_name, company_id: u.company_id })));
+
+  // Filter users to only show those belonging to this specific company
+  // This is a safety check in case backend returns users from other companies
+  const companyUsers = users.data.filter(u => u.company_id === id);
+  
+  console.log(`[CompanyUsers] After filtering: ${companyUsers.length} users`);
+
+  const systemAdmins = companyUsers.filter(u => u.role === 'system_admin');
+  const allOtherUsers = companyUsers.filter(u => u.role !== 'system_admin');
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">

@@ -1,8 +1,9 @@
 import { Header } from '@/components/dashboard/header'
 import { requireRole } from '@/lib/rbac/server'
+import { requireUser } from '@/lib/auth/dal'
 import { EmployeeEditForm } from '@/components/employees/employee-edit-form'
 import { getCompany } from '@/lib/services/company'
-import { getUsers } from '@/lib/services/users'
+import { getUsers, getAllOrganizationUsers } from '@/lib/services/users'
 import { getActiveDepartments } from '@/lib/services/departments'
 import { notFound } from 'next/navigation'
 import { t } from '@lingui/core/macro'
@@ -10,14 +11,22 @@ import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export default async function EditEmployeePage(props: { params: Promise<{ id: string }> }) {
 	await getLocaleAndInitialize()
-	await requireRole(['hr_manager', 'payroll_manager', 'system_admin'])
+	const user = await requireUser()
+	await requireRole(['hr_manager', 'payroll_manager', 'system_admin', 'organization_admin'])
 
-	const [company, users, departments] = await Promise.all([
-		getCompany(),
-		getUsers(),
+	const { id } = await props.params
+
+	// Fetch users based on role
+	const isOrgAdmin = user.role === 'organization_admin'
+	const [company, usersData, departments] = await Promise.all([
+		getCompany().catch(() => null),
+		isOrgAdmin ? getAllOrganizationUsers() : getUsers(),
 		getActiveDepartments(),
 	])
-	const { id } = await props.params
+
+	// Extract users array from response
+	const users = Array.isArray(usersData) ? usersData : (usersData?.data || [])
+	
 	// Show all users (no filtering by is_employee)
 	const employee = users.find(e => String(e.id) === String(id))
 

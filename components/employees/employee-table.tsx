@@ -375,6 +375,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
               </th>
               <th className="text-left p-3 min-w-[180px]">{i18n._(msg`Email`)}</th>
               <th className="text-left p-3 min-w-[120px]">{i18n._(msg`Role`)}</th>
+              <th className="text-left p-3 min-w-[120px]">{i18n._(msg`Company`)}</th>
               <th className="text-left p-3 min-w-[120px]">{i18n._(msg`Department`)}</th>
               <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Status`)}</th>
               <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Actions`)}</th>
@@ -383,7 +384,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
           <tbody>
             {filteredAndSortedItems.length === 0 ? (
               <tr>
-                <td className="p-4" colSpan={7}>
+                <td className="p-4" colSpan={8}>
                   {i18n._(msg`No employees found`)}
                 </td>
               </tr>
@@ -409,6 +410,7 @@ export function EmployeeTable({ initialEmployees }: EmployeeTableProps) {
                       {ROLE_DISPLAY_NAMES[e.role as keyof typeof ROLE_DISPLAY_NAMES] || e.role}
                     </span>
                   </td>
+                  <td className="p-3 min-w-[120px]">{e.company_name || e.organization_name || "-"}</td>
                   <td className="p-3 min-w-[120px]">{e.department || "-"}</td>
                   <td className="p-3 min-w-[100px]">
                     <span

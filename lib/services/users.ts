@@ -26,6 +26,9 @@ export interface User {
 	role: string
 	full_name: string
 	company_id: string
+	company_name?: string // Display name for company
+	organization_id?: string
+	organization_name?: string // Display name for organization (fallback when no company)
 	is_active: boolean
 	last_login?: string | null
 	created_at: string

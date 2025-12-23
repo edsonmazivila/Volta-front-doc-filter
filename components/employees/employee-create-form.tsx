@@ -29,6 +29,7 @@ const schema = z.object({
   role: z.string().min(1, "Role is required"),
   can_login: z.boolean().optional(),
   is_active: z.boolean().optional(),
+  company_id: z.string().optional(),
 
   // Employment & Organization
   department_id: z.string().optional(),
@@ -78,9 +79,11 @@ type FormValues = z.infer<typeof schema>;
 interface EmployeeCreateFormProps {
   companyName: string;
   departments: { id: string; name: string }[];
+  companies?: { id: string; name: string }[] | null;
+  isOrgAdmin?: boolean;
 }
 
-export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateFormProps) {
+export function EmployeeCreateForm({ companyName, departments, companies, isOrgAdmin }: EmployeeCreateFormProps) {
 	const router = useRouter();
 	const toast = useToastHelpers();
 	const { i18n } = useLingui();
@@ -88,6 +91,9 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
 	const [canLogin, setCanLogin] = useState<boolean>(true);
 	const [showPassword, setShowPassword] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<string[]>([]);
+	const [selectedCompanyId, setSelectedCompanyId] = useState<string>(
+		companies && companies.length > 0 ? companies[0].id : ''
+	);
 
   const {
     register,
@@ -103,6 +109,7 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
       role: "",
       can_login: true,
       is_active: true,
+      company_id: "",
       department_id: "",
       employee_number: "",
       job_title: "",
@@ -168,6 +175,11 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
 			formData.append('is_employee', 'true');
 			formData.append('can_login', String(canLogin));
 			formData.append('is_active', 'true');
+
+			// For organization admin, add selected company_id
+			if (isOrgAdmin && selectedCompanyId) {
+				formData.append('company_id', selectedCompanyId);
+			}
 
 			// Add all form values, filtering out empty strings and special keys
 			Object.entries(values).forEach(([key, value]) => {
@@ -419,12 +431,34 @@ export function EmployeeCreateForm({ companyName, departments }: EmployeeCreateF
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1 md:col-span-2">
               <label className="text-sm font-medium ">{i18n._(msg`Company`)} *</label>
-              <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-muted-foreground">
-                {companyName}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {i18n._(msg`Company is automatically set based on your account`)}
-              </p>
+              {isOrgAdmin && companies && companies.length > 0 ? (
+                <>
+                  <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                    <SelectTrigger className="bg-background w-full">
+                      <SelectValue placeholder={i18n._(msg`Select company`)} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {i18n._(msg`Select the company for this employee`)}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-full border rounded-md px-3 py-2 bg-muted/20 text-muted-foreground">
+                    {companyName}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {i18n._(msg`Company is automatically set based on your account`)}
+                  </p>
+                </>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">{i18n._(msg`Department`)}</label>
