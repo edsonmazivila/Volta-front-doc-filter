@@ -64,6 +64,11 @@ export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
       return
     }
 
+    if (!payScheduleId) {
+      toast.error(i18n._(msg`Please select a pay schedule`))
+      return
+    }
+
     setIsSubmitting(true)
     try {
       // Calculate pay date (next Friday after end date)
@@ -115,9 +120,7 @@ export function PayrollSection({ runs, paySchedules }: PayrollSectionProps) {
       formData.append('pay_period_end', endDate)
       formData.append('pay_date', payDate.toISOString().slice(0, 10))
       formData.append('pay_frequency', payFrequency)
-      if (payScheduleId) {
-        formData.append('pay_schedule_id', payScheduleId)
-      }
+      formData.append('pay_schedule_id', payScheduleId)
 
       const result = await processPayrollAction(null, formData)
 

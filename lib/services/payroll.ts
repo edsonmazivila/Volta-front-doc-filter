@@ -41,7 +41,7 @@ const processPayrollSchema = z.object({
   pay_period_end: z.string().min(1, 'End date is required'),
   pay_date: z.string().min(1, 'Pay date is required'),
   pay_frequency: z.enum(['weekly', 'biweekly', 'semimonthly', 'monthly']).default('biweekly'),
-  pay_schedule_id: z.string().optional(),
+  pay_schedule_id: z.string().min(1, 'Pay schedule is required'),
 })
 
 // ============================================================================
