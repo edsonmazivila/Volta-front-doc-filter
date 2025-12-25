@@ -46,7 +46,7 @@ export async function getOrganizationPayrolls(params?: {
     cache: 'no-store'
   }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch payrolls');
+  if (!response.ok) throw new Error('Failed to fetch organization payrolls');
   const json = await response.json() as ApiResponse<OrganizationPayroll[]>;
   return { data: json.data || [], count: json.count || 0 };
 }
@@ -83,7 +83,7 @@ export async function getOrganizationTimesheets(params?: {
     cache: 'no-store'
   }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch timesheets');
+  if (!response.ok) throw new Error('Failed to fetch organization timesheets');
   const json = await response.json() as ApiResponse<OrganizationTimesheet[]>;
   return { data: json.data || [], count: json.count || 0 };
 }
@@ -119,7 +119,7 @@ export async function getOrganizationLeaves(params?: {
     cache: 'no-store'
   }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch leaves');
+  if (!response.ok) throw new Error('Failed to fetch organization leaves');
   const json = await response.json() as ApiResponse<OrganizationLeave[]>;
   return { data: json.data || [], count: json.count || 0 };
 }
@@ -151,7 +151,7 @@ export async function getOrganizationDepartments(params?: {
     cache: 'no-store'
   }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch departments');
+  if (!response.ok) throw new Error('Failed to fetch organization departments');
   const json = await response.json() as ApiResponse<OrganizationDepartment[]>;
   return { data: json.data || [], count: json.count || 0 };
 }
@@ -186,7 +186,7 @@ export async function getOrganizationDocuments(params?: {
     cache: 'no-store'
   }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch documents');
+  if (!response.ok) throw new Error('Failed to fetch organization documents');
   const json = await response.json() as ApiResponse<OrganizationDocument[]>;
   return { data: json.data || [], count: json.count || 0 };
 }
@@ -220,7 +220,7 @@ export async function getOrganizationCompanyDocuments(params?: {
     cache: 'no-store'
   }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch company documents');
+  if (!response.ok) throw new Error('Failed to fetch organization company documents');
   const json = await response.json() as ApiResponse<OrganizationCompanyDocument[]>;
   return { data: json.data || [], count: json.count || 0 };
 }

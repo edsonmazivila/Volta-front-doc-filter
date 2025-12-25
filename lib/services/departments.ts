@@ -33,6 +33,7 @@ const createDepartmentSchema = z.object({
 	name: z.string().min(1, 'Department name is required'),
 	description: z.string().optional().default(''),
 	manager_id: z.string().nullable().optional(),
+	company_id: z.string().optional(), // For organization admins to specify company
 	is_active: z.boolean().default(true),
 })
 
@@ -152,6 +153,7 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 		name: formData.get('name'),
 		description: formData.get('description'),
 		manager_id: formData.get('manager_id') || null,
+		company_id: formData.get('company_id') || undefined, // Organization Admin can specify company
 		is_active: isActive,
 	})
 

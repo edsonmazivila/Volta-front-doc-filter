@@ -101,11 +101,6 @@ function useNavSections(): NavSection[] {
           },
           {
             href: "/dashboard/organization/departments",
-            label: i18n._(msg`All Leaves`),
-            icon: Calendar,
-          },
-          {
-            href: "/dashboard/organization/all-departments",
             label: i18n._(msg`All Departments`),
             icon: Building2,
           },
@@ -153,18 +148,6 @@ function useNavSections(): NavSection[] {
             { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
             { href: "/dashboard/my-documents", label: i18n._(msg`Documents`), icon: FolderOpen },
             { href: "/dashboard/profile", label: i18n._(msg`Profile`), icon: UserCog },
-          ],
-        },
-        {
-          title: i18n._(msg`Administration`),
-          items: [
-            {
-              href: "/dashboard/departments",
-              label: i18n._(msg`Department Management`),
-              icon: Building2,
-            },
-            { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
-            { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
           ],
         }
       );
