@@ -11,11 +11,9 @@ const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
   const [selectedCompany, setSelectedCompanyState] = useState<string | 'all'>('all');
-  const [isMounted, setIsMounted] = useState(false);
 
   // Persist selection in localStorage (client-side only)
   useEffect(() => {
-    setIsMounted(true);
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('selectedCompany');
       if (saved) {
