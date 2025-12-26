@@ -46,19 +46,28 @@ export function OrganizationDepartmentFormDialog({
     const fetchManagers = async () => {
       setLoadingManagers(true)
       try {
-        const response = await fetch(`/api/users?company_id=${selectedCompany}&is_employee=true`, {
+        // Use proper endpoint - backend expects GET /api/users with company_id query param
+        const response = await fetch(`/api/proxy/users?company_id=${selectedCompany}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
           credentials: 'include'
         })
         
         if (response.ok) {
           const data = await response.json()
+          // Handle both array and {data, count} response formats
           const users = Array.isArray(data) ? data : (data.data || [])
-          setManagers(users.map((u: { id: string; full_name: string; email: string }) => ({
+          // Filter only employees (is_employee = true) if needed
+          const employees = users.filter((u: { is_employee?: boolean }) => u.is_employee !== false)
+          setManagers(employees.map((u: { id: string; full_name: string; email: string }) => ({
             id: u.id,
             full_name: u.full_name,
             email: u.email
           })))
         } else {
+          console.error('Failed to fetch employees:', response.status)
           setManagers([])
         }
       } catch (error) {

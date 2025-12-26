@@ -140,6 +140,19 @@ function useNavSections(): NavSection[] {
           ],
         },
         {
+          title: i18n._(msg`Administration`),
+          items: [
+            {
+              href: "/dashboard/organization/departments",
+              label: i18n._(msg`Department Management`),
+              icon: Building2,
+            },
+            { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
+            { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
+            { href: "/dashboard/settings", label: i18n._(msg`Settings`), icon: UserCog },
+          ],
+        },
+        {
           title: i18n._(msg`Self Service`),
           items: [
             { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
