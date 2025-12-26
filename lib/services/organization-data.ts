@@ -39,16 +39,50 @@ export async function getOrganizationPayrolls(params?: {
   if (params?.status) queryParams.append('status', params.status);
   
   const url = `${API_BASE_URL}/api/organization/payrolls${queryParams.toString() ? `?${queryParams}` : ''}`;
-  const response = await fetchWithTimeout(url, {
-    method: 'GET',
-    headers,
-    credentials: 'include',
-    cache: 'no-store'
-  }, 10000);
+  
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch payrolls');
-  const json = await response.json() as ApiResponse<OrganizationPayroll[]>;
-  return { data: json.data || [], count: json.count || 0 };
+    // Handle authentication errors
+    if (response.status === 401) {
+      console.error('Session expired - redirecting to login');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired');
+    }
+
+    // Handle permission errors
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view organization payrolls');
+    }
+
+    // Handle not found - return empty array instead of throwing
+    if (response.status === 404) {
+      console.warn('No organization payrolls found');
+      return { data: [], count: 0 };
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch organization payrolls');
+    }
+
+    const json = await response.json() as ApiResponse<OrganizationPayroll[]>;
+    return { data: json.data || [], count: json.count || 0 };
+  } catch (error) {
+    // Network errors or timeout
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('Request timeout - server took too long to respond');
+      throw new Error('Request timeout - please try again');
+    }
+    throw error;
+  }
 }
 
 // TIMESHEETS
@@ -76,16 +110,46 @@ export async function getOrganizationTimesheets(params?: {
   if (params?.status) queryParams.append('status', params.status);
   
   const url = `${API_BASE_URL}/api/organization/timesheets${queryParams.toString() ? `?${queryParams}` : ''}`;
-  const response = await fetchWithTimeout(url, {
-    method: 'GET',
-    headers,
-    credentials: 'include',
-    cache: 'no-store'
-  }, 10000);
+  
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch timesheets');
-  const json = await response.json() as ApiResponse<OrganizationTimesheet[]>;
-  return { data: json.data || [], count: json.count || 0 };
+    if (response.status === 401) {
+      console.error('Session expired - redirecting to login');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired');
+    }
+
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view organization timesheets');
+    }
+
+    if (response.status === 404) {
+      console.warn('No organization timesheets found');
+      return { data: [], count: 0 };
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch organization timesheets');
+    }
+
+    const json = await response.json() as ApiResponse<OrganizationTimesheet[]>;
+    return { data: json.data || [], count: json.count || 0 };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('Request timeout - server took too long to respond');
+      throw new Error('Request timeout - please try again');
+    }
+    throw error;
+  }
 }
 
 // LEAVES
@@ -112,16 +176,46 @@ export async function getOrganizationLeaves(params?: {
   if (params?.status) queryParams.append('status', params.status);
   
   const url = `${API_BASE_URL}/api/organization/leaves${queryParams.toString() ? `?${queryParams}` : ''}`;
-  const response = await fetchWithTimeout(url, {
-    method: 'GET',
-    headers,
-    credentials: 'include',
-    cache: 'no-store'
-  }, 10000);
+  
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch leaves');
-  const json = await response.json() as ApiResponse<OrganizationLeave[]>;
-  return { data: json.data || [], count: json.count || 0 };
+    if (response.status === 401) {
+      console.error('Session expired - redirecting to login');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired');
+    }
+
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view organization leaves');
+    }
+
+    if (response.status === 404) {
+      console.warn('No organization leaves found');
+      return { data: [], count: 0 };
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch organization leaves');
+    }
+
+    const json = await response.json() as ApiResponse<OrganizationLeave[]>;
+    return { data: json.data || [], count: json.count || 0 };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('Request timeout - server took too long to respond');
+      throw new Error('Request timeout - please try again');
+    }
+    throw error;
+  }
 }
 
 // DEPARTMENTS
@@ -144,16 +238,46 @@ export async function getOrganizationDepartments(params?: {
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   
   const url = `${API_BASE_URL}/api/organization/departments${queryParams.toString() ? `?${queryParams}` : ''}`;
-  const response = await fetchWithTimeout(url, {
-    method: 'GET',
-    headers,
-    credentials: 'include',
-    cache: 'no-store'
-  }, 10000);
+  
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch departments');
-  const json = await response.json() as ApiResponse<OrganizationDepartment[]>;
-  return { data: json.data || [], count: json.count || 0 };
+    if (response.status === 401) {
+      console.error('Session expired - redirecting to login');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired');
+    }
+
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view organization departments');
+    }
+
+    if (response.status === 404) {
+      console.warn('No organization departments found');
+      return { data: [], count: 0 };
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch organization departments');
+    }
+
+    const json = await response.json() as ApiResponse<OrganizationDepartment[]>;
+    return { data: json.data || [], count: json.count || 0 };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('Request timeout - server took too long to respond');
+      throw new Error('Request timeout - please try again');
+    }
+    throw error;
+  }
 }
 
 // DOCUMENTS
@@ -179,16 +303,46 @@ export async function getOrganizationDocuments(params?: {
   if (params?.status) queryParams.append('status', params.status);
   
   const url = `${API_BASE_URL}/api/organization/documents${queryParams.toString() ? `?${queryParams}` : ''}`;
-  const response = await fetchWithTimeout(url, {
-    method: 'GET',
-    headers,
-    credentials: 'include',
-    cache: 'no-store'
-  }, 10000);
+  
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch documents');
-  const json = await response.json() as ApiResponse<OrganizationDocument[]>;
-  return { data: json.data || [], count: json.count || 0 };
+    if (response.status === 401) {
+      console.error('Session expired - redirecting to login');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired');
+    }
+
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view organization documents');
+    }
+
+    if (response.status === 404) {
+      console.warn('No organization documents found');
+      return { data: [], count: 0 };
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch organization documents');
+    }
+
+    const json = await response.json() as ApiResponse<OrganizationDocument[]>;
+    return { data: json.data || [], count: json.count || 0 };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('Request timeout - server took too long to respond');
+      throw new Error('Request timeout - please try again');
+    }
+    throw error;
+  }
 }
 
 // COMPANY DOCUMENTS
@@ -213,14 +367,44 @@ export async function getOrganizationCompanyDocuments(params?: {
   if (params?.document_type) queryParams.append('document_type', params.document_type);
   
   const url = `${API_BASE_URL}/api/organization/company-documents${queryParams.toString() ? `?${queryParams}` : ''}`;
-  const response = await fetchWithTimeout(url, {
-    method: 'GET',
-    headers,
-    credentials: 'include',
-    cache: 'no-store'
-  }, 10000);
+  
+  try {
+    const response = await fetchWithTimeout(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    }, 10000);
 
-  if (!response.ok) throw new Error('Failed to fetch company documents');
-  const json = await response.json() as ApiResponse<OrganizationCompanyDocument[]>;
-  return { data: json.data || [], count: json.count || 0 };
+    if (response.status === 401) {
+      console.error('Session expired - redirecting to login');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      throw new Error('Session expired');
+    }
+
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view organization company documents');
+    }
+
+    if (response.status === 404) {
+      console.warn('No organization company documents found');
+      return { data: [], count: 0 };
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch organization company documents');
+    }
+
+    const json = await response.json() as ApiResponse<OrganizationCompanyDocument[]>;
+    return { data: json.data || [], count: json.count || 0 };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('Request timeout - server took too long to respond');
+      throw new Error('Request timeout - please try again');
+    }
+    throw error;
+  }
 }

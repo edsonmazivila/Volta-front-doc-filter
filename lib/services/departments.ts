@@ -33,6 +33,7 @@ const createDepartmentSchema = z.object({
 	name: z.string().min(1, 'Department name is required'),
 	description: z.string().optional().default(''),
 	manager_id: z.string().nullable().optional(),
+	company_id: z.string().optional(), // For organization admins to specify company
 	is_active: z.boolean().default(true),
 })
 
@@ -152,6 +153,7 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 		name: formData.get('name'),
 		description: formData.get('description'),
 		manager_id: formData.get('manager_id') || null,
+		company_id: formData.get('company_id') || undefined, // Organization Admin can specify company
 		is_active: isActive,
 	})
 
@@ -161,6 +163,8 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 
 	try {
 		const cookieHeader = await getAuthCookieHeader()
+		console.log('[createDepartmentAction] Sending to backend:', parsed.data)
+		
 		const res = await fetch(`${API_BASE_URL}/api/departments`, {
 			method: 'POST',
 			headers: {
@@ -170,18 +174,24 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 			body: JSON.stringify(parsed.data),
 		})
 
+		console.log('[createDepartmentAction] Response status:', res.status)
+
 		if (!res.ok) {
 			const error = await res.json().catch(() => ({}))
-			return { errors: { _form: [error.message || 'Failed to create department'] } }
+			console.error('[createDepartmentAction] Error response:', error)
+			return { errors: { _form: [error.message || error.error || 'Failed to create department'] } }
 		}
 
 		const data = await res.json()
+		console.log('[createDepartmentAction] Success response:', data)
+		
 		// Revalidate departments and all dependent caches
 		revalidateEntityMutation('DEPARTMENTS')
 
 		return { success: true, data }
-	} catch {
-		return { errors: { _form: ['Failed to create department'] } }
+	} catch (err) {
+		console.error('[createDepartmentAction] Exception:', err)
+		return { errors: { _form: ['Failed to create department: ' + (err instanceof Error ? err.message : 'Unknown error')] } }
 	}
 }
 

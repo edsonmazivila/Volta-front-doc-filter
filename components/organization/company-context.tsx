@@ -12,17 +12,21 @@ const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 export function CompanyProvider({ children }: { children: ReactNode }) {
   const [selectedCompany, setSelectedCompanyState] = useState<string | 'all'>('all');
 
-  // Persist selection in localStorage
+  // Persist selection in localStorage (client-side only)
   useEffect(() => {
-    const saved = localStorage.getItem('selectedCompany');
-    if (saved) {
-      setSelectedCompanyState(saved);
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('selectedCompany');
+      if (saved) {
+        setSelectedCompanyState(saved);
+      }
     }
   }, []);
 
   const setSelectedCompany = (companyId: string | 'all') => {
     setSelectedCompanyState(companyId);
-    localStorage.setItem('selectedCompany', companyId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedCompany', companyId);
+    }
   };
 
   return (
