@@ -116,8 +116,6 @@ const rejectDocumentSchema = z.object({
 export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
   try {
     const cookieHeader = await getAuthCookieHeader()
-    console.log('[getMyDocuments] Fetching from:', `${API_BASE_URL}/api/my-documents`)
-    console.log('[getMyDocuments] Has auth cookie:', !!cookieHeader)
     
     const res = await fetch(`${API_BASE_URL}/api/my-documents`, {
       headers: {
@@ -126,9 +124,6 @@ export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
       },
       cache: 'no-store',
     })
-
-    console.log('[getMyDocuments] Response status:', res.status)
-    console.log('[getMyDocuments] Response headers:', Object.fromEntries(res.headers.entries()))
 
     if (!res.ok) {
       const errorText = await res.text()
@@ -147,15 +142,11 @@ export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
     }
 
     const json: MyDocumentsResponse = await res.json()
-    console.log('[getMyDocuments] Success response:', JSON.stringify(json).substring(0, 300))
-    console.log('[getMyDocuments] Full data array:', JSON.stringify(json.data))
     
     if (!json.success || !Array.isArray(json.data)) {
-      console.warn('[getMyDocuments] Invalid response structure:', json)
+      console.warn('[getMyDocuments] Invalid response structure')
       return []
     }
-
-    console.log('[getMyDocuments] Returned', json.data.length, 'documents')
 
     return json.data.map((d) => ({
       id: d.id,
@@ -464,7 +455,7 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
   const documentType = formData.get('document_type')
   const file = formData.get('file')
 
-  console.log('[uploadMyDocumentAction] Starting upload:', { documentType, fileName: file instanceof File ? file.name : 'no-file' })
+  // Upload document action
 
   // Basic validation - employee_id not needed (backend uses session)
   if (!documentType || !file) {
@@ -477,7 +468,7 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
 
   try {
     const cookieHeader = await getAuthCookieHeader()
-    console.log('[uploadMyDocumentAction] Has auth cookie:', !!cookieHeader)
+    // Prepare upload request
 
     // Use /api/my-documents/upload endpoint which uses session user
     const res = await fetch(`${API_BASE_URL}/api/my-documents/upload`, {
@@ -488,7 +479,7 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
       body: formData,
     })
 
-    console.log('[uploadMyDocumentAction] Upload response status:', res.status)
+    // Check upload response
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}))
@@ -497,7 +488,7 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
     }
 
     const data = await res.json()
-    console.log('[uploadMyDocumentAction] Upload successful:', data)
+    // Upload successful
 
     // Revalidate caches for my-documents view
     revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })

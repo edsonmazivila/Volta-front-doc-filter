@@ -35,6 +35,12 @@ export default async function EditUserPage({
     console.log(`[EditUserPage] User ${userId} not found in organization, redirecting...`);
     redirect(`/dashboard/organization/companies/${companyId}/users`);
   }
+
+  // Security check: Ensure the user belongs to the specified company
+  if (targetUser.company_id !== companyId) {
+    console.warn(`[EditUserPage] User ${userId} does not belong to company ${companyId}, redirecting...`);
+    redirect(`/dashboard/organization/companies/${companyId}/users`);
+  }
   
   console.log(`[EditUserPage] User found:`, targetUser.full_name, targetUser.role);
 
