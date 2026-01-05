@@ -528,7 +528,6 @@ export async function rejectLeaveRequestAction(
   reason: string
 ): Promise<void> {
   const cookieHeader = await getAuthCookieHeader();
-  console.log(`[REJECT_LEAVE] Rejecting leave request ${id} with reason:`, reason);
   const res = await fetch(`${API_BASE_URL}/api/leave-requests/${id}/reject`, {
     method: "POST",
     headers: {
@@ -538,10 +537,8 @@ export async function rejectLeaveRequestAction(
     body: JSON.stringify({ reason }),
   });
 
-  console.log(`[REJECT_LEAVE] Response status: ${res.status}`);
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    console.error(`[REJECT_LEAVE] Error response:`, error);
     throw new Error(error.message || "Failed to reject leave request");
   }
 

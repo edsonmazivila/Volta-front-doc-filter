@@ -258,16 +258,6 @@ export async function getOrganizationDepartments(params?: {
 
     const json = await response.json() as ApiResponse<OrganizationDepartment[]>;
     
-    // Debug: Log department data to verify company_name
-    if (json.data && json.data.length > 0) {
-      console.log('[getOrganizationDepartments] First department:', {
-        id: json.data[0].id,
-        name: json.data[0].name,
-        company_id: json.data[0].company_id,
-        company_name: json.data[0].company_name
-      });
-    }
-    
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
     console.error('Exception fetching organization departments:', error);
@@ -298,10 +288,7 @@ export async function getOrganizationDocuments(params?: {
   if (params?.status) queryParams.append('status', params.status);
   
   const url = `${API_BASE_URL}/api/organization/documents${queryParams.toString() ? `?${queryParams}` : ''}`;
-  
-  console.log('[getOrganizationDocuments] Fetching from:', url);
-  console.log('[getOrganizationDocuments] Params:', params);
-  
+
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
@@ -309,8 +296,6 @@ export async function getOrganizationDocuments(params?: {
       credentials: 'include',
       cache: 'no-store'
     }, 10000);
-
-    console.log('[getOrganizationDocuments] Response status:', response.status);
 
     if (response.status === 401) {
       console.error('Session expired or not authenticated');
@@ -334,8 +319,6 @@ export async function getOrganizationDocuments(params?: {
     }
 
     const json = await response.json() as ApiResponse<OrganizationDocument[]>;
-    console.log('[getOrganizationDocuments] Response data:', json);
-    console.log('[getOrganizationDocuments] Documents count:', json.data?.length || 0);
     
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {

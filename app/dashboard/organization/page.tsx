@@ -54,15 +54,6 @@ export default async function OrganizationPage({
     pending_approvals: 0
   };
 
-  // Debug: Log company stats
-  console.log('[OrganizationPage] Companies with stats:', companies.map(c => ({
-    name: c.name,
-    employees_count: c.employees_count,
-    active_employees: c.active_employees
-  })));
-  console.log('[OrganizationPage] Total employees_count:', stats.employees_count);
-  console.log('[OrganizationPage] Total active_employees:', stats.active_employees);
-
   // Await searchParams at the very end
   const params = await searchParams;
 

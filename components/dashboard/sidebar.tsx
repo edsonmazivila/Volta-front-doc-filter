@@ -289,7 +289,6 @@ export function Sidebar() {
   const { i18n } = useLingui();
 
   // Compute filtered sections directly each render to reflect current role immediately
-  const selfServiceTitle = i18n._(msg`Self Service`);
   const filteredSections = navSections
     .map((section) => ({
       ...section,
@@ -377,7 +376,6 @@ function SidebarDrawer() {
   const { i18n } = useLingui();
 
   // Compute filtered sections directly each render
-  const selfServiceTitle = i18n._(msg`Self Service`);
   const filteredSections = navSections
     .map((section) => ({
       ...section,

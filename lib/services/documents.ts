@@ -126,25 +126,13 @@ export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
     })
 
     if (!res.ok) {
-      const errorText = await res.text()
-      console.error('[getMyDocuments] Error response:', errorText)
-      console.error('[getMyDocuments] Status code:', res.status)
-      
       // Return empty array instead of throwing for non-auth errors
-      if (res.status === 401 || res.status === 403) {
-        console.warn('[getMyDocuments] Authentication/Permission error - returning empty array')
-        return []
-      }
-      
-      // For other errors, log and return empty
-      console.error('[getMyDocuments] Server error - returning empty array')
       return []
     }
 
     const json: MyDocumentsResponse = await res.json()
     
     if (!json.success || !Array.isArray(json.data)) {
-      console.warn('[getMyDocuments] Invalid response structure')
       return []
     }
 

@@ -23,28 +23,20 @@ export default async function EditUserPage({
 
   // Fetch all organization users and find the target user
   // We use getAllOrganizationUsers because getUserById has RLS restrictions
-  console.log(`[EditUserPage] Fetching all organization users to find user: ${userId}`);
-  const allUsers = await getAllOrganizationUsers().catch((error) => {
-    console.error(`[EditUserPage] Failed to fetch organization users:`, error);
+  const allUsers = await getAllOrganizationUsers().catch(() => {
     return [];
   });
 
   const targetUser = allUsers.find(u => u.id === userId);
 
   if (!targetUser) {
-    console.log(`[EditUserPage] User ${userId} not found in organization, redirecting...`);
     redirect(`/dashboard/organization/companies/${companyId}/users`);
   }
 
   // Security check: Ensure the user belongs to the specified company
   if (targetUser.company_id !== companyId) {
-    console.warn(`[EditUserPage] User ${userId} does not belong to company ${companyId}, redirecting...`);
     redirect(`/dashboard/organization/companies/${companyId}/users`);
   }
-  
-  console.log(`[EditUserPage] User found:`, targetUser.full_name, targetUser.role);
-
-  return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
       <Header title={t`Edit User - ${targetUser.full_name}`} />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
