@@ -37,6 +37,8 @@ export default async function EditUserPage({
   if (targetUser.company_id !== companyId) {
     redirect(`/dashboard/organization/companies/${companyId}/users`);
   }
+
+  return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
       <Header title={t`Edit User - ${targetUser.full_name}`} />
       <main className="container mx-auto px-4 py-8 max-w-3xl">

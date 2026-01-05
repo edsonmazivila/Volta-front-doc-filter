@@ -6,6 +6,10 @@ function getApiBaseUrl(): string {
 		// Server-side: prefer API_URL (internal), fallback to NEXT_PUBLIC_API_URL
 		const url = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL
 		if (!url) {
+			// During build time, use a placeholder
+			if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+				return 'http://localhost:8080'
+			}
 			throw new Error(
 				'Missing API configuration: API_URL or NEXT_PUBLIC_API_URL must be set in environment variables'
 			)
