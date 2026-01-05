@@ -657,3 +657,56 @@ export async function createUser(data: {
 	
 	return json.data
 }
+
+export async function updateUser(userId: string, data: {
+	full_name?: string
+	email?: string
+	password?: string
+	role?: string
+	can_login?: boolean
+	is_active?: boolean
+}): Promise<User> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		body: JSON.stringify(data),
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to update user')
+	}
+
+	const json = await res.json()
+	
+	// Revalidate users cache
+	revalidateEntityMutation('USERS')
+	
+	return json.data
+}
+
+export async function getUserById(userId: string): Promise<User> {
+	const cookieHeader = await getAuthCookieHeader()
+	
+	const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			...(cookieHeader && { Cookie: cookieHeader }),
+		},
+		cache: 'no-store',
+	})
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({}))
+		throw new Error(error.message || 'Failed to fetch user')
+	}
+
+	const json = await res.json()
+	return json.data
+}

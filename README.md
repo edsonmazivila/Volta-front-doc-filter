@@ -1,3 +1,7 @@
+# Volta HR - Powered by Dorico Dynamics
+
+Modern multi-tenant payroll and HR management system built with Next.js.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

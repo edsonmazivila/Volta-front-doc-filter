@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import { CompanyDocumentsFilters } from '@/components/company/company-documents-filters';
 
 export default async function OrganizationCompanyDocumentsPage({
   searchParams
@@ -37,30 +38,7 @@ export default async function OrganizationCompanyDocumentsPage({
 
       {/* Filters */}
       <Card>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Company</label>
-            <select className="w-full px-3 py-2 border rounded-lg" defaultValue={companyId || 'all'}>
-              <option value="all">All Companies</option>
-              {companies.map(company => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Document Type</label>
-            <select className="w-full px-3 py-2 border rounded-lg" defaultValue={documentType || 'all'}>
-              <option value="all">All Types</option>
-              <option value="business_license">Business License</option>
-              <option value="tax_certificate">Tax Certificate</option>
-              <option value="insurance">Insurance</option>
-              <option value="contract">Contract</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
+        <CompanyDocumentsFilters companies={companies} />
       </Card>
 
       {/* Table */}

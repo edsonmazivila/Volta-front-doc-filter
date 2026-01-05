@@ -116,16 +116,18 @@ const rejectDocumentSchema = z.object({
 export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
   try {
     const cookieHeader = await getAuthCookieHeader()
+    
     const res = await fetch(`${API_BASE_URL}/api/my-documents`, {
       headers: {
         'Content-Type': 'application/json',
         ...(cookieHeader && { Cookie: cookieHeader }),
       },
-      next: { tags: ['my-documents'], revalidate: 60 },
+      cache: 'no-store',
     })
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch my documents: ${res.status}`)
+      // Return empty array instead of throwing for non-auth errors
+      return []
     }
 
     const json: MyDocumentsResponse = await res.json()
@@ -464,6 +466,7 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}))
+      console.error('[uploadMyDocumentAction] Upload failed:', error)
       return { errors: { _form: [error.error || error.message || 'Failed to upload document'] } }
     }
 

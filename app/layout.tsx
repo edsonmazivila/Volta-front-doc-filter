@@ -26,8 +26,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NEXUpayroll",
-  description: "manage your payroll and HR with ease",
+  title: "Volta HR - Powered by Dorico Dynamics",
+  description: "Volta HR - Modern multi-tenant payroll and HR management system. Powered by Dorico Dynamics.",
 };
 
 /**

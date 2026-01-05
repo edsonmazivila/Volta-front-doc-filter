@@ -7,7 +7,7 @@ import { t } from '@lingui/core/macro'
 import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export const metadata = {
-  title: 'My Documents - NexuPayroll',
+  title: 'My Documents - Volta HR',
   description: 'View and manage your personal documents',
 }
 

@@ -99,9 +99,9 @@ export default async function OrganizationTimesheetsPage({
                     <TableCell>
                       {new Date(timesheet.pay_period_start).toLocaleDateString()} - {new Date(timesheet.pay_period_end).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-right">{timesheet.regular_hours.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{timesheet.overtime_hours.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{timesheet.total_hours.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{(timesheet.regular_hours ?? 0).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{(timesheet.overtime_hours ?? 0).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{(timesheet.total_hours ?? 0).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(timesheet.status)}>
                         {timesheet.status}

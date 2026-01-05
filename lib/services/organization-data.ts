@@ -48,21 +48,19 @@ export async function getOrganizationPayrolls(params?: {
       cache: 'no-store'
     }, 10000);
 
-    // Handle authentication errors
+    // Handle authentication errors - return empty for SSR
     if (response.status === 401) {
-      console.error('Session expired - redirecting to login');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
+      console.error('Session expired or not authenticated');
+      return { data: [], count: 0 };
     }
 
-    // Handle permission errors
+    // Handle permission errors - return empty for SSR
     if (response.status === 403) {
-      throw new Error('You do not have permission to view organization payrolls');
+      console.error('Permission denied to view organization payrolls');
+      return { data: [], count: 0 };
     }
 
-    // Handle not found - return empty array instead of throwing
+    // Handle not found - return empty array
     if (response.status === 404) {
       console.warn('No organization payrolls found');
       return { data: [], count: 0 };
@@ -70,18 +68,16 @@ export async function getOrganizationPayrolls(params?: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch organization payrolls');
+      console.error(`Failed to fetch organization payrolls [${response.status}]:`, errorData);
+      return { data: [], count: 0 };
     }
 
     const json = await response.json() as ApiResponse<OrganizationPayroll[]>;
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
-    // Network errors or timeout
-    if (error instanceof Error && error.message.includes('timeout')) {
-      console.error('Request timeout - server took too long to respond');
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
+    // Network errors or timeout - return empty for SSR stability
+    console.error('Exception fetching organization payrolls:', error);
+    return { data: [], count: 0 };
   }
 }
 
@@ -120,15 +116,13 @@ export async function getOrganizationTimesheets(params?: {
     }, 10000);
 
     if (response.status === 401) {
-      console.error('Session expired - redirecting to login');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
+      console.error('Session expired or not authenticated');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 403) {
-      throw new Error('You do not have permission to view organization timesheets');
+      console.error('Permission denied to view organization timesheets');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 404) {
@@ -138,17 +132,15 @@ export async function getOrganizationTimesheets(params?: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch organization timesheets');
+      console.error(`Failed to fetch organization timesheets [${response.status}]:`, errorData);
+      return { data: [], count: 0 };
     }
 
     const json = await response.json() as ApiResponse<OrganizationTimesheet[]>;
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      console.error('Request timeout - server took too long to respond');
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
+    console.error('Exception fetching organization timesheets:', error);
+    return { data: [], count: 0 };
   }
 }
 
@@ -186,15 +178,13 @@ export async function getOrganizationLeaves(params?: {
     }, 10000);
 
     if (response.status === 401) {
-      console.error('Session expired - redirecting to login');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
+      console.error('Session expired or not authenticated');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 403) {
-      throw new Error('You do not have permission to view organization leaves');
+      console.error('Permission denied to view organization leaves');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 404) {
@@ -204,17 +194,15 @@ export async function getOrganizationLeaves(params?: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch organization leaves');
+      console.error(`Failed to fetch organization leaves [${response.status}]:`, errorData);
+      return { data: [], count: 0 };
     }
 
     const json = await response.json() as ApiResponse<OrganizationLeave[]>;
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      console.error('Request timeout - server took too long to respond');
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
+    console.error('Exception fetching organization leaves:', error);
+    return { data: [], count: 0 };
   }
 }
 
@@ -248,15 +236,13 @@ export async function getOrganizationDepartments(params?: {
     }, 10000);
 
     if (response.status === 401) {
-      console.error('Session expired - redirecting to login');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
+      console.error('Session expired or not authenticated');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 403) {
-      throw new Error('You do not have permission to view organization departments');
+      console.error('Permission denied to view organization departments');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 404) {
@@ -266,17 +252,16 @@ export async function getOrganizationDepartments(params?: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch organization departments');
+      console.error(`Failed to fetch organization departments [${response.status}]:`, errorData);
+      return { data: [], count: 0 };
     }
 
     const json = await response.json() as ApiResponse<OrganizationDepartment[]>;
+    
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      console.error('Request timeout - server took too long to respond');
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
+    console.error('Exception fetching organization departments:', error);
+    return { data: [], count: 0 };
   }
 }
 
@@ -303,7 +288,7 @@ export async function getOrganizationDocuments(params?: {
   if (params?.status) queryParams.append('status', params.status);
   
   const url = `${API_BASE_URL}/api/organization/documents${queryParams.toString() ? `?${queryParams}` : ''}`;
-  
+
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
@@ -313,15 +298,13 @@ export async function getOrganizationDocuments(params?: {
     }, 10000);
 
     if (response.status === 401) {
-      console.error('Session expired - redirecting to login');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
+      console.error('Session expired or not authenticated');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 403) {
-      throw new Error('You do not have permission to view organization documents');
+      console.error('Permission denied to view organization documents');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 404) {
@@ -331,17 +314,16 @@ export async function getOrganizationDocuments(params?: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch organization documents');
+      console.error(`Failed to fetch organization documents [${response.status}]:`, errorData);
+      return { data: [], count: 0 };
     }
 
     const json = await response.json() as ApiResponse<OrganizationDocument[]>;
+    
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      console.error('Request timeout - server took too long to respond');
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
+    console.error('Exception fetching organization documents:', error);
+    return { data: [], count: 0 };
   }
 }
 
@@ -377,15 +359,13 @@ export async function getOrganizationCompanyDocuments(params?: {
     }, 10000);
 
     if (response.status === 401) {
-      console.error('Session expired - redirecting to login');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
+      console.error('Session expired or not authenticated');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 403) {
-      throw new Error('You do not have permission to view organization company documents');
+      console.error('Permission denied to view organization company documents');
+      return { data: [], count: 0 };
     }
 
     if (response.status === 404) {
@@ -395,16 +375,14 @@ export async function getOrganizationCompanyDocuments(params?: {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Failed to fetch organization company documents');
+      console.error(`Failed to fetch organization company documents [${response.status}]:`, errorData);
+      return { data: [], count: 0 };
     }
 
     const json = await response.json() as ApiResponse<OrganizationCompanyDocument[]>;
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('timeout')) {
-      console.error('Request timeout - server took too long to respond');
-      throw new Error('Request timeout - please try again');
-    }
-    throw error;
+    console.error('Exception fetching organization company documents:', error);
+    return { data: [], count: 0 };
   }
 }

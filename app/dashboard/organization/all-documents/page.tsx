@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import { DocumentsFilters } from '@/components/organization/documents-filters';
 
 export default async function OrganizationDocumentsPage({
   searchParams
@@ -46,28 +47,7 @@ export default async function OrganizationDocumentsPage({
 
       {/* Filters */}
       <Card>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Company</label>
-            <select className="w-full px-3 py-2 border rounded-lg" defaultValue={companyId || 'all'}>
-              <option value="all">All Companies</option>
-              {companies.map(company => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Status</label>
-            <select className="w-full px-3 py-2 border rounded-lg" defaultValue={status || 'all'}>
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-        </div>
+        <DocumentsFilters companies={companies} />
       </Card>
 
       {/* Table */}

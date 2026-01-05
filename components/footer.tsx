@@ -62,14 +62,25 @@ export function Footer() {
 
       <div className="grid w-full gap-8 xl:grid-cols-3 xl:gap-8">
         <AnimatedContainer className="space-y-4">
+          {/* Logo para light mode */}
           <Image
-            src="/logo/full-logo-blue-white.svg"
+            src="/logo/full-logo-blue-black-2000x827.svg"
             alt="logo"
             width={100}
             height={100}
+            className="dark:hidden"
+          />
+          {/* Logo para dark mode */}
+          <Image
+            src="/logo/full-logo-blue-white-2000x827.svg"
+            alt="logo"
+            width={100}
+            height={100}
+            className="hidden dark:block"
           />
           <p className="text-muted-foreground mt-8 text-sm md:mt-0">
-            © {new Date().getFullYear()} Nexu. {i18n._(msg`All rights reserved.`)}
+            Volta HR - Powered by Dorico Dynamics<br />
+            © {new Date().getFullYear()} Dorico Dynamics. {i18n._(msg`All rights reserved.`)}
           </p>
         </AnimatedContainer>
 

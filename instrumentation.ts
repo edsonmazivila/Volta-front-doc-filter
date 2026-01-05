@@ -6,7 +6,7 @@
  *
  * Required environment variables:
  * - DD_ENV: Environment name (e.g., 'production', 'staging', 'development')
- * - DD_SERVICE: Service name (defaults to 'nexupayroll')
+ * - DD_SERVICE: Service name (defaults to 'volta-hr')
  * - DD_VERSION: Application version for deployment tracking
  * - DD_AGENT_HOST: Datadog Agent host (defaults to 'localhost')
  * - DD_TRACE_AGENT_PORT: Datadog Agent trace port (defaults to 8126)
@@ -23,7 +23,7 @@ export async function register() {
     // Initialize the Datadog tracer with configuration
     tracer.init({
       // Service identification
-      service: process.env.DD_SERVICE || "nexupayroll",
+      service: process.env.DD_SERVICE || "volta-hr",
       env: process.env.DD_ENV || "development",
       version: process.env.DD_VERSION || "0.1.0",
 
@@ -61,7 +61,7 @@ export async function register() {
     // Log successful initialization
     if (process.env.NODE_ENV !== "production") {
       console.log("[Datadog APM] Tracer initialized successfully");
-      console.log(`[Datadog APM] Service: ${process.env.DD_SERVICE || "nexupayroll"}`);
+      console.log(`[Datadog APM] Service: ${process.env.DD_SERVICE || "volta-hr"}`);
       console.log(`[Datadog APM] Environment: ${process.env.DD_ENV || "development"}`);
     }
   }

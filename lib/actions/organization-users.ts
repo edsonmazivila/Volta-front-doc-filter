@@ -1,6 +1,6 @@
 'use server'
 
-import { createUser as createUserService } from '@/lib/services/users'
+import { createUser as createUserService, updateUser as updateUserService } from '@/lib/services/users'
 import { revalidatePath } from 'next/cache'
 
 export interface CreateUserActionData {
@@ -11,6 +11,15 @@ export interface CreateUserActionData {
 	company_id: string
 	can_login: boolean
 	department_id?: string
+}
+
+export interface UpdateUserActionData {
+	full_name: string
+	email: string
+	password?: string
+	role: string
+	can_login: boolean
+	is_active: boolean
 }
 
 export interface UserActionResult {
@@ -46,6 +55,33 @@ export async function createUserForCompanyAction(data: CreateUserActionData): Pr
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Failed to create user'
+		}
+	}
+}
+
+/**
+ * Server Action: Update existing user
+ */
+export async function updateUserAction(userId: string, data: UpdateUserActionData): Promise<UserActionResult> {
+	try {
+		const user = await updateUserService(userId, data)
+		
+		// Revalidate users pages
+		revalidatePath('/dashboard/organization/companies')
+		
+		return {
+			success: true,
+			data: {
+				id: user.id,
+				email: user.email,
+				full_name: user.full_name
+			}
+		}
+	} catch (error) {
+		console.error('[UPDATE_USER_ACTION] Error:', error)
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Failed to update user'
 		}
 	}
 }
