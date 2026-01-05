@@ -455,8 +455,6 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
   const documentType = formData.get('document_type')
   const file = formData.get('file')
 
-  // Upload document action
-
   // Basic validation - employee_id not needed (backend uses session)
   if (!documentType || !file) {
     return {
@@ -468,7 +466,6 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
 
   try {
     const cookieHeader = await getAuthCookieHeader()
-    // Prepare upload request
 
     // Use /api/my-documents/upload endpoint which uses session user
     const res = await fetch(`${API_BASE_URL}/api/my-documents/upload`, {
@@ -479,8 +476,6 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
       body: formData,
     })
 
-    // Check upload response
-
     if (!res.ok) {
       const error = await res.json().catch(() => ({}))
       console.error('[uploadMyDocumentAction] Upload failed:', error)
@@ -488,7 +483,6 @@ export async function uploadMyDocumentAction(prevState: unknown, formData: FormD
     }
 
     const data = await res.json()
-    // Upload successful
 
     // Revalidate caches for my-documents view
     revalidateEntityMutation('DOCUMENTS', { additionalTags: ['my-documents'], additionalPaths: ['/dashboard/my-documents'] })
