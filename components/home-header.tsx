@@ -66,11 +66,11 @@ export function HomeHeader() {
           <div className="flex items-center gap-2">
             <Link href="/" className="font-semibold flex items-center gap-2">
               <Image
-                src="/logo/symbol-blue.svg"
+                src="/logo/symbol-blue-1000x1155.svg"
                 alt="Logo"
-                width={28}
-                height={28}
-                className="h-10 w-10"
+                width={35}
+                height={40}
+                className="h-10 w-auto"
               />
             </Link>
           </div>

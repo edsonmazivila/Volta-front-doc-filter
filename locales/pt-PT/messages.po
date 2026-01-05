@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: 2025-11-27 20:10+0000\n"
-"Last-Translator: NEXUpayroll Team\n"
+"Last-Translator: Dorico Dynamics Team\n"
 "Language-Team: Portuguese (Portugal)\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 

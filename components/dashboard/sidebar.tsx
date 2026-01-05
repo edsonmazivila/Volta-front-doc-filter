@@ -149,7 +149,6 @@ function useNavSections(): NavSection[] {
             },
             { href: "/dashboard/reports", label: i18n._(msg`Reports`), icon: BarChart3 },
             { href: "/dashboard/company", label: i18n._(msg`Company`), icon: Briefcase },
-            { href: "/dashboard/settings", label: i18n._(msg`Settings`), icon: UserCog },
           ],
         },
         {
@@ -290,11 +289,8 @@ export function Sidebar() {
   const { i18n } = useLingui();
 
   // Compute filtered sections directly each render to reflect current role immediately
-  const hideSelfService = user?.role === "system_admin";
   const selfServiceTitle = i18n._(msg`Self Service`);
-  const filteredSections = navSections.filter(
-    (section) => !(hideSelfService && section.title === selfServiceTitle)
-  )
+  const filteredSections = navSections
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => canAccessPage(item.href)),
@@ -304,12 +300,21 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex w-64 shrink-0 border-r border-border bg-background/50 backdrop-blur flex-col">
       <div className="p-1 border-b border-border">
+        {/* Logo para light mode */}
         <Image
-          src="/logo/full-logo-blue-white.svg"
-          alt="NEXUpayroll"
+          src="/logo/full-logo-blue-black-2000x827.svg"
+          alt="Volta HR"
           width={100}
           height={100}
-          className="h-auto w-20"
+          className="h-auto w-20 dark:hidden"
+        />
+        {/* Logo para dark mode */}
+        <Image
+          src="/logo/full-logo-blue-white-2000x827.svg"
+          alt="Volta HR"
+          width={100}
+          height={100}
+          className="h-auto w-20 hidden dark:block"
         />
       </div>
 
@@ -372,11 +377,8 @@ function SidebarDrawer() {
   const { i18n } = useLingui();
 
   // Compute filtered sections directly each render
-  const hideSelfService = user?.role === "system_admin";
   const selfServiceTitle = i18n._(msg`Self Service`);
-  const filteredSections = navSections.filter(
-    (section) => !(hideSelfService && section.title === selfServiceTitle)
-  )
+  const filteredSections = navSections
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => canAccessPage(item.href)),
@@ -406,7 +408,7 @@ function SidebarDrawer() {
         aria-label="Navigation menu"
       >
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <h2 className="text-lg font-bold">NEXUpayroll</h2>
+          <h2 className="text-lg font-bold">Volta HR</h2>
           <button
             onClick={closeDrawer}
             aria-label="Close menu"

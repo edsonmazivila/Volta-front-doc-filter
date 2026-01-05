@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # =============================================================================
-# NEXUpayroll Production Dockerfile
+# Volta HR Production Dockerfile
 # Multi-stage build following 2025 industry best practices
 # =============================================================================
 

@@ -498,6 +498,7 @@ export async function approveLeaveAction(
   notes?: string
 ): Promise<void> {
   const cookieHeader = await getAuthCookieHeader();
+  console.log(`[APPROVE_LEAVE] Approving leave request ${id} with notes:`, notes);
   const res = await fetch(
     `${API_BASE_URL}/api/leave-requests/${id}/approve`,
     {
@@ -510,8 +511,10 @@ export async function approveLeaveAction(
     }
   );
 
+  console.log(`[APPROVE_LEAVE] Response status: ${res.status}`);
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
+    console.error(`[APPROVE_LEAVE] Error response:`, error);
     throw new Error(error.message || "Failed to approve leave request");
   }
 
@@ -528,6 +531,7 @@ export async function rejectLeaveRequestAction(
   reason: string
 ): Promise<void> {
   const cookieHeader = await getAuthCookieHeader();
+  console.log(`[REJECT_LEAVE] Rejecting leave request ${id} with reason:`, reason);
   const res = await fetch(`${API_BASE_URL}/api/leave-requests/${id}/reject`, {
     method: "POST",
     headers: {
@@ -537,8 +541,10 @@ export async function rejectLeaveRequestAction(
     body: JSON.stringify({ reason }),
   });
 
+  console.log(`[REJECT_LEAVE] Response status: ${res.status}`);
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
+    console.error(`[REJECT_LEAVE] Error response:`, error);
     throw new Error(error.message || "Failed to reject leave request");
   }
 

@@ -1,7 +1,7 @@
 version: "3.9"
 
 # =============================================================================
-# NEXUpayroll Docker Compose Configuration
+# Volta HR Docker Compose Configuration
 # Includes application and Datadog Agent for APM
 # =============================================================================
 
@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nexupayroll-app
+    container_name: volta-hr-app
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -23,7 +23,7 @@ services:
 
       # Datadog APM configuration
       - DD_ENV=${DD_ENV:-development}
-      - DD_SERVICE=nexupayroll
+      - DD_SERVICE=volta-hr
       - DD_VERSION=${DD_VERSION:-0.1.0}
       - DD_AGENT_HOST=datadog-agent
       - DD_TRACE_AGENT_PORT=8126
@@ -48,7 +48,7 @@ services:
   # ---------------------------------------------------------------------------
   datadog-agent:
     image: gcr.io/datadoghq/agent:7
-    container_name: nexupayroll-datadog-agent
+    container_name: volta-hr-datadog-agent
     restart: unless-stopped
     environment:
       # Datadog API key (required)
@@ -79,7 +79,7 @@ services:
       - "8126:8126" # APM traces
       - "8125:8125/udp" # DogStatsD metrics
     networks:
-      - nexupayroll-network
+      - volta-hr-network
     healthcheck:
       test: ["CMD-SHELL", "agent health"]
       interval: 30s
@@ -88,7 +88,7 @@ services:
       start_period: 30s
 
 networks:
-  nexupayroll-network:
+  volta-hr-network:
     driver: bridge
-    name: nexupayroll-network
+    name: volta-hr-network
 
