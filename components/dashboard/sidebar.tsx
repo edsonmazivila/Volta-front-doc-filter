@@ -154,7 +154,7 @@ function useNavSections(): NavSection[] {
         {
           title: i18n._(msg`Self Service`),
           items: [
-            { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+            { href: "/dashboard/paystubs", label: i18n._(msg`Payment Receipts`), icon: FileCheck },
             { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
             { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
             { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
@@ -191,7 +191,7 @@ function useNavSections(): NavSection[] {
       {
         title: i18n._(msg`Self Service`),
         items: [
-          { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+          { href: "/dashboard/paystubs", label: i18n._(msg`Payment Receipts`), icon: FileCheck },
           { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
           { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
           { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
@@ -238,7 +238,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Self Service",
     items: [
-      { href: "/dashboard/paystubs", label: "Paystubs", icon: FileCheck },
+      { href: "/dashboard/paystubs", label: "Payment Receipts", icon: FileCheck },
       { href: "/dashboard/my-attendance", label: "Attendance", icon: Clock },
       { href: "/dashboard/my-timesheets", label: "Timesheets", icon: Clock },
       { href: "/dashboard/my-leaves", label: "Time Off", icon: CalendarCheck },
