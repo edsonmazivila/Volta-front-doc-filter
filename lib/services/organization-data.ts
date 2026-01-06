@@ -3,7 +3,8 @@
  * Organization Admin: View consolidated data across all companies
  */
 
-import { getAuthCookieHeader, fetchWithTimeout } from '@/lib/http/request.server';
+import { fetchWithTimeout } from '@/lib/http/request.server';
+import { getAuthCookieHeader } from '@/lib/auth/server-utils';
 import { API_BASE_URL } from '@/lib/config';
 
 interface ApiResponse<T> {
@@ -21,7 +22,7 @@ export interface OrganizationPayroll {
   pay_period_start: string;
   pay_period_end: string;
   pay_date?: string;
-  status: 'draft' | 'processed' | 'paid';
+  status: 'calculated' | 'processed';
   total_employees: number;
   gross_amount: number;
   net_amount: number;
@@ -33,42 +34,45 @@ export async function getOrganizationPayrolls(params?: {
   company_id?: string;
   status?: string;
 }): Promise<{ data: OrganizationPayroll[]; count: number }> {
-  const headers = await getAuthCookieHeader();
+  const cookieHeader = await getAuthCookieHeader();
   const queryParams = new URLSearchParams();
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   if (params?.status) queryParams.append('status', params.status);
   
-  const url = `${API_BASE_URL}/api/organization/payrolls${queryParams.toString() ? `?${queryParams}` : ''}`;
+  const url = `${API_BASE_URL}/api/reports/organization/payroll${queryParams.toString() ? `?${queryParams}` : ''}`;
   
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader })
+      },
       credentials: 'include',
       cache: 'no-store'
     }, 10000);
 
     // Handle authentication errors - return empty for SSR
     if (response.status === 401) {
-      console.error('Session expired or not authenticated');
+      console.error('[getOrganizationPayrolls] 401 Unauthorized - Session expired or not authenticated');
       return { data: [], count: 0 };
     }
 
     // Handle permission errors - return empty for SSR
     if (response.status === 403) {
-      console.error('Permission denied to view organization payrolls');
+      console.error('[getOrganizationPayrolls] 403 Forbidden - Permission denied to view organization payrolls');
       return { data: [], count: 0 };
     }
 
     // Handle not found - return empty array
     if (response.status === 404) {
-      console.warn('No organization payrolls found');
+      console.warn('[getOrganizationPayrolls] 404 Not Found - Endpoint may not be implemented in backend');
       return { data: [], count: 0 };
     }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error(`Failed to fetch organization payrolls [${response.status}]:`, errorData);
+      console.error(`[getOrganizationPayrolls] Failed [${response.status}]:`, errorData);
       return { data: [], count: 0 };
     }
 
@@ -76,7 +80,7 @@ export async function getOrganizationPayrolls(params?: {
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
     // Network errors or timeout - return empty for SSR stability
-    console.error('Exception fetching organization payrolls:', error);
+    console.error('[getOrganizationPayrolls] Exception:', error);
     return { data: [], count: 0 };
   }
 }
@@ -100,17 +104,20 @@ export async function getOrganizationTimesheets(params?: {
   company_id?: string;
   status?: string;
 }): Promise<{ data: OrganizationTimesheet[]; count: number }> {
-  const headers = await getAuthCookieHeader();
+  const cookieHeader = await getAuthCookieHeader();
   const queryParams = new URLSearchParams();
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   if (params?.status) queryParams.append('status', params.status);
   
-  const url = `${API_BASE_URL}/api/organization/timesheets${queryParams.toString() ? `?${queryParams}` : ''}`;
+  const url = `${API_BASE_URL}/api/reports/organization/timesheets${queryParams.toString() ? `?${queryParams}` : ''}`;
   
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader })
+      },
       credentials: 'include',
       cache: 'no-store'
     }, 10000);
@@ -162,17 +169,20 @@ export async function getOrganizationLeaves(params?: {
   company_id?: string;
   status?: string;
 }): Promise<{ data: OrganizationLeave[]; count: number }> {
-  const headers = await getAuthCookieHeader();
+  const cookieHeader = await getAuthCookieHeader();
   const queryParams = new URLSearchParams();
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   if (params?.status) queryParams.append('status', params.status);
   
-  const url = `${API_BASE_URL}/api/organization/leaves${queryParams.toString() ? `?${queryParams}` : ''}`;
+  const url = `${API_BASE_URL}/api/reports/organization/leave${queryParams.toString() ? `?${queryParams}` : ''}`;
   
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader })
+      },
       credentials: 'include',
       cache: 'no-store'
     }, 10000);
@@ -221,16 +231,19 @@ export interface OrganizationDepartment {
 export async function getOrganizationDepartments(params?: {
   company_id?: string;
 }): Promise<{ data: OrganizationDepartment[]; count: number }> {
-  const headers = await getAuthCookieHeader();
+  const cookieHeader = await getAuthCookieHeader();
   const queryParams = new URLSearchParams();
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   
-  const url = `${API_BASE_URL}/api/organization/departments${queryParams.toString() ? `?${queryParams}` : ''}`;
+  const url = `${API_BASE_URL}/api/reports/organization/departments${queryParams.toString() ? `?${queryParams}` : ''}`;
   
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader })
+      },
       credentials: 'include',
       cache: 'no-store'
     }, 10000);
@@ -282,17 +295,20 @@ export async function getOrganizationDocuments(params?: {
   company_id?: string;
   status?: string;
 }): Promise<{ data: OrganizationDocument[]; count: number }> {
-  const headers = await getAuthCookieHeader();
+  const cookieHeader = await getAuthCookieHeader();
   const queryParams = new URLSearchParams();
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   if (params?.status) queryParams.append('status', params.status);
   
-  const url = `${API_BASE_URL}/api/organization/documents${queryParams.toString() ? `?${queryParams}` : ''}`;
+  const url = `${API_BASE_URL}/api/reports/organization/documents${queryParams.toString() ? `?${queryParams}` : ''}`;
 
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader })
+      },
       credentials: 'include',
       cache: 'no-store'
     }, 10000);
@@ -343,17 +359,20 @@ export async function getOrganizationCompanyDocuments(params?: {
   company_id?: string;
   document_type?: string;
 }): Promise<{ data: OrganizationCompanyDocument[]; count: number }> {
-  const headers = await getAuthCookieHeader();
+  const cookieHeader = await getAuthCookieHeader();
   const queryParams = new URLSearchParams();
   if (params?.company_id) queryParams.append('company_id', params.company_id);
   if (params?.document_type) queryParams.append('document_type', params.document_type);
   
-  const url = `${API_BASE_URL}/api/organization/company-documents${queryParams.toString() ? `?${queryParams}` : ''}`;
+  const url = `${API_BASE_URL}/api/reports/organization/company-documents${queryParams.toString() ? `?${queryParams}` : ''}`;
   
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader })
+      },
       credentials: 'include',
       cache: 'no-store'
     }, 10000);

@@ -7,20 +7,20 @@ import { t } from '@lingui/core/macro'
 import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
 export const metadata = {
-  title: 'My Paystubs - Volta HR',
-  description: 'View and download your paystubs',
+  title: 'My Payment Receipts - Volta HR',
+  description: 'View and download your payment receipts',
 }
 
 export default async function PaystubsPage() {
   await getLocaleAndInitialize()
-  await requireRole(['employee','operational_manager','hr_manager','payroll_manager','organization_admin'])
+  await requireRole(['employee','operational_manager','hr_manager','payroll_manager','organization_admin','system_admin'])
   const session = await verifySession()
 
   const paystubs = await getMyPaystubs()
 
   return (
     <>
-      <Header title={t`My Paystubs`} />
+      <Header title={t`My Payment Receipts`} />
       <section className="p-4 overflow-y-auto">
         <PaystubsSection
           paystubs={paystubs}

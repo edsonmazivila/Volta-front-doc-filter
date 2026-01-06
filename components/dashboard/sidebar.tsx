@@ -154,7 +154,7 @@ function useNavSections(): NavSection[] {
         {
           title: i18n._(msg`Self Service`),
           items: [
-            { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+            { href: "/dashboard/paystubs", label: i18n._(msg`Payment Receipts`), icon: FileCheck },
             { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
             { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
             { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
@@ -191,7 +191,7 @@ function useNavSections(): NavSection[] {
       {
         title: i18n._(msg`Self Service`),
         items: [
-          { href: "/dashboard/paystubs", label: i18n._(msg`Paystubs`), icon: FileCheck },
+          { href: "/dashboard/paystubs", label: i18n._(msg`Payment Receipts`), icon: FileCheck },
           { href: "/dashboard/my-attendance", label: i18n._(msg`Attendance`), icon: Clock },
           { href: "/dashboard/my-timesheets", label: i18n._(msg`Timesheets`), icon: Clock },
           { href: "/dashboard/my-leaves", label: i18n._(msg`Time Off`), icon: CalendarCheck },
@@ -238,7 +238,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Self Service",
     items: [
-      { href: "/dashboard/paystubs", label: "Paystubs", icon: FileCheck },
+      { href: "/dashboard/paystubs", label: "Payment Receipts", icon: FileCheck },
       { href: "/dashboard/my-attendance", label: "Attendance", icon: Clock },
       { href: "/dashboard/my-timesheets", label: "Timesheets", icon: Clock },
       { href: "/dashboard/my-leaves", label: "Time Off", icon: CalendarCheck },
@@ -282,11 +282,9 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
 }
 
 export function Sidebar() {
-  const { user } = useSession();
   const pathname = usePathname();
   const { canAccessPage } = usePermissions();
   const navSections = useNavSections();
-  const { i18n } = useLingui();
 
   // Compute filtered sections directly each render to reflect current role immediately
   const filteredSections = navSections
@@ -369,11 +367,9 @@ export function SidebarTrigger({ className = "" }: { className?: string }) {
 
 function SidebarDrawer() {
   const { open, closeDrawer } = useSidebar();
-  const { user } = useSession();
   const pathname = usePathname();
   const { canAccessPage } = usePermissions();
   const navSections = useNavSections();
-  const { i18n } = useLingui();
 
   // Compute filtered sections directly each render
   const filteredSections = navSections
