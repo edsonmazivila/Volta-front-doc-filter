@@ -41,12 +41,6 @@ export async function getOrganizationPayrolls(params?: {
   
   const url = `${API_BASE_URL}/api/reports/organization/payroll${queryParams.toString() ? `?${queryParams}` : ''}`;
   
-  console.log('[getOrganizationPayrolls] Request details:', {
-    url,
-    hasAuthHeader: !!cookieHeader,
-    cookieLength: cookieHeader?.length
-  });
-  
   try {
     const response = await fetchWithTimeout(url, {
       method: 'GET',
@@ -83,13 +77,6 @@ export async function getOrganizationPayrolls(params?: {
     }
 
     const json = await response.json() as ApiResponse<OrganizationPayroll[]>;
-    console.log('[getOrganizationPayrolls] Success response:', {
-      url,
-      status: response.status,
-      dataLength: json.data?.length || 0,
-      count: json.count,
-      sampleData: json.data?.[0]
-    });
     return { data: json.data || [], count: json.count || 0 };
   } catch (error) {
     // Network errors or timeout - return empty for SSR stability
