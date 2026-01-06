@@ -4,6 +4,7 @@ import { Card } from '@/components/dashboard/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
+import { PayrollFilters } from '@/components/organization/payroll-filters';
 
 export default async function OrganizationPayrollsPage({
   searchParams
@@ -58,30 +59,7 @@ export default async function OrganizationPayrollsPage({
       </div>
 
       {/* Filters */}
-      <Card>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Company</label>
-            <select className="w-full px-3 py-2 border rounded-lg" defaultValue={companyId || 'all'}>
-              <option value="all">All Companies</option>
-              {companies.map(company => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm font-medium mb-2 block">Status</label>
-            <select className="w-full px-3 py-2 border rounded-lg" defaultValue={status || 'all'}>
-              <option value="all">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="processed">Processed</option>
-              <option value="paid">Paid</option>
-            </select>
-          </div>
-        </div>
-      </Card>
+      <PayrollFilters companies={companies} />
 
       {/* Table */}
       <Card>
