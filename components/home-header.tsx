@@ -66,7 +66,7 @@ export function HomeHeader() {
           <div className="flex items-center gap-2">
             <Link href="/" className="font-semibold flex items-center gap-2">
               <Image
-                src="/logo/symbol-blue-1000x1155.svg"
+                src="/logo/SVG/symbol-purple-1000x460.svg"
                 alt="Logo"
                 width={35}
                 height={40}

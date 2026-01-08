@@ -7,18 +7,31 @@ import { fetchWithTimeout } from '@/lib/http/request.server';
 import { getAuthCookieHeader } from '@/lib/auth/server-utils';
 import { API_BASE_URL } from '@/lib/config';
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  count?: number;
-  message?: string;
+// PAYROLLS
+// Backend response interface
+interface BackendPayroll {
+  id: string;
+  company_id: string;
+  organization_id: string;
+  pay_schedule_id: string;
+  period_start: string;
+  period_end: string;
+  pay_date: string;
+  status: 'calculated' | 'processed';
+  employee_count: number;
+  total_gross_pay: number;
+  total_net_pay: number;
+  total_deductions: number;
+  total_taxes: number;
+  created_at: string;
+  updated_at: string;
 }
 
-// PAYROLLS
+// Frontend interface (with company_name from join)
 export interface OrganizationPayroll {
   id: string;
   company_id: string;
-  company_name: string;
+  company_name?: string;
   pay_period_start: string;
   pay_period_end: string;
   pay_date?: string;
@@ -76,8 +89,27 @@ export async function getOrganizationPayrolls(params?: {
       return { data: [], count: 0 };
     }
 
-    const json = await response.json() as ApiResponse<OrganizationPayroll[]>;
-    return { data: json.data || [], count: json.count || 0 };
+    const json = await response.json() as { payrolls?: BackendPayroll[]; data?: BackendPayroll[]; total?: number; count?: number };
+    // Backend returns { payrolls: [], total: ... }
+    const backendPayrolls: BackendPayroll[] = json.payrolls || json.data || [];
+    
+    // Map backend fields to frontend interface
+    const mappedPayrolls: OrganizationPayroll[] = backendPayrolls.map((p: BackendPayroll) => ({
+      id: p.id,
+      company_id: p.company_id,
+      company_name: (p as BackendPayroll & { company_name?: string }).company_name || '', // May come from backend join
+      pay_period_start: p.period_start,
+      pay_period_end: p.period_end,
+      pay_date: p.pay_date,
+      status: p.status,
+      total_employees: p.employee_count,
+      gross_amount: p.total_gross_pay,
+      net_amount: p.total_net_pay,
+      total_deductions: p.total_deductions,
+      created_at: p.created_at
+    }));
+    
+    return { data: mappedPayrolls, count: json.total || json.count || 0 };
   } catch (error) {
     // Network errors or timeout - return empty for SSR stability
     console.error('[getOrganizationPayrolls] Exception:', error);
@@ -143,8 +175,9 @@ export async function getOrganizationTimesheets(params?: {
       return { data: [], count: 0 };
     }
 
-    const json = await response.json() as ApiResponse<OrganizationTimesheet[]>;
-    return { data: json.data || [], count: json.count || 0 };
+    const json = await response.json() as { timesheets?: OrganizationTimesheet[]; data?: OrganizationTimesheet[]; total?: number; count?: number };
+    // Backend returns { timesheets: [], total: ... }
+    return { data: json.timesheets || json.data || [], count: json.total || json.count || 0 };
   } catch (error) {
     console.error('Exception fetching organization timesheets:', error);
     return { data: [], count: 0 };
@@ -208,8 +241,9 @@ export async function getOrganizationLeaves(params?: {
       return { data: [], count: 0 };
     }
 
-    const json = await response.json() as ApiResponse<OrganizationLeave[]>;
-    return { data: json.data || [], count: json.count || 0 };
+    const json = await response.json() as { leaves?: OrganizationLeave[]; data?: OrganizationLeave[]; total?: number; count?: number };
+    // Backend may return { leaves: [], total: ... } or { data: [], count: ... }
+    return { data: json.leaves || json.data || [], count: json.total || json.count || 0 };
   } catch (error) {
     console.error('Exception fetching organization leaves:', error);
     return { data: [], count: 0 };
@@ -269,9 +303,9 @@ export async function getOrganizationDepartments(params?: {
       return { data: [], count: 0 };
     }
 
-    const json = await response.json() as ApiResponse<OrganizationDepartment[]>;
-    
-    return { data: json.data || [], count: json.count || 0 };
+    const json = await response.json() as { departments?: OrganizationDepartment[]; data?: OrganizationDepartment[]; total?: number; count?: number };
+    // Backend may return { departments: [], total: ... } or { data: [], count: ... }
+    return { data: json.departments || json.data || [], count: json.total || json.count || 0 };
   } catch (error) {
     console.error('Exception fetching organization departments:', error);
     return { data: [], count: 0 };
@@ -334,9 +368,9 @@ export async function getOrganizationDocuments(params?: {
       return { data: [], count: 0 };
     }
 
-    const json = await response.json() as ApiResponse<OrganizationDocument[]>;
-    
-    return { data: json.data || [], count: json.count || 0 };
+    const json = await response.json() as { documents?: OrganizationDocument[]; data?: OrganizationDocument[]; total?: number; count?: number };
+    // Backend may return { documents: [], total: ... } or { data: [], count: ... }
+    return { data: json.documents || json.data || [], count: json.total || json.count || 0 };
   } catch (error) {
     console.error('Exception fetching organization documents:', error);
     return { data: [], count: 0 };
@@ -398,8 +432,9 @@ export async function getOrganizationCompanyDocuments(params?: {
       return { data: [], count: 0 };
     }
 
-    const json = await response.json() as ApiResponse<OrganizationCompanyDocument[]>;
-    return { data: json.data || [], count: json.count || 0 };
+    const json = await response.json() as { company_documents?: OrganizationCompanyDocument[]; data?: OrganizationCompanyDocument[]; total?: number; count?: number };
+    // Backend may return { company_documents: [], total: ... } or { data: [], count: ... }
+    return { data: json.company_documents || json.data || [], count: json.total || json.count || 0 };
   } catch (error) {
     console.error('Exception fetching organization company documents:', error);
     return { data: [], count: 0 };

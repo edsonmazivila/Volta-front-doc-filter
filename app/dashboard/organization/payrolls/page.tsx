@@ -23,9 +23,15 @@ export default async function OrganizationPayrollsPage({
   const payrolls = payrollsResult.data;
   const companies = companiesResult.data;
 
+  // Enrich payrolls with company names
+  const enrichedPayrolls = payrolls.map(payroll => ({
+    ...payroll,
+    company_name: companies.find(c => c.id === payroll.company_id)?.name || 'Unknown Company'
+  }));
+
   // Calculate summary
-  const totalGross = payrolls.reduce((sum, p) => sum + (p.gross_amount || 0), 0);
-  const totalNet = payrolls.reduce((sum, p) => sum + (p.net_amount || 0), 0);
+  const totalGross = enrichedPayrolls.reduce((sum, p) => sum + (p.gross_amount || 0), 0);
+  const totalNet = enrichedPayrolls.reduce((sum, p) => sum + (p.net_amount || 0), 0);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -45,7 +51,7 @@ export default async function OrganizationPayrollsPage({
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <p className="text-sm text-muted-foreground">Total Payrolls</p>
-          <div className="text-2xl font-bold mt-2">{payrolls.length}</div>
+          <div className="text-2xl font-bold mt-2">{enrichedPayrolls.length}</div>
         </Card>
         <Card>
           <p className="text-sm text-muted-foreground">Total Gross Amount</p>
@@ -75,14 +81,14 @@ export default async function OrganizationPayrollsPage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {payrolls.length === 0 ? (
+              {enrichedPayrolls.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground">
                     No payroll data available
                   </TableCell>
                 </TableRow>
               ) : (
-                payrolls.map((payroll) => (
+                enrichedPayrolls.map((payroll) => (
                   <TableRow key={payroll.id}>
                     <TableCell className="font-medium">{payroll.company_name}</TableCell>
                     <TableCell>
