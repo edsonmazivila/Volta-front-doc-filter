@@ -64,7 +64,7 @@ export function Footer() {
         <AnimatedContainer className="space-y-4">
           {/* Logo para light mode */}
           <Image
-            src="/logo/full-logo-blue-black-2000x827.svg"
+            src="/logo/SVG/full-logo-purple-black-2000x1500.svg"
             alt="logo"
             width={100}
             height={100}
@@ -72,7 +72,7 @@ export function Footer() {
           />
           {/* Logo para dark mode */}
           <Image
-            src="/logo/full-logo-blue-white-2000x827.svg"
+            src="/logo/SVG/full-logo-purple-white-2000x1500.svg"
             alt="logo"
             width={100}
             height={100}

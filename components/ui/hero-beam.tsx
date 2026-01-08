@@ -155,7 +155,7 @@ const Icons = {
     </svg>
   ),
   openai: () => (
-    <Image src="/logo/symbol-blue-1000x1155.svg" alt="Logo" className="w-auto h-10" width={35} height={40}/>
+    <Image src="/logo/SVG/symbol-purple-1000x460.svg" alt="Logo" className="w-auto h-10" width={35} height={40}/>
   ),
   googleDrive: () => (
     <svg
