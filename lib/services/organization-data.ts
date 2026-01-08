@@ -109,7 +109,7 @@ export async function getOrganizationPayrolls(params?: {
       created_at: p.created_at
     }));
     
-    return { data: mappedPayrolls, count: json.total || json.count || 0 };
+    return { data: mappedPayrolls, count: json.total || json.count || mappedPayrolls.length };
   } catch (error) {
     // Network errors or timeout - return empty for SSR stability
     console.error('[getOrganizationPayrolls] Exception:', error);
@@ -177,7 +177,8 @@ export async function getOrganizationTimesheets(params?: {
 
     const json = await response.json() as { timesheets?: OrganizationTimesheet[]; data?: OrganizationTimesheet[]; total?: number; count?: number };
     // Backend returns { timesheets: [], total: ... }
-    return { data: json.timesheets || json.data || [], count: json.total || json.count || 0 };
+    const timesheets = json.timesheets || json.data || [];
+    return { data: timesheets, count: json.total || json.count || timesheets.length };
   } catch (error) {
     console.error('Exception fetching organization timesheets:', error);
     return { data: [], count: 0 };
@@ -243,7 +244,8 @@ export async function getOrganizationLeaves(params?: {
 
     const json = await response.json() as { leaves?: OrganizationLeave[]; data?: OrganizationLeave[]; total?: number; count?: number };
     // Backend may return { leaves: [], total: ... } or { data: [], count: ... }
-    return { data: json.leaves || json.data || [], count: json.total || json.count || 0 };
+    const leaves = json.leaves || json.data || [];
+    return { data: leaves, count: json.total || json.count || leaves.length };
   } catch (error) {
     console.error('Exception fetching organization leaves:', error);
     return { data: [], count: 0 };
@@ -305,7 +307,8 @@ export async function getOrganizationDepartments(params?: {
 
     const json = await response.json() as { departments?: OrganizationDepartment[]; data?: OrganizationDepartment[]; total?: number; count?: number };
     // Backend may return { departments: [], total: ... } or { data: [], count: ... }
-    return { data: json.departments || json.data || [], count: json.total || json.count || 0 };
+    const departments = json.departments || json.data || [];
+    return { data: departments, count: json.total || json.count || departments.length };
   } catch (error) {
     console.error('Exception fetching organization departments:', error);
     return { data: [], count: 0 };
@@ -370,7 +373,8 @@ export async function getOrganizationDocuments(params?: {
 
     const json = await response.json() as { documents?: OrganizationDocument[]; data?: OrganizationDocument[]; total?: number; count?: number };
     // Backend may return { documents: [], total: ... } or { data: [], count: ... }
-    return { data: json.documents || json.data || [], count: json.total || json.count || 0 };
+    const documents = json.documents || json.data || [];
+    return { data: documents, count: json.total || json.count || documents.length };
   } catch (error) {
     console.error('Exception fetching organization documents:', error);
     return { data: [], count: 0 };
@@ -434,7 +438,8 @@ export async function getOrganizationCompanyDocuments(params?: {
 
     const json = await response.json() as { company_documents?: OrganizationCompanyDocument[]; data?: OrganizationCompanyDocument[]; total?: number; count?: number };
     // Backend may return { company_documents: [], total: ... } or { data: [], count: ... }
-    return { data: json.company_documents || json.data || [], count: json.total || json.count || 0 };
+    const companyDocuments = json.company_documents || json.data || [];
+    return { data: companyDocuments, count: json.total || json.count || companyDocuments.length };
   } catch (error) {
     console.error('Exception fetching organization company documents:', error);
     return { data: [], count: 0 };
