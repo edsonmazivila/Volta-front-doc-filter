@@ -22,14 +22,7 @@ paths:
   - "lib/**"
   - "middleware.ts"
 
-# Query filters
+# Run security and quality queries
 queries:
   - uses: security-and-quality
-  - exclude:
-      id:
-        - js/unused-local-variable
-        - js/useless-assignment-to-local
-
-# Disable telemetry warnings
-disable-default-queries: false
 
