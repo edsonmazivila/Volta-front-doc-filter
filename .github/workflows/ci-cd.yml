@@ -220,7 +220,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
-          queries: security-and-quality
+          config-file: ./.github/codeql/codeql-config.yml
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -356,15 +356,15 @@ jobs:
   container-scan:
     name: Container Security Scan
     runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name != 'pull_request' && needs.build.outputs.image-version != ''
+    needs: [build, version]
+    if: github.event_name != 'pull_request' && needs.version.outputs.version_changed == 'true'
     permissions:
       contents: read
       security-events: write
 
     steps:
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.image-version }}
           format: 'sarif'
@@ -378,7 +378,7 @@ jobs:
           category: 'container-scan'
 
       - name: Run Trivy vulnerability scanner (table output)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.image-version }}
           format: 'table'
