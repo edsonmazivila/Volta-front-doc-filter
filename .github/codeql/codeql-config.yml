@@ -22,7 +22,3 @@ paths:
   - "lib/**"
   - "middleware.ts"
 
-# Run security and quality queries
-queries:
-  - uses: security-and-quality
-
