@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { Trans } from '@lingui/react/macro'
@@ -12,14 +12,6 @@ export default function RegistrationSuccessPage() {
 	const companyName = searchParams.get('company')
 	const adminEmail = searchParams.get('email')
 
-	useEffect(() => {
-		// Auto-redirect após 10 segundos
-		const timer = setTimeout(() => {
-			router.push('/login')
-		}, 10000)
-
-		return () => clearTimeout(timer)
-	}, [router])
 
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
@@ -28,17 +20,17 @@ export default function RegistrationSuccessPage() {
 					{/* Success Icon */}
 					<div className="flex justify-center mb-6">
 						<div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center">
-							<svg 
-								className="w-10 h-10 text-green-500" 
-								fill="none" 
-								stroke="currentColor" 
+							<svg
+								className="w-10 h-10 text-green-500"
+								fill="none"
+								stroke="currentColor"
 								viewBox="0 0 24 24"
 							>
-								<path 
-									strokeLinecap="round" 
-									strokeLinejoin="round" 
-									strokeWidth={2} 
-									d="M5 13l4 4L19 7" 
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M5 13l4 4L19 7"
 								/>
 							</svg>
 						</div>
@@ -52,17 +44,17 @@ export default function RegistrationSuccessPage() {
 					{/* Info Alert */}
 					<div className="mb-8 p-6 rounded-lg bg-blue-500/10 border border-blue-500/20">
 						<div className="flex items-start gap-3">
-							<svg 
-								className="w-6 h-6 text-blue-500 mt-0.5 flex-shrink-0" 
-								fill="none" 
-								stroke="currentColor" 
+							<svg
+								className="w-6 h-6 text-blue-500 mt-0.5 flex-shrink-0"
+								fill="none"
+								stroke="currentColor"
 								viewBox="0 0 24 24"
 							>
-								<path 
-									strokeLinecap="round" 
-									strokeLinejoin="round" 
-									strokeWidth={2} 
-									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 								/>
 							</svg>
 							<div className="flex-1">
@@ -71,14 +63,20 @@ export default function RegistrationSuccessPage() {
 								</h3>
 								<p className="text-sm text-muted-foreground mb-4">
 									<Trans>
-										Your organization has been registered and is pending approval from a Platform Owner. 
+										Your organization has been registered and is pending approval from a Platform Owner.
 										You will receive an email notification once your organization is approved.
 									</Trans>
 								</p>
 								<p className="text-sm text-muted-foreground">
 									<Trans>
-										After approval, you&apos;ll be able to log in and start managing your companies, 
-										employees, payroll, and more.
+										Your organization registration has been received and is currently under review by our team.
+										This security check ensures the integrity of our platform.
+									</Trans>
+								</p>
+								<p className="text-sm text-muted-foreground">
+									<Trans>
+										You will receive an email notification as soon as your account is approved.
+										Once approved, you will be able to sign in and access your dashboard.
 									</Trans>
 								</p>
 							</div>
@@ -181,7 +179,7 @@ export default function RegistrationSuccessPage() {
 							className="flex-1 py-3"
 							onClick={() => router.push('/login')}
 						>
-							<Trans>Go to Login</Trans>
+							<Trans>Sign In</Trans>
 						</Button>
 						<Button
 							variant="outline"
@@ -192,10 +190,6 @@ export default function RegistrationSuccessPage() {
 						</Button>
 					</div>
 
-					{/* Auto-redirect notice */}
-					<p className="text-center text-xs text-muted-foreground mt-4">
-						<Trans>You will be automatically redirected to login in 10 seconds...</Trans>
-					</p>
 				</div>
 			</div>
 		</div>
