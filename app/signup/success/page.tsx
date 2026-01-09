@@ -179,7 +179,7 @@ export default function RegistrationSuccessPage() {
 							className="flex-1 py-3"
 							onClick={() => router.push('/login')}
 						>
-							<Trans>Sign In</Trans>
+							<Trans>Go to Login</Trans>
 						</Button>
 						<Button
 							variant="outline"
