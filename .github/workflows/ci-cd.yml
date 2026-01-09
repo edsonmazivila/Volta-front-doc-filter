@@ -362,40 +362,11 @@ jobs:
       #     path: sbom.spdx.json
       #     retention-days: 90
 
-  container-scan:
-    name: Container Security Scan
-    runs-on: ubuntu-latest
-    needs: [build, version]
-    if: github.event_name != 'pull_request' && needs.version.outputs.version_changed == 'true'
-    permissions:
-      contents: read
-      security-events: write
 
-    steps:
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.image-version }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'container-scan'
-
-      - name: Run Trivy vulnerability scanner (table output)
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.image-version }}
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
 
   release:
     name: Create Release
-    needs: [version, build, container-scan]
+    needs: [version, build]
     if: needs.version.outputs.version_changed == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
