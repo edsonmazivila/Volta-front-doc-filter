@@ -164,7 +164,7 @@ export function CompanyLogoUpload({
         onLogoUpdated({ logo_path: '', logo_url: '' })
       }
 
-      setTimeout(() => {
+      refreshTimeoutRef.current = setTimeout(() => {
         router.refresh()
       }, 1000)
     } catch (err) {
@@ -303,7 +303,7 @@ export function CompanyLogoUploadCompact({
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      const timeoutId = refreshTimeoutRef.current // eslint-disable-line react-hooks/exhaustive-deps
+      const timeoutId = refreshTimeoutRef.current
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
@@ -353,7 +353,7 @@ export function CompanyLogoUploadCompact({
         onLogoUpdated(data)
       }
 
-      setTimeout(() => {
+      refreshTimeoutRef.current = setTimeout(() => {
         router.refresh()
       }, 1500)
     } catch (err) {
