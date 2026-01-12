@@ -79,7 +79,13 @@ export class ApiClient {
 
 	private async doFetch(method: string, endpoint: string, body?: unknown, _token?: string, config?: ApiRequestConfig): Promise<Response> {
 		const url = this.buildUrl(endpoint, config)
-		const headers: Record<string, string> = { 'Content-Type': 'application/json', ...config?.headers }
+		const headers: Record<string, string> = { ...config?.headers }
+		
+		// Only add Content-Type for non-FormData requests
+		if (!(body instanceof FormData)) {
+			headers['Content-Type'] = 'application/json'
+		}
+		
 		// Note: Token-based auth removed - use HTTP-only cookies only
 		if (method !== 'GET') {
 			const csrf = getCsrfToken()

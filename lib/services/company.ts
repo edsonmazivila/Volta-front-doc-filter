@@ -21,6 +21,7 @@ export interface CompanyProfile {
   postal_code?: string
   country?: string
   logo?: string
+  logo_path?: string
 }
 
 export interface PaySchedule {
@@ -169,6 +170,14 @@ export const getCompany = cache(async (): Promise<CompanyProfile | null> => {
     if (!data || (!data.id && !data.name)) return null
 
     const company = data
+    
+    console.log('[getCompany] Backend response:', {
+      hasLogoPath: !!company.logo_path,
+      logo_path: company.logo_path,
+      hasLogo: !!company.logo,
+      logo: company.logo
+    })
+    
     return {
       id: String(company.id || ''),
       name: String(company.name || ''),
@@ -184,6 +193,7 @@ export const getCompany = cache(async (): Promise<CompanyProfile | null> => {
       postal_code: company.postal_code || company.zip || company.zip_code || '',
       country: company.country || '',
       logo: company.logo || company.logo_url || '',
+      logo_path: company.logo_path || '',
     }
   } catch {
     return null

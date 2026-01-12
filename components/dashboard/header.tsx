@@ -7,6 +7,7 @@ import { LogoutButton } from '@/components/dashboard/logout-button'
 import { UserCog } from 'lucide-react'
 import { NotificationsMenu } from '@/components/dashboard/notifications-menu'
 import { useSession } from '@/components/auth/session-context'
+import { UserAvatar } from '@/components/profile/user-avatar'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -20,8 +21,27 @@ import { useLingui } from "@lingui/react"
 import { msg } from "@lingui/core/macro"
 
 export function Header({ title }: { title: string }) {
+  const [mounted, setMounted] = React.useState(false)
   const { user, isAuthenticated } = useSession()
   const { i18n } = useLingui()
+  
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  if (!mounted) {
+    // During SSR or initial render, show minimal header
+    return (
+      <header className='sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+        <div className='h-12 px-4 flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <h1 className='text-lg font-medium'>{title}</h1>
+          </div>
+        </div>
+      </header>
+    )
+  }
+  
   return (
     <header className='sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='h-12 px-4 flex items-center justify-between'>
@@ -32,12 +52,16 @@ export function Header({ title }: { title: string }) {
         <div className='flex items-center gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-				<button
-                  aria-label={i18n._(msg`User menu`)}
-                  className='rounded-full h-10 w-10 bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'
-                  suppressHydrationWarning
-                >
-                {(user?.full_name || user?.email || 'U').substring(0,1).toUpperCase()}
+              <button
+                aria-label={i18n._(msg`User menu`)}
+                className='rounded-full focus:outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px]'
+                suppressHydrationWarning
+              >
+                <UserAvatar 
+                  photoUrl={user?.profile_photo_url}
+                  name={user?.full_name || user?.email}
+                  size="md"
+                />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-56'>

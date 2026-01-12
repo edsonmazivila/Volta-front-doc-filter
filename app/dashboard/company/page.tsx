@@ -1,4 +1,4 @@
-import { Header } from '@/components/dashboard/header'
+import { PageLayout } from '@/components/dashboard/page-layout'
 import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { CompanyProfile as CompanyProfileComponent } from '@/components/company/company-profile'
@@ -35,8 +35,7 @@ export default async function CompanyPage() {
     logo: '',
   }
   return (
-    <>
-      <Header title={t`Company Management`} />
+    <PageLayout title={t`Company Management`}>
       <section className='p-2 grid gap-4 overflow-y-auto overflow-x-hidden'>
         <Card className="overflow-hidden">
           <CardHeader title={t`Company Profile`} />
@@ -48,7 +47,7 @@ export default async function CompanyPage() {
           />
         </Card>
       </section>
-    </>
+    </PageLayout>
   )
 }
 

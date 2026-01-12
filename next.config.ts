@@ -10,6 +10,22 @@ const nextConfig: NextConfig = {
   experimental: {
     swcPlugins: [["@lingui/swc-plugin", {}]],
   },
+
+  // Configure external image domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.s3.**.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 's3.**.amazonaws.com',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

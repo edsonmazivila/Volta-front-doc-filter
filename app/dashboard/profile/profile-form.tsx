@@ -1,13 +1,20 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { MeResponse } from '@/lib/services/me'
 import { updateProfileAction } from '@/lib/services/me'
 import { Button } from '@/components/ui'
+import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload'
+// import { UserAvatar } from '@/components/profile/user-avatar'
+import { useSession } from '@/components/auth/session-context'
 
 export function ProfileForm({ initialData }: { initialData: MeResponse | null }) {
+	const router = useRouter()
+	const { user, setUser } = useSession()
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState<string | null>(null)
 	const [isEditing, setIsEditing] = useState(false)
+	const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(initialData?.profile_photo_url || null)
 
 	async function action(formData: FormData) {
 		setError(null)
@@ -21,6 +28,24 @@ export function ProfileForm({ initialData }: { initialData: MeResponse | null })
 		setIsEditing(false)
 	}
 
+	const handlePhotoUploadSuccess = (photoUrl: string) => {
+		setProfilePhotoUrl(photoUrl)
+		setSuccess('Profile photo updated successfully')
+		
+		// Update session with new photo URL
+		if (user) {
+			setUser({
+				...user,
+				profile_photo_url: photoUrl
+			})
+		}
+		
+		// Also refresh the page to ensure everything is in sync
+		setTimeout(() => {
+			router.refresh()
+		}, 500)
+	}
+
 	return (
 		<div className="glass rounded-xl p-6">
 			{error && (
@@ -29,6 +54,15 @@ export function ProfileForm({ initialData }: { initialData: MeResponse | null })
 			{success && (
 				<div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-sm text-green-700 dark:text-green-400">{success}</div>
 			)}
+
+			{/* Profile Photo Section */}
+			<div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+				<ProfilePhotoUpload
+					currentPhotoUrl={profilePhotoUrl}
+					onUploadSuccess={handlePhotoUploadSuccess}
+					locale="pt-PT"
+				/>
+			</div>
 
 			<div className="flex items-center justify-between mb-4">
 				<h2 className="text-base font-semibold">Profile</h2>

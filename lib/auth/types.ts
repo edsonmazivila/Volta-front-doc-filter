@@ -21,6 +21,7 @@ export interface User {
 	is_active: boolean
 	can_login: boolean
 	avatar?: string
+	profile_photo_url?: string
 	created_at: string
 	updated_at: string
 }
@@ -34,6 +35,7 @@ export interface ClientUser {
 	organization_id: string | null
 	company_id: string | null
 	avatar?: string
+	profile_photo_url?: string
 	created_at: string
 	updated_at: string
 }

@@ -8,6 +8,7 @@ import { revalidateEntityMutation } from '@/lib/cache-utils'
 export interface MeResponse {
 	email: string
 	full_name: string
+	profile_photo_url?: string | null
 	address_line1?: string | null
 	address_line2?: string | null
 	city?: string | null
@@ -36,6 +37,7 @@ export const getProfile = cache(async (): Promise<MeResponse | null> => {
 	return {
 		email: String(user.email || ''),
 		full_name: String(user.full_name || ''),
+		profile_photo_url: user.profile_photo_url ?? null,
 		address_line1: user.address_line1 ?? null,
 		address_line2: user.address_line2 ?? null,
 		city: user.city ?? null,
