@@ -56,7 +56,7 @@ export function CompanyLogoUpload({
     // Client-side validation
     const validationError = validateCompanyLogo(file)
     if (validationError) {
-      const errorMessage = validationError === 'LOGO_TOO_LARGE'
+      const errorMessage = validationError === 'FILE_TOO_LARGE'
         ? i18n._(msg`Logo must be smaller than 5MB`)
         : i18n._(msg`Only PNG and JPG images are allowed`)
       toast.error(errorMessage)
@@ -319,7 +319,7 @@ export function CompanyLogoUploadCompact({
   const handleFileSelect = async (file: File) => {
     const validationError = validateCompanyLogo(file)
     if (validationError) {
-      const errorMessage = validationError === 'LOGO_TOO_LARGE'
+      const errorMessage = validationError === 'FILE_TOO_LARGE'
         ? i18n._(msg`Logo must be smaller than 5MB`)
         : i18n._(msg`Only PNG and JPG images are allowed`)
       toast.error(errorMessage)
