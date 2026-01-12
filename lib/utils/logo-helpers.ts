@@ -64,13 +64,13 @@ export function validateCompanyLogo(file: File): string | null {
   // Max size: 5MB
   const MAX_SIZE = 5 * 1024 * 1024
   if (file.size > MAX_SIZE) {
-    return 'Logo must be smaller than 5MB'
+    return 'LOGO_TOO_LARGE'
   }
   
-  // Allowed types: PNG, JPG, JPEG
-  const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg']
+  // Allowed types: PNG, JPEG
+  const ALLOWED_TYPES = ['image/png', 'image/jpeg']
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return 'Only PNG and JPG images are allowed'
+    return 'LOGO_INVALID_TYPE'
   }
   
   return null // Valid

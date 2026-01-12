@@ -11,7 +11,7 @@
  * - Error handling with i18n
  */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { enhancedApiClient, isApiError } from "@/lib/http/enhanced-api-client";
 import { useApiError } from "@/lib/hooks/useApiError";
 import { toast } from "sonner";
@@ -39,6 +39,11 @@ export function ProfilePhotoUpload({
   const [photoUrl, setPhotoUrl] = useState<string | null>(currentPhotoUrl || null);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync state with prop changes
+  useEffect(() => {
+    setPhotoUrl(currentPhotoUrl || null);
+  }, [currentPhotoUrl]);
 
   const { handleError } = useApiError({
     locale,

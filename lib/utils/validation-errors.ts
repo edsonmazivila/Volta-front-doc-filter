@@ -86,8 +86,8 @@ export function clearFieldError(
   errors: Record<string, string>,
   fieldName: string
 ): Record<string, string> {
-  const { [fieldName]: _removed, ...rest } = errors;
-  void _removed; // Suppress unused var warning
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { [fieldName]: _, ...rest } = errors;
   return rest;
 }
 

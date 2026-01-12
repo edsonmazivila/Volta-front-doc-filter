@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Upload, X, Loader2 } from 'lucide-react'
@@ -34,6 +34,17 @@ export function CompanyLogoUpload({
   const [logoPath, setLogoPath] = useState<string | null>(currentLogoPath || null)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      const timeoutId = refreshTimeoutRef.current
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [])
 
   // Use local state if set, otherwise fall back to props (but respect null for removal)
   const displayUrl = getCompanyLogoUrl(
@@ -45,7 +56,10 @@ export function CompanyLogoUpload({
     // Client-side validation
     const validationError = validateCompanyLogo(file)
     if (validationError) {
-      toast.error(validationError)
+      const errorMessage = validationError === 'LOGO_TOO_LARGE'
+        ? i18n._(msg`Logo must be smaller than 5MB`)
+        : i18n._(msg`Only PNG and JPG images are allowed`)
+      toast.error(errorMessage)
       return
     }
 
@@ -61,8 +75,14 @@ export function CompanyLogoUpload({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || errorData.message || 'Upload failed')
+        let errorMessage = 'Upload failed'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch {
+          // If JSON parsing fails, use default message
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -78,8 +98,8 @@ export function CompanyLogoUpload({
         onLogoUpdated(data)
       }
 
-      // Refresh server-side data using Next.js router
-      setTimeout(() => {
+      // Refresh server-side data using Next.js router with cleanup
+      refreshTimeoutRef.current = setTimeout(() => {
         router.refresh()
       }, 1500)
     } catch (err) {
@@ -123,10 +143,33 @@ export function CompanyLogoUpload({
     fileInputRef.current?.click()
   }
 
-  const handleRemove = (e: React.MouseEvent) => {
+  const handleRemove = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    setLogoPath(null)
-    setLogoUrl(null)
+    
+    try {
+      const response = await fetch('/api/company/logo', {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to remove logo')
+      }
+
+      setLogoPath(null)
+      setLogoUrl(null)
+      toast.success(i18n._(msg`Logo removed successfully`))
+      
+      if (onLogoUpdated) {
+        onLogoUpdated({ logo_path: '', logo_url: '' })
+      }
+
+      setTimeout(() => {
+        router.refresh()
+      }, 1000)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to remove logo')
+    }
   }
 
   return (
@@ -151,7 +194,7 @@ export function CompanyLogoUpload({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/jpg"
+          accept="image/png,image/jpeg"
           onChange={handleChange}
           disabled={disabled || uploading}
           className="hidden"
@@ -249,11 +292,23 @@ export function CompanyLogoUploadCompact({
   onLogoUpdated,
   disabled = false,
 }: CompanyLogoUploadCompactProps) {
+  const router = useRouter()
   const { i18n } = useLingui()
   const [uploading, setUploading] = useState(false)
   const [logoUrl, setLogoUrl] = useState<string | null>(currentLogoUrl || null)
   const [logoPath, setLogoPath] = useState<string | null>(currentLogoPath || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      const timeoutId = refreshTimeoutRef.current // eslint-disable-line react-hooks/exhaustive-deps
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [])
 
   // Use local state if set, otherwise fall back to props (but respect null for removal)
   const displayUrl = getCompanyLogoUrl(
@@ -264,7 +319,10 @@ export function CompanyLogoUploadCompact({
   const handleFileSelect = async (file: File) => {
     const validationError = validateCompanyLogo(file)
     if (validationError) {
-      toast.error(validationError)
+      const errorMessage = validationError === 'LOGO_TOO_LARGE'
+        ? i18n._(msg`Logo must be smaller than 5MB`)
+        : i18n._(msg`Only PNG and JPG images are allowed`)
+      toast.error(errorMessage)
       return
     }
 
@@ -294,8 +352,11 @@ export function CompanyLogoUploadCompact({
       if (onLogoUpdated) {
         onLogoUpdated(data)
       }
+
+      setTimeout(() => {
+        router.refresh()
+      }, 1500)
     } catch (err) {
-      console.error('Logo upload error:', err)
       toast.error(err instanceof Error ? err.message : 'Failed to upload logo')
     } finally {
       setUploading(false)
@@ -315,10 +376,11 @@ export function CompanyLogoUploadCompact({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/png,image/jpeg,image/jpg"
+        accept="image/png,image/jpeg"
         onChange={handleChange}
         disabled={disabled || uploading}
         className="hidden"
+        aria-label="Upload company logo"
       />
 
       <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
