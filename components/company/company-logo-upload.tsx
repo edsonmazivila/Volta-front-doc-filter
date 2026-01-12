@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Upload, X, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
@@ -26,6 +27,7 @@ export function CompanyLogoUpload({
   className,
   disabled = false,
 }: CompanyLogoUploadProps) {
+  const router = useRouter()
   const { i18n } = useLingui()
   const [uploading, setUploading] = useState(false)
   const [logoUrl, setLogoUrl] = useState<string | null>(currentLogoUrl || null)
@@ -53,12 +55,6 @@ export function CompanyLogoUpload({
       const formData = new FormData()
       formData.append('logo', file)
 
-      console.log('[CompanyLogoUpload] Uploading logo...', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      })
-
       const response = await fetch('/api/company/logo', {
         method: 'POST',
         body: formData,
@@ -66,12 +62,10 @@ export function CompanyLogoUpload({
 
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('[CompanyLogoUpload] Upload failed:', errorData)
         throw new Error(errorData.error || errorData.message || 'Upload failed')
       }
 
       const data = await response.json()
-      console.log('[CompanyLogoUpload] Upload successful, backend response:', data)
 
       // Update local state
       setLogoPath(data.logo_path)
@@ -84,13 +78,11 @@ export function CompanyLogoUpload({
         onLogoUpdated(data)
       }
 
-      // Trigger page reload to update company data after a short delay
+      // Refresh server-side data using Next.js router
       setTimeout(() => {
-        console.log('[CompanyLogoUpload] Reloading page...')
-        window.location.reload()
+        router.refresh()
       }, 1500)
     } catch (err) {
-      console.error('[CompanyLogoUpload] Logo upload error:', err)
       toast.error(err instanceof Error ? err.message : 'Failed to upload logo')
     } finally {
       setUploading(false)

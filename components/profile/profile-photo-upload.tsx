@@ -84,18 +84,10 @@ export function ProfilePhotoUpload({
       const formData = new FormData();
       formData.append("photo", file);
 
-      console.log('[ProfilePhotoUpload] Uploading photo...', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      });
-
       const response = await enhancedApiClient.post<{ photo_url: string }>(
         "/api/auth/profile/photo",
         formData
       );
-
-      console.log('[ProfilePhotoUpload] Upload successful:', response);
 
       setPhotoUrl(response.photo_url);
       

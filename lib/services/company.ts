@@ -171,13 +171,6 @@ export const getCompany = cache(async (): Promise<CompanyProfile | null> => {
 
     const company = data
     
-    console.log('[getCompany] Backend response:', {
-      hasLogoPath: !!company.logo_path,
-      logo_path: company.logo_path,
-      hasLogo: !!company.logo,
-      logo: company.logo
-    })
-    
     return {
       id: String(company.id || ''),
       name: String(company.name || ''),
