@@ -16,13 +16,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.s3.**.amazonaws.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 's3.**.amazonaws.com',
-        pathname: '/**',
+        hostname: 'django-project-tmz.s3.us-east-2.amazonaws.com',
+        pathname: '/nexupayroll/**',
       },
     ],
   },

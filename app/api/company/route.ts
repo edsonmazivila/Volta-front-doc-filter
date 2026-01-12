@@ -38,7 +38,8 @@ export async function GET() {
 		const data = await response.json()
 		console.log('[Company Proxy] Success, has logo_path:', !!data?.data?.logo_path || !!data?.logo_path)
 		
-		return NextResponse.json({ success: true, data })
+		// Return flattened response (backend already returns { data: {...} })
+		return NextResponse.json({ success: true, ...data })
 	} catch (error) {
 		console.error('[Company Proxy] Exception:', error)
 		return NextResponse.json(

@@ -22,7 +22,7 @@ export function CompanyLogoDisplay({ className = '', size = 80 }: CompanyLogoDis
     // Fetch company data to get logo
     async function fetchCompanyData() {
       try {
-        const response = await fetch('/api/proxy?endpoint=/api/company', {
+        const response = await fetch('/api/company', {
           credentials: 'include',
         })
 
@@ -102,7 +102,7 @@ export function CompanyLogoCompact() {
   React.useEffect(() => {
     async function fetchCompanyData() {
       try {
-        const response = await fetch('/api/proxy?endpoint=/api/company', {
+        const response = await fetch('/api/company', {
           credentials: 'include',
         })
 

@@ -28,7 +28,10 @@ export function getCompanyLogoUrl(
   // For local storage, construct download URL
   if (logoPath.startsWith('uploads/')) {
     const filename = logoPath.split('/').pop()
-    return `/api/company/logo/${filename}`
+    if (!filename) {
+      return '/logo/default-company-logo.png'
+    }
+    return `/api/company/logo/${encodeURIComponent(filename)}`
   }
 
   // Fallback

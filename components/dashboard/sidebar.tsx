@@ -402,7 +402,7 @@ function SidebarDrawer() {
           {filteredSections.map((section) => (
             <div key={section.title}>
               <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-           CompanyLogoCompact /
+                {section.title}
               </h3>
               <div className="space-y-1">
                 {section.items.map((item) => {

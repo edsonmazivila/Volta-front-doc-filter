@@ -16,15 +16,32 @@ export async function GET(
 
 		const { filename } = await params
 
-		// Forward the request to the backend API
+		// Validate filename to prevent path traversal
+		if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+			return NextResponse.json(
+				{ error: 'Invalid filename' },
+				{ status: 400 }
+			)
+		}
+
+		// Forward the request to the backend API with manual redirect
 		const response = await fetch(
 			`${API_BASE_URL}/api/auth/profile/photo/${filename}`,
 			{
 				headers: {
 					Cookie: `${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken.value}`,
 				},
+				redirect: 'manual', // Handle redirects manually
 			}
 		)
+
+		// For S3, backend will redirect to presigned URL
+		if (response.status === 302 || response.status === 301) {
+			const location = response.headers.get('Location')
+			if (location) {
+				return NextResponse.redirect(location)
+			}
+		}
 
 		if (!response.ok) {
 			return NextResponse.json(
@@ -33,16 +50,12 @@ export async function GET(
 			)
 		}
 
-		// For S3, backend will redirect to presigned URL
-		if (response.redirected || response.status === 302) {
-			return NextResponse.redirect(response.url)
-		}
-
 		// For local storage, stream the file
 		const blob = await response.blob()
 		const headers = new Headers()
 		headers.set('Content-Type', response.headers.get('Content-Type') || 'image/png')
-		headers.set('Cache-Control', 'public, max-age=3600')
+		// Use private cache for user-specific photos
+		headers.set('Cache-Control', 'private, max-age=3600')
 
 		return new NextResponse(blob, { headers })
 	} catch (error) {

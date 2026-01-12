@@ -17,18 +17,28 @@ export async function GET(
 
 		const { filename } = await params
 		
+		// Validate filename to prevent path traversal
+		if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+			console.error('[Company Logo GET Proxy] Invalid filename:', filename)
+			return NextResponse.json(
+				{ error: 'Invalid filename' },
+				{ status: 400 }
+			)
+		}
+		
 		console.log('[Company Logo GET Proxy] Fetching logo:', {
 			filename,
 			url: `${API_BASE_URL}/api/company/logo/${filename}`
 		})
 
-		// Forward the request to the backend API
+		// Forward the request to the backend API with manual redirect
 		const response = await fetch(
 			`${API_BASE_URL}/api/company/logo/${filename}`,
 			{
 				headers: {
 					Cookie: `${COOKIE_NAMES.SESSION_TOKEN}=${sessionToken.value}`,
 				},
+				redirect: 'manual', // Handle redirects manually
 			}
 		)
 
@@ -39,18 +49,20 @@ export async function GET(
 			contentType: response.headers.get('Content-Type')
 		})
 
+		// For S3, backend will redirect to presigned URL
+		if (response.status === 302 || response.status === 301) {
+			const location = response.headers.get('Location')
+			if (location) {
+				return NextResponse.redirect(location)
+			}
+		}
+
 		if (!response.ok) {
 			console.error('[Company Logo GET Proxy] Not OK response')
 			return NextResponse.json(
 				{ error: 'Logo not found' },
 				{ status: response.status }
 			)
-		}
-
-		// For S3, backend will redirect to presigned URL
-		if (response.redirected || response.status === 302) {
-			console.log('[Company Logo GET Proxy] Redirecting to:', response.url)
-			return NextResponse.redirect(response.url)
 		}
 
 		// For local storage, stream the file

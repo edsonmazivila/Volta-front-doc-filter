@@ -33,7 +33,11 @@ export function CompanyLogoUpload({
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const displayUrl = getCompanyLogoUrl(logoPath || currentLogoPath, logoUrl || currentLogoUrl)
+  // Use local state if set, otherwise fall back to props (but respect null for removal)
+  const displayUrl = getCompanyLogoUrl(
+    logoPath !== null ? logoPath : currentLogoPath,
+    logoUrl !== null ? logoUrl : currentLogoUrl
+  )
 
   const handleFileSelect = async (file: File) => {
     // Client-side validation
@@ -187,6 +191,7 @@ export function CompanyLogoUpload({
               </div>
               {!disabled && (
                 <button
+                  type="button"
                   onClick={handleRemove}
                   className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                   aria-label="Remove logo"
@@ -258,7 +263,11 @@ export function CompanyLogoUploadCompact({
   const [logoPath, setLogoPath] = useState<string | null>(currentLogoPath || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const displayUrl = getCompanyLogoUrl(logoPath || currentLogoPath, logoUrl || currentLogoUrl)
+  // Use local state if set, otherwise fall back to props (but respect null for removal)
+  const displayUrl = getCompanyLogoUrl(
+    logoPath !== null ? logoPath : currentLogoPath,
+    logoUrl !== null ? logoUrl : currentLogoUrl
+  )
 
   const handleFileSelect = async (file: File) => {
     const validationError = validateCompanyLogo(file)

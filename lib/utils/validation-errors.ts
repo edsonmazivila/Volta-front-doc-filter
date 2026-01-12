@@ -87,7 +87,7 @@ export function clearFieldError(
   fieldName: string
 ): Record<string, string> {
   const { [fieldName]: _removed, ...rest } = errors;
-  _removed; // Suppress unused var warning
+  void _removed; // Suppress unused var warning
   return rest;
 }
 

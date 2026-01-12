@@ -7,6 +7,7 @@
  * with automatic fallback to initials or default avatar.
  */
 
+import React from "react";
 import Image from "next/image";
 import { User } from "lucide-react";
 
@@ -37,7 +38,8 @@ const SIZE_PX = {
 function getInitials(name?: string | null): string {
   if (!name) return "";
   
-  const parts = name.trim().split(" ");
+  const parts = name.trim().split(" ").filter(p => p.length > 0);
+  if (parts.length === 0) return "";
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }
@@ -72,25 +74,30 @@ export function UserAvatar({
   size = "md",
   className = "" 
 }: UserAvatarProps) {
+  const [imageError, setImageError] = React.useState(false);
   const sizeClass = SIZE_MAP[size];
   const sizePx = SIZE_PX[size];
   const initials = getInitials(name);
   const bgColor = getBackgroundColor(name);
 
+  // Reset error state when photoUrl changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [photoUrl]);
+
   return (
     <div 
       className={`relative ${sizeClass} rounded-full overflow-hidden flex-shrink-0 ${className}`}
     >
-      {photoUrl ? (
+      {photoUrl && !imageError ? (
         <Image
           src={photoUrl}
           alt={name || "User"}
           width={sizePx}
           height={sizePx}
           className="object-cover w-full h-full"
-          onError={(e) => {
-            // Hide image on error and show fallback
-            (e.target as HTMLImageElement).style.display = "none";
+          onError={() => {
+            setImageError(true);
           }}
         />
       ) : initials ? (

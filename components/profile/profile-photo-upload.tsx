@@ -27,7 +27,7 @@ interface ProfilePhotoUploadProps {
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg"];
+const ALLOWED_TYPES = ["image/png", "image/jpeg"];
 
 export function ProfilePhotoUpload({
   currentPhotoUrl,

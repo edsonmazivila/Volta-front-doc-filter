@@ -14,20 +14,25 @@ export async function POST(request: NextRequest) {
 
 		// Get the form data from the request - this reads the multipart data
 		const formData = await request.formData()
+		const photo = formData.get('photo')
+		
+		// Validate that photo exists and is a file
+		if (!photo || !(photo instanceof File)) {
+			console.error('[Photo Upload Proxy] Invalid or missing photo file')
+			return NextResponse.json(
+				{ error: 'Photo file is required' },
+				{ status: 400 }
+			)
+		}
 		
 		// Create a new FormData to send to backend
 		const backendFormData = new FormData()
-		const photo = formData.get('photo')
-		
-		if (photo && photo instanceof File) {
-			backendFormData.append('photo', photo)
-		}
+		backendFormData.append('photo', photo)
 		
 		console.log('[Photo Upload Proxy] Uploading to backend:', {
 			url: `${API_BASE_URL}/api/auth/profile/photo`,
-			hasPhoto: !!photo,
-			photoName: photo instanceof File ? photo.name : 'N/A',
-			photoSize: photo instanceof File ? photo.size : 'N/A'
+			photoName: photo.name,
+			photoSize: photo.size
 		})
 
 		// Forward the request to the backend API
@@ -52,7 +57,7 @@ export async function POST(request: NextRequest) {
 				errorText
 			})
 			
-			let errorData: { error?: string; message?: string; status?: number; code?: string; timestamp?: string } = { error: 'Failed to upload photo' }
+			let errorData: { error?: string; message?: string; status?: number; code?: string; timestamp?: string }
 			try {
 				errorData = JSON.parse(errorText)
 			} catch {
