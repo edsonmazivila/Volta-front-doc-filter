@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { API_BASE_URL, COOKIE_NAMES } from '@/lib/config'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ filename: string }> }
