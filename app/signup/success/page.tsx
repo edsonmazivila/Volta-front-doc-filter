@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { Trans } from '@lingui/react/macro'
@@ -12,14 +11,15 @@ export default function RegistrationSuccessPage() {
 	const companyName = searchParams.get('company')
 	const adminEmail = searchParams.get('email')
 
-	useEffect(() => {
-		// Auto-redirect após 10 segundos
-		const timer = setTimeout(() => {
-			router.push('/login')
-		}, 10000)
+	// Removed auto-redirect - user should manually navigate to login after reading the approval message
+	// useEffect(() => {
+	// 	// Auto-redirect após 10 segundos
+	// 	const timer = setTimeout(() => {
+	// 		router.push('/login')
+	// 	}, 10000)
 
-		return () => clearTimeout(timer)
-	}, [router])
+	// 	return () => clearTimeout(timer)
+	// }, [router])
 
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
@@ -191,11 +191,6 @@ export default function RegistrationSuccessPage() {
 							<Trans>Back to Home</Trans>
 						</Button>
 					</div>
-
-					{/* Auto-redirect notice */}
-					<p className="text-center text-xs text-muted-foreground mt-4">
-						<Trans>You will be automatically redirected to login in 10 seconds...</Trans>
-					</p>
 				</div>
 			</div>
 		</div>

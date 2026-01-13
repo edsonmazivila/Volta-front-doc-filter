@@ -152,6 +152,9 @@ export function ProfilePhotoUpload({
     inputRef.current?.click();
   };
 
+  // Check if URL is a presigned S3 URL (has X-Amz- query params)
+  const isPresignedUrl = photoUrl?.includes('X-Amz-Algorithm=');
+
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
       {/* Photo Preview */}
@@ -165,13 +168,23 @@ export function ProfilePhotoUpload({
         onDrop={handleDrop}
       >
         {photoUrl ? (
-          <Image
-            src={photoUrl}
-            alt="Profile photo"
-            fill
-            className="object-cover"
-            priority
-          />
+          isPresignedUrl ? (
+            // Use regular img tag for presigned URLs to avoid Next.js Image Optimization caching
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={photoUrl}
+              alt="Profile photo"
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <Image
+              src={photoUrl}
+              alt="Profile photo"
+              fill
+              className="object-cover"
+              priority
+            />
+          )
         ) : (
           <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <Upload className="w-8 h-8 text-gray-400" />

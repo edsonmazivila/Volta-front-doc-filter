@@ -85,21 +85,37 @@ export function UserAvatar({
     setImageError(false);
   }, [photoUrl]);
 
+  // Check if URL is a presigned S3 URL (has X-Amz- query params)
+  const isPresignedUrl = photoUrl?.includes('X-Amz-Algorithm=');
+
   return (
     <div 
       className={`relative ${sizeClass} rounded-full overflow-hidden flex-shrink-0 ${className}`}
     >
       {photoUrl && !imageError ? (
-        <Image
-          src={photoUrl}
-          alt={name || "User"}
-          width={sizePx}
-          height={sizePx}
-          className="object-cover w-full h-full"
-          onError={() => {
-            setImageError(true);
-          }}
-        />
+        isPresignedUrl ? (
+          // Use regular img tag for presigned URLs to avoid Next.js Image Optimization caching
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={photoUrl}
+            alt={name || "User"}
+            className="object-cover w-full h-full"
+            onError={() => {
+              setImageError(true);
+            }}
+          />
+        ) : (
+          <Image
+            src={photoUrl}
+            alt={name || "User"}
+            width={sizePx}
+            height={sizePx}
+            className="object-cover w-full h-full"
+            onError={() => {
+              setImageError(true);
+            }}
+          />
+        )
       ) : initials ? (
         <div 
           className={`w-full h-full ${bgColor} flex items-center justify-center text-white font-semibold`}

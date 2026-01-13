@@ -46,6 +46,10 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Compile Lingui translations BEFORE building
+# This ensures all i18n messages are compiled to .ts files
+RUN npm run i18n:compile
+
 # Build the application
 # Note: Turbopack is used for faster builds
 RUN npm run build
