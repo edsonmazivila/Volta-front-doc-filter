@@ -76,12 +76,12 @@ export function CompanyLogoDisplay({ className = '', size = 80 }: CompanyLogoDis
   // Show company logo
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size * 0.75 }}>
-      <Image
+      {/* Use regular img tag for same-origin API routes to ensure cookies are sent */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={logoUrl}
         alt={companyName}
-        fill
-        className="object-contain"
-        unoptimized={logoUrl.startsWith('/api/')}
+        className="object-contain w-full h-full"
         onError={() => {
           console.error('[CompanyLogoDisplay] Failed to load logo:', logoUrl)
           // Fallback to platform logo on error

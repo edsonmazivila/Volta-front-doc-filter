@@ -10,15 +10,20 @@ export async function GET(
 	{ params }: { params: Promise<{ filename: string }> }
 ) {
 	try {
+		console.log('[Company Logo GET Proxy] Request received')
 		const cookieStore = await cookies()
 		const sessionToken = cookieStore.get(COOKIE_NAMES.SESSION_TOKEN)
+		
+		console.log('[Company Logo GET Proxy] Session token:', sessionToken ? 'EXISTS' : 'MISSING')
+		console.log('[Company Logo GET Proxy] All cookies:', cookieStore.getAll().map(c => c.name))
 
 		if (!sessionToken) {
-			console.error('[Company Logo GET Proxy] No session token')
+			console.error('[Company Logo GET Proxy] No session token - returning 401')
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
 		const { filename } = await params
+		console.log('[Company Logo GET Proxy] Processing filename:', filename)
 		
 		// Validate filename to prevent path traversal
 		if (!filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
