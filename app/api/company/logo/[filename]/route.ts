@@ -57,10 +57,11 @@ export async function GET(
 			contentType: response.headers.get('Content-Type')
 		})
 
-		// For S3, backend will redirect to presigned URL
-		if (response.status === 302 || response.status === 301) {
+		// For S3, backend will redirect to presigned URL (301, 302, 307, 308)
+		if (response.status === 301 || response.status === 302 || response.status === 307 || response.status === 308) {
 			const location = response.headers.get('Location')
 			if (location) {
+				console.log('[Company Logo GET Proxy] Redirecting to:', location)
 				return NextResponse.redirect(location)
 			}
 		}
