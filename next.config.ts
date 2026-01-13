@@ -10,6 +10,17 @@ const nextConfig: NextConfig = {
   experimental: {
     swcPlugins: [["@lingui/swc-plugin", {}]],
   },
+
+  // Configure external image domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'django-project-tmz.s3.us-east-2.amazonaws.com',
+        pathname: '/nexupayroll/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

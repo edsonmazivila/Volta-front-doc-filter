@@ -14,10 +14,9 @@ import {
   updateLeavePolicyAction,
   deleteLeavePolicyAction,
 } from '@/lib/services/company'
-import { Edit, Trash2, Upload } from 'lucide-react'
+import { Edit, Trash2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import Image from 'next/image'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,6 +28,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
+import { CompanyLogoUploadCompact } from '@/components/company/company-logo-upload'
 import type { CompanyDocumentsResponse } from '@/lib/services/company'
 import { toast } from 'sonner'
 import { useLingui } from '@lingui/react'
@@ -50,6 +50,7 @@ interface CompanyProfileProps {
 		postal_code?: string
 		country?: string
 		logo?: string
+		logo_path?: string
 	}
 	paySchedules: { id: string, name: string, frequency: string, start_date: string, is_active: boolean }[]
 	leavePolicies: { id: string, name: string, description?: string, policy_type: string, leave_type: string, annual_allocation_days: number, accrual_rate: number, accrual_frequency: string, allow_carry_over: boolean, max_carry_over_days: number, carry_over_expiry_months: number, min_request_days: number, max_request_days: number, max_consecutive_days: number, min_advance_notice_days: number, requires_manager_approval: boolean, requires_hr_approval: boolean, auto_approval_threshold: number, allow_half_days: boolean, allow_negative_balance: boolean, effective_date: string, is_active: boolean }[]
@@ -284,35 +285,11 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 					</div>
 					<div className='mt-3 grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6'>
 						<div className='flex flex-col items-start gap-3'>
-							{company.logo ? (
-								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden'>
-									<Image src={company.logo} alt={i18n._(msg`Company Logo`)} className='max-h-full max-w-full object-contain' width={96} height={96} />
-								</div>
-							) : (
-								<div className='h-24 w-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted-foreground'>{i18n._(msg`Logo`)}</div>
-							)}
-							<label className='text-xs text-muted-foreground inline-flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors'>
-								<Upload className='h-3.5 w-3.5' />
-								<span>{i18n._(msg`Upload logo`)}</span>
-								<input type='file' accept='image/*' className='hidden' onChange={async (e)=>{
-									const file = e.target.files?.[0]
-									if (!file) return
-									try {
-										const formData = new FormData()
-										formData.append('logo', file)
-										const res = await fetch('/api/company/logo', { method: 'POST', body: formData, credentials: 'include' })
-										if (!res.ok) {
-											const error = await res.json().catch(() => ({}))
-											toast.error(error.error || i18n._(msg`Failed to upload logo`))
-											return
-										}
-										toast.success(i18n._(msg`Logo uploaded successfully`))
-										router.refresh()
-									} catch {
-										toast.error(i18n._(msg`Failed to upload logo`))
-									}
-								}} />
-							</label>
+							<CompanyLogoUploadCompact
+								currentLogoPath={company.logo_path}
+								companyName={company.name}
+								onLogoUpdated={() => router.refresh()}
+							/>
 						</div>
 						<div className='grid grid-cols-1 md:grid-cols-2 gap-3 text-foreground'>
 							<div><div className='text-xs text-muted-foreground'>{i18n._(msg`Company Name`)}</div><div>{company.name || '—'}</div></div>

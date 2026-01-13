@@ -50,6 +50,7 @@ export interface Company {
 	postal_code?: string
 	phone?: string
 	website?: string
+	logo_path?: string
 	is_active: boolean
 	created_at: string
 	updated_at: string

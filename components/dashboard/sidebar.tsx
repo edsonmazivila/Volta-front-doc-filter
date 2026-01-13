@@ -32,7 +32,7 @@ import {
 import { Button } from "@/components/ui";
 import { useSession } from "@/components/auth/session-context";
 import { usePermissions } from "@/lib/rbac/hooks";
-import Image from "next/image";
+import { CompanyLogoDisplay } from "@/components/company/company-logo-display";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
 
@@ -297,22 +297,7 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex w-64 shrink-0 border-r border-border bg-background/50 backdrop-blur flex-col">
       <div className="p-1 border-b border-border">
-        {/* Logo para light mode */}
-        <Image
-          src="/logo/SVG/full-logo-purple-black-2000x1500.svg"
-          alt="Volta HR"
-          width={100}
-          height={100}
-          className="h-auto w-20 dark:hidden"
-        />
-        {/* Logo para dark mode */}
-        <Image
-          src="/logo/SVG/full-logo-purple-white-2000x1500.svg"
-          alt="Volta HR"
-          width={100}
-          height={100}
-          className="h-auto w-20 hidden dark:block"
-        />
+        <CompanyLogoDisplay size={80} className="w-20" />
       </div>
 
 

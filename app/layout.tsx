@@ -77,6 +77,7 @@ export default async function RootLayout({
     organization_id: user.organization_id,
     company_id: user.company_id,
     avatar: user.avatar,
+    profile_photo_url: user.profile_photo_url,
     created_at: user.created_at,
     updated_at: user.updated_at
   } : null
