@@ -30,8 +30,9 @@ export function CompanyLogoUpload({
   const router = useRouter()
   const { i18n } = useLingui()
   const [uploading, setUploading] = useState(false)
-  const [logoUrl, setLogoUrl] = useState<string | null>(currentLogoUrl || null)
-  const [logoPath, setLogoPath] = useState<string | null>(currentLogoPath || null)
+  // Tri-state: undefined = not overridden, null = explicitly removed, string = has value
+  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(undefined)
+  const [logoPath, setLogoPath] = useState<string | null | undefined>(undefined)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -46,10 +47,10 @@ export function CompanyLogoUpload({
     }
   }, [])
 
-  // Use local state if set, otherwise fall back to props (but respect null for removal)
+  // Use local state if set, otherwise fall back to props
   const displayUrl = getCompanyLogoUrl(
-    logoPath !== null ? logoPath : currentLogoPath,
-    logoUrl !== null ? logoUrl : currentLogoUrl
+    logoPath !== undefined ? logoPath : currentLogoPath,
+    logoUrl !== undefined ? logoUrl : currentLogoUrl
   )
 
   const handleFileSelect = async (file: File) => {
@@ -121,6 +122,8 @@ export function CompanyLogoUpload({
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (disabled || uploading) return
+    
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true)
     } else if (e.type === 'dragleave') {
@@ -132,6 +135,8 @@ export function CompanyLogoUpload({
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
+
+    if (disabled || uploading) return
 
     const file = e.dataTransfer.files?.[0]
     if (file) {
@@ -182,6 +187,8 @@ export function CompanyLogoUpload({
     <div className={cn('space-y-4', className)}>
       {/* Logo Preview & Upload Area */}
       <div
+        role="button"
+        tabIndex={disabled || uploading ? -1 : 0}
         className={cn(
           'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors',
           dragActive
@@ -196,6 +203,13 @@ export function CompanyLogoUpload({
         onDragOver={handleDrag}
         onDrop={handleDrop}
         onClick={!disabled ? handleClick : undefined}
+        onKeyDown={(e) => {
+          if (!disabled && !uploading && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault()
+            handleClick()
+          }
+        }}
+        aria-label="Upload company logo"
       >
         <input
           ref={fileInputRef}
@@ -301,8 +315,9 @@ export function CompanyLogoUploadCompact({
   const router = useRouter()
   const { i18n } = useLingui()
   const [uploading, setUploading] = useState(false)
-  const [logoUrl, setLogoUrl] = useState<string | null>(currentLogoUrl || null)
-  const [logoPath, setLogoPath] = useState<string | null>(currentLogoPath || null)
+  // Tri-state: undefined = not overridden, null = explicitly removed, string = has value
+  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(undefined)
+  const [logoPath, setLogoPath] = useState<string | null | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -316,10 +331,10 @@ export function CompanyLogoUploadCompact({
     }
   }, [])
 
-  // Use local state if set, otherwise fall back to props (but respect null for removal)
+  // Use local state if set, otherwise fall back to props
   const displayUrl = getCompanyLogoUrl(
-    logoPath !== null ? logoPath : currentLogoPath,
-    logoUrl !== null ? logoUrl : currentLogoUrl
+    logoPath !== undefined ? logoPath : currentLogoPath,
+    logoUrl !== undefined ? logoUrl : currentLogoUrl
   )
 
   const handleFileSelect = async (file: File) => {
