@@ -152,8 +152,14 @@ export function CompanyLogoUpload({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to remove logo')
+        let errorMessage = 'Failed to remove logo'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch {
+          // If JSON parsing fails, use default message
+        }
+        throw new Error(errorMessage)
       }
 
       setLogoPath(null)
@@ -338,8 +344,14 @@ export function CompanyLogoUploadCompact({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || errorData.message || 'Upload failed')
+        let errorMessage = 'Upload failed'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch {
+          // If JSON parsing fails, use default message
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
