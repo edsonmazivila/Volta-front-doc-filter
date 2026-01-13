@@ -10,6 +10,7 @@
 import React from "react";
 import Image from "next/image";
 import { User } from "lucide-react";
+import { isS3PresignedUrl } from "@/lib/utils/image-helpers";
 
 interface UserAvatarProps {
   photoUrl?: string | null;
@@ -85,8 +86,8 @@ export function UserAvatar({
     setImageError(false);
   }, [photoUrl]);
 
-  // Check if URL is a presigned S3 URL (has X-Amz- query params)
-  const isPresignedUrl = photoUrl?.includes('X-Amz-Algorithm=');
+  // Check if URL is a presigned S3 URL to avoid Next.js Image Optimization caching
+  const isPresignedUrl = isS3PresignedUrl(photoUrl);
 
   return (
     <div 

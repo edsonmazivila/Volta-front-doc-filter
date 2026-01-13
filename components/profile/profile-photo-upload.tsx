@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui";
+import { isS3PresignedUrl } from "@/lib/utils/image-helpers";
 
 interface ProfilePhotoUploadProps {
   currentPhotoUrl?: string | null;
@@ -152,8 +153,8 @@ export function ProfilePhotoUpload({
     inputRef.current?.click();
   };
 
-  // Check if URL is a presigned S3 URL (has X-Amz- query params)
-  const isPresignedUrl = photoUrl?.includes('X-Amz-Algorithm=');
+  // Check if URL is a presigned S3 URL to avoid Next.js Image Optimization caching
+  const isPresignedUrl = isS3PresignedUrl(photoUrl);
 
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
