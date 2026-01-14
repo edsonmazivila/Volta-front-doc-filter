@@ -69,6 +69,10 @@ ENV DD_APM_ENABLED=${DD_APM_ENABLED}
 ENV API_URL=${API_URL}
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
+# Compile Lingui translations BEFORE building
+# This ensures all i18n messages are compiled to .ts files
+RUN npm run i18n:compile
+
 # Build the application
 # Note: Turbopack is used for faster builds
 RUN npm run build

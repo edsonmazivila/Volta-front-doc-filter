@@ -8,6 +8,7 @@ const publicRoutes = new Set([
 	'/',
 	'/login',
 	'/signup',
+	'/signup/success',
 	'/forgot-password',
 	'/reset-password'
 ])

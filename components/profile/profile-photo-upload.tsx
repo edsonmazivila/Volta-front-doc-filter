@@ -3,12 +3,17 @@
 /**
  * Profile Photo Upload Component
  * 
- * Allows users to upload and update their profile photo with:
- * - Drag & drop support
- * - File validation (size, type)
- * - Preview before/after upload
- * - Loading states
- * - Error handling with i18n
+ * Handles profile photo upload and display following backend storage guide:
+ * 
+ * Upload Flow:
+ * 1. User selects photo
+ * 2. Upload to backend via /api/auth/profile/photo
+ * 3. Backend uploads to S3 and returns CloudFront URL
+ * 4. CloudFront URL can be used immediately (no expiration)
+ * 
+ * Display:
+ * - CloudFront URLs: Use Next.js <Image> (optimized, cached)
+ * - Presigned URLs (legacy): Use <img> (avoid caching)
  */
 
 import { useState, useRef, useEffect } from "react";
@@ -18,6 +23,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui";
+import { isS3PresignedUrl } from "@/lib/utils/image-helpers";
 
 interface ProfilePhotoUploadProps {
   currentPhotoUrl?: string | null;
@@ -152,6 +158,9 @@ export function ProfilePhotoUpload({
     inputRef.current?.click();
   };
 
+  // Check if URL is a presigned S3 URL to avoid Next.js Image Optimization caching
+  const isPresignedUrl = isS3PresignedUrl(photoUrl);
+
   return (
     <div className={`flex flex-col items-center gap-4 ${className}`}>
       {/* Photo Preview */}
@@ -165,13 +174,23 @@ export function ProfilePhotoUpload({
         onDrop={handleDrop}
       >
         {photoUrl ? (
-          <Image
-            src={photoUrl}
-            alt="Profile photo"
-            fill
-            className="object-cover"
-            priority
-          />
+          isPresignedUrl ? (
+            // Use regular img tag for presigned URLs to avoid Next.js Image Optimization caching
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={photoUrl}
+              alt="Profile photo"
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <Image
+              src={photoUrl}
+              alt="Profile photo"
+              fill
+              className="object-cover"
+              priority
+            />
+          )
         ) : (
           <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
             <Upload className="w-8 h-8 text-gray-400" />

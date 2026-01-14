@@ -14,11 +14,15 @@ const nextConfig: NextConfig = {
   // Configure external image domains
   images: {
     remotePatterns: [
+      // Direct S3 access (current - will be deprecated)
       {
         protocol: 'https',
         hostname: 'django-project-tmz.s3.us-east-2.amazonaws.com',
         pathname: '/nexupayroll/**',
       },
+      // CloudFront CDN (future - add actual CloudFront domain when available)
+      // Example: { protocol: 'https', hostname: 'd111111abcdef8.cloudfront.net' }
+      // TODO: Add CloudFront distribution domain once configured in AWS
     ],
   },
 };

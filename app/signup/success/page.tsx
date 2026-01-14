@@ -1,9 +1,9 @@
 'use client'
 
-
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui'
 import { Trans } from '@lingui/react/macro'
+import { LanguageToggle } from '@/components/dashboard/language-toggle'
 
 export default function RegistrationSuccessPage() {
 	const router = useRouter()
@@ -12,9 +12,13 @@ export default function RegistrationSuccessPage() {
 	const companyName = searchParams.get('company')
 	const adminEmail = searchParams.get('email')
 
-
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
+			{/* Language Toggle - Top Right */}
+			<div className="fixed top-6 right-6 z-50">
+				<LanguageToggle />
+			</div>
+
 			<div className="w-full max-w-2xl">
 				<div className="glass rounded-xl p-8 md:p-12">
 					{/* Success Icon */}
@@ -189,9 +193,8 @@ export default function RegistrationSuccessPage() {
 							<Trans>Back to Home</Trans>
 						</Button>
 					</div>
-
-				</div>
 			</div>
 		</div>
-	)
+	</div>
+)
 }

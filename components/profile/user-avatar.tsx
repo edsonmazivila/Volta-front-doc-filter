@@ -3,13 +3,24 @@
 /**
  * User Avatar Component
  * 
- * Reusable avatar component that displays user profile photo
- * with automatic fallback to initials or default avatar.
+ * Displays user profile photos following backend storage guide:
+ * 
+ * ✅ Profile Photos (CloudFront): Use directly in <Image> or <img>
+ *    - No expiration, can cache
+ *    - Example: https://assets.voltahr.io/uploads/profile_photos/user_123/avatar.jpg
+ * 
+ * ⚠️ Presigned URLs (S3): Use <img> only (bypass Next.js optimization)
+ *    - Expires in 10-180 minutes
+ *    - Don't cache
+ *    - Example: https://s3.amazonaws.com/...?X-Amz-Expires=600...
+ * 
+ * This component automatically detects and handles both types.
  */
 
 import React from "react";
 import Image from "next/image";
 import { User } from "lucide-react";
+import { isS3PresignedUrl } from "@/lib/utils/image-helpers";
 
 interface UserAvatarProps {
   photoUrl?: string | null;
@@ -85,21 +96,37 @@ export function UserAvatar({
     setImageError(false);
   }, [photoUrl]);
 
+  // Check if URL is a presigned S3 URL to avoid Next.js Image Optimization caching
+  const isPresignedUrl = isS3PresignedUrl(photoUrl);
+
   return (
     <div 
       className={`relative ${sizeClass} rounded-full overflow-hidden flex-shrink-0 ${className}`}
     >
       {photoUrl && !imageError ? (
-        <Image
-          src={photoUrl}
-          alt={name || "User"}
-          width={sizePx}
-          height={sizePx}
-          className="object-cover w-full h-full"
-          onError={() => {
-            setImageError(true);
-          }}
-        />
+        isPresignedUrl ? (
+          // Use regular img tag for presigned URLs to avoid Next.js Image Optimization caching
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={photoUrl}
+            alt={name || "User"}
+            className="object-cover w-full h-full"
+            onError={() => {
+              setImageError(true);
+            }}
+          />
+        ) : (
+          <Image
+            src={photoUrl}
+            alt={name || "User"}
+            width={sizePx}
+            height={sizePx}
+            className="object-cover w-full h-full"
+            onError={() => {
+              setImageError(true);
+            }}
+          />
+        )
       ) : initials ? (
         <div 
           className={`w-full h-full ${bgColor} flex items-center justify-center text-white font-semibold`}
