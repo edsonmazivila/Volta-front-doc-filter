@@ -3,12 +3,17 @@
 /**
  * Profile Photo Upload Component
  * 
- * Allows users to upload and update their profile photo with:
- * - Drag & drop support
- * - File validation (size, type)
- * - Preview before/after upload
- * - Loading states
- * - Error handling with i18n
+ * Handles profile photo upload and display following backend storage guide:
+ * 
+ * Upload Flow:
+ * 1. User selects photo
+ * 2. Upload to backend via /api/auth/profile/photo
+ * 3. Backend uploads to S3 and returns CloudFront URL
+ * 4. CloudFront URL can be used immediately (no expiration)
+ * 
+ * Display:
+ * - CloudFront URLs: Use Next.js <Image> (optimized, cached)
+ * - Presigned URLs (legacy): Use <img> (avoid caching)
  */
 
 import { useState, useRef, useEffect } from "react";

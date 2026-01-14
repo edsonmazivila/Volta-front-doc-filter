@@ -3,8 +3,18 @@
 /**
  * User Avatar Component
  * 
- * Reusable avatar component that displays user profile photo
- * with automatic fallback to initials or default avatar.
+ * Displays user profile photos following backend storage guide:
+ * 
+ * ✅ Profile Photos (CloudFront): Use directly in <Image> or <img>
+ *    - No expiration, can cache
+ *    - Example: https://assets.voltahr.io/uploads/profile_photos/user_123/avatar.jpg
+ * 
+ * ⚠️ Presigned URLs (S3): Use <img> only (bypass Next.js optimization)
+ *    - Expires in 10-180 minutes
+ *    - Don't cache
+ *    - Example: https://s3.amazonaws.com/...?X-Amz-Expires=600...
+ * 
+ * This component automatically detects and handles both types.
  */
 
 import React from "react";
