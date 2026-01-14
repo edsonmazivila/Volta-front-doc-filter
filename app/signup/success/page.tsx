@@ -25,7 +25,7 @@ export default function RegistrationSuccessPage() {
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
 			{/* Language Toggle - Top Right */}
-			<div className="absolute top-6 right-6">
+			<div className="fixed top-6 right-6 z-50">
 				<LanguageToggle />
 			</div>
 
