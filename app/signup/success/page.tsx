@@ -193,7 +193,8 @@ export default function RegistrationSuccessPage() {
 							<Trans>Back to Home</Trans>
 						</Button>
 					</div>
+			</div>
 		</div>
 	</div>
-</div>
-)}
+)
+}
