@@ -157,7 +157,7 @@ export async function signupAction(prevState: unknown, formData: FormData): Prom
 	if (!res.ok) {
 		const err: unknown = await res.json().catch(() => ({}))
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		return { errors: { _form: [(err as any)?.message || 'Organization registration failed'] } }
+		return { errors: { _form: [(err as any)?.error || (err as any)?.message || 'Organization registration failed'] } }
 	}
 
 	return { success: true }

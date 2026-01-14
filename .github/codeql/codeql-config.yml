@@ -1,0 +1,24 @@
+name: "CodeQL Configuration"
+
+# Paths to exclude from analysis
+paths-ignore:
+  - "node_modules/**"
+  - ".next/**"
+  - "out/**"
+  - "build/**"
+  - "dist/**"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/*.config.ts"
+  - "**/*.config.js"
+  - "**/*.config.mjs"
+
+# Paths to include in analysis
+paths:
+  - "app/**"
+  - "components/**"
+  - "lib/**"
+  - "middleware.ts"
+

@@ -2,13 +2,13 @@
 
 # =============================================================================
 # Volta HR Production Dockerfile
-# Multi-stage build following 2025 industry best practices
+# Multi-stage build following 2026 industry best practices
 # =============================================================================
 
 # -----------------------------------------------------------------------------
 # Stage 1: Base image with common dependencies
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 # Install libc6-compat for Alpine compatibility with native Node.js modules
 RUN apk add --no-cache libc6-compat
@@ -36,6 +36,20 @@ FROM base AS builder
 
 WORKDIR /app
 
+# Accept build arguments for environment variables
+ARG VERSION
+ARG BUILD_TIME
+ARG GIT_COMMIT
+ARG DD_ENV
+ARG DD_SERVICE
+ARG DD_TRACE_SAMPLE_RATE
+ARG DD_PROFILING_ENABLED
+ARG DD_TRACE_DEBUG
+ARG DD_LOGS_INJECTION
+ARG DD_APM_ENABLED
+ARG API_URL
+ARG NEXT_PUBLIC_API_URL
+
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
@@ -45,6 +59,15 @@ COPY . .
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV DD_ENV=${DD_ENV}
+ENV DD_SERVICE=${DD_SERVICE}
+ENV DD_TRACE_SAMPLE_RATE=${DD_TRACE_SAMPLE_RATE}
+ENV DD_PROFILING_ENABLED=${DD_PROFILING_ENABLED}
+ENV DD_TRACE_DEBUG=${DD_TRACE_DEBUG}
+ENV DD_LOGS_INJECTION=${DD_LOGS_INJECTION}
+ENV DD_APM_ENABLED=${DD_APM_ENABLED}
+ENV API_URL=${API_URL}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Compile Lingui translations BEFORE building
 # This ensures all i18n messages are compiled to .ts files
@@ -61,9 +84,39 @@ FROM base AS runner
 
 WORKDIR /app
 
+# Accept build arguments for runtime environment variables
+ARG DD_ENV
+ARG DD_VERSION
+ARG DD_SERVICE
+ARG DD_TRACE_SAMPLE_RATE
+ARG DD_PROFILING_ENABLED
+ARG DD_TRACE_DEBUG
+ARG DD_AGENT_HOST
+ARG DD_TRACE_AGENT_PORT
+ARG DD_LOGS_INJECTION
+ARG DD_APM_ENABLED
+ARG API_URL
+ARG NEXT_PUBLIC_API_URL
+
 # Set production environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Set Datadog environment variables
+ENV DD_ENV=${DD_ENV}
+ENV DD_VERSION=${DD_VERSION}
+ENV DD_SERVICE=${DD_SERVICE}
+ENV DD_TRACE_SAMPLE_RATE=${DD_TRACE_SAMPLE_RATE}
+ENV DD_PROFILING_ENABLED=${DD_PROFILING_ENABLED}
+ENV DD_TRACE_DEBUG=${DD_TRACE_DEBUG}
+ENV DD_AGENT_HOST=${DD_AGENT_HOST}
+ENV DD_TRACE_AGENT_PORT=${DD_TRACE_AGENT_PORT}
+ENV DD_LOGS_INJECTION=${DD_LOGS_INJECTION}
+ENV DD_APM_ENABLED=${DD_APM_ENABLED}
+
+# Set API environment variables
+ENV API_URL=${API_URL}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Create non-root user for security (following principle of least privilege)
 RUN addgroup --system --gid 1001 nodejs && \
