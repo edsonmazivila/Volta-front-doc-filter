@@ -9,7 +9,7 @@
  * ⚠️ Important: Presigned URLs expire! This component auto-refreshes before expiry
  */
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { fetchPresignedUrl, getPresignedUrlRefreshInterval } from '@/lib/utils/document-helpers'
@@ -34,48 +34,49 @@ export function DocumentPreview({
   const isMountedRef = useRef(true)
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  useEffect(() => {
-    isMountedRef.current = true
+  // Define loadPresignedUrl outside useEffect so it can be called from retry button
+  const loadPresignedUrl = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
 
-    async function loadPresignedUrl() {
-      try {
-        setIsLoading(true)
+      const { url: presignedUrl } = await fetchPresignedUrl(documentId)
+
+      if (isMountedRef.current) {
+        setUrl(presignedUrl)
+        setLastRefresh(new Date())
         setError(null)
 
-        const { url: presignedUrl } = await fetchPresignedUrl(documentId)
+        // Schedule auto-refresh before URL expires
+        // Refresh at 80% of expiry time (e.g., 8 min for 10 min expiry)
+        const refreshInterval = getPresignedUrlRefreshInterval(documentType)
 
-        if (isMountedRef.current) {
-          setUrl(presignedUrl)
-          setLastRefresh(new Date())
-          setError(null)
+        if (refreshTimerRef.current) {
+          clearTimeout(refreshTimerRef.current)
+        }
 
-          // Schedule auto-refresh before URL expires
-          // Refresh at 80% of expiry time (e.g., 8 min for 10 min expiry)
-          const refreshInterval = getPresignedUrlRefreshInterval(documentType)
-
-          if (refreshTimerRef.current) {
-            clearTimeout(refreshTimerRef.current)
+        refreshTimerRef.current = setTimeout(() => {
+          if (isMountedRef.current) {
+            console.log('[DocumentPreview] Auto-refreshing presigned URL')
+            loadPresignedUrl()
           }
-
-          refreshTimerRef.current = setTimeout(() => {
-            if (isMountedRef.current) {
-              console.log('[DocumentPreview] Auto-refreshing presigned URL')
-              loadPresignedUrl()
-            }
-          }, refreshInterval)
-        }
-      } catch (err) {
-        if (isMountedRef.current) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to load document'
-          setError(errorMessage)
-          console.error('[DocumentPreview] Load error:', err)
-        }
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoading(false)
-        }
+        }, refreshInterval)
+      }
+    } catch (err) {
+      if (isMountedRef.current) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load document'
+        setError(errorMessage)
+        console.error('[DocumentPreview] Load error:', err)
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false)
       }
     }
+  }, [documentId, documentType])
+
+  useEffect(() => {
+    isMountedRef.current = true
 
     loadPresignedUrl()
 
@@ -85,7 +86,7 @@ export function DocumentPreview({
         clearTimeout(refreshTimerRef.current)
       }
     }
-  }, [documentId, documentType])
+  }, [loadPresignedUrl])
 
   if (isLoading && !url) {
     return (
@@ -112,7 +113,7 @@ export function DocumentPreview({
           <h3 className="text-lg font-semibold text-foreground mb-2">Failed to Load Document</h3>
           <p className="text-sm text-muted-foreground mb-4">{error}</p>
           <Button
-            onClick={() => window.location.reload()}
+            onClick={loadPresignedUrl}
             variant="outline"
             size="sm"
           >
@@ -139,7 +140,7 @@ export function DocumentPreview({
         className="w-full border border-border rounded-lg"
         style={{ height }}
         title="Document Preview"
-        sandbox="allow-same-origin allow-scripts allow-popups"
+        sandbox="allow-same-origin allow-popups"
       />
     </div>
   )
