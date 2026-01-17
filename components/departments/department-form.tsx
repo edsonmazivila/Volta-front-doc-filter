@@ -139,12 +139,26 @@ export function DepartmentForm({
             {i18n._(msg`No parent (top-level department)`)}
           </option>
           {departments
-            .filter((d) => d.id !== department?.id && d.is_active)
+            .filter((d) => {
+              // Never allow selecting self as parent
+              if (d.id === department?.id) return false;
+              // Always include the currently selected parent (even if inactive)
+              if (
+                department?.parent_department_id &&
+                d.id === department.parent_department_id
+              )
+                return true;
+              // Always include defaultParentId (even if inactive)
+              if (defaultParentId && d.id === defaultParentId) return true;
+              // Otherwise only show active departments
+              return d.is_active;
+            })
             .map((dept) => (
               <option key={dept.id} value={dept.id}>
                 {dept.parent_department_name
                   ? `${dept.parent_department_name} → ${dept.name}`
                   : dept.name}
+                {!dept.is_active ? ` (${i18n._(msg`inactive`)})` : ""}
               </option>
             ))}
         </select>
