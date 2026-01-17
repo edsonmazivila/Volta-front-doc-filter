@@ -230,6 +230,8 @@ export function DepartmentManagement({
                       router.push(`/dashboard/departments/${department.id}`)
                     }
                     onKeyDown={(e) => {
+                      // Only handle when the row itself is focused, not interactive children (e.g., actions menu)
+                      if (e.target !== e.currentTarget) return;
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
                         router.push(`/dashboard/departments/${department.id}`);

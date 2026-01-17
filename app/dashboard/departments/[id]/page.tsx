@@ -115,12 +115,16 @@ export default async function DepartmentDetailPage({ params }: PageProps) {
                   <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     <GitBranch className="h-3 w-3" />
                     {t`Part of`}{" "}
-                    <Link
-                      href={`/dashboard/departments/${department.parent_department_id}`}
-                      className="text-primary hover:underline"
-                    >
-                      {department.parent_department_name}
-                    </Link>
+                    {department.parent_department_id ? (
+                      <Link
+                        href={`/dashboard/departments/${department.parent_department_id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {department.parent_department_name}
+                      </Link>
+                    ) : (
+                      <span>{department.parent_department_name}</span>
+                    )}
                   </p>
                 )}
                 {department.description && (
