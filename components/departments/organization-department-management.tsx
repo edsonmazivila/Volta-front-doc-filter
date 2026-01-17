@@ -1,45 +1,64 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { Card } from '@/components/dashboard/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Building2, Plus, Users, UserCheck } from 'lucide-react'
-import { OrganizationDepartmentFormDialog } from './organization-department-form-dialog'
-import type { OrganizationDepartment } from '@/lib/services/organization-data'
-import type { Company } from '@/lib/types/organization'
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/dashboard/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Building2,
+  Plus,
+  Users,
+  UserCheck,
+  ChevronRight,
+  GitBranch,
+} from "lucide-react";
+import { OrganizationDepartmentFormDialog } from "./organization-department-form-dialog";
+import type { OrganizationDepartment } from "@/lib/services/organization-data";
+import type { Company } from "@/lib/types/organization";
 
 interface OrganizationDepartmentManagementProps {
-  departments: OrganizationDepartment[]
-  companies: Company[]
-  initialCompanyFilter?: string
+  departments: OrganizationDepartment[];
+  companies: Company[];
+  initialCompanyFilter?: string;
 }
 
 export function OrganizationDepartmentManagement({
   departments,
   companies,
-  initialCompanyFilter
+  initialCompanyFilter,
 }: OrganizationDepartmentManagementProps) {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [companyFilter, setCompanyFilter] = useState(initialCompanyFilter || 'all')
+  const router = useRouter();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [companyFilter, setCompanyFilter] = useState(
+    initialCompanyFilter || "all",
+  );
 
-  const filteredDepartments = companyFilter === 'all'
-    ? departments
-    : departments.filter(d => d.company_id === companyFilter)
+  const filteredDepartments =
+    companyFilter === "all"
+      ? departments
+      : departments.filter((d) => d.company_id === companyFilter);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value
-    setCompanyFilter(value)
+    const value = e.target.value;
+    setCompanyFilter(value);
     // Update URL with new filter
-    const url = new URL(window.location.href)
-    if (value === 'all') {
-      url.searchParams.delete('company')
+    const url = new URL(window.location.href);
+    if (value === "all") {
+      url.searchParams.delete("company");
     } else {
-      url.searchParams.set('company', value)
+      url.searchParams.set("company", value);
     }
-    window.history.pushState({}, '', url.toString())
-  }
+    window.history.pushState({}, "", url.toString());
+  };
 
   return (
     <>
@@ -47,28 +66,29 @@ export function OrganizationDepartmentManagement({
       <Card>
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-xs">
-            <label className="text-sm font-medium mb-2 block">Filter by Company</label>
-            <select 
+            <label className="text-sm font-medium mb-2 block">
+              Filter by Company
+            </label>
+            <select
               className="w-full px-3 py-2 border rounded-lg bg-background"
               value={companyFilter}
               onChange={handleFilterChange}
             >
               <option value="all">All Companies ({departments.length})</option>
-              {companies.map(company => {
-                const count = departments.filter(d => d.company_id === company.id).length
+              {companies.map((company) => {
+                const count = departments.filter(
+                  (d) => d.company_id === company.id,
+                ).length;
                 return (
                   <option key={company.id} value={company.id}>
                     {company.name} ({count})
                   </option>
-                )
+                );
               })}
             </select>
           </div>
-          
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="gap-2"
-          >
+
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Create Department
           </Button>
@@ -87,7 +107,12 @@ export function OrganizationDepartmentManagement({
                 </div>
               </TableHead>
               <TableHead>Department Name</TableHead>
-              <TableHead>Code</TableHead>
+              <TableHead>
+                <div className="flex items-center gap-2">
+                  <GitBranch className="h-4 w-4" />
+                  Parent
+                </div>
+              </TableHead>
               <TableHead>
                 <div className="flex items-center gap-2">
                   <UserCheck className="h-4 w-4" />
@@ -106,28 +131,58 @@ export function OrganizationDepartmentManagement({
           <TableBody>
             {filteredDepartments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell
+                  colSpan={6}
+                  className="text-center text-muted-foreground py-8"
+                >
                   <div className="flex flex-col items-center gap-2">
                     <Building2 className="h-12 w-12 text-muted-foreground/50" />
                     <p>No departments available</p>
-                    <p className="text-sm">Get started by creating a new department.</p>
+                    <p className="text-sm">
+                      Get started by creating a new department.
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
               filteredDepartments.map((department) => (
-                <TableRow key={department.id}>
+                <TableRow
+                  key={department.id}
+                  className="cursor-pointer hover:bg-muted/50 group focus:outline-none focus:bg-muted/50"
+                  tabIndex={0}
+                  aria-label={`View department ${department.name}`}
+                  onClick={() =>
+                    router.push(`/dashboard/departments/${department.id}`)
+                  }
+                  onKeyDown={(e) => {
+                    // Only handle when the row itself is focused, not interactive children
+                    if (e.target !== e.currentTarget) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/dashboard/departments/${department.id}`);
+                    }
+                  }}
+                >
                   <TableCell className="font-medium">
                     {department.company_name}
                   </TableCell>
-                  <TableCell>{department.name}</TableCell>
                   <TableCell>
-                    {department.code ? (
-                      <code className="px-2 py-1 bg-muted rounded text-xs">
-                        {department.code}
-                      </code>
+                    <div className="flex items-center gap-2">
+                      <span className="group-hover:text-primary transition-colors">
+                        {department.name}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {department.parent_department_name ? (
+                      <span className="text-muted-foreground text-sm">
+                        {department.parent_department_name}
+                      </span>
                     ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground/60 text-xs italic">
+                        Top-level
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -136,14 +191,18 @@ export function OrganizationDepartmentManagement({
                         <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <UserCheck className="h-4 w-4 text-primary" />
                         </div>
-                        <span className="font-medium">{department.manager_name}</span>
+                        <span className="font-medium">
+                          {department.manager_name}
+                        </span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                           <Users className="h-4 w-4" />
                         </div>
-                        <span className="text-sm italic">No manager assigned</span>
+                        <span className="text-sm italic">
+                          No manager assigned
+                        </span>
                       </div>
                     )}
                   </TableCell>
@@ -153,8 +212,12 @@ export function OrganizationDepartmentManagement({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={department.is_active ? 'bg-green-500' : 'bg-gray-500'}>
-                      {department.is_active ? 'Active' : 'Inactive'}
+                    <Badge
+                      className={
+                        department.is_active ? "bg-green-500" : "bg-gray-500"
+                      }
+                    >
+                      {department.is_active ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -171,5 +234,5 @@ export function OrganizationDepartmentManagement({
         companies={companies}
       />
     </>
-  )
+  );
 }
