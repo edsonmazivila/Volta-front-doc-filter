@@ -40,14 +40,19 @@ export default async function DepartmentDetailPage({ params }: PageProps) {
   }
 
   // Get potential managers (users with manager/admin roles)
+  // Always include the current manager even if their role changed, to prevent
+  // the select from defaulting to "No manager" and accidentally clearing the assignment
+  const managerRoles = [
+    "system_admin",
+    "hr_manager",
+    "payroll_manager",
+    "operational_manager",
+  ];
   const managers = allUsers
-    .filter((u) =>
-      [
-        "system_admin",
-        "hr_manager",
-        "payroll_manager",
-        "operational_manager",
-      ].includes(u.role),
+    .filter(
+      (u) =>
+        managerRoles.includes(u.role) ||
+        (department.manager_id && u.id === department.manager_id),
     )
     .map((u) => ({
       id: u.id,
