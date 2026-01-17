@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Edit, Trash2, Building2, MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Building2,
+  MoreHorizontal,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import {
@@ -48,6 +56,7 @@ export function DepartmentManagement({
   stats,
   managers,
 }: DepartmentManagementProps) {
+  const router = useRouter();
   const { user } = useSession();
   const { i18n } = useLingui();
   const [selectedDepartment, setSelectedDepartment] =
@@ -81,7 +90,11 @@ export function DepartmentManagement({
     }
   }, []);
 
-  const canManage = hasAnyRole(user, ["system_admin", "hr_manager"]);
+  const canManage = hasAnyRole(user, [
+    "system_admin",
+    "hr_manager",
+    "organization_admin",
+  ]);
 
   const handleDelete = async () => {
     if (!departmentToDelete) return;
@@ -112,25 +125,33 @@ export function DepartmentManagement({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="p-4 rounded-lg bg-card border border-border">
-          <div className="text-sm text-muted-foreground">{i18n._(msg`Total Departments`)}</div>
+          <div className="text-sm text-muted-foreground">
+            {i18n._(msg`Total Departments`)}
+          </div>
           <div className="text-2xl font-bold text-foreground">
             {stats.totalDepartments}
           </div>
         </div>
         <div className="p-4 rounded-lg bg-card border border-border">
-          <div className="text-sm text-muted-foreground">{i18n._(msg`Active`)}</div>
+          <div className="text-sm text-muted-foreground">
+            {i18n._(msg`Active`)}
+          </div>
           <div className="text-2xl font-bold text-green-600">
             {stats.activeDepartments}
           </div>
         </div>
         <div className="p-4 rounded-lg bg-card border border-border">
-          <div className="text-sm text-muted-foreground">{i18n._(msg`Inactive`)}</div>
+          <div className="text-sm text-muted-foreground">
+            {i18n._(msg`Inactive`)}
+          </div>
           <div className="text-2xl font-bold text-red-600">
             {stats.inactiveDepartments}
           </div>
         </div>
         <div className="p-4 rounded-lg bg-card border border-border">
-          <div className="text-sm text-muted-foreground">{i18n._(msg`With Manager`)}</div>
+          <div className="text-sm text-muted-foreground">
+            {i18n._(msg`With Manager`)}
+          </div>
           <div className="text-2xl font-bold text-blue-600">
             {stats.departmentsWithManager}
           </div>
@@ -173,15 +194,28 @@ export function DepartmentManagement({
           </div>
         ) : (
           <div className="overflow-x-auto border-t border-[var(--border)]">
-            <table className="w-full text-sm min-w-[800px]">
+            <table className="w-full text-sm min-w-[900px]">
               <thead className="border-b border-[var(--border)] text-neutral-400 sticky top-0 bg-background z-10 shadow-sm">
                 <tr>
-                  <th className="text-left p-3 min-w-[200px]">{i18n._(msg`Name`)}</th>
-                  <th className="text-left p-3 min-w-[250px]">{i18n._(msg`Description`)}</th>
-                  <th className="text-left p-3 min-w-[200px]">{i18n._(msg`Manager`)}</th>
-                  <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Status`)}</th>
+                  <th className="text-left p-3 min-w-[200px]">
+                    {i18n._(msg`Name`)}
+                  </th>
+                  <th className="text-left p-3 min-w-[150px]">
+                    {i18n._(msg`Parent`)}
+                  </th>
+                  <th className="text-left p-3 min-w-[200px]">
+                    {i18n._(msg`Description`)}
+                  </th>
+                  <th className="text-left p-3 min-w-[150px]">
+                    {i18n._(msg`Manager`)}
+                  </th>
+                  <th className="text-left p-3 min-w-[100px]">
+                    {i18n._(msg`Status`)}
+                  </th>
                   {canManage && (
-                    <th className="text-left p-3 min-w-[100px]">{i18n._(msg`Actions`)}</th>
+                    <th className="text-left p-3 min-w-[100px]">
+                      {i18n._(msg`Actions`)}
+                    </th>
                   )}
                 </tr>
               </thead>
@@ -189,27 +223,39 @@ export function DepartmentManagement({
                 {departments.map((department) => (
                   <tr
                     key={department.id}
-                    className="border-b border-[var(--border)] hover:bg-muted/50"
+                    className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer group"
+                    onClick={() =>
+                      router.push(`/dashboard/departments/${department.id}`)
+                    }
                   >
                     <td className="p-3 min-w-[200px]">
-                      <div className="text-sm font-medium">
-                        {department.name}
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-medium group-hover:text-primary transition-colors">
+                          {department.name}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </td>
-                    <td className="p-3 min-w-[250px]">
-                      <div className="text-sm text-muted-foreground">
+                    <td className="p-3 min-w-[150px]">
+                      {department.parent_department_name ? (
+                        <span className="text-sm text-muted-foreground">
+                          {department.parent_department_name}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/60 italic">
+                          {i18n._(msg`Top-level`)}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 min-w-[200px]">
+                      <div className="text-sm text-muted-foreground truncate max-w-[200px]">
                         {department.description || i18n._(msg`No description`)}
                       </div>
                     </td>
-                    <td className="p-3 min-w-[200px]">
+                    <td className="p-3 min-w-[150px]">
                       {department.manager ? (
-                        <div className="text-sm">
-                          <div className="font-medium">
-                            {department.manager.full_name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {department.manager.email}
-                          </div>
+                        <div className="text-sm font-medium">
+                          {department.manager.full_name}
                         </div>
                       ) : (
                         <span className="text-sm text-muted-foreground">
@@ -225,7 +271,9 @@ export function DepartmentManagement({
                             : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                         }`}
                       >
-                        {department.is_active ? i18n._(msg`Active`) : i18n._(msg`Inactive`)}
+                        {department.is_active
+                          ? i18n._(msg`Active`)
+                          : i18n._(msg`Inactive`)}
                       </span>
                     </td>
                     {canManage && (
@@ -236,13 +284,15 @@ export function DepartmentManagement({
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSelectedDepartment(department);
                                 setEditOpen(true);
                               }}
@@ -251,7 +301,8 @@ export function DepartmentManagement({
                               {i18n._(msg`Edit`)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setDepartmentToDelete(department);
                                 setDeleteOpen(true);
                               }}
@@ -282,6 +333,7 @@ export function DepartmentManagement({
             onCancel={() => handleCreateOpenChange(false)}
             onSuccess={() => handleCreateOpenChange(false)}
             managers={managers}
+            departments={departments}
           />
         </DialogContent>
       </Dialog>
@@ -298,6 +350,7 @@ export function DepartmentManagement({
               onCancel={() => handleEditOpenChange(false)}
               onSuccess={() => handleEditOpenChange(false)}
               managers={managers}
+              departments={departments}
             />
           )}
         </DialogContent>
@@ -309,7 +362,9 @@ export function DepartmentManagement({
           <AlertDialogHeader>
             <AlertDialogTitle>{i18n._(msg`Are you sure?`)}</AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n._(msg`This will permanently delete the department "${departmentToDelete?.name ?? ''}". This action cannot be undone.`)}
+              {i18n._(
+                msg`This will permanently delete the department "${departmentToDelete?.name ?? ""}". This action cannot be undone.`,
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
