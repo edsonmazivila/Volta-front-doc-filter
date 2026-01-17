@@ -223,10 +223,18 @@ export function DepartmentManagement({
                 {departments.map((department) => (
                   <tr
                     key={department.id}
-                    className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer group"
+                    className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer group focus:outline-none focus:bg-muted/50"
+                    tabIndex={0}
+                    aria-label={i18n._(msg`View department ${department.name}`)}
                     onClick={() =>
                       router.push(`/dashboard/departments/${department.id}`)
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        router.push(`/dashboard/departments/${department.id}`);
+                      }
+                    }}
                   >
                     <td className="p-3 min-w-[200px]">
                       <div className="flex items-center gap-2">

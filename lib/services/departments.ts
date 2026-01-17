@@ -154,7 +154,8 @@ export const getDepartmentById = cache(
 
         const json = await res.json();
         const data = json.data || json;
-        const childDepartments = json.child_departments || [];
+        const childDepartments =
+          data.child_departments || json.child_departments || [];
 
         return {
           id: String(data.id || ""),
@@ -278,8 +279,6 @@ export async function createDepartmentAction(
 
   try {
     const cookieHeader = await getAuthCookieHeader();
-    console.log("[createDepartmentAction] Sending to backend:", parsed.data);
-
     const res = await fetch(`${API_BASE_URL}/api/departments`, {
       method: "POST",
       headers: {
@@ -289,11 +288,8 @@ export async function createDepartmentAction(
       body: JSON.stringify(parsed.data),
     });
 
-    console.log("[createDepartmentAction] Response status:", res.status);
-
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
-      console.error("[createDepartmentAction] Error response:", error);
       return {
         errors: {
           _form: [
@@ -304,20 +300,15 @@ export async function createDepartmentAction(
     }
 
     const data = await res.json();
-    console.log("[createDepartmentAction] Success response:", data);
 
     // Revalidate departments and all dependent caches
     revalidateEntityMutation("DEPARTMENTS");
 
     return { success: true, data };
-  } catch (err) {
-    console.error("[createDepartmentAction] Exception:", err);
+  } catch {
     return {
       errors: {
-        _form: [
-          "Failed to create department: " +
-            (err instanceof Error ? err.message : "Unknown error"),
-        ],
+        _form: ["Failed to create department"],
       },
     };
   }

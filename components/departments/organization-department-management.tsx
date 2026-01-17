@@ -132,7 +132,7 @@ export function OrganizationDepartmentManagement({
             {filteredDepartments.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={6}
                   className="text-center text-muted-foreground py-8"
                 >
                   <div className="flex flex-col items-center gap-2">
@@ -148,10 +148,18 @@ export function OrganizationDepartmentManagement({
               filteredDepartments.map((department) => (
                 <TableRow
                   key={department.id}
-                  className="cursor-pointer hover:bg-muted/50 group"
+                  className="cursor-pointer hover:bg-muted/50 group focus:outline-none focus:bg-muted/50"
+                  tabIndex={0}
+                  aria-label={`View department ${department.name}`}
                   onClick={() =>
                     router.push(`/dashboard/departments/${department.id}`)
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/dashboard/departments/${department.id}`);
+                    }
+                  }}
                 >
                   <TableCell className="font-medium">
                     {department.company_name}

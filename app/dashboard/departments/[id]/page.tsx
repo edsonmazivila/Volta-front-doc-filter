@@ -179,13 +179,24 @@ function buildBreadcrumbs(
   }[],
 ): { id: string; name: string }[] {
   const breadcrumbs: { id: string; name: string }[] = [];
+  const visited = new Set<string>();
   let current:
     | { id: string; name: string; parent_department_id: string | null }
     | undefined = department;
 
   while (current) {
+    // Guard against cyclic parent relationships
+    if (visited.has(current.id)) {
+      break;
+    }
+    visited.add(current.id);
+
     breadcrumbs.unshift({ id: current.id, name: current.name });
     if (current.parent_department_id) {
+      // Check if parent is already visited before traversing
+      if (visited.has(current.parent_department_id)) {
+        break;
+      }
       current = allDepartments.find(
         (d) => d.id === current!.parent_department_id,
       );
