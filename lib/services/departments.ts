@@ -12,6 +12,7 @@ export interface Department {
 	description: string
 	manager_id: string | null
 	parent_department_id: string | null
+	parent_department_name?: string | null
 	manager: {
 		id: string
 		full_name: string
@@ -23,7 +24,6 @@ export interface Department {
 }
 
 export interface DepartmentDetail extends Department {
-	parent_department_name?: string | null
 	child_departments?: Department[]
 }
 
@@ -76,6 +76,7 @@ export const getDepartments = cache(async (): Promise<Department[]> => {
 				description?: string;
 				manager_id?: string | number;
 				parent_department_id?: string | number;
+				parent_department_name?: string;
 				manager?: {
 					id?: string | number;
 					full_name?: string;
@@ -91,6 +92,7 @@ export const getDepartments = cache(async (): Promise<Department[]> => {
 				description: String(d.description || ''),
 				manager_id: d.manager_id ? String(d.manager_id) : null,
 				parent_department_id: d.parent_department_id ? String(d.parent_department_id) : null,
+				parent_department_name: d.parent_department_name ? String(d.parent_department_name) : null,
 				manager: d.manager ? {
 					id: String(d.manager.id || ''),
 					full_name: String(d.manager.full_name || ''),
