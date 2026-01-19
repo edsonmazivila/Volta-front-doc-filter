@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { ProfileForm } from './profile-form'
 import { ChangePasswordSection } from '@/components/profile/change-password-section'
-import { useLingui } from '@lingui/react'
 import { Trans } from '@lingui/react/macro'
 import type { MeResponse } from '@/lib/services/me'
 

@@ -1,7 +1,6 @@
 'use client'
 
 import { API_BASE_URL } from '@/lib/config'
-import { AUTH_ENDPOINTS } from '@/lib/auth/utils'
 
 /**
  * Client-side Password API calls
@@ -36,10 +35,13 @@ function getCsrfToken(): string | null {
 	return null
 }
 
-/**
+/*
+ * Unused function - kept for reference
+ * 
  * Fetch CSRF token from backend if not in cookies
  * Try multiple strategies to obtain the token
  */
+/*
 async function ensureCsrfToken(): Promise<string | null> {
 	let csrf = getCsrfToken()
 	
@@ -97,6 +99,7 @@ async function ensureCsrfToken(): Promise<string | null> {
 	console.warn('[ensureCsrfToken] All strategies failed - no CSRF token available')
 	return null
 }
+*/
 
 /**
  * Request password reset email (client-side)

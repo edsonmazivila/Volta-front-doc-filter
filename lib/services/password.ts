@@ -2,7 +2,6 @@
 
 import { API_BASE_URL } from '@/lib/config'
 import { AUTH_ENDPOINTS } from '@/lib/auth/utils'
-import { getAuthCookieHeader } from '@/lib/auth/server-utils'
 
 /**
  * Password Management Service
