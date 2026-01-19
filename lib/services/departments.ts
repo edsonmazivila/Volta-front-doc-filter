@@ -127,7 +127,11 @@ export const getDepartmentById = cache(async (id: string): Promise<DepartmentDet
 
 			if (!res.ok) {
 				if (res.status === 404) return null
-				throw new Error(`Failed to fetch department: ${res.status}`)
+				// Log error but return null to prevent page crash
+				console.error(`[getDepartmentById] Failed to fetch department ${id}: ${res.status}`)
+				const errorData = await res.json().catch(() => ({}))
+				console.error(`[getDepartmentById] Error details:`, errorData)
+				return null
 			}
 
 			const json = await res.json()
