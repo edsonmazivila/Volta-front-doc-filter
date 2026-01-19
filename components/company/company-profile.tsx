@@ -30,6 +30,8 @@ import {
 import { CompanyDocumentsSection } from '@/components/company/company-documents-section'
 import { CompanyLogoUploadCompact } from '@/components/company/company-logo-upload'
 import type { CompanyDocumentsResponse } from '@/lib/services/company'
+import type { CompanyTaxRule } from '@/lib/types/tax-rules'
+import { TaxRulesSection } from '@/components/tax-rules'
 import { toast } from 'sonner'
 import { useLingui } from '@lingui/react'
 import { msg } from '@lingui/core/macro'
@@ -55,9 +57,10 @@ interface CompanyProfileProps {
 	paySchedules: { id: string, name: string, frequency: string, start_date: string, is_active: boolean }[]
 	leavePolicies: { id: string, name: string, description?: string, policy_type: string, leave_type: string, annual_allocation_days: number, accrual_rate: number, accrual_frequency: string, allow_carry_over: boolean, max_carry_over_days: number, carry_over_expiry_months: number, min_request_days: number, max_request_days: number, max_consecutive_days: number, min_advance_notice_days: number, requires_manager_approval: boolean, requires_hr_approval: boolean, auto_approval_threshold: number, allow_half_days: boolean, allow_negative_balance: boolean, effective_date: string, is_active: boolean }[]
 	companyDocuments?: CompanyDocumentsResponse
+	taxRules: CompanyTaxRule[]
 }
 
-export function CompanyProfile({ company, paySchedules, leavePolicies, companyDocuments }: CompanyProfileProps) {
+export function CompanyProfile({ company, paySchedules, leavePolicies, companyDocuments, taxRules }: CompanyProfileProps) {
 	const searchParams = useSearchParams()
 	const router = useRouter()
 	const { i18n } = useLingui()
@@ -275,6 +278,7 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
 					<TabsTrigger value='basic'>{i18n._(msg`Basic Information`)}</TabsTrigger>
 					<TabsTrigger value='policies'>{i18n._(msg`Leave Policies`)}</TabsTrigger>
 					<TabsTrigger value='schedules'>{i18n._(msg`Pay Schedules`)}</TabsTrigger>
+					<TabsTrigger value='tax-rules'>{i18n._(msg`Tax Rules`)}</TabsTrigger>
 					</TabsList>
 				</div>
 
@@ -363,6 +367,10 @@ export function CompanyProfile({ company, paySchedules, leavePolicies, companyDo
                                 </div>
 							)) : (<div className='text-muted-foreground text-sm'>{i18n._(msg`No pay schedules found.`)}</div>)}
                         </div>
+				</TabsContent>
+
+				<TabsContent value='tax-rules'>
+					<TaxRulesSection taxRules={taxRules} />
 				</TabsContent>
 			</Tabs>
 

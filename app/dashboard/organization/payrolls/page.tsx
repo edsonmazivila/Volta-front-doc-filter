@@ -92,7 +92,9 @@ export default async function OrganizationPayrollsPage({
                   <TableRow key={payroll.id}>
                     <TableCell className="font-medium">{payroll.company_name}</TableCell>
                     <TableCell>
-                      {new Date(payroll.pay_period_start).toLocaleDateString()} - {new Date(payroll.pay_period_end).toLocaleDateString()}
+                      {payroll.pay_period_start && payroll.pay_period_end
+                        ? `${new Date(payroll.pay_period_start).toLocaleDateString()} - ${new Date(payroll.pay_period_end).toLocaleDateString()}`
+                        : 'Invalid Date - Invalid Date'}
                     </TableCell>
                     <TableCell>
                       {payroll.pay_date ? new Date(payroll.pay_date).toLocaleDateString() : '-'}

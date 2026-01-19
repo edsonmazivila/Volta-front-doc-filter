@@ -11,11 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui";
 import { FormField, Input, Checkbox } from "./form-field";
 import { PasswordInput, PasswordStrength } from "./password-input";
-import type { AnyZodObject, TypeOf } from "zod";
+import type { AnyZodObject, TypeOf, ZodEffects } from "zod";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
 
-interface AuthFormProps<TSchema extends AnyZodObject> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ZodSchema = AnyZodObject | ZodEffects<AnyZodObject, any, any>
+
+interface AuthFormProps<TSchema extends ZodSchema> {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
@@ -29,7 +32,7 @@ interface AuthFormProps<TSchema extends AnyZodObject> {
   footer?: React.ReactNode;
 }
 
-export function AuthForm<TSchema extends AnyZodObject>({
+export function AuthForm<TSchema extends ZodSchema>({
   title,
   subtitle,
   children,

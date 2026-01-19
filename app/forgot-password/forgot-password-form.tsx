@@ -3,18 +3,15 @@
 import { useState } from 'react'
 import { AuthForm, EmailField } from '@/components/auth/auth-form'
 import { forgotPasswordSchema } from '@/lib/auth/types'
-import { forgotPasswordAction } from '@/lib/auth/actions'
 import { useLingui } from '@lingui/react'
 import { Trans } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
+import { forgotPasswordClient } from '@/lib/services/password-client'
 
 export function ForgotPasswordForm() {
-	// Remove external loading; rely on form's submitting state
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState(false)
 	const { i18n } = useLingui()
-
-	const handleForgotPassword = async () => {}
 
 	if (success) {
 		return (
@@ -45,17 +42,41 @@ export function ForgotPasswordForm() {
 			<AuthForm
 				title={i18n._(msg`Reset your password`)}
 				subtitle={i18n._(msg`Enter your email address and we'll send you a link to reset your password`)}
-				onSubmit={handleForgotPassword}
+				onSubmit={async () => {}}
 				action={async (formData) => {
-					const result = await forgotPasswordAction(undefined, formData)
-					if ('errors' in result) {
-						const formErrors = (result.errors as Record<string, string[] | undefined>)._form
-						if (formErrors?.length) {
-							setError(formErrors[0])
+					setError(null)
+					const email = formData.get('email') as string
+					
+					console.log('[ForgotPassword] Starting with email:', email)
+					
+					// Validate email
+					const validation = forgotPasswordSchema.safeParse({ email })
+					if (!validation.success) {
+						const emailErrors = validation.error.flatten().fieldErrors.email
+						if (emailErrors?.length) {
+							console.log('[ForgotPassword] Validation error:', emailErrors[0])
+							setError(emailErrors[0])
 							return
 						}
 					}
-					setSuccess(true)
+
+					try {
+						// Call API
+						console.log('[ForgotPassword] Calling forgotPassword API...')
+						const result = await forgotPasswordClient(email)
+						
+						console.log('[ForgotPassword] Result:', result)
+						
+						if (!result.success) {
+							setError(result.error)
+							return
+						}
+
+						setSuccess(true)
+					} catch (err) {
+						console.error('[ForgotPassword] Unexpected error:', err)
+						setError('An unexpected error occurred. Please try again.')
+					}
 				}}
 				schema={forgotPasswordSchema}
 				submitText={i18n._(msg`Send reset link`)}

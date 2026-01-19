@@ -23,15 +23,19 @@
 export function isS3PresignedUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   
+  // Check if URL is from AWS S3 domain
+  const isAwsDomain = url.includes('amazonaws.com') || url.includes('s3.');
+
   // Check for AWS Signature Version 4 parameters
   const hasV4Signature = url.includes('X-Amz-Algorithm=') || 
-                         url.includes('X-Amz-Credential=') || 
+                         url.includes('X-Amz-Credential=') ||
                          url.includes('X-Amz-Signature=');
-  
+
   // Check for AWS Signature Version 2 parameters (older format)
+  // Only check generic 'Signature=' if it's from AWS domain to avoid false positives
   const hasV2Signature = url.includes('AWSAccessKeyId=') || 
-                         url.includes('Signature=');
-  
+                         (url.includes('Signature=') && isAwsDomain);
+
   return hasV4Signature || hasV2Signature;
 }
 

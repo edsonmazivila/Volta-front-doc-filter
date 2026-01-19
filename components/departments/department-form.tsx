@@ -39,9 +39,7 @@ export function DepartmentForm({
   );
 
   const [updateState, updateAction, updatePending] = useActionState(
-    department
-      ? updateDepartmentAction.bind(null, department.id)
-      : createDepartmentAction,
+    updateDepartmentAction,
     null,
   );
 
