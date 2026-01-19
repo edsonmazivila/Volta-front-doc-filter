@@ -200,8 +200,8 @@ export function getTaxRuleStatus(rule: CompanyTaxRule): TaxRuleStatus {
  * Formatar taxa como porcentagem
  */
 export function formatRate(rate: number): string {
-  // Backend já retorna rate como 0-100 (ex: 3 = 3%), não precisa multiplicar
-  return `${rate.toFixed(2)}%`
+  // Backend retorna rate como decimal (0.03 = 3%), então multiplicamos por 100
+  return `${(rate * 100).toFixed(2)}%`
 }
 
 /**
