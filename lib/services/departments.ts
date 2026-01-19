@@ -39,6 +39,7 @@ const createDepartmentSchema = z.object({
 	name: z.string().min(1, 'Department name is required'),
 	description: z.string().optional().default(''),
 	manager_id: z.string().nullable().optional(),
+	parent_department_id: z.string().nullable().optional(),
 	company_id: z.string().optional(), // For organization admins to specify company
 	is_active: z.boolean().default(true),
 })
@@ -47,6 +48,7 @@ const updateDepartmentSchema = z.object({
 	name: z.string().min(1).optional(),
 	description: z.string().optional(),
 	manager_id: z.string().nullable().optional(),
+	parent_department_id: z.string().nullable().optional(),
 	is_active: z.boolean().optional(),
 })
 
@@ -226,6 +228,7 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 		name: formData.get('name'),
 		description: formData.get('description'),
 		manager_id: formData.get('manager_id') || null,
+		parent_department_id: formData.get('parent_department_id') || null,
 		company_id: formData.get('company_id') || undefined, // Organization Admin can specify company
 		is_active: isActive,
 	})
@@ -284,6 +287,7 @@ export async function updateDepartmentAction(prevState: unknown, formData: FormD
 		name: formData.get('name') || undefined,
 		description: formData.get('description') || undefined,
 		manager_id: formData.get('manager_id') || null,
+		parent_department_id: formData.get('parent_department_id') || null,
 		is_active: isActive,
 	})
 
