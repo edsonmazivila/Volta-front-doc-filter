@@ -238,8 +238,10 @@ type ActionResult = { errors: Record<string, string[]> } | { success: true; data
 
 export async function createDepartmentAction(prevState: unknown, formData: FormData): Promise<ActionResult> {
 	// Handle duplicate fields (hidden false + checkbox true). Prefer any true value.
+	// Only set is_active if the field is present in formData; otherwise leave undefined
+	const hasIsActive = formData.has('is_active')
 	const isActiveValues = formData.getAll('is_active').map(String)
-	const isActive = isActiveValues.some(v => v === 'true' || v === 'on')
+	const isActive = hasIsActive ? isActiveValues.some(v => v === 'true' || v === 'on') : undefined
 
 	const parentDeptId = formData.get('parent_department_id')
 	const managerId = formData.get('manager_id')

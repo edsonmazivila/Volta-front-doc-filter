@@ -84,7 +84,9 @@ export function ForgotPasswordForm() {
 
 					setSuccess(true)
 				} catch (err) {
-					console.error('[ForgotPassword] Unexpected error:', err)
+					if (process.env.NODE_ENV !== 'production') {
+						console.error('[ForgotPassword] Unexpected error:', err)
+					}
 					setError(i18n._(msg`An unexpected error occurred. Please try again.`))
 				}
 				}}

@@ -22,7 +22,7 @@ interface AuthFormProps<TSchema extends ZodSchema> {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-  onSubmit: (data: TypeOf<TSchema>) => Promise<void>;
+  onSubmit?: (data: TypeOf<TSchema>) => Promise<void>;
   // Optional Next.js server action (if provided, form will submit to this instead of onSubmit)
   action?: (formData: FormData) => void | Promise<void>;
   schema: TSchema;
@@ -52,7 +52,9 @@ export function AuthForm<TSchema extends ZodSchema>({
 
   const handleFormSubmit = async (data: TypeOf<TSchema>) => {
     try {
-      await onSubmit(data);
+      if (onSubmit) {
+        await onSubmit(data);
+      }
     } catch {}
   };
 
