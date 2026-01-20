@@ -287,8 +287,10 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 		const data = await res.json()
 		console.log('[createDepartmentAction] Success response:', data)
 		
-		// Revalidate departments and all dependent caches
-		revalidateEntityMutation('DEPARTMENTS')
+		// Revalidate departments and all dependent caches (including per-id cache)
+		const createdId = data.department?.id
+		const additionalTags = createdId ? [`${CacheTags.DEPARTMENTS}-${createdId}`] : []
+		revalidateEntityMutation('DEPARTMENTS', { additionalTags })
 
 		return { success: true, data }
 	} catch (err) {
@@ -325,7 +327,9 @@ export async function updateDepartmentAction(prevState: unknown, formData: FormD
 		manager_id: formData.has('manager_id') 
 			? (managerId ? String(managerId) : null) 
 			: undefined,
-		parent_department_id: parentDeptId ? String(parentDeptId) : null,
+		parent_department_id: formData.has('parent_department_id')
+			? (parentDeptId ? String(parentDeptId) : null)
+			: undefined,
 		is_active: isActive,
 	})
 
@@ -350,8 +354,9 @@ export async function updateDepartmentAction(prevState: unknown, formData: FormD
 		}
 
 		const data = await res.json()
-		// Revalidate departments and all dependent caches
-		revalidateEntityMutation('DEPARTMENTS')
+		// Revalidate departments and all dependent caches (including per-id cache)
+		const additionalTags = [`${CacheTags.DEPARTMENTS}-${id}`]
+		revalidateEntityMutation('DEPARTMENTS', { additionalTags })
 
 		return { success: true, data }
 	} catch {
@@ -374,8 +379,9 @@ export async function deleteDepartmentAction(id: string): Promise<void> {
 		throw new Error(error.message || 'Failed to delete department')
 	}
 
-	// Revalidate departments and all dependent caches
-	revalidateEntityMutation('DEPARTMENTS')
+	// Revalidate departments and all dependent caches (including per-id cache)
+	const additionalTags = [`${CacheTags.DEPARTMENTS}-${id}`]
+	revalidateEntityMutation('DEPARTMENTS', { additionalTags })
 }
 
 export async function toggleDepartmentStatusAction(id: string, isActive: boolean): Promise<void> {
@@ -394,6 +400,7 @@ export async function toggleDepartmentStatusAction(id: string, isActive: boolean
 		throw new Error(error.message || 'Failed to toggle department status')
 	}
 
-	// Revalidate departments and all dependent caches
-	revalidateEntityMutation('DEPARTMENTS')
+	// Revalidate departments and all dependent caches (including per-id cache)
+	const additionalTags = [`${CacheTags.DEPARTMENTS}-${id}`]
+	revalidateEntityMutation('DEPARTMENTS', { additionalTags })
 }

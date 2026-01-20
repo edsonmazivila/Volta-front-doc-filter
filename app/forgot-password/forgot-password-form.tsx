@@ -45,7 +45,9 @@ export function ForgotPasswordForm() {
 				onSubmit={async () => {}}
 				action={async (formData) => {
 					setError(null)
-					const email = formData.get('email') as string
+					// Normalize email: handle null/File, trim and lowercase
+					const rawEmail = formData.get('email')
+					const email = (typeof rawEmail === 'string' ? rawEmail : '').trim().toLowerCase()
 					
 				if (process.env.NODE_ENV === 'development') {
 					console.log('[ForgotPassword] Starting request...')
@@ -76,14 +78,14 @@ export function ForgotPasswordForm() {
 					}
 					
 					if (!result.success) {
-						setError(result.error)
+						setError(result.error ?? i18n._(msg`An unexpected error occurred. Please try again.`))
 						return
 					}
 
 					setSuccess(true)
 				} catch (err) {
 					console.error('[ForgotPassword] Unexpected error:', err)
-					setError('An unexpected error occurred. Please try again.')
+					setError(i18n._(msg`An unexpected error occurred. Please try again.`))
 				}
 				}}
 				schema={forgotPasswordSchema}

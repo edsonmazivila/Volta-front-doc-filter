@@ -128,7 +128,7 @@ export function TaxRulesSection({ taxRules: initialTaxRules }: { taxRules: Compa
     setSelectedTaxRule(null)
     
     if (result.success) {
-      toast.success(`✅ Tax rule "${ruleName}" deleted successfully`)
+      toast.success(i18n._(msg`Tax rule "${ruleName}" deleted successfully`))
       console.log('[TaxRulesSection] 🔄 Reloading tax rules after delete...')
       await loadTaxRules()
       console.log('[TaxRulesSection] ✅ Tax rules reloaded')
@@ -169,9 +169,9 @@ export function TaxRulesSection({ taxRules: initialTaxRules }: { taxRules: Compa
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Tax Rules Management</CardTitle>
+              <CardTitle>{i18n._(msg`Tax Rules Management`)}</CardTitle>
               <CardDescription>
-                Configure dynamic tax rules for your company. These rules are automatically applied during payroll processing.
+                {i18n._(msg`Configure dynamic tax rules for your company. These rules are automatically applied during payroll processing.`)}
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -187,7 +187,7 @@ export function TaxRulesSection({ taxRules: initialTaxRules }: { taxRules: Compa
               {canManage && (
                 <Button onClick={() => setShowCreateDialog(true)}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Tax Rule
+                  {i18n._(msg`Add Tax Rule`)}
                 </Button>
               )}
             </div>
