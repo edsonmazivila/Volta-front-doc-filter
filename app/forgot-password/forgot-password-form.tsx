@@ -47,36 +47,44 @@ export function ForgotPasswordForm() {
 					setError(null)
 					const email = formData.get('email') as string
 					
-					console.log('[ForgotPassword] Starting with email:', email)
-					
-					// Validate email
-					const validation = forgotPasswordSchema.safeParse({ email })
-					if (!validation.success) {
-						const emailErrors = validation.error.flatten().fieldErrors.email
-						if (emailErrors?.length) {
+				if (process.env.NODE_ENV === 'development') {
+					console.log('[ForgotPassword] Starting request...')
+				}
+				
+				// Validate email
+				const validation = forgotPasswordSchema.safeParse({ email })
+				if (!validation.success) {
+					const emailErrors = validation.error.flatten().fieldErrors.email
+					if (emailErrors?.length) {
+						if (process.env.NODE_ENV === 'development') {
 							console.log('[ForgotPassword] Validation error:', emailErrors[0])
-							setError(emailErrors[0])
-							return
 						}
+						setError(emailErrors[0])
+						return
+					}
+				}
+
+				try {
+					// Call API
+					if (process.env.NODE_ENV === 'development') {
+						console.log('[ForgotPassword] Calling API...')
+					}
+					const result = await forgotPasswordClient(email)
+					
+					if (process.env.NODE_ENV === 'development') {
+						console.log('[ForgotPassword] Request completed with success:', result.success)
+					}
+					
+					if (!result.success) {
+						setError(result.error)
+						return
 					}
 
-					try {
-						// Call API
-						console.log('[ForgotPassword] Calling forgotPassword API...')
-						const result = await forgotPasswordClient(email)
-						
-						console.log('[ForgotPassword] Result:', result)
-						
-						if (!result.success) {
-							setError(result.error)
-							return
-						}
-
-						setSuccess(true)
-					} catch (err) {
-						console.error('[ForgotPassword] Unexpected error:', err)
-						setError('An unexpected error occurred. Please try again.')
-					}
+					setSuccess(true)
+				} catch (err) {
+					console.error('[ForgotPassword] Unexpected error:', err)
+					setError('An unexpected error occurred. Please try again.')
+				}
 				}}
 				schema={forgotPasswordSchema}
 				submitText={i18n._(msg`Send reset link`)}

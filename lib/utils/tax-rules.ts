@@ -28,8 +28,8 @@ export function validateTaxRule(rule: Partial<CreateTaxRuleInput>): string[] {
   if (rule.calculation_type === 'percentage') {
     if (rule.rate === undefined || rule.rate === null) {
       errors.push('Rate is required for percentage-based taxes')
-    } else if (rule.rate < 0 || rule.rate > 100) {
-      errors.push('Rate must be between 0 and 100')
+    } else if (rule.rate < 0 || rule.rate > 1) {
+      errors.push('Rate must be between 0 and 1 (decimal form, e.g., 0.03 for 3%)')
     }
   }
 

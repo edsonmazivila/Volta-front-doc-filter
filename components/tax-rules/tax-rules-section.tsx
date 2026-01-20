@@ -39,15 +39,17 @@ export function TaxRulesSection({ taxRules: initialTaxRules }: { taxRules: Compa
   const userRole = user?.role || 'employee'
   const canManage = canManageTaxRules(userRole)
 
-  // Carregar todas as tax rules ativas (de todos os anos)
+  // Carregar todas as tax rules (ativas e inativas para permitir reativação)
   const loadTaxRules = async () => {  
-    console.log('[TaxRulesSection] 🔄 Loading all active tax rules...')
+    console.log('[TaxRulesSection] 🔄 Loading all tax rules...')
     setLoading(true)
     try {
-      const rules = await getTaxRules({ is_active: true })
+      // Carregar todas as rules (sem filtro is_active) para permitir reativação
+      const rules = await getTaxRules()
       console.log('[TaxRulesSection] ✅ Loaded tax rules:', {
         count: rules.length,
-        rules: rules.map(r => ({ id: r.id, code: r.tax_code, name: r.tax_name, year: r.tax_year, active: r.is_active }))
+        active: rules.filter(r => r.is_active).length,
+        inactive: rules.filter(r => !r.is_active).length
       })
       setTaxRules(rules)
     } catch (error) {

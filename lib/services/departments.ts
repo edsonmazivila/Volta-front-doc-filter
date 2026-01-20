@@ -34,6 +34,23 @@ export interface DepartmentStats {
 	departmentsWithManager: number
 }
 
+// Internal types for API responses
+interface RawDepartmentChild {
+	id?: string | number;
+	name?: string;
+	description?: string;
+	manager_id?: string | number;
+	parent_department_id?: string | number;
+	manager?: {
+		id?: string | number;
+		full_name?: string;
+		email?: string;
+	};
+	is_active?: boolean;
+	created_at?: string;
+	updated_at?: string;
+}
+
 // Validation schemas
 const createDepartmentSchema = z.object({
 	name: z.string().min(1, 'Department name is required'),
@@ -156,21 +173,7 @@ export const getDepartmentById = cache(async (id: string): Promise<DepartmentDet
 				is_active: Boolean(d.is_active),
 				created_at: String(d.created_at || ''),
 				updated_at: String(d.updated_at || ''),
-				child_departments: d.child_departments ? d.child_departments.map((child: {
-					id?: string | number;
-					name?: string;
-					description?: string;
-					manager_id?: string | number;
-					parent_department_id?: string | number;
-					manager?: {
-						id?: string | number;
-						full_name?: string;
-						email?: string;
-					};
-					is_active?: boolean;
-					created_at?: string;
-					updated_at?: string;
-				}) => ({
+				child_departments: d.child_departments ? d.child_departments.map((child: RawDepartmentChild) => ({
 					id: String(child.id || ''),
 					name: String(child.name || ''),
 					description: String(child.description || ''),
@@ -319,7 +322,9 @@ export async function updateDepartmentAction(prevState: unknown, formData: FormD
 	const parsed = updateDepartmentSchema.safeParse({
 		name: formData.get('name') || undefined,
 		description: formData.get('description') || undefined,
-		manager_id: managerId ? String(managerId) : null,
+		manager_id: formData.has('manager_id') 
+			? (managerId ? String(managerId) : null) 
+			: undefined,
 		parent_department_id: parentDeptId ? String(parentDeptId) : null,
 		is_active: isActive,
 	})
