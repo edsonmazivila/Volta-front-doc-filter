@@ -23,6 +23,12 @@ interface Manager {
   email: string
 }
 
+interface Department {
+  id: string
+  name: string
+  parent_department_id?: string | null
+}
+
 export function OrganizationDepartmentFormDialog({
   open,
   onOpenChange,
@@ -33,21 +39,25 @@ export function OrganizationDepartmentFormDialog({
   const [selectedCompany, setSelectedCompany] = useState('')
   const [managers, setManagers] = useState<Manager[]>([])
   const [loadingManagers, setLoadingManagers] = useState(false)
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loadingDepartments, setLoadingDepartments] = useState(false)
 
   const [state, action, pending] = useActionState(createDepartmentAction, null)
 
-  // Fetch managers when company changes
+  // Fetch managers and departments when company changes
   useEffect(() => {
     if (!selectedCompany) {
       setManagers([])
+      setDepartments([])
       return
     }
 
-    const fetchManagers = async () => {
+    const fetchManagersAndDepartments = async () => {
       setLoadingManagers(true)
+      setLoadingDepartments(true)
       try {
-        // Use proper endpoint - backend expects GET /api/users with company_id query param
-        const response = await fetch(`/api/proxy/users?company_id=${selectedCompany}`, {
+        // Fetch managers
+        const managersResponse = await fetch(`/api/proxy/users?company_id=${selectedCompany}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -55,11 +65,9 @@ export function OrganizationDepartmentFormDialog({
           credentials: 'include'
         })
         
-        if (response.ok) {
-          const data = await response.json()
-          // Handle both array and {data, count} response formats
+        if (managersResponse.ok) {
+          const data = await managersResponse.json()
           const users = Array.isArray(data) ? data : (data.data || [])
-          // Filter only employees (is_employee = true) if needed
           const employees = users.filter((u: { is_employee?: boolean }) => u.is_employee !== false)
           setManagers(employees.map((u: { id: string; full_name: string; email: string }) => ({
             id: u.id,
@@ -67,18 +75,42 @@ export function OrganizationDepartmentFormDialog({
             email: u.email
           })))
         } else {
-          console.error('Failed to fetch employees:', response.status)
+          console.error('Failed to fetch employees:', managersResponse.status)
           setManagers([])
         }
+
+        // Fetch departments for this company
+        const deptsResponse = await fetch(`/api/proxy/departments?company_id=${selectedCompany}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+        
+        if (deptsResponse.ok) {
+          const data = await deptsResponse.json()
+          const depts = Array.isArray(data) ? data : (data.data || data.departments || [])
+          setDepartments(depts.map((d: { id: string; name: string; parent_department_id?: string | null }) => ({
+            id: d.id,
+            name: d.name,
+            parent_department_id: d.parent_department_id
+          })))
+        } else {
+          console.error('Failed to fetch departments:', deptsResponse.status)
+          setDepartments([])
+        }
       } catch (error) {
-        console.error('Failed to fetch managers:', error)
+        console.error('Failed to fetch managers/departments:', error)
         setManagers([])
+        setDepartments([])
       } finally {
         setLoadingManagers(false)
+        setLoadingDepartments(false)
       }
     }
 
-    fetchManagers()
+    fetchManagersAndDepartments()
   }, [selectedCompany])
 
   // Handle success
@@ -202,6 +234,35 @@ export function OrganizationDepartmentFormDialog({
               <p className="text-sm text-muted-foreground mt-1">
                 No employees found in this company. You can assign a manager later.
               </p>
+            )}
+          </div>
+
+          {/* Parent Department Selection */}
+          <div>
+            <label htmlFor="parent_department_id" className="block text-sm font-medium text-foreground mb-1">
+              Parent Department (optional)
+            </label>
+            <select
+              id="parent_department_id"
+              name="parent_department_id"
+              disabled={!selectedCompany || loadingDepartments}
+              className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">
+                {!selectedCompany 
+                  ? 'Select a company first...' 
+                  : loadingDepartments 
+                    ? 'Loading departments...' 
+                    : 'No parent department (top-level)'}
+              </option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            {state && 'errors' in state && state.errors?.parent_department_id && (
+              <p className="text-sm text-red-600 mt-1">{state.errors.parent_department_id[0]}</p>
             )}
           </div>
 

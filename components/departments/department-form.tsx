@@ -75,7 +75,14 @@ export function DepartmentForm({
   }, [isSuccess]);
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="space-y-4" onSubmit={(e) => {
+      const formData = new FormData(e.currentTarget)
+      console.log('[DepartmentForm] Form submitted with data:', {
+        name: formData.get('name'),
+        parent_department_id: formData.get('parent_department_id'),
+        description: formData.get('description'),
+      })
+    }}>
       <div>
         <label
           htmlFor="name"

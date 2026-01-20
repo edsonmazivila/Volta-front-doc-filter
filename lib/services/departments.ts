@@ -156,7 +156,21 @@ export const getDepartmentById = cache(async (id: string): Promise<DepartmentDet
 				is_active: Boolean(d.is_active),
 				created_at: String(d.created_at || ''),
 				updated_at: String(d.updated_at || ''),
-				child_departments: d.child_departments ? d.child_departments.map((child: Record<string, unknown>) => ({
+				child_departments: d.child_departments ? d.child_departments.map((child: {
+					id?: string | number;
+					name?: string;
+					description?: string;
+					manager_id?: string | number;
+					parent_department_id?: string | number;
+					manager?: {
+						id?: string | number;
+						full_name?: string;
+						email?: string;
+					};
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				}) => ({
 					id: String(child.id || ''),
 					name: String(child.name || ''),
 					description: String(child.description || ''),
@@ -224,11 +238,20 @@ export async function createDepartmentAction(prevState: unknown, formData: FormD
 	const isActiveValues = formData.getAll('is_active').map(String)
 	const isActive = isActiveValues.some(v => v === 'true' || v === 'on')
 
+	const parentDeptId = formData.get('parent_department_id')
+	const managerId = formData.get('manager_id')
+
+	console.log('[createDepartmentAction] FormData values:', {
+		parent_department_id_raw: parentDeptId,
+		parent_department_id_type: typeof parentDeptId,
+		manager_id_raw: managerId,
+	})
+
 	const parsed = createDepartmentSchema.safeParse({
 		name: formData.get('name'),
 		description: formData.get('description'),
-		manager_id: formData.get('manager_id') || null,
-		parent_department_id: formData.get('parent_department_id') || null,
+		manager_id: managerId ? String(managerId) : null,
+		parent_department_id: parentDeptId ? String(parentDeptId) : null,
 		company_id: formData.get('company_id') || undefined, // Organization Admin can specify company
 		is_active: isActive,
 	})
@@ -283,11 +306,21 @@ export async function updateDepartmentAction(prevState: unknown, formData: FormD
 	const hasIsActiveField = isActiveValues.length > 0
 	const isActive = hasIsActiveField ? isActiveValues.some(v => v === 'true' || v === 'on') : undefined
 
+	const parentDeptId = formData.get('parent_department_id')
+	const managerId = formData.get('manager_id')
+
+	console.log('[updateDepartmentAction] FormData values:', {
+		id,
+		parent_department_id_raw: parentDeptId,
+		parent_department_id_type: typeof parentDeptId,
+		manager_id_raw: managerId,
+	})
+
 	const parsed = updateDepartmentSchema.safeParse({
 		name: formData.get('name') || undefined,
 		description: formData.get('description') || undefined,
-		manager_id: formData.get('manager_id') || null,
-		parent_department_id: formData.get('parent_department_id') || null,
+		manager_id: managerId ? String(managerId) : null,
+		parent_department_id: parentDeptId ? String(parentDeptId) : null,
 		is_active: isActive,
 	})
 
