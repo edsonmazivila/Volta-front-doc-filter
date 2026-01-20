@@ -4,23 +4,20 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AuthForm, PasswordField, ConfirmPasswordField } from '@/components/auth/auth-form'
 import { resetPasswordSchema } from '@/lib/auth/types'
-import { resetPasswordAction } from '@/lib/auth/actions'
 import { useLingui } from '@lingui/react'
 import { Trans } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
+import { resetPasswordClient } from '@/lib/services/password-client'
 
 interface ResetPasswordFormProps {
 	token: string
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
-	// Use form's submitting state; remove external loading
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState(false)
 	const router = useRouter()
 	const { i18n } = useLingui()
-
-	const handleResetPassword = async () => {}
 
 	if (success) {
 		return (
@@ -51,17 +48,38 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 			<AuthForm
 				title={i18n._(msg`Set new password`)}
 				subtitle={i18n._(msg`Enter your new password below`)}
-				onSubmit={handleResetPassword}
+				onSubmit={async () => {}}
 				action={async (formData) => {
-					if (!formData.get('token')) formData.set('token', token)
-					const result = await resetPasswordAction(undefined, formData)
-					if ('errors' in result) {
-						const formErrors = (result.errors as Record<string, string[] | undefined>)._form
-						if (formErrors?.length) {
-							setError(formErrors[0])
-							return
-						}
+					setError(null)
+					const password = formData.get('password') as string
+					const confirmPassword = formData.get('confirmPassword') as string
+					
+					// Validate form data
+					const validation = resetPasswordSchema.safeParse({
+						password,
+						confirmPassword,
+						token,
+					})
+					
+					if (!validation.success) {
+						const errors = validation.error.flatten()
+						const firstError = 
+							errors.fieldErrors.password?.[0] ||
+							errors.fieldErrors.confirmPassword?.[0] ||
+							errors.formErrors?.[0] ||
+							'Invalid form data'
+						setError(firstError)
+						return
 					}
+
+					// Call API
+					const result = await resetPasswordClient(token, password)
+					
+					if (!result.success) {
+						setError(result.error)
+						return
+					}
+
 					setSuccess(true)
 					setTimeout(() => {
 						router.push('/login?message=Password reset successfully! Please sign in with your new password.')

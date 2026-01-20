@@ -3,18 +3,15 @@
 import { useState } from 'react'
 import { AuthForm, EmailField } from '@/components/auth/auth-form'
 import { forgotPasswordSchema } from '@/lib/auth/types'
-import { forgotPasswordAction } from '@/lib/auth/actions'
 import { useLingui } from '@lingui/react'
 import { Trans } from '@lingui/react/macro'
 import { msg } from '@lingui/core/macro'
+import { forgotPasswordClient } from '@/lib/services/password-client'
 
 export function ForgotPasswordForm() {
-	// Remove external loading; rely on form's submitting state
 	const [error, setError] = useState<string | null>(null)
 	const [success, setSuccess] = useState(false)
 	const { i18n } = useLingui()
-
-	const handleForgotPassword = async () => {}
 
 	if (success) {
 		return (
@@ -45,17 +42,53 @@ export function ForgotPasswordForm() {
 			<AuthForm
 				title={i18n._(msg`Reset your password`)}
 				subtitle={i18n._(msg`Enter your email address and we'll send you a link to reset your password`)}
-				onSubmit={handleForgotPassword}
+				onSubmit={async () => {}}
 				action={async (formData) => {
-					const result = await forgotPasswordAction(undefined, formData)
-					if ('errors' in result) {
-						const formErrors = (result.errors as Record<string, string[] | undefined>)._form
-						if (formErrors?.length) {
-							setError(formErrors[0])
-							return
+					setError(null)
+					// Normalize email: handle null/File, trim and lowercase
+					const rawEmail = formData.get('email')
+					const email = (typeof rawEmail === 'string' ? rawEmail : '').trim().toLowerCase()
+					
+				if (process.env.NODE_ENV === 'development') {
+					console.log('[ForgotPassword] Starting request...')
+				}
+				
+				// Validate email
+				const validation = forgotPasswordSchema.safeParse({ email })
+				if (!validation.success) {
+					const emailErrors = validation.error.flatten().fieldErrors.email
+					if (emailErrors?.length) {
+						if (process.env.NODE_ENV === 'development') {
+							console.log('[ForgotPassword] Validation error:', emailErrors[0])
 						}
+						setError(emailErrors[0])
+						return
 					}
+				}
+
+				try {
+					// Call API
+					if (process.env.NODE_ENV === 'development') {
+						console.log('[ForgotPassword] Calling API...')
+					}
+					const result = await forgotPasswordClient(email)
+					
+					if (process.env.NODE_ENV === 'development') {
+						console.log('[ForgotPassword] Request completed with success:', result.success)
+					}
+					
+					if (!result.success) {
+						setError(result.error ?? i18n._(msg`An unexpected error occurred. Please try again.`))
+						return
+					}
+
 					setSuccess(true)
+				} catch (err) {
+					if (process.env.NODE_ENV !== 'production') {
+						console.error('[ForgotPassword] Unexpected error:', err)
+					}
+					setError(i18n._(msg`An unexpected error occurred. Please try again.`))
+				}
 				}}
 				schema={forgotPasswordSchema}
 				submitText={i18n._(msg`Send reset link`)}

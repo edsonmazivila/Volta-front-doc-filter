@@ -39,9 +39,7 @@ export function DepartmentForm({
   );
 
   const [updateState, updateAction, updatePending] = useActionState(
-    department
-      ? updateDepartmentAction.bind(null, department.id)
-      : createDepartmentAction,
+    updateDepartmentAction,
     null,
   );
 
@@ -77,7 +75,18 @@ export function DepartmentForm({
   }, [isSuccess]);
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="space-y-4" onSubmit={(e) => {
+      const formData = new FormData(e.currentTarget)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DepartmentForm] Form submitted with data:', {
+          name: formData.get('name'),
+          parent_department_id: formData.get('parent_department_id'),
+          description: formData.get('description'),
+        })
+      }
+    }}>
+      {/* Hidden input for department ID when editing */}
+      {department && <input type="hidden" name="id" value={department.id} />}
       <div>
         <label
           htmlFor="name"

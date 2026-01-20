@@ -11,15 +11,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui";
 import { FormField, Input, Checkbox } from "./form-field";
 import { PasswordInput, PasswordStrength } from "./password-input";
-import type { AnyZodObject, TypeOf } from "zod";
+import type { AnyZodObject, TypeOf, ZodEffects } from "zod";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
 
-interface AuthFormProps<TSchema extends AnyZodObject> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ZodSchema = AnyZodObject | ZodEffects<AnyZodObject, any, any>
+
+interface AuthFormProps<TSchema extends ZodSchema> {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-  onSubmit: (data: TypeOf<TSchema>) => Promise<void>;
+  onSubmit?: (data: TypeOf<TSchema>) => Promise<void>;
   // Optional Next.js server action (if provided, form will submit to this instead of onSubmit)
   action?: (formData: FormData) => void | Promise<void>;
   schema: TSchema;
@@ -29,7 +32,7 @@ interface AuthFormProps<TSchema extends AnyZodObject> {
   footer?: React.ReactNode;
 }
 
-export function AuthForm<TSchema extends AnyZodObject>({
+export function AuthForm<TSchema extends ZodSchema>({
   title,
   subtitle,
   children,
@@ -49,7 +52,9 @@ export function AuthForm<TSchema extends AnyZodObject>({
 
   const handleFormSubmit = async (data: TypeOf<TSchema>) => {
     try {
-      await onSubmit(data);
+      if (onSubmit) {
+        await onSubmit(data);
+      }
     } catch {}
   };
 

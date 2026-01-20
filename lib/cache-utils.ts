@@ -53,6 +53,9 @@ export const CACHE_DEPENDENCIES: Record<string, string[]> = {
   // Company settings affect all data
   company: ['users', 'departments', 'employees', 'payroll-runs', 'leaves', 'attendance', 'meetings'],
 
+  // Tax rules affect payroll calculations
+  'tax-rules': ['payroll-runs', 'payroll-stats', 'paystubs'],
+
   // Stats caches
   'users-stats': [],
   'department-stats': [],
@@ -203,6 +206,7 @@ export const CacheTags = {
   PAYROLL_CHART: 'payroll-chart',
   EMPLOYEE_METRICS: 'employee-metrics',
   TAX_TREND: 'tax-trend',
+  TAX_RULES: 'tax-rules',
 } as const
 
 /**
@@ -223,6 +227,7 @@ export const CachePaths = {
   MEETINGS: '/dashboard/meetings',
   COMPANY: '/dashboard/company',
   REPORTS: '/dashboard/reports',
+  TAX_RULES: '/dashboard/tax-rules',
 } as const
 
 /**
@@ -244,6 +249,7 @@ export function getPathsForEntity(entity: keyof typeof CacheTags): string[] {
     COMPANY: [CachePaths.COMPANY, CachePaths.DASHBOARD],
     DASHBOARD: [CachePaths.DASHBOARD],
     REPORTS: [CachePaths.REPORTS],
+    TAX_RULES: [CachePaths.TAX_RULES, CachePaths.PAYROLL, CachePaths.DASHBOARD],
   }
 
   return entityToPaths[entity] || [CachePaths.DASHBOARD]

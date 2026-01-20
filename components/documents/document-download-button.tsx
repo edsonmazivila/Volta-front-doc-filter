@@ -37,27 +37,29 @@ export function DocumentDownloadButton({
   async function handleDownload() {
     setIsDownloading(true)
 
-    await downloadDocument({
-      documentId,
-      onSuccess: () => {
-        toast.success(`${filename} downloaded successfully`)
-        
-        // Optional: Track analytics
-        if (typeof window !== 'undefined' && window.analytics) {
-          window.analytics.track('document_downloaded', {
-            document_id: documentId,
-            document_type: documentType,
-            filename,
-          })
-        }
-      },
-      onError: (error) => {
-        console.error('[DocumentDownloadButton] Download failed:', error)
-        toast.error(error.message || 'Failed to download document. Please try again.')
-      },
-    })
-
-    setIsDownloading(false)
+    try {
+      await downloadDocument({
+        documentId,
+        onSuccess: () => {
+          toast.success(`${filename} downloaded successfully`)
+          
+          // Optional: Track analytics
+          if (typeof window !== 'undefined' && window.analytics) {
+            window.analytics.track('document_downloaded', {
+              document_id: documentId,
+              document_type: documentType,
+              filename,
+            })
+          }
+        },
+        onError: (error) => {
+          console.error('[DocumentDownloadButton] Download failed:', error)
+          toast.error(error.message || 'Failed to download document. Please try again.')
+        },
+      })
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   return (

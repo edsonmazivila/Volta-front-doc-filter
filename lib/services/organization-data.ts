@@ -113,21 +113,31 @@ export async function getOrganizationPayrolls(params?: {
 
     // Map backend fields to frontend interface
     const mappedPayrolls: OrganizationPayroll[] = backendPayrolls.map(
-      (p: BackendPayroll) => ({
-        id: p.id,
-        company_id: p.company_id,
-        company_name:
-          (p as BackendPayroll & { company_name?: string }).company_name || "", // May come from backend join
-        pay_period_start: p.period_start,
-        pay_period_end: p.period_end,
-        pay_date: p.pay_date,
-        status: p.status,
-        total_employees: p.employee_count,
-        gross_amount: p.total_gross_pay,
-        net_amount: p.total_net_pay,
-        total_deductions: p.total_deductions,
-        created_at: p.created_at,
-      }),
+      (p: BackendPayroll) => {
+        const rawPayroll = p as BackendPayroll & {
+          company_name?: string;
+          pay_period_start?: string;
+          pay_period_end?: string;
+          total_employees?: number;
+          gross_amount?: number;
+          net_amount?: number;
+        };
+        
+        return {
+          id: p.id,
+          company_id: p.company_id,
+          company_name: rawPayroll.company_name || "",
+          pay_period_start: rawPayroll.pay_period_start || p.period_start,
+          pay_period_end: rawPayroll.pay_period_end || p.period_end,
+          pay_date: p.pay_date,
+          status: p.status,
+          total_employees: rawPayroll.total_employees ?? p.employee_count,
+          gross_amount: rawPayroll.gross_amount ?? p.total_gross_pay,
+          net_amount: rawPayroll.net_amount ?? p.total_net_pay,
+          total_deductions: p.total_deductions,
+          created_at: p.created_at,
+        };
+      },
     );
 
     return {

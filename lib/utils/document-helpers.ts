@@ -13,6 +13,48 @@ export interface DownloadDocumentOptions {
 }
 
 /**
+ * Internal: Download document and throw errors (for retry logic)
+ * 
+ * @param documentId - Document ID
+ * @param token - Optional auth token
+ * @throws Error if download fails
+ */
+async function _downloadDocumentInternal(
+  documentId: string,
+  token?: string
+): Promise<void> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // 1. Request presigned URL from backend
+  const response = await fetch(`/api/documents/${documentId}/download`, {
+    headers,
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Download failed: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.success || !data.url) {
+    throw new Error(data.error || 'Failed to get download URL');
+  }
+
+  // 2. Use presigned URL for direct download
+  const link = document.createElement('a');
+  link.href = data.url;
+  link.download = data.document?.filename || 'document';
+  link.click();
+}
+
+/**
  * Download a document using presigned URL from backend
  * 
  * ⚠️ Important: Never cache presigned URLs - they expire!
@@ -27,36 +69,7 @@ export async function downloadDocument({
   onError
 }: DownloadDocumentOptions): Promise<void> {
   try {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    // 1. Request presigned URL from backend
-    const response = await fetch(`/api/documents/${documentId}/download`, {
-      headers,
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Download failed: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.success || !data.url) {
-      throw new Error(data.error || 'Failed to get download URL');
-    }
-
-    // 2. Use presigned URL for direct download
-    const link = document.createElement('a');
-    link.href = data.url;
-    link.download = data.document?.filename || 'document';
-    link.click();
-
+    await _downloadDocumentInternal(documentId, token);
     onSuccess?.();
   } catch (error) {
     console.error('[DocumentHelpers] Download error:', error);
@@ -68,15 +81,17 @@ export async function downloadDocument({
  * Download with retry logic for transient failures
  * 
  * @param documentId - Document ID
+ * @param token - Optional auth token
  * @param maxRetries - Maximum number of retry attempts
  */
 export async function downloadDocumentWithRetry(
   documentId: string,
+  token?: string,
   maxRetries = 2
 ): Promise<void> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      await downloadDocument({ documentId });
+      await _downloadDocumentInternal(documentId, token);
       return; // Success
     } catch (error) {
       if (attempt === maxRetries - 1) {

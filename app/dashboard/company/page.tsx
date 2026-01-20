@@ -3,6 +3,7 @@ import { Card, CardHeader } from '@/components/dashboard/card'
 import { requireRole } from '@/lib/rbac/server'
 import { CompanyProfile as CompanyProfileComponent } from '@/components/company/company-profile'
 import { getCompany, getLeavePolicies, getPaySchedules, getCompanyDocuments } from '@/lib/services/company'
+import { getTaxRules } from '@/lib/services/tax-rules'
 import { t } from '@lingui/core/macro'
 import { getLocaleAndInitialize } from '@/lib/i18n/server'
 
@@ -12,11 +13,12 @@ export default async function CompanyPage() {
 
   // Only HR managers and admins can manage company settings
   await requireRole(['hr_manager', 'system_admin', 'organization_admin'])
-  const [company, paySchedules, leavePolicies, companyDocuments] = await Promise.all([
+  const [company, paySchedules, leavePolicies, companyDocuments, taxRules] = await Promise.all([
     getCompany(),
     getPaySchedules(),
     getLeavePolicies(),
     getCompanyDocuments(),
+    getTaxRules(),
   ])
   const safeCompany = company ?? {
     id: '',
@@ -44,6 +46,7 @@ export default async function CompanyPage() {
             paySchedules={paySchedules || []}
             leavePolicies={leavePolicies || []}
             companyDocuments={companyDocuments}
+            taxRules={taxRules || []}
           />
         </Card>
       </section>
