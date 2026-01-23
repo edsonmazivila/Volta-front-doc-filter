@@ -50,7 +50,7 @@ export function HomeHeader() {
     { href: "/features", label: i18n._(msg`Features`) },
     { href: "/careers", label: i18n._(msg`Careers`) },
   ];
-  const showNavLinks = false; // Toggle to true to show navigation links again
+  const showNavLinks = true; // Enable navigation links
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
