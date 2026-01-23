@@ -100,9 +100,6 @@ export const metadata: Metadata = {
     maximumScale: 5,
     userScalable: true,
   },
-  verification: {
-    google: 'google-site-verification-code-here',
-  },
   alternates: {
     canonical: 'https://voltahr.com',
   },
