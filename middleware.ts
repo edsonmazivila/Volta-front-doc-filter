@@ -14,7 +14,8 @@ const publicRoutes = new Set([
 	'/pricing',
 	'/about',
 	'/features',
-	'/contact'
+	'/contact',
+	'/careers'
 ])
 
 // Auth routes that should redirect to dashboard if already authenticated

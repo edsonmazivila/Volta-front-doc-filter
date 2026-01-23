@@ -2,6 +2,7 @@
 
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export function Integrations() {
@@ -73,10 +74,10 @@ export function Integrations() {
 
         {/* CTA */}
         <div className="text-center">
-          <button className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 group">
+          <Link href="/integrations" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 group">
             {i18n._(msg`View All Integrations`)}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-          </button>
+          </Link>
         </div>
       </div>
     </section>

@@ -12,6 +12,7 @@ export default function PricingPage() {
 
   const pricingTiers = [
     {
+      id: "starter",
       name: i18n._(msg`Starter`),
       price: "$29",
       period: i18n._(msg`/month`),
@@ -27,6 +28,7 @@ export default function PricingPage() {
       popular: false,
     },
     {
+      id: "professional",
       name: i18n._(msg`Professional`),
       price: "$79",
       period: i18n._(msg`/month`),
@@ -43,6 +45,7 @@ export default function PricingPage() {
       popular: true,
     },
     {
+      id: "enterprise",
       name: i18n._(msg`Enterprise`),
       price: i18n._(msg`Custom`),
       period: "",
@@ -127,7 +130,7 @@ export default function PricingPage() {
                 >
                   <Link
                     href={
-                      tier.name === "Enterprise" ? "/contact" : "/signup"
+                      tier.id === "enterprise" ? "/contact" : "/signup"
                     }
                   >
                     {tier.cta}

@@ -13,10 +13,10 @@ export function DeploymentFlexibility() {
       title: i18n._(msg`Multi-Cloud`),
       description: i18n._(msg`Deploy on AWS, Azure, Google Cloud, or any Kubernetes cluster. Full portability without vendor lock-in.`),
       highlights: [
-        "AWS EKS",
-        "Azure AKS",
-        "Google GKE",
-        "DigitalOcean",
+        i18n._(msg`AWS EKS`),
+        i18n._(msg`Azure AKS`),
+        i18n._(msg`Google GKE`),
+        i18n._(msg`DigitalOcean`),
       ],
     },
     {
@@ -24,10 +24,10 @@ export function DeploymentFlexibility() {
       title: i18n._(msg`On-Premises`),
       description: i18n._(msg`Run on your own infrastructure for complete data sovereignty. Perfect for regulated industries and compliance requirements.`),
       highlights: [
-        "Banking & Finance",
-        "Healthcare",
-        "Government",
-        "Data Residency",
+        i18n._(msg`Banking & Finance`),
+        i18n._(msg`Healthcare`),
+        i18n._(msg`Government`),
+        i18n._(msg`Data Residency`),
       ],
     },
     {
@@ -35,10 +35,10 @@ export function DeploymentFlexibility() {
       title: i18n._(msg`Hybrid Deployment`),
       description: i18n._(msg`Mix cloud and on-prem deployments. Keep sensitive data on-premises while leveraging cloud scalability.`),
       highlights: [
-        "Best of Both Worlds",
-        "Phased Migration",
-        "Disaster Recovery",
-        "Cost Optimization",
+        i18n._(msg`Best of Both Worlds`),
+        i18n._(msg`Phased Migration`),
+        i18n._(msg`Disaster Recovery`),
+        i18n._(msg`Cost Optimization`),
       ],
     },
   ];
