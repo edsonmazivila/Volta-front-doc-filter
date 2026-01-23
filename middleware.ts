@@ -10,7 +10,12 @@ const publicRoutes = new Set([
 	'/signup',
 	'/signup/success',
 	'/forgot-password',
-	'/reset-password'
+	'/reset-password',
+	'/pricing',
+	'/about',
+	'/features',
+	'/contact',
+	'/careers'
 ])
 
 // Auth routes that should redirect to dashboard if already authenticated

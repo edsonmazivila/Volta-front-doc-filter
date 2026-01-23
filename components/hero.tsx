@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import { Spotlight } from "@/components/ui/spotlight";
 import { Button } from "@/components/ui";
 import Link from "next/link";
 import { useLingui } from "@lingui/react";
@@ -12,73 +10,95 @@ const Hero = () => {
   const { i18n } = useLingui();
 
   return (
-    <div className="relative min-h-screen flex flex-col w-full overflow-hidden bg-transparent ">
-      {/* Left beam */}
-      <Spotlight
-        className="-top-32 -left-80 md:h-[50%] md:block hidden"
-        fill="white"
-      />
-      {/* Bottom moon image */}
-      <div className="z-10 mx-auto w-full max-w-7xl p-4 mt-24">
+    <div className="relative min-h-screen flex flex-col items-center justify-center w-full overflow-hidden">
+      {/* Smooth professional gradient with multiple stops to prevent banding */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_#1e3a8a_0%,_#1e293b_25%,_#0f172a_50%,_#020617_100%)]" />
+      
+      {/* Additional overlay for extra smoothness */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-slate-950/40" />
+      
+      {/* Subtle noise texture to break up any remaining banding */}
+      <div className="absolute inset-0 opacity-[0.015] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=')]" />
+      
+      {/* Soft glow accents */}
+      <div className="absolute top-0 left-1/3 w-[800px] h-[800px] bg-blue-600/[0.08] rounded-full blur-[128px]" />
+      <div className="absolute bottom-0 right-1/3 w-[700px] h-[700px] bg-indigo-600/[0.06] rounded-full blur-[120px]" />
+      
+      {/* Content container */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24">
+        {/* Unique Value Prop Badge */}
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full">
+            <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9a1 1 0 112 0v4a1 1 0 11-2 0V9zm1-5a1 1 0 100 2 1 1 0 000-2z" />
+            </svg>
+            <span className="text-blue-400 font-semibold text-sm">
+              {i18n._(msg`Built for Regulated Industries • SOC 2 Certified`)}
+            </span>
+          </div>
+        </div>
+
+        {/* Main Headline - Problem/Solution Format */}
         <h1 className="tracking-wide leading-tight bg-opacity-50 bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-center text-4xl font-bold text-transparent md:text-7xl">
-          {i18n._(msg`All‑in‑one HR & Payroll Platform`)}
+          {i18n._(msg`HR & Payroll Platform`)}
+          <br />
+          <span className="text-3xl md:text-5xl">
+            {i18n._(msg`That Keeps You Compliant`)}
+          </span>
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-center text-base md:text-lg font-normal text-neutral-300">
-          {i18n._(msg`Streamline employee management, time & attendance, documents, and payroll in a secure system with bank approvals and actionable reporting.`)}
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-3">
+
+        {/* Value Proposition - Business Outcomes */}
+        <div className="mx-auto mt-6 max-w-2xl text-center">
+          <p className="text-xl md:text-2xl font-semibold text-white mb-2">
+            {i18n._(msg`Automate Payroll, Track Time, Manage Documents—All in One Place`)}
+          </p>
+        </div>
+
+        {/* CTAs */}
+        <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
           <Button
             variant="primaryGradient"
-            className="px-8 py-4 text-lg font-semibold"
+            className="px-8 py-4 text-lg font-semibold shadow-xl shadow-blue-500/20"
             asChild
           >
-            <Link href="/signup">{i18n._(msg`Get Started Free`)}</Link>
+            <Link href="/signup">{i18n._(msg`Start Free Trial`)}</Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="px-8 py-4 text-lg font-semibold border-gray-600 hover:border-blue-500 hover:bg-blue-500/10"
+            asChild
+          >
+            <Link href="/pricing">{i18n._(msg`View Pricing`)}</Link>
           </Button>
         </div>
-      </div>
-      <div className="flex flex-col items-center justify-center w-full">
-        <Image
-          src="/moon.png"
-          alt="Moon"
-          width={1920}
-          height={1080}
-          priority
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 opacity-90 w-full h-auto md:block hidden max-w-7xl"
-        />
-        {/* Temporarily hiding trust logos for future reuse */}
 
-        <h1 className="absolute bottom-36 text-white text-2xl font-bold text-center mb-4">
-          {i18n._(msg`Trusted by Companies of All Sizes`)}
-        </h1>
-        {/*
-        <div className="absolute bottom-12 overflow-hidden max-w-4xl">
-          <Marquee>
-            <Image
-              src="/ts.png"
-              alt="ts"
-              width={60}
-              height={50}
-              className="w-16 h-16"
-            />
-            <Image
-              src="/nextjs.webp"
-              alt="nextjs"
-              width={60}
-              height={50}
-              className="w-16 h-16"
-            />
-            <Image
-              src="/figma.png"
-              alt="figma"
-              width={60}
-              height={50}
-              className="w-16 h-16"
-            />
-          </Marquee>
-          <div className="from-[#030009] absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r"></div>
-          <div className="from-[#030009] absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l"></div>
+        {/* Consolidated Trust Indicators */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-gray-400">
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {i18n._(msg`14-Day Free Trial`)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {i18n._(msg`No Credit Card`)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {i18n._(msg`SOC 2 Certified`)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            {i18n._(msg`99.5% SLA`)}
+          </span>
         </div>
-        */}
       </div>
     </div>
   );
