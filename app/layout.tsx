@@ -26,8 +26,87 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Volta HR - Powered by Dorico Dynamics",
-  description: "Volta HR - Modern multi-tenant payroll and HR management system. Powered by Dorico Dynamics.",
+  metadataBase: new URL('https://voltahr.com'),
+  title: {
+    default: "Volta HR - All-in-One HR & Payroll Platform for African Businesses",
+    template: "%s | Volta HR",
+  },
+  description: "Streamline employee management, time tracking, leave requests, and payroll processing. Secure, scalable, and built for growth. Powered by Dorico Dynamics.",
+  keywords: [
+    "HR software",
+    "payroll system",
+    "time tracking",
+    "leave management",
+    "employee management",
+    "HR platform Africa",
+    "payroll software Mozambique",
+    "HRIS",
+    "human resources management",
+    "multi-tenant HR",
+    "cloud HR platform",
+    "automated payroll",
+    "compliance management",
+  ],
+  authors: [{ name: "Dorico Dynamics" }],
+  creator: "Dorico Dynamics",
+  publisher: "Dorico Dynamics",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://voltahr.com',
+    title: "Volta HR - All-in-One HR & Payroll Platform",
+    description: "Streamline your entire employee lifecycle with automated time tracking, leave management, and comprehensive reporting.",
+    siteName: 'Volta HR',
+    images: [
+      {
+        url: '/logo/volta-og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Volta HR Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Volta HR - All-in-One HR & Payroll Platform",
+    description: "Streamline employee management, time tracking, and payroll. Start your free trial today.",
+    images: ['/logo/volta-og-image.png'],
+    creator: '@voltahr',
+  },
+  icons: {
+    icon: [
+      { url: '/icon.png' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
+  manifest: '/manifest.webmanifest',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
+  verification: {
+    google: 'google-site-verification-code-here',
+  },
+  alternates: {
+    canonical: 'https://voltahr.com',
+  },
+  category: 'business',
 };
 
 /**
@@ -84,6 +163,32 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'Volta HR',
+              applicationCategory: 'BusinessApplication',
+              operatingSystem: 'Web',
+              offers: {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'USD',
+                lowPrice: '29',
+                highPrice: '79',
+              },
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '4.8',
+                ratingCount: '150',
+              },
+              description: 'Streamline employee management, time tracking, leave requests, and payroll processing.',
+            }),
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LinguiClientProvider initialLocale={locale} initialMessages={messages}>

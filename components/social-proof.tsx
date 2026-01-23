@@ -63,7 +63,7 @@ export function SocialProof() {
 
               {/* Quote */}
               <blockquote className="text-gray-300 text-base leading-relaxed mb-6">
-                "{testimonial.quote}"
+                &ldquo;{testimonial.quote}&rdquo;
               </blockquote>
 
               {/* Author */}
@@ -91,7 +91,7 @@ export function SocialProof() {
   );
 }
 
-function AnimatedStat({ value, suffix, label }: { value: number; suffix: string; label: string }) {
+function AnimatedStat({ value, suffix, label }: Readonly<{ value: number; suffix: string; label: string }>) {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

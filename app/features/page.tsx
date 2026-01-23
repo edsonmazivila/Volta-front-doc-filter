@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata } from "next";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
 import HomeHeader from "@/components/home-header";
