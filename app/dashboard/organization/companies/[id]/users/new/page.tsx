@@ -6,35 +6,38 @@ import { getCompanyById } from "@/lib/services/companies";
 import { t } from "@lingui/core/macro";
 import { NewUserForm } from "@/components/organization/new-user-form";
 
-export default async function NewUserPage({ 
+export default async function NewUserPage({
   params,
-  searchParams
-}: { 
-  params: { id: string };
-  searchParams: { role?: string };
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ role?: string }>;
 }) {
   await getLocaleAndInitialize();
   const user = await requireUser();
 
   // Only organization_admin can create users
-  if (user.role !== 'organization_admin' && user.role !== 'platform_owner') {
-    redirect('/dashboard');
+  if (user.role !== "organization_admin" && user.role !== "platform_owner") {
+    redirect("/dashboard");
   }
 
-  const company = await getCompanyById(params.id).catch(() => null);
+  const { id } = await params;
+  const { role } = await searchParams;
+
+  const company = await getCompanyById(id).catch(() => null);
 
   if (!company) {
-    redirect('/dashboard/organization');
+    redirect("/dashboard/organization");
   }
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
       <Header title={t`New User - ${company.name}`} />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
-        <NewUserForm 
-          companyId={params.id} 
+        <NewUserForm
+          companyId={id}
           companyName={company.name}
-          defaultRole={searchParams.role}
+          defaultRole={role}
         />
       </main>
     </div>

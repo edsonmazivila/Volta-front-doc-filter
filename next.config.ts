@@ -11,6 +11,30 @@ const nextConfig: NextConfig = {
     swcPlugins: [["@lingui/swc-plugin", {}]],
   },
 
+  // Mark server-only packages as external to prevent bundling issues
+  serverExternalPackages: [
+    "dd-trace",
+    "@datadog/pprof",
+    "@datadog/libdatadog",
+    "@datadog/native-metrics",
+    "@datadog/native-appsec",
+    "@datadog/native-iast-taint-tracking",
+    "@datadog/native-iast-rewriter",
+    "@datadog/wasm-js-rewriter",
+  ],
+
+  // Webpack configuration to properly handle dd-trace
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Mark dd-trace and all @datadog packages as external
+      config.externals = config.externals || [];
+      config.externals.push({
+        "dd-trace": "commonjs dd-trace",
+      });
+    }
+    return config;
+  },
+
   // Configure external image domains
   images: {
     remotePatterns: [

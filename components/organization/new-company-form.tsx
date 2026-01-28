@@ -23,22 +23,22 @@ export function NewCompanyForm() {
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    
+
     const payload: CreateCompanyData = {
-      name: formData.get('name') as string,
-      business_email: formData.get('business_email') as string,
-      country: formData.get('country') as string,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      country: formData.get("country") as string,
     };
 
     // Add optional fields if provided
-    const legal_name = formData.get('legal_name') as string;
-    const tax_id = formData.get('tax_id') as string;
-    const address_line1 = formData.get('address_line1') as string;
-    const city = formData.get('city') as string;
-    const state = formData.get('state') as string;
-    const postal_code = formData.get('postal_code') as string;
-    const phone = formData.get('phone') as string;
-    const website = formData.get('website') as string;
+    const legal_name = formData.get("legal_name") as string;
+    const tax_id = formData.get("tax_id") as string;
+    const address_line1 = formData.get("address_line1") as string;
+    const city = formData.get("city") as string;
+    const state = formData.get("state") as string;
+    const postal_code = formData.get("postal_code") as string;
+    const phone = formData.get("phone") as string;
+    const website = formData.get("website") as string;
 
     if (legal_name) payload.legal_name = legal_name;
     if (tax_id) payload.tax_id = tax_id;
@@ -51,16 +51,21 @@ export function NewCompanyForm() {
 
     try {
       const result = await createCompanyAction(payload);
-      
+
       if (!result.success || !result.data) {
         setError(result.error || i18n._(msg`Failed to create company`));
         setIsSubmitting(false);
         return;
       }
-      
-      router.push(`/dashboard/organization?success=company_created&name=${encodeURIComponent(result.data.name)}`);
+
+      router.push(
+        `/dashboard/organization?success=company_created&name=${encodeURIComponent(result.data.name)}`,
+      );
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : i18n._(msg`Failed to create company`);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : i18n._(msg`Failed to create company`);
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -69,13 +74,10 @@ export function NewCompanyForm() {
 
   return (
     <Card>
-      <CardHeader 
+      <CardHeader
         title={i18n._(msg`Add New Company`)}
         action={
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-          >
+          <Button variant="outline" onClick={() => router.back()}>
             <Trans>Cancel</Trans>
           </Button>
         }
@@ -99,7 +101,8 @@ export function NewCompanyForm() {
 
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-2">
-              <Trans>Company Name</Trans> <span className="text-red-500">*</span>
+              <Trans>Company Name</Trans>{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -112,13 +115,14 @@ export function NewCompanyForm() {
           </div>
 
           <div>
-            <label htmlFor="business_email" className="block text-sm font-medium mb-2">
-              <Trans>Business Email</Trans> <span className="text-red-500">*</span>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
+              <Trans>Business Email</Trans>{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
-              id="business_email"
-              name="business_email"
+              id="email"
+              name="email"
               required
               className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder={i18n._(msg`contact@company.com`)}
@@ -138,7 +142,7 @@ export function NewCompanyForm() {
               pattern="[A-Z]{2}"
               className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="US"
-              style={{ textTransform: 'uppercase' }}
+              style={{ textTransform: "uppercase" }}
             />
             <p className="text-xs text-neutral-500 mt-1">
               <Trans>2-letter country code (e.g., US, UK, PT)</Trans>
@@ -147,17 +151,35 @@ export function NewCompanyForm() {
         </div>
 
         {/* Optional Fields */}
-        <details open={showOptional} onToggle={(e) => setShowOptional((e.target as HTMLDetailsElement).open)}>
+        <details
+          open={showOptional}
+          onToggle={(e) =>
+            setShowOptional((e.target as HTMLDetailsElement).open)
+          }
+        >
           <summary className="cursor-pointer text-primary font-medium flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
             <Trans>Additional Information (Optional)</Trans>
           </summary>
 
           <div className="mt-4 space-y-4 pl-7">
             <div>
-              <label htmlFor="legal_name" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="legal_name"
+                className="block text-sm font-medium mb-2"
+              >
                 <Trans>Legal Name</Trans>
               </label>
               <input
@@ -169,7 +191,10 @@ export function NewCompanyForm() {
             </div>
 
             <div>
-              <label htmlFor="tax_id" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="tax_id"
+                className="block text-sm font-medium mb-2"
+              >
                 <Trans>Tax ID / VAT Number</Trans>
               </label>
               <input
@@ -181,7 +206,10 @@ export function NewCompanyForm() {
             </div>
 
             <div>
-              <label htmlFor="address_line1" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="address_line1"
+                className="block text-sm font-medium mb-2"
+              >
                 <Trans>Address</Trans>
               </label>
               <input
@@ -194,7 +222,10 @@ export function NewCompanyForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="city" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="city"
+                  className="block text-sm font-medium mb-2"
+                >
                   <Trans>City</Trans>
                 </label>
                 <input
@@ -206,7 +237,10 @@ export function NewCompanyForm() {
               </div>
 
               <div>
-                <label htmlFor="state" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="state"
+                  className="block text-sm font-medium mb-2"
+                >
                   <Trans>State/Province</Trans>
                 </label>
                 <input
@@ -218,7 +252,10 @@ export function NewCompanyForm() {
               </div>
 
               <div>
-                <label htmlFor="postal_code" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="postal_code"
+                  className="block text-sm font-medium mb-2"
+                >
                   <Trans>Postal Code</Trans>
                 </label>
                 <input
@@ -243,7 +280,10 @@ export function NewCompanyForm() {
             </div>
 
             <div>
-              <label htmlFor="website" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="website"
+                className="block text-sm font-medium mb-2"
+              >
                 <Trans>Website</Trans>
               </label>
               <input
@@ -258,12 +298,12 @@ export function NewCompanyForm() {
         </details>
 
         <div className="flex gap-4 pt-4">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1"
-          >
-            {isSubmitting ? <Trans>Creating Company...</Trans> : <Trans>Create Company</Trans>}
+          <Button type="submit" disabled={isSubmitting} className="flex-1">
+            {isSubmitting ? (
+              <Trans>Creating Company...</Trans>
+            ) : (
+              <Trans>Create Company</Trans>
+            )}
           </Button>
           <Button
             type="button"
