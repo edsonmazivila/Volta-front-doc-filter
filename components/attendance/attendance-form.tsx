@@ -161,6 +161,13 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
         </div>
       )}
 
+      {/* Hidden timezone field */}
+      <input
+        type="hidden"
+        name="timezone"
+        value="Africa/Maputo"
+      />
+
       {/* Error Message */}
       {state && 'errors' in state && state.errors?._form && (
         <div className="rounded-lg bg-red-50 p-4">

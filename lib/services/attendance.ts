@@ -519,30 +519,127 @@ export async function createAttendanceAction(
   }
 
   try {
-    const payload = {
-      ...result.data,
-      // Normalize date to ISO UTC to satisfy backend expectations
-      date: toIsoUtc(result.data.date) || result.data.date,
-    }
-    const res = await fetch(`${API_BASE_URL}/api/attendance`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(cookieHeader && { Cookie: cookieHeader }),
-      },
-      body: JSON.stringify(payload),
-    });
+    const { employee_id, date, status, clock_in, clock_out, justification } = result.data;
+    const timezone = formData.get('timezone') as string || 'Africa/Maputo';
 
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        errors: { _form: [error.message || "Failed to create attendance"] },
+    // For absent status, use mark-absence endpoint
+    if (status === 'absent') {
+      const payload = {
+        userId: employee_id,
+        date: date,
+        reason: justification || 'Marked absent by admin'
       };
+
+      const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        return {
+          errors: { _form: [error.message || "Failed to mark absence"] },
+        };
+      }
+
+      revalidateEntityMutation("ATTENDANCE");
+      return { success: true };
     }
 
-    revalidateEntityMutation("ATTENDANCE");
-    return { success: true };
-  } catch {
+    // For present, late, half_day - use check-in endpoint
+    if (status === 'present' || status === 'late' || status === 'half_day') {
+      if (!clock_in) {
+        return { errors: { clock_in: ['Clock in time is required'] } };
+      }
+
+      // Step 1: Check-in
+      const checkInPayload = {
+        userId: employee_id,
+        clockIn: clock_in,
+        date: date,
+        timezone: timezone
+      };
+
+      const checkInRes = await fetch(`${API_BASE_URL}/api/attendance/check-in`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
+        body: JSON.stringify(checkInPayload),
+      });
+
+      if (!checkInRes.ok) {
+        const error = await checkInRes.json().catch(() => ({}));
+        return {
+          errors: { _form: [error.message || error.error || "Failed to register check-in"] },
+        };
+      }
+
+      // Step 2: If clock_out is provided, do check-out
+      if (clock_out) {
+        const checkOutPayload = {
+          userId: employee_id,
+          clockOut: clock_out,
+          date: date,
+          timezone: timezone
+        };
+
+        const checkOutRes = await fetch(`${API_BASE_URL}/api/attendance/check-out`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          body: JSON.stringify(checkOutPayload),
+        });
+
+        if (!checkOutRes.ok) {
+          const error = await checkOutRes.json().catch(() => ({}));
+          // Check-in succeeded but check-out failed - still return success with warning
+          console.warn('Check-out failed:', error);
+        }
+      }
+
+      revalidateEntityMutation("ATTENDANCE");
+      return { success: true };
+    }
+
+    // For on_leave status, use mark-absence with leave reason
+    if (status === 'on_leave') {
+      const payload = {
+        userId: employee_id,
+        date: date,
+        reason: justification || 'On leave'
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(cookieHeader && { Cookie: cookieHeader }),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        return {
+          errors: { _form: [error.message || "Failed to mark as on leave"] },
+        };
+      }
+
+      revalidateEntityMutation("ATTENDANCE");
+      return { success: true };
+    }
+
+    return { errors: { _form: ['Invalid status'] } };
+  } catch (err) {
+    console.error('createAttendanceAction error:', err);
     return { errors: { _form: ["Network error"] } };
   }
 }
