@@ -14,15 +14,17 @@ const nextConfig: NextConfig = {
   // Configure external image domains
   images: {
     remotePatterns: [
-      // Direct S3 access (current - will be deprecated)
+      // Direct S3 access (preprod)
       {
-        protocol: 'https',
-        hostname: 'django-project-tmz.s3.us-east-2.amazonaws.com',
-        pathname: '/nexupayroll/**',
+        protocol: "https",
+        hostname: "django-project-tmz.s3.us-east-2.amazonaws.com",
+        pathname: "/volta/**",
       },
-      // CloudFront CDN (future - add actual CloudFront domain when available)
-      // Example: { protocol: 'https', hostname: 'd111111abcdef8.cloudfront.net' }
-      // TODO: Add CloudFront distribution domain once configured in AWS
+      // CloudFront CDN for production assets
+      {
+        protocol: "https",
+        hostname: "assets.voltahr.io",
+      },
     ],
   },
 
@@ -30,39 +32,39 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
           {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          }
-        ]
-      }
-    ]
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
   },
 };
 
