@@ -165,7 +165,7 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
       <input
         type="hidden"
         name="timezone"
-        value="Africa/Maputo"
+        value={Intl.DateTimeFormat().resolvedOptions().timeZone}
       />
 
       {/* Error Message */}

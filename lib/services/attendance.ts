@@ -520,7 +520,7 @@ export async function createAttendanceAction(
 
   try {
     const { employee_id, date, status, clock_in, clock_out, justification } = result.data;
-    const timezone = formData.get('timezone') as string || 'Africa/Maputo';
+    const timezone = (formData.get('timezone') as string) || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // For absent status, use mark-absence endpoint
     if (status === 'absent') {
@@ -542,7 +542,7 @@ export async function createAttendanceAction(
       if (!res.ok) {
         const error = await res.json().catch(() => ({}));
         return {
-          errors: { _form: [error.message || "Failed to mark absence"] },
+          errors: { _form: [error.message || error.error || "Failed to mark absence"] },
         };
       }
 
@@ -600,8 +600,12 @@ export async function createAttendanceAction(
 
         if (!checkOutRes.ok) {
           const error = await checkOutRes.json().catch(() => ({}));
-          // Check-in succeeded but check-out failed - still return success with warning
+          // Check-in succeeded but check-out failed
           console.warn('Check-out failed:', error);
+          revalidateEntityMutation("ATTENDANCE");
+          return {
+            errors: { _form: [`Check-in successful, but check-out failed: ${error.message || error.error || 'Unknown error'}`] },
+          };
         }
       }
 
@@ -629,7 +633,7 @@ export async function createAttendanceAction(
       if (!res.ok) {
         const error = await res.json().catch(() => ({}));
         return {
-          errors: { _form: [error.message || "Failed to mark as on leave"] },
+          errors: { _form: [error.message || error.error || "Failed to mark as on leave"] },
         };
       }
 
