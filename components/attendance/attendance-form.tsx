@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect, useRef } from 'react'
 import { createAttendanceAction, updateAttendanceAction } from '@/lib/services/attendance'
 import type { AttendanceRecord } from '@/lib/types/attendance'
 import type { User } from '@/lib/services/users'
@@ -36,16 +36,20 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
 
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [selectedStatus, setSelectedStatus] = useState(editRecord?.status || 'present')
+  const prevStateRef = useRef(state)
 
-  // Handle success and warnings
-  if (state && 'success' in state && state.success) {
-    if (state.warning) {
-      toast.warning(state.warning)
-    } else {
-      toast.success(editRecord ? i18n._(msg`Attendance updated`) : i18n._(msg`Attendance recorded`))
+  // Handle success and warnings - only trigger once per state change
+  useEffect(() => {
+    if (state && 'success' in state && state.success && state !== prevStateRef.current) {
+      if (state.warning) {
+        toast.warning(state.warning)
+      } else {
+        toast.success(editRecord ? i18n._(msg`Attendance updated`) : i18n._(msg`Attendance recorded`))
+      }
+      onSuccess?.()
+      prevStateRef.current = state
     }
-    onSuccess?.()
-  }
+  }, [state, editRecord, i18n, onSuccess])
 
   return (
     <form action={formAction} className="space-y-4">
@@ -145,8 +149,8 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
         </div>
       )}
 
-      {/* Justification - only for absent status */}
-      {selectedStatus === 'absent' && (
+      {/* Justification - for absent and on_leave statuses */}
+      {(selectedStatus === 'absent' || selectedStatus === 'on_leave') && (
         <div>
           <label htmlFor="justification" className="block text-sm font-medium mb-2">
             {i18n._(msg`Justification`)}

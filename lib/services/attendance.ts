@@ -522,131 +522,133 @@ export async function createAttendanceAction(
     const { employee_id, date, status, clock_in, clock_out, justification } = result.data;
     const timezone = (formData.get('timezone') as string) || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // For absent status, use mark-absence endpoint
-    if (status === 'absent') {
-      const payload = {
-        userId: employee_id,
-        date: date,
-        reason: justification || 'Marked absent by admin'
-      };
-
-      const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(cookieHeader && { Cookie: cookieHeader }),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const error = await res.json().catch(() => ({}));
-        return {
-          errors: { _form: [error.message || error.error || "Failed to mark absence"] },
-        };
-      }
-
-      revalidateEntityMutation("ATTENDANCE");
-      return { success: true };
-    }
-
-    // For present, late, half_day - use check-in endpoint
-    if (status === 'present' || status === 'late' || status === 'half_day') {
-      if (!clock_in) {
-        return { errors: { clock_in: ['Clock in time is required'] } };
-      }
-
-      // Step 1: Check-in
-      const checkInPayload = {
-        userId: employee_id,
-        clockIn: clock_in,
-        date: date,
-        timezone: timezone
-      };
-
-      const checkInRes = await fetch(`${API_BASE_URL}/api/attendance/check-in`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(cookieHeader && { Cookie: cookieHeader }),
-        },
-        body: JSON.stringify(checkInPayload),
-      });
-
-      if (!checkInRes.ok) {
-        const error = await checkInRes.json().catch(() => ({}));
-        return {
-          errors: { _form: [error.message || error.error || "Failed to register check-in"] },
-        };
-      }
-
-      // Step 2: If clock_out is provided, do check-out
-      if (clock_out) {
-        const checkOutPayload = {
+    switch (status) {
+      case 'absent': {
+        const payload = {
           userId: employee_id,
-          clockOut: clock_out,
           date: date,
-          timezone: timezone
+          reason: justification || 'Marked absent by admin'
         };
 
-        const checkOutRes = await fetch(`${API_BASE_URL}/api/attendance/check-out`, {
+        const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(cookieHeader && { Cookie: cookieHeader }),
           },
-          body: JSON.stringify(checkOutPayload),
+          body: JSON.stringify(payload),
         });
 
-        if (!checkOutRes.ok) {
-          const error = await checkOutRes.json().catch(() => ({}));
-          // Check-in succeeded but check-out failed - return success with warning
-          console.warn('Check-out failed:', error);
-          revalidateEntityMutation("ATTENDANCE");
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
           return {
-            success: true,
-            warning: `Check-in successful, but check-out failed: ${error.message || error.error || 'Unknown error'}`,
+            errors: { _form: [error.message || error.error || "Failed to mark absence"] },
           };
         }
+
+        revalidateEntityMutation("ATTENDANCE");
+        return { success: true };
       }
 
-      revalidateEntityMutation("ATTENDANCE");
-      return { success: true };
-    }
+      case 'present':
+      case 'late':
+      case 'half_day': {
+        if (!clock_in) {
+          return { errors: { clock_in: ['Clock in time is required'] } };
+        }
 
-    // For on_leave status, use mark-absence with leave reason
-    if (status === 'on_leave') {
-      const payload = {
-        userId: employee_id,
-        date: date,
-        reason: justification || 'On leave'
-      };
-
-      const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(cookieHeader && { Cookie: cookieHeader }),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const error = await res.json().catch(() => ({}));
-        return {
-          errors: { _form: [error.message || error.error || "Failed to mark as on leave"] },
+        // Step 1: Check-in
+        const checkInPayload = {
+          userId: employee_id,
+          clockIn: clock_in,
+          date: date,
+          timezone: timezone
         };
+
+        const checkInRes = await fetch(`${API_BASE_URL}/api/attendance/check-in`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          body: JSON.stringify(checkInPayload),
+        });
+
+        if (!checkInRes.ok) {
+          const error = await checkInRes.json().catch(() => ({}));
+          return {
+            errors: { _form: [error.message || error.error || "Failed to register check-in"] },
+          };
+        }
+
+        // Step 2: If clock_out is provided, do check-out
+        if (clock_out) {
+          const checkOutPayload = {
+            userId: employee_id,
+            clockOut: clock_out,
+            date: date,
+            timezone: timezone
+          };
+
+          const checkOutRes = await fetch(`${API_BASE_URL}/api/attendance/check-out`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(cookieHeader && { Cookie: cookieHeader }),
+            },
+            body: JSON.stringify(checkOutPayload),
+          });
+
+          if (!checkOutRes.ok) {
+            const error = await checkOutRes.json().catch(() => ({}));
+            // Check-in succeeded but check-out failed - return success with warning
+            console.warn('Check-out failed:', error);
+            revalidateEntityMutation("ATTENDANCE");
+            return {
+              success: true,
+              warning: `Check-in successful, but check-out failed: ${error.message || error.error || 'Unknown error'}`,
+            };
+          }
+        }
+
+        revalidateEntityMutation("ATTENDANCE");
+        return { success: true };
       }
 
-      revalidateEntityMutation("ATTENDANCE");
-      return { success: true };
-    }
+      case 'on_leave': {
+        const payload = {
+          userId: employee_id,
+          date: date,
+          reason: justification || 'On leave'
+        };
 
-    // TypeScript exhaustiveness check: ensures all enum values from schema are handled
-    // If a new status is added to attendanceSchema without updating the logic above,
-    // this will cause a compile-time error
-    const _exhaustiveCheck: never = status;
-    return { errors: { _form: [`Unhandled status: ${String(status)}`] } };
+        const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          return {
+            errors: { _form: [error.message || error.error || "Failed to mark as on leave"] },
+          };
+        }
+
+        revalidateEntityMutation("ATTENDANCE");
+        return { success: true };
+      }
+
+      // TypeScript exhaustiveness check: if a new status is added to attendanceSchema
+      // without adding a case above, this will cause a compile-time error
+      default: {
+        const _exhaustiveCheck: never = status;
+        return { errors: { _form: [`Unhandled status: ${String(_exhaustiveCheck)}`] } };
+      }
+    }
   } catch (err) {
     console.error('createAttendanceAction error:', err);
     return { errors: { _form: ["Network error"] } };
