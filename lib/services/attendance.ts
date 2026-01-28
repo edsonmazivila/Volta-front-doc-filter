@@ -286,7 +286,7 @@ const attendanceSchema = z.object({
 });
 
 export type ActionResult =
-  | { success: true; data?: unknown }
+  | { success: true; data?: unknown; warning?: string }
   | { errors: { _form?: string[]; [key: string]: string[] | undefined } };
 
 // My Attendance (current user) Actions
@@ -450,7 +450,7 @@ export async function markAbsenceAction(
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}))
-      return { errors: { _form: [error.message || 'Failed to mark absence'] } }
+      return { errors: { _form: [error.message || error.error || 'Failed to mark absence'] } }
     }
 
     revalidateEntityMutation('ATTENDANCE')
@@ -519,30 +519,138 @@ export async function createAttendanceAction(
   }
 
   try {
-    const payload = {
-      ...result.data,
-      // Normalize date to ISO UTC to satisfy backend expectations
-      date: toIsoUtc(result.data.date) || result.data.date,
-    }
-    const res = await fetch(`${API_BASE_URL}/api/attendance`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(cookieHeader && { Cookie: cookieHeader }),
-      },
-      body: JSON.stringify(payload),
-    });
+    const { employee_id, date, status, clock_in, clock_out, justification } = result.data;
+    const timezone = (formData.get('timezone') as string) || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    if (!res.ok) {
-      const error = await res.json();
-      return {
-        errors: { _form: [error.message || "Failed to create attendance"] },
-      };
-    }
+    switch (status) {
+      case 'absent': {
+        const payload = {
+          userId: employee_id,
+          date: date,
+          reason: justification || 'Marked absent by admin'
+        };
 
-    revalidateEntityMutation("ATTENDANCE");
-    return { success: true };
-  } catch {
+        const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          return {
+            errors: { _form: [error.message || error.error || "Failed to mark absence"] },
+          };
+        }
+
+        revalidateEntityMutation("ATTENDANCE");
+        return { success: true };
+      }
+
+      case 'present':
+      case 'late':
+      case 'half_day': {
+        if (!clock_in) {
+          return { errors: { clock_in: ['Clock in time is required'] } };
+        }
+
+        // Step 1: Check-in
+        const checkInPayload = {
+          userId: employee_id,
+          clockIn: clock_in,
+          date: date,
+          timezone: timezone
+        };
+
+        const checkInRes = await fetch(`${API_BASE_URL}/api/attendance/check-in`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          body: JSON.stringify(checkInPayload),
+        });
+
+        if (!checkInRes.ok) {
+          const error = await checkInRes.json().catch(() => ({}));
+          return {
+            errors: { _form: [error.message || error.error || "Failed to register check-in"] },
+          };
+        }
+
+        // Step 2: If clock_out is provided, do check-out
+        if (clock_out) {
+          const checkOutPayload = {
+            userId: employee_id,
+            clockOut: clock_out,
+            date: date,
+            timezone: timezone
+          };
+
+          const checkOutRes = await fetch(`${API_BASE_URL}/api/attendance/check-out`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(cookieHeader && { Cookie: cookieHeader }),
+            },
+            body: JSON.stringify(checkOutPayload),
+          });
+
+          if (!checkOutRes.ok) {
+            const error = await checkOutRes.json().catch(() => ({}));
+            // Check-in succeeded but check-out failed - return success with warning
+            console.warn('Check-out failed:', error);
+            revalidateEntityMutation("ATTENDANCE");
+            return {
+              success: true,
+              warning: `Check-in successful, but check-out failed: ${error.message || error.error || 'Unknown error'}`,
+            };
+          }
+        }
+
+        revalidateEntityMutation("ATTENDANCE");
+        return { success: true };
+      }
+
+      case 'on_leave': {
+        const payload = {
+          userId: employee_id,
+          date: date,
+          reason: justification || 'On leave'
+        };
+
+        const res = await fetch(`${API_BASE_URL}/api/attendance/mark-absence`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(cookieHeader && { Cookie: cookieHeader }),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({}));
+          return {
+            errors: { _form: [error.message || error.error || "Failed to mark as on leave"] },
+          };
+        }
+
+        revalidateEntityMutation("ATTENDANCE");
+        return { success: true };
+      }
+
+      // TypeScript exhaustiveness check: if a new status is added to attendanceSchema
+      // without adding a case above, this will cause a compile-time error
+      default: {
+        const _exhaustiveCheck: never = status;
+        return { errors: { _form: [`Unhandled status: ${String(_exhaustiveCheck)}`] } };
+      }
+    }
+  } catch (err) {
+    console.error('createAttendanceAction error:', err);
     return { errors: { _form: ["Network error"] } };
   }
 }
