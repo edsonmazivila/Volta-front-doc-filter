@@ -286,7 +286,7 @@ const attendanceSchema = z.object({
 });
 
 export type ActionResult =
-  | { success: true; data?: unknown }
+  | { success: true; data?: unknown; warning?: string }
   | { errors: { _form?: string[]; [key: string]: string[] | undefined } };
 
 // My Attendance (current user) Actions
@@ -450,7 +450,7 @@ export async function markAbsenceAction(
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}))
-      return { errors: { _form: [error.message || 'Failed to mark absence'] } }
+      return { errors: { _form: [error.message || error.error || 'Failed to mark absence'] } }
     }
 
     revalidateEntityMutation('ATTENDANCE')
@@ -600,11 +600,12 @@ export async function createAttendanceAction(
 
         if (!checkOutRes.ok) {
           const error = await checkOutRes.json().catch(() => ({}));
-          // Check-in succeeded but check-out failed
+          // Check-in succeeded but check-out failed - return success with warning
           console.warn('Check-out failed:', error);
           revalidateEntityMutation("ATTENDANCE");
           return {
-            errors: { _form: [`Check-in successful, but check-out failed: ${error.message || error.error || 'Unknown error'}`] },
+            success: true,
+            warning: `Check-in successful, but check-out failed: ${error.message || error.error || 'Unknown error'}`,
           };
         }
       }
@@ -641,7 +642,11 @@ export async function createAttendanceAction(
       return { success: true };
     }
 
-    return { errors: { _form: ['Invalid status'] } };
+    // TypeScript exhaustiveness check: ensures all enum values from schema are handled
+    // If a new status is added to attendanceSchema without updating the logic above,
+    // this will cause a compile-time error
+    const _exhaustiveCheck: never = status;
+    return { errors: { _form: [`Unhandled status: ${String(status)}`] } };
   } catch (err) {
     console.error('createAttendanceAction error:', err);
     return { errors: { _form: ["Network error"] } };

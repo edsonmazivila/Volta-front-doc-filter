@@ -37,9 +37,13 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
   const [selectedEmployee, setSelectedEmployee] = useState('')
   const [selectedStatus, setSelectedStatus] = useState(editRecord?.status || 'present')
 
-  // Handle success
+  // Handle success and warnings
   if (state && 'success' in state && state.success) {
-    toast.success(editRecord ? i18n._(msg`Attendance updated`) : i18n._(msg`Attendance recorded`))
+    if (state.warning) {
+      toast.warning(state.warning)
+    } else {
+      toast.success(editRecord ? i18n._(msg`Attendance updated`) : i18n._(msg`Attendance recorded`))
+    }
     onSuccess?.()
   }
 
@@ -141,8 +145,8 @@ export function AttendanceForm({ employees, editRecord, onSuccess, onCancel }: A
         </div>
       )}
 
-      {/* Justification */}
-      {(selectedStatus === 'absent' || selectedStatus === 'late') && (
+      {/* Justification - only for absent status */}
+      {selectedStatus === 'absent' && (
         <div>
           <label htmlFor="justification" className="block text-sm font-medium mb-2">
             {i18n._(msg`Justification`)}
