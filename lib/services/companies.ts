@@ -16,7 +16,7 @@ interface ApiResponse<T> {
 
 export interface CreateCompanyData {
   name: string;
-  email: string;
+  business_email: string;
   country: string;
   legal_name?: string;
   tax_id?: string;

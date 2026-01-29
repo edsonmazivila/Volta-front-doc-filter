@@ -26,7 +26,7 @@ export function NewCompanyForm() {
 
     const payload: CreateCompanyData = {
       name: formData.get("name") as string,
-      email: formData.get("email") as string,
+      business_email: formData.get("business_email") as string,
       country: formData.get("country") as string,
     };
 
@@ -115,14 +115,14 @@ export function NewCompanyForm() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
+            <label htmlFor="business_email" className="block text-sm font-medium mb-2">
               <Trans>Business Email</Trans>{" "}
               <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
-              id="email"
-              name="email"
+              id="business_email"
+              name="business_email"
               required
               className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder={i18n._(msg`contact@company.com`)}
