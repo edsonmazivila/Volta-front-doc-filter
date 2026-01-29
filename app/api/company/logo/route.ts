@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     console.log("[Company Logo Upload Proxy] Success, returning:", data);
 
     // Revalidate company cache to fetch updated logo
-    revalidateTag("company");
+    revalidateTag("company", "max");
     console.log("[Company Logo Upload Proxy] Revalidated company cache");
 
     return NextResponse.json(data);
@@ -100,7 +100,7 @@ export async function DELETE() {
     }
 
     const data = await response.json();
-    revalidateTag("company");
+    revalidateTag("company", "max");
 
     return NextResponse.json(data);
   } catch (error) {

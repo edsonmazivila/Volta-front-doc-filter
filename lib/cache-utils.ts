@@ -117,14 +117,14 @@ export function revalidateWithDependencies(
 
   try {
     // Revalidate primary tag
-    revalidateTag(tag);
+    revalidateTag(tag, "max");
 
     // Revalidate dependent tags
     if (includeDependencies) {
       const dependencies = CACHE_DEPENDENCIES[tag] || [];
       dependencies.forEach((depTag) => {
         try {
-          revalidateTag(depTag);
+          revalidateTag(depTag, "max");
         } catch (error) {
           console.error(
             `[Cache] Failed to revalidate dependency ${depTag}:`,

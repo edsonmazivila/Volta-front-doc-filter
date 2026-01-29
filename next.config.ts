@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
     swcPlugins: [["@lingui/swc-plugin", {}]],
   },
 
+  // Turbopack configuration (empty config acknowledges we're aware of Turbopack)
+  // This silences the warning about having webpack config without turbopack config
+  turbopack: {},
+
   // Mark server-only packages as external to prevent bundling issues
   serverExternalPackages: [
     "dd-trace",
