@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -11,7 +11,12 @@ import { ToastProvider } from "@/components/ui/toast";
 import { ModalProvider } from "@/components/ui/modal";
 import { LinguiClientProvider } from "@/lib/i18n/LinguiClientProvider";
 import { initializeI18n, getMessagesForLocale } from "@/lib/i18n/server";
-import { defaultLocale, LOCALE_COOKIE_NAME, isValidLocale, type Locale } from "@/lib/i18n";
+import {
+  defaultLocale,
+  LOCALE_COOKIE_NAME,
+  isValidLocale,
+  type Locale,
+} from "@/lib/i18n";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,12 +31,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://voltahr.com'),
+  metadataBase: new URL("https://voltahr.com"),
   title: {
-    default: "Volta HR - All-in-One HR & Payroll Platform for African Businesses",
+    default:
+      "Volta HR - All-in-One HR & Payroll Platform for African Businesses",
     template: "%s | Volta HR",
   },
-  description: "Streamline employee management, time tracking, leave requests, and payroll processing. Secure, scalable, and built for growth. Powered by Dorico Dynamics.",
+  description:
+    "Streamline employee management, time tracking, leave requests, and payroll processing. Secure, scalable, and built for growth. Powered by Dorico Dynamics.",
   keywords: [
     "HR software",
     "payroll system",
@@ -56,54 +63,52 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://voltahr.com',
+    type: "website",
+    locale: "en_US",
+    url: "https://voltahr.com",
     title: "Volta HR - All-in-One HR & Payroll Platform",
-    description: "Streamline your entire employee lifecycle with automated time tracking, leave management, and comprehensive reporting.",
-    siteName: 'Volta HR',
+    description:
+      "Streamline your entire employee lifecycle with automated time tracking, leave management, and comprehensive reporting.",
+    siteName: "Volta HR",
     images: [
       {
-        url: '/logo/volta-og-image.png',
+        url: "/logo/volta-og-image.png",
         width: 1200,
         height: 630,
-        alt: 'Volta HR Platform',
+        alt: "Volta HR Platform",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
+    card: "summary_large_image",
     title: "Volta HR - All-in-One HR & Payroll Platform",
-    description: "Streamline employee management, time tracking, and payroll. Start your free trial today.",
-    images: ['/logo/volta-og-image.png'],
-    creator: '@voltahr',
+    description:
+      "Streamline employee management, time tracking, and payroll. Start your free trial today.",
+    images: ["/logo/volta-og-image.png"],
+    creator: "@voltahr",
   },
   icons: {
-    icon: [
-      { url: '/icon.png' },
-      { url: '/favicon.ico', sizes: 'any' },
-    ],
-    apple: [
-      { url: '/apple-icon.png' },
-    ],
+    icon: [{ url: "/icon.png" }, { url: "/favicon.ico", sizes: "any" }],
+    apple: [{ url: "/apple-icon.png" }],
   },
-  manifest: '/manifest.webmanifest',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
+  manifest: "/manifest.webmanifest",
   alternates: {
-    canonical: 'https://voltahr.com',
+    canonical: "https://voltahr.com",
   },
-  category: 'business',
+  category: "business",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 /**
@@ -120,7 +125,7 @@ async function getLocale(): Promise<Locale> {
   }
 
   // 2. Check header set by middleware
-  const headerLocale = headersList.get('x-locale');
+  const headerLocale = headersList.get("x-locale");
   if (headerLocale && isValidLocale(headerLocale)) {
     return headerLocale;
   }
@@ -135,28 +140,27 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Get user and locale in parallel
-  const [user, locale] = await Promise.all([
-    getUser(),
-    getLocale(),
-  ]);
+  const [user, locale] = await Promise.all([getUser(), getLocale()]);
 
   // Initialize i18n for server components
   await initializeI18n(locale);
   const messages = await getMessagesForLocale(locale);
 
   // Convert server User to safe ClientUser (remove sensitive fields)
-  const clientUser: ClientUser | null = user ? {
-    id: user.id,
-    email: user.email,
-    full_name: user.full_name,
-    role: user.role,
-    organization_id: user.organization_id,
-    company_id: user.company_id,
-    avatar: user.avatar,
-    profile_photo_url: user.profile_photo_url,
-    created_at: user.created_at,
-    updated_at: user.updated_at
-  } : null
+  const clientUser: ClientUser | null = user
+    ? {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        organization_id: user.organization_id,
+        company_id: user.company_id,
+        avatar: user.avatar,
+        profile_photo_url: user.profile_photo_url,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      }
+    : null;
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -165,36 +169,41 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'SoftwareApplication',
-              name: 'Volta HR',
-              applicationCategory: 'BusinessApplication',
-              operatingSystem: 'Web',
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "Volta HR",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
               offers: {
-                '@type': 'AggregateOffer',
-                priceCurrency: 'USD',
-                lowPrice: '29',
-                highPrice: '79',
+                "@type": "AggregateOffer",
+                priceCurrency: "USD",
+                lowPrice: "29",
+                highPrice: "79",
               },
               aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: '4.8',
-                ratingCount: '150',
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                ratingCount: "150",
               },
-              description: 'Streamline employee management, time tracking, leave requests, and payroll processing.',
+              description:
+                "Streamline employee management, time tracking, leave requests, and payroll processing.",
             }),
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <LinguiClientProvider initialLocale={locale} initialMessages={messages}>
+          <LinguiClientProvider
+            initialLocale={locale}
+            initialMessages={messages}
+          >
             <SessionProvider initialUser={clientUser}>
               <ToastProvider>
                 <ModalProvider>
-                  <SidebarProvider>
-                    {children}
-                  </SidebarProvider>
+                  <SidebarProvider>{children}</SidebarProvider>
                 </ModalProvider>
               </ToastProvider>
             </SessionProvider>
