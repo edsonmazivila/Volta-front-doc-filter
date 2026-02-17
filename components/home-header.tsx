@@ -11,12 +11,29 @@ import { msg } from "@lingui/core/macro";
 export function HomeHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { i18n } = useLingui();
 
   // Handle hydration
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Navbar background on scroll
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isMounted]);
 
   // Close menu when clicking outside or on link
   useEffect(() => {
@@ -33,7 +50,7 @@ export function HomeHeader() {
 
     if (isMenuOpen) {
       document.addEventListener("click", handleClickOutside);
-      document.body.style.overflow = "hidden"; // Prevent background scroll
+      document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
@@ -46,11 +63,9 @@ export function HomeHeader() {
 
   const navLinks = [
     { href: "/", label: i18n._(msg`Home`) },
-    { href: "/pricing", label: i18n._(msg`Pricing`) },
     { href: "/features", label: i18n._(msg`Features`) },
-    { href: "/careers", label: i18n._(msg`Careers`) },
   ];
-  const showNavLinks = true; // Enable navigation links
+  const showNavLinks = true;
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -61,23 +76,14 @@ export function HomeHeader() {
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-center mt-4 px-4">
-        <nav className="glass-nav mx-auto w-full max-w-6xl rounded-full p-2 flex items-center justify-between relative">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <Link href="/" className="font-semibold flex items-center gap-2">
-              <Image
-                src="/logo/SVG/symbol-purple-1000x460.svg"
-                alt="Logo"
-                width={35}
-                height={40}
-                className="h-10 w-auto"
-              />
-            </Link>
-          </div>
-
-          {/* Desktop Center Navigation */}
+        <nav
+          className={`mx-auto w-full max-w-4xl rounded-full p-2 flex items-center justify-between relative transition-colors duration-300 ${
+            isScrolled ? "glass-nav" : "bg-transparent"
+          }`}
+        >
+          {/* Desktop Left Navigation */}
           {showNavLinks && (
-            <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
+            <div className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -90,12 +96,32 @@ export function HomeHeader() {
             </div>
           )}
 
+          {/* Center Logo */}
+          <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+            <Link
+              href="/"
+              className="font-semibold flex items-center gap-2 pointer-events-auto"
+            >
+              <Image
+                src="/logo/SVG/symbol-purple-1000x460.svg"
+                alt="Logo"
+                width={35}
+                height={40}
+                className="h-10 w-auto"
+              />
+            </Link>
+          </div>
+
           {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-2">
-            <Button variant="primaryGradient" className="text-md font-semibold px-6 py-3" asChild>
+          <div className="hidden md:flex items-center gap-2">
+            <Button variant="primaryGradient" className="text-md font-semibold px-6 py-3 rounded-[12px]" asChild>
               <Link href="/signup"><Trans>Sign Up</Trans></Link>
             </Button>
-            <Button variant="outline" className="text-md font-semibold px-6 py-3 bg-background/70 text-foreground hover:bg-accent" asChild>
+            <Button
+              variant="outline"
+              className="text-md font-semibold px-6 py-3 rounded-[12px] text-white/90 bg-[#05060a] border border-white/20 shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_12px_30px_rgba(0,0,0,0.4)] bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1),transparent_55%)] hover:bg-[#05060a] hover:border-white/30 hover:text-white"
+              asChild
+            >
               <Link href="/login"><Trans>Sign In</Trans></Link>
             </Button>
           </div>
@@ -103,7 +129,7 @@ export function HomeHeader() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden menu-toggle p-2 rounded-full glass-button transition-all duration-200 hover:bg-white/10"
+            className="md:hidden menu-toggle p-2 rounded-full glass-button transition-all duration-200 hover:bg-white/10"
             aria-label="Toggle menu"
           >
             {isMenuOpen ? (
@@ -117,7 +143,7 @@ export function HomeHeader() {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 md:hidden">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 

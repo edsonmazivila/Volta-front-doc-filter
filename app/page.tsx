@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Hero from "../components/hero";
+
 import HomeHeader from "../components/home-header";
 import { DeploymentFlexibility } from "@/components/deployment-flexibility";
+import { FeaturesHighlights } from "@/components/features-highlights";
 import { SocialProof } from "@/components/social-proof";
 import { Integrations } from "@/components/integrations";
 import { SecurityCompliance } from "@/components/security-compliance";
 import { FAQ as FrequentlyAskedQuestions } from "@/components/faq";
 import { FinalCTA } from "@/components/final-cta";
+import Footer from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Volta HR - All-in-One HR & Payroll Platform for African Businesses",
@@ -41,19 +44,18 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="bg-[#030009]">
+    <main className="bg-neutral-900">
       <HomeHeader />
       <Hero />
-      <DeploymentFlexibility />
+      <FeaturesHighlights />
       <SocialProof />
+      <DeploymentFlexibility />
       <Integrations />
       <SecurityCompliance />
       <FrequentlyAskedQuestions />
       <FinalCTA />
-      {/* Temporarily hiding footer for future reuse */}
-      {/*
       <Footer/>
-      */}
+     
     </main>
   );
 }

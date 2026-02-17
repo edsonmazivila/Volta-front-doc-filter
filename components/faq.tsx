@@ -2,8 +2,10 @@
 
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CircleHelp, MessageCircle, Phone } from "lucide-react";
 import { useState } from "react";
+import { SectionHeader } from "@/components/section-header";
+import { Button } from "@/components/ui/button";
 
 export function FAQ() {
   const { i18n } = useLingui();
@@ -41,9 +43,14 @@ export function FAQ() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-gray-900/30 to-[#030009]">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-20 px-4 bg-neutral-900">
+      <div className="max-w-6xl mx-auto">
         {/* Section Header */}
+        <SectionHeader
+          text={i18n._(msg`Support`)}
+          icon={CircleHelp}
+          className="mb-8"
+        />
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             {i18n._(msg`Frequently Asked Questions`)}
@@ -53,38 +60,93 @@ export function FAQ() {
           </p>
         </div>
 
-        {/* FAQ Accordion */}
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={faq.question}
-              className="bg-gray-900/40 border border-gray-700/50 rounded-xl overflow-hidden hover:border-gray-600/50 transition-all duration-300"
-            >
-              <button
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-800/30 transition-colors duration-200"
-              >
-                <span className="text-white font-semibold text-lg pr-8">
-                  {faq.question}
-                </span>
-                <ChevronDown
-                  className={`w-6 h-6 text-gray-400 flex-shrink-0 transition-transform duration-300 ${
-                    openIndex === index ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+        {/* Two-column: FAQ list + Contact card */}
+        <div className="grid lg:grid-cols-[1fr_340px] gap-8 lg:gap-10 items-start">
+          {/* FAQ Accordion - transparent cards with blue glow from bottom when expanded */}
+          <div className="space-y-4">
+            {faqs.map((faq, index) => {
+              const isOpen = openIndex === index
+              return (
+                <div
+                  key={faq.question}
+                  className="relative rounded-2xl overflow-hidden border border-white/10 bg-transparent transition-all duration-300 hover:border-white/15"
+                >
+                  {/* Blue gradient from bottom when expanded */}
+                  {isOpen && (
+                    <div
+                      className="absolute inset-0 pointer-events-none bg-gradient-to-t from-blue-500/25 from-0% via-blue-500/8 via-35% to-transparent to-100%"
+                      aria-hidden
+                    />
+                  )}
+                  <div className="relative">
+                    <button
+                      onClick={() => setOpenIndex(isOpen ? null : index)}
+                      className="w-full px-6 py-5 flex items-center justify-between text-left transition-colors duration-200"
+                    >
+                      <span className="text-white font-semibold text-lg pr-8">
+                        {faq.question}
+                      </span>
+                      <ChevronDown
+                        className={`w-6 h-6 text-blue-400 flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
 
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  openIndex === index ? "max-h-96" : "max-h-0"
-                }`}
-              >
-                <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-gray-700/30 pt-4">
-                  {faq.answer}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96" : "max-h-0"}`}
+                    >
+                      <div className="px-6 pb-5 text-gray-300 leading-relaxed border-t border-white/10 pt-4">
+                        {faq.answer}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              )
+            })}
+          </div>
+
+          {/* Contact Support card - glass blur with inner shadow + blue from bottom */}
+          <div className="relative rounded-2xl overflow-hidden shrink-0">
+            {/* Glass blur + inner shadow container */}
+            <div
+              className="relative p-8 h-full min-h-[280px] flex flex-col rounded-2xl border border-white/10 backdrop-blur-xl bg-transparent overflow-hidden"
+              style={{
+                boxShadow:
+                  "inset 0 0 60px -15px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.06), 0 25px 50px -12px rgba(0,0,0,0.25)",
+              }}
+            >
+              {/* Blue gradient from bottom - same as question cards */}
+              <div
+                className="absolute inset-0 pointer-events-none bg-gradient-to-t from-blue-500/25 from-0% via-blue-500/8 via-35% to-transparent to-100%"
+                aria-hidden
+              />
+              {/* Subtle glow accents */}
+              <div className="absolute top-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative flex flex-col items-center text-center flex-1">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-400/30 mb-5">
+                  <MessageCircle className="w-7 h-7 text-blue-400" />
+                </div>
+                <h3 className="text-white font-bold text-xl mb-2">
+                  {i18n._(msg`You have different questions?`)}
+                </h3>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                  {i18n._(msg`Our team will answer all your questions.`)}
+                </p>
+                <Button
+                  variant="primaryGradient"
+                  size="lg"
+                  className="w-full rounded-xl shadow-md shadow-blue-500/25"
+                  asChild
+                >
+                  <a href="mailto:support@volta-hr.com">
+                    <Phone className="w-4 h-4" />
+                    {i18n._(msg`Contact Support Team`)}
+                  </a>
+                </Button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>

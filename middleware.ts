@@ -15,7 +15,8 @@ const publicRoutes = new Set([
 	'/about',
 	'/features',
 	'/contact',
-	'/careers'
+	'/careers',
+	
 ])
 
 // Auth routes that should redirect to dashboard if already authenticated
@@ -153,15 +154,15 @@ export async function middleware(request: NextRequest) {
 		} catch (error) {
 			// Network error or backend down
 			console.error('[Middleware] Session validation failed:', error)
-			
+
 			// In development, log warning but allow access if timeout/network error
 			// This prevents blocking during local development when backend might be restarting
-			if (process.env.NODE_ENV === 'development' && 
-			    (error instanceof Error && (error.name === 'TimeoutError' || error.message.includes('ECONNREFUSED')))) {
+			if (process.env.NODE_ENV === 'development' &&
+				(error instanceof Error && (error.name === 'TimeoutError' || error.message.includes('ECONNREFUSED')))) {
 				console.warn('[Middleware] Development mode: Allowing access despite backend connection issue')
 				return createResponseWithLocale(NextResponse.next(), locale)
 			}
-			
+
 			// In production or for other errors, redirect to login
 			const loginUrl = new URL('/login', request.url)
 			loginUrl.searchParams.set('redirect', pathname)
@@ -194,7 +195,7 @@ export const config = {
 		 * - icons (icon files)
 		 * - static files
 		 */
-		'/((?!api|_next/static|_next/image|favicon.ico|logo|icons|figma|moon|nextjs|ts|vercel|window|file|globe).*)',
+		'/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)',
 	]
 }
 

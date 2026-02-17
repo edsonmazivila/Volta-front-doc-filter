@@ -1,104 +1,134 @@
 "use client";
 
-import React from "react";
-import { Button } from "@/components/ui";
+import { motion } from "motion/react";
+import { Button, GridBackground } from "@/components/ui";
 import Link from "next/link";
+import Image from "next/image";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
+import { HeroDashboardPreview } from "@/components/hero-dashboard-preview";
+
+function DashboardPreviewContent() {
+  return (
+    <>
+      <Image
+        src="/Dashboard.png"
+        alt="Dashboard Preview"
+        width={1200}
+        height={800}
+        className="w-full h-auto opacity-90"
+        priority
+      />
+      <div className="absolute inset-0 flex flex-col p-2 sm:px-4 sm:pt-[15px] sm:pb-0">
+        <div className="flex-1 min-h-[min(82vh,780px)] w-full rounded-[30px] overflow-hidden flex flex-col">
+          <HeroDashboardPreview />
+        </div>
+      </div>
+      <div
+        className="absolute inset-0 z-10 pointer-events-none rounded-t-3xl"
+        style={{
+          background: "linear-gradient(to top, rgb(23 23 23) 0%, rgba(23 23 23 / 0.5) 20%, transparent 40%)",
+        }}
+      />
+    </>
+  );
+}
 
 const Hero = () => {
   const { i18n } = useLingui();
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center w-full overflow-hidden">
-      {/* Smooth professional gradient with multiple stops to prevent banding */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_#1e3a8a_0%,_#1e293b_25%,_#0f172a_50%,_#020617_100%)]" />
-      
-      {/* Additional overlay for extra smoothness */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-slate-950/40" />
-      
-      {/* Subtle noise texture to break up any remaining banding */}
-      <div className="absolute inset-0 opacity-[0.015] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=')]" />
-      
-      {/* Soft glow accents */}
-      <div className="absolute top-0 left-1/3 w-[800px] h-[800px] bg-blue-600/[0.08] rounded-full blur-[128px]" />
-      <div className="absolute bottom-0 right-1/3 w-[700px] h-[700px] bg-indigo-600/[0.06] rounded-full blur-[120px]" />
-      
+    <div className="relative min-h-screen flex flex-col items-center justify-center w-full overflow-hidden bg-neutral-900">
+      {/* Top perspective grid under navbar */}
+      <GridBackground />
+
       {/* Content container */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-3 sm:pt-40">
         {/* Unique Value Prop Badge */}
-        <div className="flex justify-center mb-4">
+        <motion.div
+          className="flex justify-center mb-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+        >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full">
             <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9a1 1 0 112 0v4a1 1 0 11-2 0V9zm1-5a1 1 0 100 2 1 1 0 000-2z" />
             </svg>
-            <span className="text-blue-400 font-semibold text-sm">
+            <span className="text-blue-400 font-semibold text-xs">
               {i18n._(msg`Built for Regulated Industries • SOC 2 Certified`)}
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Main Headline - Problem/Solution Format */}
-        <h1 className="tracking-wide leading-tight bg-opacity-50 bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-center text-4xl font-bold text-transparent md:text-7xl">
+        <motion.h1
+          className="tracking-wide leading-tight bg-opacity-50 bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-center text-4xl font-bold text-transparent md:text-7xl"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        >
           {i18n._(msg`HR & Payroll Platform`)}
           <br />
           <span className="text-3xl md:text-5xl">
             {i18n._(msg`That Keeps You Compliant`)}
           </span>
-        </h1>
+        </motion.h1>
 
         {/* Value Proposition - Business Outcomes */}
-        <div className="mx-auto mt-6 max-w-2xl text-center">
+        <motion.div
+          className="mx-auto mt-6 max-w-2xl text-center"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+        >
           <p className="text-xl md:text-2xl font-semibold text-white mb-2">
-            {i18n._(msg`Automate Payroll, Track Time, Manage Documents—All in One Place`)}
+            {i18n._(msg`Automate Payroll, Track Time, Manage Documents, All in One Place`)}
           </p>
-        </div>
+        </motion.div>
 
         {/* CTAs */}
-        <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
+        <motion.div
+          className="mt-8 flex items-center justify-center gap-4 flex-wrap"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+        >
           <Button
             variant="primaryGradient"
-            className="px-8 py-4 text-lg font-semibold shadow-xl shadow-blue-500/20"
+            className="px-8 py-4 text-lg font-semibold rounded-[12px] shadow-xl shadow-blue-500/20"
             asChild
           >
-            <Link href="/signup">{i18n._(msg`Start Free Trial`)}</Link>
+            <Link href="/signup">{i18n._(msg`Get Started`)}</Link>
           </Button>
           <Button
-            variant="outline"
-            className="px-8 py-4 text-lg font-semibold border-gray-600 hover:border-blue-500 hover:bg-blue-500/10"
+            className="px-8 py-4 text-lg font-semibold rounded-[12px] text-white bg-neutral-950 border border-white/30 hover:bg-neutral-800 transition-colors shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_1px_2px_rgba(0,0,0,0.5)]"
             asChild
           >
-            <Link href="/pricing">{i18n._(msg`View Pricing`)}</Link>
+            <Link href="/login">{i18n._(msg`Sign In`)}</Link>
           </Button>
-        </div>
+        </motion.div>
 
-        {/* Consolidated Trust Indicators */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-gray-400">
-          <span className="flex items-center gap-1.5">
-            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            {i18n._(msg`14-Day Free Trial`)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            {i18n._(msg`No Credit Card`)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            {i18n._(msg`SOC 2 Certified`)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            {i18n._(msg`99.5% SLA`)}
-          </span>
-        </div>
+        {/* Dashboard Preview — hidden on mobile/small screens; fades in from bottom on appear */}
+        <motion.div
+          className="mt-20 relative w-full max-w-6xl mx-auto rounded-t-3xl overflow-hidden shadow-xl backdrop-blur-sm hidden md:block"
+          initial={{ opacity: 0, y: 56 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <DashboardPreviewContent />
+        </motion.div>
+      </div>
+
+      {/* Light Fade Effect at Bottom of Hero */}
+      <div className="absolute bottom-0 left-0 w-full h-[600px] z-20 pointer-events-none">
+        <Image
+          src="/Light.png"
+          alt=""
+          fill
+          className="object-cover object-bottom"
+          priority
+        />
       </div>
     </div>
   );

@@ -2,10 +2,6 @@
 import React from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import {
-  FacebookIcon,
-  LinkedinIcon,
-} from "lucide-react";
 import Image from "next/image";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
@@ -25,15 +21,13 @@ const footerLinks: FooterSection[] = [
   {
     labelKey: msg`Product`,
     links: [
-      { titleKey: msg`Features`, href: "#features" },
-      { titleKey: msg`Pricing`, href: "#pricing" },
-      { titleKey: msg`Testimonials`, href: "#testimonials" },
+      { titleKey: msg`Features`, href: "/features" },
+      { titleKey: msg`Testimonials`, href: "/#testimonials" },
     ],
   },
   {
     labelKey: msg`Company`,
     links: [
-      { titleKey: msg`About Us`, href: "/about" },
       { titleKey: msg`Privacy Policy`, href: "/privacy" },
       { titleKey: msg`Terms of Services`, href: "/terms" },
     ],
@@ -41,15 +35,7 @@ const footerLinks: FooterSection[] = [
   {
     labelKey: msg`Resources`,
     links: [
-      { titleKey: msg`Blog`, href: "/blog" },
-      { titleKey: msg`Help`, href: "/help" },
-    ],
-  },
-  {
-    labelKey: msg`Social Links`,
-    links: [
-      { titleKey: msg`Facebook`, href: "#", icon: FacebookIcon },
-      { titleKey: msg`LinkedIn`, href: "#", icon: LinkedinIcon },
+      { titleKey: msg`Help`, href: "/" },
     ],
   },
 ];
@@ -57,9 +43,7 @@ const footerLinks: FooterSection[] = [
 export function Footer() {
   const { i18n } = useLingui();
   return (
-    <footer className="md:rounded-t-6xl relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center rounded-t-4xl border-t bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:py-16">
-      <div className="bg-foreground/20 absolute top-0 right-1/2 left-1/2 h-px w-1/3 -translate-x-1/2 -translate-y-1/2 rounded-full blur" />
-
+    <footer className="md:rounded-t-6xl relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center rounded-t-4xl bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/8%),transparent)] px-6 py-12 lg:py-16">
       <div className="grid w-full gap-8 xl:grid-cols-3 xl:gap-8">
         <AnimatedContainer className="space-y-4">
           {/* Logo para light mode */}
