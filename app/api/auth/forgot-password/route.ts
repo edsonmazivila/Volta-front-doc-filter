@@ -9,11 +9,21 @@ import { AUTH_ENDPOINTS } from '@/lib/auth/utils'
 export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json()
+		const email = typeof body?.email === 'string' ? body.email.trim() : ''
 		
 		// Validate email is present
-		if (!body.email || typeof body.email !== 'string') {
+		if (!email) {
 			return NextResponse.json(
 				{ status: 400, code: 'BAD_REQUEST', message: 'Email is required' },
+				{ status: 400 }
+			)
+		}
+
+		// Validate email format to avoid backend generic 500 errors
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		if (!emailRegex.test(email)) {
+			return NextResponse.json(
+				{ status: 400, code: 'BAD_REQUEST', message: 'Invalid email address' },
 				{ status: 400 }
 			)
 		}
@@ -27,7 +37,7 @@ export async function POST(request: NextRequest) {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ email: body.email }),
+			body: JSON.stringify({ email }),
 		})
 
 		console.log('[API:forgot-password] Backend response status:', response.status)

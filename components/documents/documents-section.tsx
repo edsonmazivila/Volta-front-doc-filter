@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui";
 import { useToastHelpers } from "@/components/ui/toast";
 import { SearchInput } from "@/components/search-input";
+import { groupDocumentsByCollaborator } from "@/lib/utils/document-grouping";
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 
@@ -60,19 +61,13 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return items.filter((i) => {
-      const matchesQ =
-        !q ||
-        [i.employeeName, i.title, i.type, i.status].some((v) =>
-          String(v || "")
-            .toLowerCase()
-            .includes(q)
-        );
-      return matchesQ;
-    });
-  }, [items, search]);
+  const groupedDocuments = useMemo(
+    () => groupDocumentsByCollaborator(items, search),
+    [items, search],
+  );
+
+  const hasDocuments = items.length > 0;
+  const hasFilteredGroups = groupedDocuments.length > 0;
 
 
 
@@ -84,74 +79,95 @@ export function DocumentsSection({ items, initialTypes = [], initialEmployees = 
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder={i18n._(msg`Search documents...`)}
+            placeholder={i18n._(msg`Search collaborator...`)}
           />
           <Button onClick={() => setUploadOpen(true)}>{i18n._(msg`Upload`)}</Button>
         </div>
       </div>
-      <DocumentTable
-        items={filtered}
-        onApprove={async (id) => {
-          if (operationInProgress[id]) return; // Prevent double-click
-          setOperationInProgress(prev => ({ ...prev, [id]: true }));
-          try {
-            await approveDocumentAction(id);
-            toast.success(i18n._(msg`Approved`));
-            router.refresh();
-          } catch {
-            toast.error(i18n._(msg`Failed to approve`));
-          } finally {
-            setOperationInProgress(prev => ({ ...prev, [id]: false }));
-          }
-        }}
-        onReject={(id) => {
-          if (operationInProgress[id]) return;
-          setRejectId(id);
-          setRejectOpen(true);
-        }}
-        onDelete={async (id) => {
-          if (operationInProgress[id]) return; // Prevent double-click
-          if (!confirm(i18n._(msg`Delete document?`))) return;
-          setOperationInProgress(prev => ({ ...prev, [id]: true }));
-          try {
-            await deleteDocumentAction(id);
-            toast.success(i18n._(msg`Deleted`));
-          } catch {
-            toast.error(i18n._(msg`Failed to delete`));
-          } finally {
-            setOperationInProgress(prev => ({ ...prev, [id]: false }));
-          }
-        }}
-        onView={async (id) => {
-          setViewId(id);
-          setViewData(null);
-          try {
-            const data = await getDocument(id);
-            setViewData(data);
-          } catch {}
-        }}
-        onEdit={async (id) => {
-          setEditId(id);
-          try {
-            const data = await getDocumentForEdit(id);
-            setEditData({
-              title: data?.title || "",
-              description: data?.description || "",
-              expiry_date: data?.expiry_date
-                ? String(data.expiry_date).slice(0, 10)
-                : "",
-              is_confidential: !!data?.is_confidential,
-            });
-          } catch {
-            setEditData({
-              title: "",
-              description: "",
-              expiry_date: "",
-              is_confidential: false,
-            });
-          }
-        }}
-      />
+      {!hasFilteredGroups ? (
+        <div className="glass rounded-xl p-6 text-sm text-muted-foreground">
+          {hasDocuments
+            ? i18n._(msg`No collaborators match this search`)
+            : i18n._(msg`No documents found`)}
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {groupedDocuments.map((group) => (
+            <section key={group.collaboratorId} className="grid gap-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">{group.collaboratorName}</h3>
+                <span className="text-xs text-muted-foreground">
+                  {group.documents.length} {i18n._(msg`documents`)}
+                </span>
+              </div>
+              <DocumentTable
+                items={group.documents}
+                hideEmployeeColumn
+                onApprove={async (id) => {
+                  if (operationInProgress[id]) return; // Prevent double-click
+                  setOperationInProgress(prev => ({ ...prev, [id]: true }));
+                  try {
+                    await approveDocumentAction(id);
+                    toast.success(i18n._(msg`Approved`));
+                    router.refresh();
+                  } catch {
+                    toast.error(i18n._(msg`Failed to approve`));
+                  } finally {
+                    setOperationInProgress(prev => ({ ...prev, [id]: false }));
+                  }
+                }}
+                onReject={(id) => {
+                  if (operationInProgress[id]) return;
+                  setRejectId(id);
+                  setRejectOpen(true);
+                }}
+                onDelete={async (id) => {
+                  if (operationInProgress[id]) return; // Prevent double-click
+                  if (!confirm(i18n._(msg`Delete document?`))) return;
+                  setOperationInProgress(prev => ({ ...prev, [id]: true }));
+                  try {
+                    await deleteDocumentAction(id);
+                    toast.success(i18n._(msg`Deleted`));
+                  } catch {
+                    toast.error(i18n._(msg`Failed to delete`));
+                  } finally {
+                    setOperationInProgress(prev => ({ ...prev, [id]: false }));
+                  }
+                }}
+                onView={async (id) => {
+                  setViewId(id);
+                  setViewData(null);
+                  try {
+                    const data = await getDocument(id);
+                    setViewData(data);
+                  } catch {}
+                }}
+                onEdit={async (id) => {
+                  setEditId(id);
+                  try {
+                    const data = await getDocumentForEdit(id);
+                    setEditData({
+                      title: data?.title || "",
+                      description: data?.description || "",
+                      expiry_date: data?.expiry_date
+                        ? String(data.expiry_date).slice(0, 10)
+                        : "",
+                      is_confidential: !!data?.is_confidential,
+                    });
+                  } catch {
+                    setEditData({
+                      title: "",
+                      description: "",
+                      expiry_date: "",
+                      is_confidential: false,
+                    });
+                  }
+                }}
+              />
+            </section>
+          ))}
+        </div>
+      )}
 
       {/* Upload Dialog */}
       <DocumentUploadFormDialog

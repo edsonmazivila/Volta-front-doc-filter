@@ -9,18 +9,42 @@ import { AUTH_ENDPOINTS } from '@/lib/auth/utils'
 export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json()
+		const token = typeof body?.token === 'string' ? body.token.trim() : ''
+		const newPassword = typeof body?.new_password === 'string' ? body.new_password : ''
 		
 		// Validate required fields
-		if (!body.token || typeof body.token !== 'string') {
+		if (!token) {
 			return NextResponse.json(
 				{ status: 400, code: 'BAD_REQUEST', message: 'Token is required' },
 				{ status: 400 }
 			)
 		}
 		
-		if (!body.new_password || typeof body.new_password !== 'string') {
+		if (!newPassword) {
 			return NextResponse.json(
 				{ status: 400, code: 'BAD_REQUEST', message: 'New password is required' },
+				{ status: 400 }
+			)
+		}
+
+		// Validate token format early to avoid backend generic 500 errors
+		if (token.length < 32) {
+			return NextResponse.json(
+				{ status: 400, code: 'BAD_REQUEST', message: 'Invalid reset token' },
+				{ status: 400 }
+			)
+		}
+
+		// Validate password strength
+		if (newPassword.length < 8) {
+			return NextResponse.json(
+				{ status: 400, code: 'BAD_REQUEST', message: 'Password must be at least 8 characters' },
+				{ status: 400 }
+			)
+		}
+		if (!/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+			return NextResponse.json(
+				{ status: 400, code: 'BAD_REQUEST', message: 'Password must contain uppercase, lowercase, and number' },
 				{ status: 400 }
 			)
 		}
@@ -32,8 +56,8 @@ export async function POST(request: NextRequest) {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				token: body.token,
-				new_password: body.new_password,
+				token,
+				new_password: newPassword,
 			}),
 		})
 

@@ -16,6 +16,7 @@ import { msg } from '@lingui/core/macro'
 interface DocumentTableProps {
 	items?: DocumentListItem[]
 	isLoading?: boolean
+	hideEmployeeColumn?: boolean
 	onApprove?: (id: string) => void
 	onReject?: (id: string) => void
 	onDelete?: (id: string) => void
@@ -23,10 +24,11 @@ interface DocumentTableProps {
 	onEdit?: (id: string) => void
 }
 
-export function DocumentTable({ items = [], isLoading = false, onApprove, onReject, onDelete, onView, onEdit }: DocumentTableProps) {
+export function DocumentTable({ items = [], isLoading = false, hideEmployeeColumn = false, onApprove, onReject, onDelete, onView, onEdit }: DocumentTableProps) {
 	const { i18n } = useLingui()
 	const rows = useMemo(() => items, [items])
 	const [pendingId, setPendingId] = useState<string | null>(null)
+	const columnsCount = hideEmployeeColumn ? 5 : 6
 
 	function statusClass(status: string) {
 		switch (status) {
@@ -71,12 +73,14 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 				<table className="w-full text-sm">
 					<thead className="border-b border-[var(--border)] text-neutral-400">
 						<tr>
-							<th className="text-left p-3">
-								<div className="flex items-center gap-2">
-									{i18n._(msg`Employee`)}
-									<span className="text-xs text-muted-foreground">{i18n._(msg`(click to view details)`)}</span>
-								</div>
-							</th>
+							{!hideEmployeeColumn && (
+								<th className="text-left p-3">
+									<div className="flex items-center gap-2">
+										{i18n._(msg`Employee`)}
+										<span className="text-xs text-muted-foreground">{i18n._(msg`(click to view details)`)}</span>
+									</div>
+								</th>
+							)}
 							<th className="text-left p-3">{i18n._(msg`Document`)}</th>
 							<th className="text-left p-3">{i18n._(msg`Type`)}</th>
 							<th className="text-left p-3">{i18n._(msg`Status`)}</th>
@@ -87,7 +91,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 					<tbody>
 						{rows.length === 0 ? (
 							<tr>
-								<td className="p-4" colSpan={6}>
+								<td className="p-4" colSpan={columnsCount}>
 									{i18n._(msg`No documents found`)}
 								</td>
 							</tr>
@@ -98,7 +102,7 @@ export function DocumentTable({ items = [], isLoading = false, onApprove, onReje
 									className="border-b border-[var(--border)] hover:bg-muted/50 cursor-pointer transition-colors"
 									onClick={(event) => handleRowClick(row, event)}
 								>
-									<td className="p-3">{row.employeeName}</td>
+									{!hideEmployeeColumn && <td className="p-3">{row.employeeName}</td>}
 									<td className="p-3">{row.title}</td>
 									<td className="p-3 uppercase">{row.type}</td>
 									<td className="p-3">

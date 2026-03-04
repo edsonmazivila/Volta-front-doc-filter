@@ -65,6 +65,7 @@ export interface Document {
 // List item for tables/grids
 export interface DocumentListItem {
   id: string
+  employeeId?: string
   employeeName: string
   title: string
   type: string
@@ -138,6 +139,7 @@ export const getMyDocuments = cache(async (): Promise<DocumentListItem[]> => {
 
     return json.data.map((d) => ({
       id: d.id,
+      employeeId: d.employee_id,
       employeeName: '—', // Employee viewing their own docs
       title: d.original_filename || 'Untitled',
       type: d.document_type,
@@ -177,6 +179,9 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
     id?: string | number;
     doc_id?: string | number;
     uuid?: string;
+    employee_id?: string | number;
+    employeeId?: string | number;
+    user_id?: string | number;
     full_name?: string;
     title?: string;
     original_filename?: string;
@@ -193,6 +198,7 @@ export const getDocuments = cache(async (): Promise<DocumentListItem[]> => {
   return raw.map((d: RawDocument) => {
     return {
       id: String(d.id ?? d.doc_id ?? d.uuid ?? ''),
+      employeeId: d.employee_id ?? d.employeeId ?? d.user_id ? String(d.employee_id ?? d.employeeId ?? d.user_id) : undefined,
       employeeName: String(d.full_name || '—'),
       title: String(d.title ?? d.original_filename ?? 'Untitled'),
       type: String(d.document_type ?? d.type ?? 'unknown'),

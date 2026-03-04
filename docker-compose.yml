@@ -20,6 +20,8 @@ services:
     environment:
       # Application configuration
       - NODE_ENV=production
+      - API_URL=http://host.docker.internal:8081
+      - NEXT_PUBLIC_API_URL=http://localhost:8081
 
       # Datadog APM configuration
       - DD_ENV=${DD_ENV:-development}
@@ -33,6 +35,8 @@ services:
     depends_on:
       datadog-agent:
         condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - volta-hr-network
     healthcheck:
