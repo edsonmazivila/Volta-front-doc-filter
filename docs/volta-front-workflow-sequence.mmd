@@ -1,0 +1,58 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant B as Browser
+    participant MW as Next Middleware
+    participant P as Next Page (Server Component)
+    participant DAL as Auth DAL/RBAC
+    participant FE as Front Services
+    participant API as Backend API
+
+    U->>B: Acessa rota protegida (/dashboard ou /dashboard/documents)
+    B->>MW: HTTP Request + cookies
+
+    alt Sem sessão
+        MW-->>B: 302 /login?redirect=...
+    else Com sessão
+        MW->>API: GET /api/auth/profile (validar sessão)
+        alt Sessão inválida
+            API-->>MW: 401/403
+            MW-->>B: 302 /login + limpa cookies
+        else Sessão válida
+            API-->>MW: 200 user profile
+            MW-->>P: NextResponse.next()
+
+            P->>DAL: requireUser() / requireRole(...)
+            DAL->>API: GET /api/auth/profile
+            API-->>DAL: user + role
+
+            alt Role sem permissão
+                DAL-->>B: redirect('/dashboard' ou '/login')
+            else Role permitida
+                P->>FE: getDocuments(), getDocumentTypes(), getUsers()
+                FE->>API: GET /api/documents
+                FE->>API: GET /api/document-types
+                FE->>API: GET /api/users
+                API-->>FE: dados normalizados
+                FE-->>P: items + types + users
+                P-->>B: Render DocumentsSection
+            end
+        end
+    end
+
+    rect rgba(220,255,230,0.40)
+    Note over U,B: Fluxo client-side em DocumentsSection
+    U->>B: Digita "Search collaborator"
+    B->>B: groupDocumentsByCollaborator(items, search)
+    B-->>U: Lista filtrada por colaborador
+    end
+
+    rect rgba(255,240,220,0.45)
+    Note over U,API: Ações em documento
+    U->>B: Approve / Reject / Delete / View / Edit
+    B->>FE: server actions / getDocument / getDocumentForEdit
+    FE->>API: PATCH/DELETE/GET documentos
+    API-->>FE: resultado
+    FE-->>B: toast + router.refresh()
+    B-->>U: UI atualizada
+    end

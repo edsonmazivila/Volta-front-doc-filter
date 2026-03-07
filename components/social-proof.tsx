@@ -101,8 +101,6 @@ export function SocialProof() {
 							const offset = (index - activeIndex + testimonials.length) % testimonials.length;
 							const normalizedOffset = offset > testimonials.length / 2 ? offset - testimonials.length : offset;
 							const isActive = index === activeIndex;
-							const isLeft = normalizedOffset < 0;
-							const isRight = normalizedOffset > 0;
 
 							return (
 								<div

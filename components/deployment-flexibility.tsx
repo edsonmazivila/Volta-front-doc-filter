@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
 import { Cloud, Server, Network, Globe, CheckCircle2, Boxes } from "lucide-react";
@@ -76,9 +77,12 @@ export function DeploymentFlexibility() {
           WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
         }}
       >
-        <img
+        <Image
           src="/deploy-bg.png"
           alt=""
+          width={1920}
+          height={1080}
+          sizes="100vw"
           className="w-full h-auto object-cover"
           draggable="false"
         />
@@ -129,9 +133,11 @@ export function DeploymentFlexibility() {
                         WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 100%)',
                       }}
                     >
-                      <img
+                      <Image
                         src={option.image}
                         alt={option.title}
+                        fill
+                        sizes="(min-width: 768px) 33vw, 100vw"
                         className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>

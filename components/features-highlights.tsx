@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLingui } from "@lingui/react";
 import { msg } from "@lingui/core/macro";
 import {
@@ -11,7 +12,6 @@ import {
     BarChart3,
     ArrowRight,
     Sparkles,
-    Boxes,
     Shield,
 } from "lucide-react";
 import Link from "next/link";
@@ -84,11 +84,6 @@ export function FeaturesHighlights() {
             textPosition: "bottom-10",
         },
     ];
-
-    // Split into rows for bento layout
-    const topRow = features.slice(0, 2); // 2 large cards
-    const middleRow = features.slice(2, 4); // 2 small cards
-    const bottomRow = features.slice(4, 6); // 2 large cards
 
     return (
         <section className="py-24 px-4 bg-neutral-900 overflow-hidden">
@@ -194,9 +189,11 @@ function BentoCard({ feature }: { feature: BentoFeature }) {
             <div className="relative rounded-3xl overflow-hidden h-full border border-white/10 hover:border-white/15 transition-all duration-300 group/card bg-neutral-900">
                 {/* Background image fills entire card - using object-cover to eliminate gaps */}
                 <div className="relative w-full aspect-square md:aspect-auto md:h-[400px] lg:h-[450px] overflow-hidden">
-                    <img
+                    <Image
                         src={feature.image}
                         alt={feature.title}
+                        fill
+                        sizes="(min-width: 1024px) 450px, (min-width: 768px) 400px, 100vw"
                         className="w-full h-full object-cover transform group-hover/card:scale-105 transition-transform duration-700"
                     />
 
